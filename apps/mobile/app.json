@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "Kwatro",
+    "slug": "kwatro",
+    "scheme": "kwatro",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "fr.kwatro.app",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "fr.kwatro.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

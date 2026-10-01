@@ -1,0 +1,68 @@
+# ────────────────────────────────────────────────────────────────
+# Kwatro — environnement LOCAL
+#
+#   pnpm db:up        → PostgreSQL/PostGIS + Mailpit (on lance l'API et le site avec `pnpm dev`)
+#   pnpm docker:up    → idem + API et site dans des conteneurs, comme en production
+#   pnpm docker:down  → arrête tout
+#
+# Production : voir docker-compose.dokploy.yml
+# ────────────────────────────────────────────────────────────────
+name: kwatro
+
+services:
+  postgres:
+    image: postgis/postgis:17-3.5
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kwatro
+      POSTGRES_PASSWORD: kwatro
+      POSTGRES_DB: kwatro
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kwatro -d kwatro"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mailpit:
+    # Boîte mail de test : http://localhost:8025 (SMTP sur le port 1025)
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  # ---- Profil « app » : les images de production, pour tester en local ----
+  api:
+    profiles: [app]
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      NODE_ENV: production
+      API_PORT: 3000
+      DATABASE_URL: postgresql://kwatro:kwatro@postgres:5432/kwatro?schema=public
+      CORS_ORIGINS: http://localhost:3001,http://localhost:8081
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    profiles: [app]
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:3000
+    ports:
+      - "3001:3000"
+    depends_on:
+      - api
+
+volumes:
+  postgres-data:

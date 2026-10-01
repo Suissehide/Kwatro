@@ -1,0 +1,35 @@
+graphify-out/
+
+# Dépendances
+node_modules/
+.pnpm-store/
+
+# Builds
+dist/
+build/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+
+# Expo
+.expo/
+web-build/
+expo-env.d.ts
+apps/mobile/ios/
+apps/mobile/android/
+
+# Prisma (client généré)
+apps/api/src/generated/
+
+# Environnement (ne jamais committer de secrets)
+.env
+.env.*
+!.env.example
+!.env.dokploy.example
+
+# Divers
+.DS_Store
+*.log
+coverage/
+.idea/

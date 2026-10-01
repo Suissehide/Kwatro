@@ -1,0 +1,35 @@
+{
+  "name": "kwatro",
+  "private": true,
+  "packageManager": "pnpm@10.34.6",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:api": "turbo run dev --filter=@kwatro/api",
+    "dev:web": "turbo run dev --filter=@kwatro/web",
+    "dev:mobile": "turbo run dev --filter=@kwatro/mobile",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "lint:ci": "biome ci .",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:generate": "pnpm --filter @kwatro/api db:generate",
+    "db:migrate": "pnpm --filter @kwatro/api db:migrate",
+    "db:seed": "pnpm --filter @kwatro/api db:seed",
+    "db:studio": "pnpm --filter @kwatro/api db:studio",
+    "prepare": "lefthook install || exit 0",
+    "docker:up": "docker compose --profile app up -d --build",
+    "docker:down": "docker compose --profile app down"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "lefthook": "^2.1.15",
+    "turbo": "^2.11.6",
+    "typescript": "~6.0.3"
+  }
+}

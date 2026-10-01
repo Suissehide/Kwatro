@@ -1,0 +1,269 @@
+// Schéma initial Kwatro. Voir Obsidian « Architecture fonctionnelle — app joueurs » §16.
+// Après modification : `pnpm db:migrate` (crée la migration) puis commit du dossier migrations/.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------- Joueurs ----------
+
+enum UserRole {
+  PLAYER
+  VENUE_STAFF
+  ADMIN
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  pseudo             String    @unique
+  birthDate          DateTime  @db.Date
+  role               UserRole  @default(PLAYER)
+  city               String?
+  searchRadiusKm     Int       @default(10)
+  /// Compte parent lié (mineurs de 13-14 ans)
+  parentId           String?
+  parent             User?     @relation("ParentChild", fields: [parentId], references: [id])
+  children           User[]    @relation("ParentChild")
+  parentalConsentAt  DateTime?
+  xp                 Int       @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  deletedAt          DateTime?
+
+  gameProfiles     PlayerGameProfile[]
+  hostedRooms      Room[]              @relation("RoomHost")
+  participations   RoomParticipant[]
+  visits           Visit[]
+  staffOf          VenueStaff[]
+}
+
+// ---------- Jeux ----------
+
+enum GameKind {
+  TCG
+  BOARD_GAME
+}
+
+model Game {
+  id         String       @id @default(cuid())
+  slug       String       @unique
+  name       String
+  kind       GameKind
+  minPlayers Int          @default(2)
+  maxPlayers Int          @default(4)
+  formats    GameFormat[]
+  rooms      Room[]
+  events     Event[]
+}
+
+model GameFormat {
+  id       String              @id @default(cuid())
+  slug     String
+  name     String
+  gameId   String
+  game     Game                @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  profiles PlayerGameProfile[]
+  rooms    Room[]
+
+  @@unique([gameId, slug])
+}
+
+enum DeclaredLevel {
+  BEGINNER
+  INTERMEDIATE
+  CONFIRMED
+  EXPERT
+}
+
+/// Niveau d'un joueur sur un format TCG : Kwote (Elo, départ 1000) et fiabilité.
+model PlayerGameProfile {
+  id               String        @id @default(cuid())
+  userId           String
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  formatId         String
+  format           GameFormat    @relation(fields: [formatId], references: [id], onDelete: Cascade)
+  declaredLevel    DeclaredLevel @default(INTERMEDIATE)
+  kwote            Int           @default(1000)
+  rankedGames      Int           @default(0)
+  reliabilityPct   Int           @default(0)
+  updatedAt        DateTime      @updatedAt
+
+  @@unique([userId, formatId])
+}
+
+// ---------- Lieux ----------
+
+enum VenueType {
+  GAME_BAR
+  TCG_SHOP
+  LUDOTHEQUE
+  ASSOCIATION
+  OTHER
+}
+
+model Venue {
+  id                         String       @id @default(cuid())
+  slug                       String       @unique
+  name                       String
+  type                       VenueType
+  address                    String
+  city                       String
+  latitude                   Float
+  longitude                  Float
+  /// Point PostGIS, rempli par une migration SQL / un trigger à partir de latitude/longitude
+  location                   Unsupported("geography(Point, 4326)")?
+  isPartner                  Boolean      @default(false)
+  /// Bars (débits de boissons) : pas de moins de 16 ans non accompagnés
+  acceptsUnaccompaniedMinors Boolean      @default(false)
+  createdAt                  DateTime     @default(now())
+  updatedAt                  DateTime     @updatedAt
+
+  staff  VenueStaff[]
+  rooms  Room[]
+  events Event[]
+  visits Visit[]
+
+  @@index([city])
+  @@index([location], type: Gist)
+}
+
+enum VenueStaffRole {
+  MANAGER
+  STAFF
+}
+
+model VenueStaff {
+  userId  String
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  venueId String
+  venue   Venue          @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  role    VenueStaffRole @default(STAFF)
+
+  @@id([userId, venueId])
+}
+
+// ---------- Rooms ----------
+
+enum RoomMode {
+  RANKED
+  CASUAL
+}
+
+enum RoomStatus {
+  OPEN
+  FULL
+  CONFIRMED
+  IN_PROGRESS
+  FINISHED
+  CANCELLED
+}
+
+model Room {
+  id            String     @id @default(cuid())
+  hostId        String
+  host          User       @relation("RoomHost", fields: [hostId], references: [id])
+  gameId        String
+  game          Game       @relation(fields: [gameId], references: [id])
+  formatId      String?
+  format        GameFormat? @relation(fields: [formatId], references: [id])
+  mode          RoomMode   @default(CASUAL)
+  status        RoomStatus @default(OPEN)
+  venueId       String?
+  venue         Venue?     @relation(fields: [venueId], references: [id])
+  /// Domicile : seule une zone floue est publique ; adresse chiffrée, révélée 24 h avant
+  atHome        Boolean    @default(false)
+  homeAreaLabel String?
+  homeAddressEncrypted String?
+  startsAt      DateTime
+  capacity      Int
+  minorsAllowed Boolean    @default(false)
+  autoAccept    Boolean    @default(false)
+  description   String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  participants RoomParticipant[]
+
+  @@index([startsAt])
+}
+
+enum ParticipantStatus {
+  PENDING
+  ACCEPTED
+  WAITLISTED
+  DECLINED
+  LEFT
+}
+
+model RoomParticipant {
+  roomId      String
+  room        Room              @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      ParticipantStatus @default(PENDING)
+  checkedInAt DateTime?
+  createdAt   DateTime          @default(now())
+
+  @@id([roomId, userId])
+}
+
+// ---------- Événements des lieux ----------
+
+enum EventType {
+  GAME_NIGHT
+  INITIATION
+  TOURNAMENT
+  PRERELEASE
+  THEMED
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  venueId     String
+  venue       Venue     @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  gameId      String?
+  game        Game?     @relation(fields: [gameId], references: [id])
+  type        EventType
+  title       String
+  description String?
+  startsAt    DateTime
+  endsAt      DateTime?
+  capacity    Int?
+  priceCents  Int?
+  minAge      Int?
+  externalUrl String?
+  createdAt   DateTime  @default(now())
+
+  @@index([venueId, startsAt])
+}
+
+// ---------- Venues facturables ----------
+
+enum VisitSource {
+  QR_SCAN
+  CHECK_IN
+}
+
+/// Une venue = un joueur dans un lieu un soir. Un seul forfait par joueur, par lieu et par soirée.
+model Visit {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  venueId       String
+  venue         Venue       @relation(fields: [venueId], references: [id])
+  source        VisitSource
+  /// Soirée de rattachement (date locale Europe/Paris)
+  businessDate  DateTime    @db.Date
+  spentCents    Int?
+  billable      Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+
+  @@unique([userId, venueId, businessDate])
+}

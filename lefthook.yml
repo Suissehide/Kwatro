@@ -1,0 +1,17 @@
+# Hooks Git partagés par l'équipe (installés automatiquement par `pnpm install`)
+pre-commit:
+  commands:
+    biome:
+      glob: "*.{js,jsx,ts,tsx,json,jsonc,css}"
+      run: pnpm biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      stage_fixed: true
+
+commit-msg:
+  commands:
+    conventional:
+      run: |
+        msg=$(head -n1 {1})
+        echo "$msg" | grep -Eq '^(feat|fix|chore|docs|refactor|test|ci|build|perf|style|revert)(\([a-z0-9-]+\))?!?: .+' || {
+          echo "Message de commit invalide : utilise Conventional Commits, ex. 'feat(api): créer une room'"
+          exit 1
+        }
