@@ -12,8 +12,7 @@ kwatro/
 │   └── mobile/     → app Expo iOS / Android (+ back-office lieu)            Expo : http://localhost:8081
 ├── packages/
 │   └── shared/     → types, schémas Zod, constantes, règles (Kwote…)
-├── docker-compose.yml  → local : PostgreSQL/PostGIS, Mailpit (+ profil « app » : API et site en conteneurs)
-├── docker-compose.dokploy.yml → déploiement Dokploy (API, site, PostGIS, labels Traefik)
+├── deploy/             → tout Docker : stack locale, Dockerfiles, déploiement Dokploy, scripts
 ├── biome.json          → lint + format (remplace ESLint et Prettier)
 ├── turbo.json          → orchestration des tâches
 └── lefthook.yml        → hooks Git (Biome + format des commits)
@@ -54,12 +53,14 @@ Vérifier que tout marche : http://localhost:3000/health doit répondre `{"statu
 | `pnpm test` | Tests (Vitest) |
 | `pnpm build` | Build de tout le monorepo |
 | `pnpm db:migrate` | Nouvelle migration après modification de `apps/api/prisma/schema.prisma` |
+| `pnpm db:reset` | Repartir d'une base vide (migrations + seed) |
 | `pnpm db:studio` | Explorer la base dans le navigateur |
 | `pnpm db:down` | Arrêter les conteneurs |
+| `pnpm db:restore <fichier>` | Restaurer une sauvegarde dans la base locale |
 
 ## Base de données
 
-- Schéma : `apps/api/prisma/schema.prisma`. Client Prisma généré dans `apps/api/src/generated/` (non versionné, régénéré par `pnpm db:generate`, lancé automatiquement par Turbo).
+- Schéma : `apps/api/prisma/schema.prisma`. Client Prisma généré dans `apps/api/src/generated/` (non versionné). Depuis Prisma 7, `migrate dev` ne régénère plus le client tout seul : les scripts `db:migrate`, `db:seed` et `pnpm dev` le font pour toi ; sinon `pnpm db:generate`.
 - **Toute modification du schéma passe par une migration** (`pnpm db:migrate --name ma_modif`) committée avec le code.
 - PostGIS : la colonne `Venue.location` est de type `geography` (non géré nativement par Prisma) ; les requêtes géographiques passent par `$queryRaw`.
 
@@ -72,18 +73,30 @@ pnpm --filter @kwatro/mobile exec expo install nom-du-paquet   # côté Expo : t
 
 ## Docker
 
+Tout ce qui concerne Docker est dans `deploy/` :
+
+```
+deploy/
+├── compose.yaml                  → stack locale (profils db, backend, frontend)
+├── api/Dockerfile                → image de production de l'API (+ Dockerfile.dockerignore)
+├── web/Dockerfile                → image de production du site (+ Dockerfile.dockerignore)
+├── dokploy/
+│   └── docker-compose.dokploy.yml → déploiement Dokploy
+├── .env.example                  → variables du déploiement Dokploy
+└── scripts/restore-db-dump.sh    → restaurer une sauvegarde dans la base locale
+```
+
 **En local**
-- `pnpm db:up` : seulement PostgreSQL/PostGIS et Mailpit (http://localhost:8025) ; l'API et le site tournent avec `pnpm dev`.
-- `pnpm docker:up` : en plus, l'API (port 3000) et le site (port 3001) construits avec les images de production, pour vérifier un déploiement avant de pousser.
+- `pnpm db:up` : profil `db`, PostgreSQL/PostGIS (port `5469`, modifiable avec `POSTGRES_PORT`) et Mailpit (http://localhost:8025). L'API et le site tournent avec `pnpm dev`.
+- `pnpm docker:up` : profils `db` + `backend` + `frontend`, l'API (port 3000) et le site (port 3001) avec les images de production, pour vérifier un build avant de pousser.
+- `pnpm db:restore <fichier>` : remplace la base locale par une sauvegarde (par ex. téléchargée depuis Dokploy).
 
-**Déploiement avec Dokploy** (`docker-compose.dokploy.yml`)
-1. Dokploy › Create Service › **Compose** › dépôt `Suissehide/Kwatro`, branche `main`, *Compose Path* `./docker-compose.dokploy.yml`.
-2. Onglet **Environment** : recopier `.env.dokploy.example` avec les vraies valeurs (domaines, mot de passe Postgres, réseau / entrypoint / resolver Traefik du serveur).
-3. DNS : `API_DOMAIN` et `WEB_DOMAIN` pointent vers le serveur.
-4. **Deploy**. Les migrations Prisma en attente s'appliquent au démarrage de l'API (`prisma migrate deploy`).
-5. Sauvegardes : activer les sauvegardes du volume `kwatro-postgres-data` (ou un `pg_dump` planifié) dans Dokploy.
-
-Les domaines sont déclarés par des labels Traefik dans le fichier. Pour les gérer plutôt dans l'onglet *Domains* de Dokploy, supprimer ces labels.
+**Déploiement avec Dokploy**
+1. Dokploy › Create Service › **Compose** › dépôt `Suissehide/Kwatro`, branche `main`, *Compose Path* `./deploy/dokploy/docker-compose.dokploy.yml`.
+2. Onglet **Environment** : recopier `deploy/.env.example` avec les vraies valeurs.
+3. Onglet **Domains** : un domaine pour `api` (port 3000) et un pour `web` (port 3000), HTTPS activé.
+4. **Deploy**. Les migrations Prisma en attente s'appliquent au démarrage de l'API.
+5. Sauvegardes : le service `postgres-backup` fait un `pg_dump` quotidien (7 jours, 4 semaines, 6 mois) dans le volume `postgres-backups`. Copie hors serveur à ajouter.
 
 ## Contribuer
 

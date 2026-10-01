@@ -15,6 +15,7 @@ out/
 # Expo
 .expo/
 web-build/
+next-env.d.ts
 expo-env.d.ts
 apps/mobile/ios/
 apps/mobile/android/
@@ -26,7 +27,6 @@ apps/api/src/generated/
 .env
 .env.*
 !.env.example
-!.env.dokploy.example
 
 # Divers
 .DS_Store

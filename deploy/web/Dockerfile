@@ -1,5 +1,5 @@
 # Image de production du site Kwatro (Next.js, sortie standalone)
-# Build depuis la racine du dépôt : docker build -f apps/web/Dockerfile --build-arg NEXT_PUBLIC_API_URL=https://api.exemple.fr .
+# Build depuis la racine du dépôt : docker build -f deploy/web/Dockerfile --build-arg NEXT_PUBLIC_API_URL=https://api.exemple.fr .
 FROM node:22-alpine AS base
 RUN corepack enable
 WORKDIR /app

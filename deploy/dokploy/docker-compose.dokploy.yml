@@ -1,0 +1,100 @@
+# ────────────────────────────────────────────────────────────────
+# Kwatro — déploiement Dokploy (service de type « Compose »)
+#
+#   Compose Path : ./deploy/dokploy/docker-compose.dokploy.yml
+#   Environment  : variables de deploy/.env.example (vraies valeurs)
+#   Domains      : à déclarer dans l'onglet « Domains » de Dokploy
+#                  api → port 3000 · web → port 3000
+# ────────────────────────────────────────────────────────────────
+services:
+  api:
+    build:
+      context: ../..
+      dockerfile: deploy/api/Dockerfile
+    image: ${APP_IMAGE_NAME:-kwatro}-api:${VERSION:-latest}
+    environment:
+      - NODE_ENV=production
+      - API_PORT=3000
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB_NAME}?schema=public
+      - CORS_ORIGINS=${CORS_ORIGINS}
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ../..
+      dockerfile: deploy/web/Dockerfile
+      args:
+        # Figée au build (variable publique Next.js)
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    image: ${APP_IMAGE_NAME:-kwatro}-web:${VERSION:-latest}
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+
+  postgres:
+    image: postgis/postgis:17-3.5
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB_NAME}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Sauvegarde locale : pg_dump quotidien avec rétention (7 j + 4 hebdo + 6 mensuels).
+  # NOTE : copie chiffrée hors serveur (ex. rclone vers un stockage objet) à ajouter.
+  postgres-backup:
+    image: prodrigestivill/postgres-backup-local:17-alpine
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=${POSTGRES_DB_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - SCHEDULE=@daily
+      - BACKUP_KEEP_DAYS=7
+      - BACKUP_KEEP_WEEKS=4
+      - BACKUP_KEEP_MONTHS=6
+    volumes:
+      - postgres-backups:/backups
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+
+volumes:
+  postgres:
+  postgres-backups:

@@ -16,15 +16,17 @@
     "check": "biome check .",
     "check:fix": "biome check --write .",
     "lint:ci": "biome ci .",
-    "db:up": "docker compose up -d",
-    "db:down": "docker compose down",
+    "db:up": "docker compose -f deploy/compose.yaml --profile db up -d",
+    "db:down": "docker compose -f deploy/compose.yaml --profile db down",
     "db:generate": "pnpm --filter @kwatro/api db:generate",
     "db:migrate": "pnpm --filter @kwatro/api db:migrate",
     "db:seed": "pnpm --filter @kwatro/api db:seed",
     "db:studio": "pnpm --filter @kwatro/api db:studio",
     "prepare": "lefthook install || exit 0",
-    "docker:up": "docker compose --profile app up -d --build",
-    "docker:down": "docker compose --profile app down"
+    "docker:up": "docker compose -f deploy/compose.yaml --profile db --profile backend --profile frontend up -d --build",
+    "docker:down": "docker compose -f deploy/compose.yaml --profile db --profile backend --profile frontend down",
+    "db:reset": "pnpm --filter @kwatro/api db:reset",
+    "db:restore": "deploy/scripts/restore-db-dump.sh"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",

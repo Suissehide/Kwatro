@@ -10,10 +10,11 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
     "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy",
-    "db:seed": "prisma db seed",
-    "db:studio": "prisma studio"
+    "db:migrate": "prisma migrate dev && prisma generate",
+    "db:deploy": "prisma migrate deploy && prisma generate",
+    "db:seed": "prisma generate && prisma db seed",
+    "db:studio": "prisma studio",
+    "db:reset": "prisma migrate reset --force && prisma generate && prisma db seed"
   },
   "dependencies": {
     "@kwatro/shared": "workspace:*",

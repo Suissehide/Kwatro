@@ -1,0 +1,16 @@
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/.expo
+**/src/generated
+**/*.tsbuildinfo
+.git
+.github
+.vscode
+.pnpm-store
+apps/mobile
+.env
+.env.*
+!.env.example
+*.log

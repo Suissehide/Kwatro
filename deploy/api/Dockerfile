@@ -1,5 +1,5 @@
 # Image de production de l'API Kwatro (NestJS + Prisma)
-# Build depuis la racine du dépôt : docker build -f apps/api/Dockerfile .
+# Build depuis la racine du dépôt : docker build -f deploy/api/Dockerfile .
 FROM node:22-alpine AS base
 RUN corepack enable
 WORKDIR /app
