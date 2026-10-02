@@ -292,9 +292,18 @@ export default function HeroScene({
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const ctx = gsap.context(() => {})
 
-    /** Lancer : chute avec rebonds et tours complets, qui retombent pile sur la pose de repos. */
-    function toss(target: THREE.Object3D, delay: number, height = 7) {
+    /**
+     * Lancer : la pièce surgit (échelle 0 → 1) un peu au-dessus de la table, puis chute avec rebonds
+     * et tours complets qui retombent pile sur la pose de repos. Partir de plus haut la ferait entrer
+     * par le bord du canvas, coupée net : 2,5 reste dans la marge `bleed`.
+     */
+    function toss(target: THREE.Object3D, delay: number, height = 2.5) {
       ctx.add(() => {
+        gsap.fromTo(
+          target.scale,
+          { x: 0, y: 0, z: 0 },
+          { x: 1, y: 1, z: 1, duration: 0.35, delay, ease: 'back.out(1.7)' },
+        )
         gsap.fromTo(
           target.position,
           { y: height },
@@ -325,7 +334,7 @@ export default function HeroScene({
     }
 
     holders.forEach((holder, i) => {
-      holder.position.y = 7 // hors champ jusqu'au lancer
+      holder.scale.setScalar(0) // invisible jusqu'au lancer
       toss(holder, 0.25 + i * 0.14)
     })
     gsap.to(el, { opacity: 1, duration: 0.3 })
