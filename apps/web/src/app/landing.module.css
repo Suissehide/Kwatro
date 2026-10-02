@@ -215,7 +215,18 @@
   letter-spacing: -0.04em;
 }
 .tileRoom {
-  border-top: 14px solid var(--kw-room);
+  position: relative;
+  overflow: hidden;
+  padding-top: calc(clamp(22px, 2.6vw, 32px) + 11px);
+}
+/* Bandeau rouge sous la bordure encre, comme .kw-card__stripe */
+.tileRoom::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 8px;
+  background: var(--kw-room);
+  border-bottom: var(--kw-b);
 }
 .tileVenue {
   background: var(--kw-venue-soft);
