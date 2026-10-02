@@ -7,8 +7,10 @@ const HeroScene = lazy(() => import('@kwatro/design-system/scene'))
 export function TableScene() {
   return (
     <Suspense fallback={null}>
+      {/* bleed : les pièces tombent d'au-dessus de la table, le canvas déborde pour ne pas les couper */}
       <HeroScene
-        style={{ position: 'absolute', inset: '-32px 0', pointerEvents: 'none', opacity: 0 }}
+        bleed={140}
+        style={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0 }}
       />
     </Suspense>
   )

@@ -183,10 +183,16 @@ type Piece = {
 export default function HeroScene({
   className,
   style,
+  bleed = 0,
 }: {
   /** Placement de la scène (position absolue sur son conteneur) ; elle démarre à opacity 0. */
   className?: string
   style?: CSSProperties
+  /**
+   * Marge de dessin autour de la boîte, en px : la table reste cadrée sur la boîte, mais les pièces
+   * qui tombent ou débordent restent visibles jusqu'à `bleed` px au-delà (sinon le canvas les coupe).
+   */
+  bleed?: number
 }) {
   const host = useRef<HTMLDivElement>(null)
 
@@ -203,7 +209,7 @@ export default function HeroScene({
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFShadowMap
-    renderer.domElement.style.cssText = 'display:block;width:100%;height:100%'
+    renderer.domElement.style.cssText = `display:block;position:absolute;inset:${-bleed}px;width:calc(100% + ${bleed * 2}px);height:calc(100% + ${bleed * 2}px)`
     el.appendChild(renderer.domElement)
 
     const scene = new THREE.Scene()
@@ -248,17 +254,18 @@ export default function HeroScene({
       scene.add(holder)
       return holder
     })
-    const die = pieces[1]?.object
-    const dieHolder = holders[1]
 
     let halfDepth = 3
     function resize() {
       if (!el) return
       const { width, height } = el.getBoundingClientRect()
       if (!width || !height) return
-      renderer.setSize(width, height, false)
+      renderer.setSize(width + bleed * 2, height + bleed * 2, false)
       const aspect = width / height
       camera.aspect = aspect
+      // Cadrage calculé sur la boîte, rendu étendu de `bleed` px de chaque côté
+      if (bleed)
+        camera.setViewOffset(width, height, -bleed, -bleed, width + bleed * 2, height + bleed * 2)
       // Recule la caméra pour que TABLE_WIDTH remplisse toujours la largeur
       const vFov = THREE.MathUtils.degToRad(camera.fov)
       const hFov = 2 * Math.atan(Math.tan(vFov / 2) * aspect)
@@ -323,40 +330,96 @@ export default function HeroScene({
     })
     gsap.to(el, { opacity: 1, duration: 0.3 })
 
-    // Relancer le dé au clic (raycast : le canvas laisse passer les clics vers les cartes)
+    // Chaque pièce réagit au clic (raycast : le canvas laisse passer les clics vers la page)
     const raycaster = new THREE.Raycaster()
     const ndc = new THREE.Vector2()
-    function hitsDie(event: PointerEvent) {
-      if (!el || !die) return false
-      const r = el.getBoundingClientRect()
+    /** Index de la pièce sous le pointeur, ou -1. */
+    function pieceAt(event: PointerEvent) {
+      const r = renderer.domElement.getBoundingClientRect()
       ndc.set(
         ((event.clientX - r.left) / r.width) * 2 - 1,
         -((event.clientY - r.top) / r.height) * 2 + 1,
       )
-      if (Math.abs(ndc.x) > 1 || Math.abs(ndc.y) > 1) return false
+      if (Math.abs(ndc.x) > 1 || Math.abs(ndc.y) > 1) return -1
       raycaster.setFromCamera(ndc, camera)
-      return raycaster.intersectObject(die, true).length > 0
+      let hit = -1
+      let nearest = Number.POSITIVE_INFINITY
+      pieces.forEach(({ object }, i) => {
+        const distance = raycaster.intersectObject(object, true)[0]?.distance
+        if (distance !== undefined && distance < nearest) {
+          nearest = distance
+          hit = i
+        }
+      })
+      return hit
     }
     function onMove(event: PointerEvent) {
       pointer.x = (event.clientX / window.innerWidth) * 2 - 1
       pointer.y = (event.clientY / window.innerHeight) * 2 - 1
-      if (el?.parentElement) el.parentElement.style.cursor = hitsDie(event) ? 'pointer' : ''
+      if (el?.parentElement) el.parentElement.style.cursor = pieceAt(event) >= 0 ? 'pointer' : ''
     }
-    function onClick(event: PointerEvent) {
-      if (!die || !dieHolder || !hitsDie(event) || gsap.isTweening(die.rotation)) return
-      // Quarts de tour sur x et z : le dé retombe toujours à plat, sur une face au hasard
-      const flat = [0, Math.PI / 2, Math.PI, -Math.PI / 2]
-      die.rotation.x %= Math.PI * 2
-      die.rotation.z %= Math.PI * 2
-      ctx.add(() => {
-        gsap.fromTo(dieHolder.position, { y: 2.2 }, { y: 0, duration: 0.8, ease: 'bounce.out' })
+
+    const TURN = Math.PI * 2
+    const flat = [0, Math.PI / 2, Math.PI, -Math.PI / 2]
+    /** Geste propre à chaque pièce ; toutes retombent sur leur pose de repos (tours complets). */
+    const gestures: ((object: THREE.Object3D, holder: THREE.Object3D) => void)[] = [
+      // Carte : petit saut et retournement complet sur sa longueur
+      (card, holder) => {
+        gsap.fromTo(
+          holder.position,
+          { y: 0 },
+          { y: 1.6, duration: 0.3, ease: 'power2.out', yoyo: true, repeat: 1 },
+        )
+        gsap.to(card.rotation, { z: card.rotation.z + TURN, duration: 0.6, ease: 'power2.inOut' })
+      },
+      // Dé : relancé, il retombe à plat sur une face au hasard (quarts de tour sur x et z)
+      (die, holder) => {
+        die.rotation.x %= TURN
+        die.rotation.z %= TURN
+        gsap.fromTo(holder.position, { y: 2.2 }, { y: 0, duration: 0.8, ease: 'bounce.out' })
         gsap.to(die.rotation, {
-          x: gsap.utils.random(flat) + Math.PI * 4,
-          z: gsap.utils.random(flat) + Math.PI * 2,
+          x: gsap.utils.random(flat) + TURN * 2,
+          z: gsap.utils.random(flat) + TURN,
           duration: 0.8,
           ease: 'power2.out',
         })
-      })
+      },
+      // Pion : soulevé comme pour avancer d'une case, il penche puis se redresse en touchant la table
+      (pawn, holder) => {
+        gsap
+          .timeline()
+          .to(holder.position, { y: 1.3, duration: 0.25, ease: 'power2.out' })
+          .to(holder.position, { y: 0, duration: 0.5, ease: 'bounce.out' })
+        gsap
+          .timeline()
+          .to(pawn.rotation, { z: -0.45, duration: 0.25, ease: 'power2.out' })
+          .to(pawn.rotation, { z: 0, duration: 0.7, ease: 'elastic.out(1, 0.4)' })
+      },
+      // Jeton : pile ou face, deux tours en l'air
+      (chip, holder) => {
+        gsap
+          .timeline()
+          .to(holder.position, { y: 2.4, duration: 0.4, ease: 'power2.out' })
+          .to(holder.position, { y: 0, duration: 0.55, ease: 'bounce.out' })
+        gsap.to(chip.rotation, {
+          x: chip.rotation.x + TURN * 2,
+          duration: 0.8,
+          ease: 'power1.inOut',
+        })
+      },
+    ]
+    function onClick(event: PointerEvent) {
+      const i = pieceAt(event)
+      const object = pieces[i]?.object
+      const holder = holders[i]
+      if (
+        !object ||
+        !holder ||
+        gsap.isTweening(holder.position) ||
+        gsap.isTweening(object.rotation)
+      )
+        return
+      ctx.add(() => gestures[i]?.(object, holder))
     }
     window.addEventListener('pointermove', onMove, { passive: true })
     window.addEventListener('pointerdown', onClick)
@@ -385,7 +448,7 @@ export default function HeroScene({
       renderer.dispose()
       el.replaceChildren()
     }
-  }, [])
+  }, [bleed])
 
   return <div ref={host} className={className} style={style} aria-hidden="true" />
 }
