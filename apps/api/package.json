@@ -7,7 +7,7 @@
     "dev": "nest start --watch",
     "build": "nest build",
     "start": "node dist/main.js",
-    "openapi": "nest build && node dist/generate-openapi.js",
+    "openapi": "tsc -p tsconfig.build.json --outDir .openapi && node .openapi/generate-openapi.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
     "db:generate": "prisma generate",
