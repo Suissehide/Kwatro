@@ -417,8 +417,11 @@
     inset: -64px -16px;
   }
 }
+/* Le canvas déborde du cadre (.scene) pour que les pièces en vol ne soient pas coupées ;
+   le cadrage de la table reste celui de .scene (setViewOffset dans hero-scene.tsx) */
 .scene canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: -35% -20% -12%;
+  width: 140%;
+  height: 147%;
 }
