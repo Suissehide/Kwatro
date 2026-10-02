@@ -417,3 +417,11 @@
     inset: -64px -16px;
   }
 }
+/* Le canvas déborde du cadre (.scene) pour que les pièces en vol ne soient pas coupées ;
+   le cadrage de la table reste celui de .scene (setViewOffset dans @kwatro/design-system/scene) */
+.scene canvas {
+  position: absolute;
+  inset: -35% -20% -12%;
+  width: 140%;
+  height: 147%;
+}

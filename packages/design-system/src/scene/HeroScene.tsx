@@ -16,7 +16,7 @@ const VENUE = 0x157a55
 const WHITE = 0xffffff
 
 /** Largeur de table visible, en unités monde : les pièces gardent la même taille relative à l'écran. */
-const TABLE_WIDTH = 10
+const TABLE_WIDTH = 12
 const ELEVATION = THREE.MathUtils.degToRad(58)
 
 /** Dégradé à 3 tons, rendu « cartoon » qui va avec les ombres dures du design system. */
@@ -183,7 +183,7 @@ type Piece = {
 export default function HeroScene({
   className,
   style,
-  bleed = 0,
+  bleed,
 }: {
   /** Placement de la scène (position absolue sur son conteneur) ; elle démarre à opacity 0. */
   className?: string
@@ -191,6 +191,7 @@ export default function HeroScene({
   /**
    * Marge de dessin autour de la boîte, en px : la table reste cadrée sur la boîte, mais les pièces
    * qui tombent ou débordent restent visibles jusqu'à `bleed` px au-delà (sinon le canvas les coupe).
+   * Sans `bleed`, dimensionner le canvas en CSS (il peut déborder de la boîte, le cadrage suit).
    */
   bleed?: number
 }) {
@@ -209,7 +210,9 @@ export default function HeroScene({
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFShadowMap
-    renderer.domElement.style.cssText = `display:block;position:absolute;inset:${-bleed}px;width:calc(100% + ${bleed * 2}px);height:calc(100% + ${bleed * 2}px)`
+    // Sans `bleed`, le canvas se dimensionne en CSS chez l'appelant (ex. `.scene canvas` de la landing)
+    if (bleed !== undefined)
+      renderer.domElement.style.cssText = `display:block;position:absolute;inset:${-bleed}px;width:calc(100% + ${bleed * 2}px);height:calc(100% + ${bleed * 2}px)`
     el.appendChild(renderer.domElement)
 
     const scene = new THREE.Scene()
@@ -258,21 +261,27 @@ export default function HeroScene({
     let halfDepth = 3
     function resize() {
       if (!el) return
-      const { width, height } = el.getBoundingClientRect()
-      if (!width || !height) return
-      renderer.setSize(width + bleed * 2, height + bleed * 2, false)
-      const aspect = width / height
+      const frame = el.getBoundingClientRect()
+      const canvas = renderer.domElement.getBoundingClientRect()
+      if (!frame.width || !frame.height || !canvas.width || !canvas.height) return
+      renderer.setSize(canvas.width, canvas.height, false)
+      const aspect = frame.width / frame.height
       camera.aspect = aspect
-      // Cadrage calculé sur la boîte, rendu étendu de `bleed` px de chaque côté
-      if (bleed)
-        camera.setViewOffset(width, height, -bleed, -bleed, width + bleed * 2, height + bleed * 2)
       // Recule la caméra pour que TABLE_WIDTH remplisse toujours la largeur
       const vFov = THREE.MathUtils.degToRad(camera.fov)
       const hFov = 2 * Math.atan(Math.tan(vFov / 2) * aspect)
       const distance = TABLE_WIDTH / 2 / Math.tan(hFov / 2)
       camera.position.set(0, Math.sin(ELEVATION) * distance, Math.cos(ELEVATION) * distance)
       camera.lookAt(0, 0, 0)
-      camera.updateProjectionMatrix()
+      // Cadrage calculé sur la boîte, rendu sur tout le canvas (qui déborde autour : `bleed` ou CSS)
+      camera.setViewOffset(
+        frame.width,
+        frame.height,
+        canvas.left - frame.left,
+        canvas.top - frame.top,
+        canvas.width,
+        canvas.height,
+      )
       halfDepth = TABLE_WIDTH / 2 / aspect / Math.sin(ELEVATION)
       pieces.forEach(({ home }, i) => {
         // x et z seulement : y appartient à l'animation de lancer
@@ -295,7 +304,7 @@ export default function HeroScene({
     /**
      * Lancer : la pièce surgit (échelle 0 → 1) un peu au-dessus de la table, puis chute avec rebonds
      * et tours complets qui retombent pile sur la pose de repos. Partir de plus haut la ferait entrer
-     * par le bord du canvas, coupée net : 2,5 reste dans la marge `bleed`.
+     * par le bord du canvas, coupée net : 2,5 reste dans la marge de dessin (`bleed` ou CSS).
      */
     function toss(target: THREE.Object3D, delay: number, height = 2.5) {
       ctx.add(() => {
@@ -307,7 +316,12 @@ export default function HeroScene({
         gsap.fromTo(
           target.position,
           { y: height },
-          { y: 0, duration: 1.1, delay, ease: 'bounce.out' },
+          {
+            y: 0,
+            duration: 1.1,
+            delay,
+            ease: 'bounce.out',
+          },
         )
         gsap.fromTo(
           target.rotation,
