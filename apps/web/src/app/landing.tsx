@@ -39,7 +39,7 @@ const steps = [
   },
   {
     title: 'Viens jouer',
-    text: 'Inscris-toi en un geste, passe au lieu, et ta partie compte pour ta Kwote et ton XP.',
+    text: 'Inscris-toi en un geste, passe au lieu et ta partie compte pour ta Kwote et ton XP.',
   },
 ]
 
@@ -180,7 +180,7 @@ export function Landing() {
         </section>
 
         <section id="comment" className={`${s.wrap} ${s.section} ${s.how}`}>
-          <h2 className={`${s.h2} ${s.pinned}`}>Trois gestes, et tu joues.</h2>
+          <h2 className={`${s.h2} ${s.pinned}`}>Trois gestes et tu joues.</h2>
           <ol className={s.steps}>
             {steps.map((step) => (
               <li key={step.title} data-reveal className={`kw-card kw-card--raised ${s.step}`}>
