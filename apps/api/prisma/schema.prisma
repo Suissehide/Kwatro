@@ -42,6 +42,7 @@ model User {
   participations   RoomParticipant[]
   visits           Visit[]
   staffOf          VenueStaff[]
+  eventRegistrations EventRegistration[]
 }
 
 // ---------- Jeux ----------
@@ -60,7 +61,9 @@ model Game {
   maxPlayers Int          @default(4)
   formats    GameFormat[]
   rooms      Room[]
-  events     Event[]
+  events     Event[]      @relation("EventGames")
+  /// Lieux où ce jeu est disponible sur place
+  venues     Venue[]      @relation("VenueGames")
 }
 
 model GameFormat {
@@ -122,16 +125,40 @@ model Venue {
   isPartner                  Boolean      @default(false)
   /// Bars (débits de boissons) : pas de moins de 16 ans non accompagnés
   acceptsUnaccompaniedMinors Boolean      @default(false)
+  description                String?
+  /// Droit de jeu par personne (centimes) ; null = gratuit ou non renseigné
+  playFeeCents               Int?
+  /// Consommation minimum par personne (centimes)
+  minSpendCents              Int?
+  /// Avantage Kwatro proposé aux joueurs (lieux partenaires), ex. « -10 % sur les boosters »
+  kwatroPerk                 String?
   createdAt                  DateTime     @default(now())
   updatedAt                  DateTime     @updatedAt
 
-  staff  VenueStaff[]
-  rooms  Room[]
-  events Event[]
-  visits Visit[]
+  staff        VenueStaff[]
+  rooms        Room[]
+  events       Event[]
+  visits       Visit[]
+  openingHours VenueOpeningHours[]
+  /// Jeux disponibles sur place
+  games        Game[]              @relation("VenueGames")
 
   @@index([city])
   @@index([location], type: Gist)
+}
+
+/// Plage d'ouverture hebdomadaire ; plusieurs plages possibles le même jour.
+/// Minutes depuis minuit ; closesAtMinute < opensAtMinute = fermeture après minuit.
+model VenueOpeningHours {
+  id             String @id @default(cuid())
+  venueId        String
+  venue          Venue  @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  /// 1 = lundi … 7 = dimanche (ISO 8601)
+  weekday        Int
+  opensAtMinute  Int
+  closesAtMinute Int
+
+  @@index([venueId])
 }
 
 enum VenueStaffRole {
@@ -224,24 +251,65 @@ enum EventType {
   THEMED
 }
 
+enum RegistrationMode {
+  /// Entrée libre, pas d'inscription
+  NONE
+  /// Inscription dans l'app (places limitées par `capacity`)
+  IN_APP
+  /// Inscription sur un site externe (EventLink, HelloAsso…) via `externalUrl`
+  EXTERNAL
+}
+
+/// Une occurrence datée. Un événement récurrent = plusieurs Event partageant le même `seriesId`
+/// (chaque date a ses propres inscrits). Les occurrences sont créées à la saisie (back-office, seed).
 model Event {
-  id          String    @id @default(cuid())
-  venueId     String
-  venue       Venue     @relation(fields: [venueId], references: [id], onDelete: Cascade)
-  gameId      String?
-  game        Game?     @relation(fields: [gameId], references: [id])
-  type        EventType
-  title       String
-  description String?
-  startsAt    DateTime
-  endsAt      DateTime?
-  capacity    Int?
-  priceCents  Int?
-  minAge      Int?
-  externalUrl String?
-  createdAt   DateTime  @default(now())
+  id               String           @id @default(cuid())
+  venueId          String
+  venue            Venue            @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  /// Jeux concernés (vide = tous jeux, ex. soirée jeux de société libre)
+  games            Game[]           @relation("EventGames")
+  type             EventType
+  title            String
+  description      String?
+  startsAt         DateTime
+  endsAt           DateTime?
+  capacity         Int?
+  priceCents       Int?
+  minAge           Int?
+  registrationMode RegistrationMode @default(IN_APP)
+  externalUrl      String?
+  seriesId         String?
+  cancelledAt      DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  registrations EventRegistration[]
 
   @@index([venueId, startsAt])
+  @@index([startsAt])
+  @@index([seriesId])
+}
+
+enum RegistrationStatus {
+  REGISTERED
+  WAITLISTED
+  CANCELLED
+}
+
+/// Inscription d'un joueur à un événement (un seul enregistrement par joueur et par événement).
+model EventRegistration {
+  eventId     String
+  event       Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      RegistrationStatus @default(REGISTERED)
+  /// Présence pointée par le lieu (pointage, KWT-78)
+  checkedInAt DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@id([eventId, userId])
+  @@index([userId])
 }
 
 // ---------- Venues facturables ----------
