@@ -11,7 +11,8 @@ kwatro/
 │   ├── web/        → site public Next.js (SEO : ville, lieux, événements)   http://localhost:3001
 │   └── mobile/     → app Expo iOS / Android (+ back-office lieu)            Expo : http://localhost:8081
 ├── packages/
-│   └── shared/     → types, schémas Zod, constantes, règles (Kwote…)
+│   ├── shared/         → types, schémas Zod, constantes, règles (Kwote…)
+│   └── design-system/  → design system « Plateau pop » (tokens + composants RN, mobile et web)   catalogue : /design-system
 ├── deploy/             → tout Docker : stack locale, Dockerfiles, déploiement Dokploy, scripts
 ├── biome.json          → lint + format (remplace ESLint et Prettier)
 ├── turbo.json          → orchestration des tâches
