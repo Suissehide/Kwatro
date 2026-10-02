@@ -20,3 +20,44 @@ export type UserRole = (typeof USER_ROLES)[number]
 
 export const VENUE_TYPES = ['GAME_BAR', 'TCG_SHOP', 'LUDOTHEQUE', 'ASSOCIATION', 'OTHER'] as const
 export type VenueType = (typeof VENUE_TYPES)[number]
+
+export const VENUE_TYPE_LABELS: Record<VenueType, string> = {
+  GAME_BAR: 'Bar à jeux',
+  TCG_SHOP: 'Boutique TCG',
+  LUDOTHEQUE: 'Ludothèque',
+  ASSOCIATION: 'Association',
+  OTHER: 'Lieu',
+}
+
+export const EVENT_TYPES = [
+  'GAME_NIGHT',
+  'INITIATION',
+  'TOURNAMENT',
+  'PRERELEASE',
+  'THEMED',
+] as const
+export type EventType = (typeof EVENT_TYPES)[number]
+
+export const EVENT_TYPE_LABELS: Record<EventType, string> = {
+  GAME_NIGHT: 'Soirée jeux',
+  INITIATION: 'Initiation',
+  TOURNAMENT: 'Tournoi',
+  PRERELEASE: 'Avant-première',
+  THEMED: 'Soirée à thème',
+}
+
+/** Entrée libre, inscription dans l'app, ou sur un site externe (identique à l'enum Prisma). */
+export const REGISTRATION_MODES = ['NONE', 'IN_APP', 'EXTERNAL'] as const
+export type RegistrationMode = (typeof REGISTRATION_MODES)[number]
+
+/** Fuseau de référence des lieux (Bordeaux au lancement). */
+export const VENUE_TIME_ZONE = 'Europe/Paris'
+
+/** Centre par défaut quand la position du joueur est inconnue ou refusée. */
+export const DEFAULT_CITY = { name: 'Bordeaux', lat: 44.8378, lng: -0.5792 } as const
+
+/**
+ * Tri honnête des lieux : à distance « égale » (même tranche de 250 m), les partenaires passent devant ;
+ * au-delà, la distance l'emporte toujours. Valeur à affiner avec l'équipe (question ouverte n° 2).
+ */
+export const PARTNER_TIE_METERS = 250
