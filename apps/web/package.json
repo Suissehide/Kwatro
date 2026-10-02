@@ -18,12 +18,14 @@
     "next": "^16.3.8",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "react-native-web": "~0.21.3"
+    "react-native-web": "~0.21.3",
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@types/node": "^22",
     "@types/react": "~19.2.2",
     "@types/react-dom": "~19.2.2",
+    "@types/three": "^0.186.0",
     "typescript": "~6.0.3"
   }
 }

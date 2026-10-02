@@ -402,3 +402,23 @@
     transition: none;
   }
 }
+
+/* ---- Scène 3D du hero (hero-scene.tsx) : déborde du paquet de cartes, laisse passer les clics ---- */
+.scene {
+  position: absolute;
+  inset: -64px -56px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+}
+/* Mobile : le paquet occupe toute la largeur, la scène s'arrête à la gouttière de 16 px */
+@media (max-width: 899px) {
+  .scene {
+    inset: -64px -16px;
+  }
+}
+.scene canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
