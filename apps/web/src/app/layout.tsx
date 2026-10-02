@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
+import '@kwatro/design-system/kwatro.css'
 import './globals.css'
+import { RnwStyles } from './rnw-styles'
 
 export const metadata: Metadata = {
   title: 'Kwatro — Où jouer ce soir ?',
@@ -11,7 +13,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="fr">
-      <body>{children}</body>
+      <body>
+        <RnwStyles>{children}</RnwStyles>
+      </body>
     </html>
   )
 }

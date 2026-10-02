@@ -1,0 +1,37 @@
+import { Text, View } from 'react-native'
+import { Typography } from '../atoms/Typography'
+import { border, colors, font, radius } from '../tokens'
+
+/** Kwote : force par format TCG. Toujours jaune + ◆, chiffres en Space Mono. */
+export function KwoteBadge({
+  value,
+  reliability,
+  large,
+}: {
+  value: string
+  reliability?: number
+  large?: boolean
+}) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+      <View
+        aria-label={`Kwote ${value}`}
+        style={{
+          backgroundColor: colors.kwote,
+          borderWidth: border.thin,
+          borderColor: colors.ink,
+          borderRadius: radius.pill,
+          paddingVertical: large ? 4 : 2,
+          paddingHorizontal: large ? 12 : 8,
+        }}
+      >
+        <Text style={{ ...font('mono', 700), fontSize: large ? 16 : 12, color: colors.ink }}>
+          ◆ {value}
+        </Text>
+      </View>
+      {reliability != null ? (
+        <Typography variant="small">fiabilité {reliability} %</Typography>
+      ) : null}
+    </View>
+  )
+}
