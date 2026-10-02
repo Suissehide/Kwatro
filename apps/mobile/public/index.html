@@ -25,6 +25,16 @@
         height: 100%;
         flex: 1;
       }
+      /* Focus « Plateau pop », comme le site (kwatro.css) : rien au clic souris, anneau encre + halo
+         jaune au clavier, à la place du rectangle bleu du navigateur */
+      :focus:not(:focus-visible) {
+        outline: none;
+      }
+      :focus-visible {
+        outline: 3px solid #16130f;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 7px #f5b800;
+      }
     </style>
   </head>
 
