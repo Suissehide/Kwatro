@@ -1,6 +1,11 @@
 import path from 'node:path'
 import type { NextConfig } from 'next'
 
+// Le .env est à la racine du monorepo (NEXT_PUBLIC_API_URL) ; sans effet sur les variables déjà définies (build Docker)
+try {
+  process.loadEnvFile(path.join(__dirname, '../../.env'))
+} catch {}
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Image Docker légère : serveur Node autonome (voir deploy/web/Dockerfile)

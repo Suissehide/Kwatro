@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@kwatro/api-client": "workspace:*",
     "@kwatro/design-system": "workspace:*",
     "@kwatro/shared": "workspace:*",
     "next": "^16.3.8",

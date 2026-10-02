@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import '@kwatro/design-system/kwatro.css'
-import './globals.css'
 import { RnwStyles } from './rnw-styles'
 
 export const metadata: Metadata = {

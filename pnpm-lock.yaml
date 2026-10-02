@@ -151,6 +151,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@kwatro/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
       '@kwatro/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
