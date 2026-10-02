@@ -61,9 +61,6 @@ const steps = [
   },
 ]
 
-const manifesto =
-  'Chaque semaine, des centaines de bars à jeux, de boutiques et d’associations ouvrent leurs tables. Le plus dur, c’est de savoir où aller ce soir. Kwatro te le dit.'
-
 /** Landing joueurs : promesse, fonctionnement, inscription à la liste d'attente (KWT-3). */
 export function Landing() {
   const root = useRef<HTMLDivElement>(null)
@@ -80,22 +77,6 @@ export function Landing() {
             { y: 80, opacity: 0, stagger: 0.12, clearProps: 'transform,opacity' },
             '-=0.6',
           )
-
-        gsap.fromTo(
-          '[data-word]',
-          { opacity: 0.12 },
-          {
-            opacity: 1,
-            stagger: 0.1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: '[data-manifesto]',
-              start: 'top 75%',
-              end: 'bottom 40%',
-              scrub: true,
-            },
-          },
-        )
 
         for (const step of gsap.utils.toArray<HTMLElement>('[data-step]')) {
           gsap.from(step, {
@@ -122,14 +103,7 @@ export function Landing() {
 
       <header className={`${s.wrap} ${s.hero}`}>
         <h1 data-hero-line className={s.heroTitle}>
-          Trouve une table
-          <span className={s.tokens} aria-hidden="true">
-            <i />
-            <i />
-            <i />
-            <i />
-          </span>
-          ce soir, près de chez toi.
+          Trouve une table ce soir, près de chez toi.
         </h1>
         <div className={s.heroSplit}>
           <div className={s.heroText}>
@@ -207,17 +181,6 @@ export function Landing() {
             </article>
           ))}
         </div>
-      </section>
-
-      <section className={`${s.wrap} ${s.section}`} data-manifesto>
-        <p className={s.manifesto}>
-          {manifesto.split(' ').map((word, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: texte fixe, l'ordre ne change jamais
-            <span key={i} data-word>
-              {word}{' '}
-            </span>
-          ))}
-        </p>
       </section>
 
       <section id="comment" className={`${s.wrap} ${s.section} ${s.how}`}>

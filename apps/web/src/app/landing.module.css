@@ -2,9 +2,7 @@
 
 .page {
   overflow-x: clip;
-  background:
-    radial-gradient(60rem 40rem at 85% -10%, var(--kw-kwote-soft), transparent 60%),
-    radial-gradient(50rem 30rem at -10% 30%, var(--kw-room-soft), transparent 60%), var(--kw-cream);
+  background: var(--kw-cream);
 }
 
 .wrap {
@@ -61,36 +59,6 @@
   text-transform: uppercase;
   letter-spacing: -0.01em;
 }
-.tokens {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.08em;
-  height: 0.78em;
-  padding: 0 0.16em;
-  margin: 0 0.18em;
-  vertical-align: -0.04em;
-  background: #fff;
-  border: var(--kw-b);
-  border-radius: var(--kw-r-pill);
-  box-shadow: var(--kw-sh-sm);
-}
-.tokens i {
-  width: 0.42em;
-  height: 0.42em;
-  border-radius: 50%;
-  border: 2px solid var(--kw-ink);
-  background: var(--kw-event);
-}
-.tokens i:nth-child(2) {
-  background: var(--kw-room);
-}
-.tokens i:nth-child(3) {
-  background: var(--kw-venue);
-}
-.tokens i:nth-child(4) {
-  background: var(--kw-kwote);
-}
-
 .heroSplit {
   display: grid;
   gap: 56px;
@@ -199,8 +167,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 24px;
   padding: 24px;
   background: var(--slice);
   color: #fff;
@@ -219,7 +187,7 @@
 }
 .sliceTitle {
   margin: 0;
-  font: 400 clamp(1.75rem, 3vw, 2.75rem) / 1 var(--kw-font-display);
+  font: 400 clamp(1.5rem, 2.2vw, 1.75rem) / 1 var(--kw-font-display);
   text-transform: uppercase;
 }
 .sliceText {
@@ -240,54 +208,25 @@
   .slice:first-child,
   .slice:hover,
   .slice:focus-visible {
-    flex: 3;
+    flex: 2;
   }
   .slices:hover .slice:not(:hover),
   .slices:focus-within .slice:not(:focus-visible) {
     flex: 1;
   }
-  .sliceTitle {
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    align-self: flex-start;
-    transition: all var(--kw-t-normal) var(--kw-ease);
-  }
   .sliceText {
     opacity: 0;
-    transform: translateY(12px);
-    transition:
-      opacity var(--kw-t-normal) var(--kw-ease),
-      transform var(--kw-t-normal) var(--kw-ease);
-  }
-  .slice:first-child .sliceTitle,
-  .slice:hover .sliceTitle,
-  .slice:focus-visible .sliceTitle {
-    writing-mode: horizontal-tb;
-    transform: none;
+    transition: opacity var(--kw-t-normal) var(--kw-ease);
   }
   .slice:first-child .sliceText,
   .slice:hover .sliceText,
   .slice:focus-visible .sliceText {
     opacity: 1;
-    transform: none;
-  }
-  .slices:hover .slice:not(:hover) .sliceTitle,
-  .slices:focus-within .slice:not(:focus-visible) .sliceTitle {
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
   }
   .slices:hover .slice:not(:hover) .sliceText,
   .slices:focus-within .slice:not(:focus-visible) .sliceText {
     opacity: 0;
   }
-}
-
-/* ---- Manifeste (révélé au défilement) ---- */
-.manifesto {
-  margin: 0;
-  font: 800 clamp(1.75rem, 3.6vw, 3.25rem) / 1.2 var(--kw-font-body);
-  letter-spacing: -0.01em;
-  max-width: 28ch;
 }
 
 /* ---- Comment ça marche : titre épinglé, étapes qui défilent ---- */
@@ -342,13 +281,7 @@
 /* ---- Liste d'attente ---- */
 .action {
   padding-block: clamp(96px, 14vw, 192px);
-  background:
-    radial-gradient(
-      40rem 30rem at 90% 10%,
-      color-mix(in srgb, var(--kw-room) 35%, transparent),
-      transparent 70%
-    ),
-    var(--kw-ink);
+  background: var(--kw-ink);
   color: #fff;
   scroll-margin-top: 64px;
 }
@@ -463,7 +396,6 @@
     animation: none;
   }
   .slice,
-  .sliceTitle,
   .sliceText,
   .mock {
     transition: none;
