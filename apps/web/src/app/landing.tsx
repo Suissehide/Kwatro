@@ -104,7 +104,7 @@ export function Landing() {
               </div>
             </div>
             <div className={s.stack} aria-hidden="true">
-              <HeroScene className={s.scene} />
+              <HeroScene className={s.scene} bleed={140} />
               <article data-hero-card className={`kw-card kw-card--raised ${s.mock} ${s.mock1}`}>
                 <div className="kw-card__stripe" style={{ background: 'var(--kw-event)' }} />
                 <div className="kw-card__body">

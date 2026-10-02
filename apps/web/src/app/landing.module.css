@@ -403,7 +403,7 @@
   }
 }
 
-/* ---- Scène 3D du hero (hero-scene.tsx) : déborde du paquet de cartes, laisse passer les clics ---- */
+/* ---- Scène 3D du hero (@kwatro/design-system/scene) : déborde du paquet de cartes, laisse passer les clics ---- */
 .scene {
   position: absolute;
   inset: -64px -56px;
@@ -416,9 +416,4 @@
   .scene {
     inset: -64px -16px;
   }
-}
-.scene canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
 }
