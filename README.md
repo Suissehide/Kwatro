@@ -8,7 +8,7 @@ Monorepo TypeScript : app mobile (Expo), site public (Next.js), API (NestJS + Po
 kwatro/
 ├── apps/
 │   ├── api/        → API NestJS, Prisma (schéma, migrations, seed)        http://localhost:3000
-│   ├── web/        → site public Next.js (SEO : ville, lieux, événements)   http://localhost:3001
+│   ├── web/        → site public Next.js (SEO : ville, lieux, événements)   http://localhost:3010
 │   └── mobile/     → app Expo iOS / Android (+ back-office lieu)            Expo : http://localhost:8081
 ├── packages/
 │   ├── shared/         → types, schémas Zod, constantes, règles (Kwote…)
@@ -101,7 +101,7 @@ deploy/
 
 **En local**
 - `pnpm db:up` : profil `db`, PostgreSQL/PostGIS (port `5469`, modifiable avec `POSTGRES_PORT`) et Mailpit (http://localhost:8025). L'API et le site tournent avec `pnpm dev`.
-- `pnpm docker:up` : profils `db` + `backend` + `frontend`, l'API (port 3000) et le site (port 3001) avec les images de production, pour vérifier un build avant de pousser.
+- `pnpm docker:up` : profils `db` + `backend` + `frontend`, l'API (port 3000) et le site (port 3010) avec les images de production, pour vérifier un build avant de pousser.
 - `pnpm db:restore <fichier>` : remplace la base locale par une sauvegarde (par ex. téléchargée depuis Dokploy).
 
 **Déploiement avec Dokploy**

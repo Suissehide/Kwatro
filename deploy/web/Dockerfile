@@ -11,7 +11,9 @@ RUN pnpm dlx turbo@2.11.6 prune @kwatro/web --docker
 FROM base AS builder
 # Les variables NEXT_PUBLIC_* sont figées au moment du build
 ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_SITE_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=pruner /app/out/json/ .
 RUN pnpm install --frozen-lockfile

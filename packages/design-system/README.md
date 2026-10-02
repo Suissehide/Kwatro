@@ -4,7 +4,7 @@ Design system « Plateau pop » de Kwatro : tokens + composants React Native, ut
 l'app Expo (`apps/mobile`) et par le site Next.js (`apps/web`, via react-native-web).
 
 Référence visuelle : handoff design « Kwatro MVP » (`Kwatro DS Plateau pop v2`). Catalogue vivant :
-http://localhost:3001/design-system (web) et `/design-system` dans l'app Expo.
+http://localhost:3010/design-system (web) et `/design-system` dans l'app Expo.
 
 ## Organisation (atomic design)
 

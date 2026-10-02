@@ -4,23 +4,28 @@
   "private": true,
   "description": "Site public Kwatro (Next.js) : landing, pages ville, lieux, événements",
   "scripts": {
-    "dev": "next dev --port 3001",
+    "dev": "next dev --port 3010",
     "build": "next build",
-    "start": "next start --port 3001",
+    "start": "next start --port 3010",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
+    "@kwatro/api-client": "workspace:*",
     "@kwatro/design-system": "workspace:*",
     "@kwatro/shared": "workspace:*",
+    "gsap": "^3.15.0",
     "next": "^16.3.8",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "react-native-web": "~0.21.3"
+    "react-native-web": "~0.21.3",
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@types/node": "^22",
     "@types/react": "~19.2.2",
     "@types/react-dom": "~19.2.2",
+    "@types/three": "^0.186.0",
     "typescript": "~6.0.3"
   }
 }

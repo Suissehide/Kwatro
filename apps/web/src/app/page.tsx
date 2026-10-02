@@ -1,15 +1,38 @@
-import { KWOTE_START, MIN_AGE } from '@kwatro/shared'
+import { Landing } from './landing'
+import { siteDescription, siteUrl } from './site'
+
+// Données structurées : le site et l'organisation (https://schema.org)
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${siteUrl}/#website`,
+      url: siteUrl,
+      name: 'Kwatro',
+      inLanguage: 'fr-FR',
+      publisher: { '@id': `${siteUrl}/#organization` },
+    },
+    {
+      '@type': 'Organization',
+      '@id': `${siteUrl}/#organization`,
+      name: 'Kwatro',
+      url: siteUrl,
+      description: siteDescription,
+      areaServed: 'FR',
+    },
+  ],
+}
 
 export default function HomePage() {
   return (
-    <main>
-      <h1>Kwatro</h1>
-      <p>Où jouer ce soir à Bordeaux ? Bientôt disponible.</p>
-      <p>
-        <small>
-          Dès {MIN_AGE} ans · Kwote de départ : {KWOTE_START}
-        </small>
-      </p>
-    </main>
+    <>
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD statique, `<` échappé
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+      />
+      <Landing />
+    </>
   )
 }

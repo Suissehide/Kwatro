@@ -2,7 +2,7 @@ import { Catalogue } from '@kwatro/design-system/catalogue'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Design system — Kwatro',
+  title: 'Design system',
   robots: { index: false, follow: false },
 }
 
