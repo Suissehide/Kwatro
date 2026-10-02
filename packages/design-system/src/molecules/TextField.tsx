@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react'
+import { type ReactNode, type Ref, useState } from 'react'
 import {
   Platform,
   Text,
@@ -42,6 +42,7 @@ export function TextField({
   error?: string
   disabled?: boolean
   right?: ReactNode
+  ref?: Ref<TextInput>
 } & Omit<TextInputProps, 'editable' | 'style'>) {
   const [focus, setFocus] = useState(false)
   const bg = disabled ? colors.disabledBg : error ? colors.roomSoft : colors.white

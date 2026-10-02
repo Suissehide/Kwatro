@@ -1,3 +1,4 @@
+export * from './age'
 export * from './constants'
 export * from './kwote'
 export * from './schemas/game'
