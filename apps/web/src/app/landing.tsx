@@ -1,8 +1,9 @@
 'use client'
 import { useGSAP } from '@gsap/react'
+import { KWOTE_START } from '@kwatro/shared'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { type CSSProperties, useRef } from 'react'
+import { useRef } from 'react'
 import s from './landing.module.css'
 import { WaitlistForm } from './waitlist-form'
 
@@ -21,29 +22,6 @@ const games = [
   'Codenames',
   '7 Wonders',
   'Échecs',
-]
-
-const slices = [
-  {
-    color: 'var(--kw-event)',
-    title: 'Soirées',
-    text: 'L’agenda des soirées jeux, initiations, avant-premières et tournois, lieu par lieu.',
-  },
-  {
-    color: 'var(--kw-room)',
-    title: 'Tables',
-    text: 'Ouvre une table ou rejoins-en une. En partie classée, ta Kwote suit ton niveau pour des parties équilibrées.',
-  },
-  {
-    color: 'var(--kw-venue)',
-    title: 'Lieux',
-    text: 'Horaires, droit de jeu, jeux sur place, et des avantages réservés dans les lieux partenaires.',
-  },
-  {
-    color: 'var(--kw-kwote)',
-    title: 'XP',
-    text: 'Chaque soirée te rapporte de l’XP. Tu montes de niveau en jouant, tout simplement.',
-  },
 ]
 
 const steps = [
@@ -78,7 +56,7 @@ export function Landing() {
             '-=0.6',
           )
 
-        for (const step of gsap.utils.toArray<HTMLElement>('[data-step]')) {
+        for (const step of gsap.utils.toArray<HTMLElement>('[data-reveal]')) {
           gsap.from(step, {
             y: 60,
             opacity: 0,
@@ -135,7 +113,7 @@ export function Landing() {
                 <span className="kw-label">Partie classée · Pokémon</span>
                 <span className="kw-title">Il manque 2 joueurs</span>
                 <span>
-                  <span className="kw-kwote">1 180 – 1 260</span>
+                  <span className="kw-kwote">1 180 - 1 260</span>
                 </span>
               </div>
             </article>
@@ -166,20 +144,30 @@ export function Landing() {
       </section>
 
       <section className={`${s.wrap} ${s.section}`}>
-        <h2 className={s.h2}>Tout ce qui se joue autour de toi</h2>
-        <div className={s.slices}>
-          {slices.map((slice) => (
-            <article
-              key={slice.title}
-              className={s.slice}
-              style={{ '--slice': slice.color } as CSSProperties}
-              // biome-ignore lint/a11y/noNoninteractiveTabindex: le volet s'ouvre aussi au clavier
-              tabIndex={0}
-            >
-              <h3 className={s.sliceTitle}>{slice.title}</h3>
-              <p className={s.sliceText}>{slice.text}</p>
-            </article>
-          ))}
+        <h2 className={s.h2}>De quoi remplir tes soirées</h2>
+        <div className={s.bento}>
+          <article data-reveal className={`${s.tile} ${s.tileEvent}`}>
+            <span className={s.tileMeta}>Jeudi, 20 h</span>
+            <h3 className={s.tileTitle}>Draft Lorcana au bar du coin.</h3>
+            <p className={s.tileText}>Encore 3 places. Tu t’inscris, tu viens.</p>
+          </article>
+          <article data-reveal className={`${s.tile} ${s.tileKwote}`}>
+            <span className={s.tileNumber}>{KWOTE_START.toLocaleString('fr-FR')}</span>
+            <h3 className={s.tileTitle}>Ta Kwote de départ.</h3>
+            <p className={s.tileText}>
+              Tu gagnes, elle monte. Tu perds, elle descend. En face, des joueurs de ton niveau.
+            </p>
+          </article>
+          <article data-reveal className={`${s.tile} ${s.tileRoom}`}>
+            <h3 className={s.tileTitle}>Il vous manque un quatrième ?</h3>
+            <p className={s.tileText}>Ouvre ta table. Les joueurs du coin la voient.</p>
+          </article>
+          <article data-reveal className={`${s.tile} ${s.tileVenue}`}>
+            <h3 className={s.tileTitle}>Un bonus en venant avec Kwatro.</h3>
+            <p className={s.tileText}>
+              Une boisson, une réduc sur les boosters : chaque lieu partenaire choisit le sien.
+            </p>
+          </article>
         </div>
       </section>
 
@@ -187,7 +175,7 @@ export function Landing() {
         <h2 className={`${s.h2} ${s.pinned}`}>Trois gestes, et tu joues.</h2>
         <ol className={s.steps}>
           {steps.map((step) => (
-            <li key={step.title} data-step className={`kw-card kw-card--raised ${s.step}`}>
+            <li key={step.title} data-reveal className={`kw-card kw-card--raised ${s.step}`}>
               <h3 className={s.stepTitle}>{step.title}</h3>
               <p>{step.text}</p>
             </li>
