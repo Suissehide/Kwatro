@@ -2,52 +2,83 @@
 
 .page {
   min-height: 100dvh;
-  box-sizing: border-box;
-  display: grid;
-  align-content: center;
-  gap: 32px;
-  padding: 32px 16px;
   background: var(--kw-cream);
 }
-@media (min-width: 900px) {
-  .page {
-    grid-template-columns: minmax(0, 1fr) 420px;
-    align-items: center;
-    gap: 64px;
-    max-width: 1100px;
-    margin-inline: auto;
-    padding-inline: 40px;
-  }
-}
 
-.brand {
-  display: grid;
-  gap: 12px;
-}
-.wordmark {
-  font: 400 clamp(3rem, 9vw, 7.5rem) / 0.9 var(--kw-font-display);
-  text-transform: uppercase;
-  letter-spacing: -0.01em;
+.home {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   color: var(--kw-ink);
   text-decoration: none;
 }
-.tagline {
+
+.main {
+  display: grid;
+  gap: 32px;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 32px 16px 64px;
+  box-sizing: border-box;
+}
+@media (min-width: 900px) {
+  .main {
+    grid-template-columns: minmax(0, 1fr) 440px;
+    align-items: center;
+    gap: 72px;
+    min-height: calc(100dvh - 72px);
+    padding-inline: 32px;
+  }
+}
+
+.headline {
   margin: 0;
-  max-width: 22ch;
-  font: 600 clamp(1.05rem, 2vw, 1.5rem) / 1.3 var(--kw-font-body);
+  max-width: 14ch;
+  font: 400 clamp(2.25rem, 4.8vw, 4.5rem) / 0.98 var(--kw-font-display);
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
+/* Table où les pièces de la landing sont lancées ; masquée sur téléphone, le formulaire passe d'abord */
+.table {
+  position: relative;
+  height: 300px;
+  margin-top: 56px;
+}
+@media (max-width: 899px) {
+  .table {
+    display: none;
+  }
+}
+.scene {
+  position: absolute;
+  inset: -32px 0;
+  pointer-events: none;
+  opacity: 0;
+}
+.scene canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .panel {
-  padding: 24px;
+  padding: 28px;
 }
 
 .stack {
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
+/* Boutons à leur largeur : le trio d'accueil s'aligne sur le plus long, « Continuer » reste compact */
 .stack > :global(.kw-btn) {
-  width: 100%;
-  box-sizing: border-box;
+  justify-self: start;
+}
+.actions {
+  display: grid;
+  gap: 12px;
+  width: max-content;
+  max-width: 100%;
 }
 
 .title {

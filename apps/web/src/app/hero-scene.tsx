@@ -178,7 +178,7 @@ type Piece = {
  * Quatre pièces lancées sur les cartes du hero : un dé (qui tombe sur 4, Kwatro), un pion,
  * une carte et un jeton. Purement décoratif (aria-hidden), chargé après l'hydratation.
  */
-export default function HeroScene() {
+export default function HeroScene({ className = s.scene }: { className?: string }) {
   const host = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -377,5 +377,5 @@ export default function HeroScene() {
     }
   }, [])
 
-  return <div ref={host} className={s.scene} aria-hidden="true" />
+  return <div ref={host} className={className} aria-hidden="true" />
 }

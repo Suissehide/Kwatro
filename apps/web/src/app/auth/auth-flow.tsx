@@ -69,20 +69,26 @@ export function AuthFlow() {
       <div className={s.stack}>
         <h1 className={s.title}>Connexion</h1>
         <p className={s.lead}>Un seul compte pour l’app et le site. Pas de mot de passe.</p>
-        {/* ponytail: Apple et Google affichés pour l'aperçu, branchés par KWT-9 (Better Auth) */}
-        <button type="button" className="kw-btn kw-btn--ink" onClick={() => setProviderSoon(true)}>
-          Continuer avec Apple
-        </button>
-        <button
-          type="button"
-          className="kw-btn kw-btn--ghost"
-          onClick={() => setProviderSoon(true)}
-        >
-          Continuer avec Google
-        </button>
-        <button type="button" className="kw-btn kw-btn--room" onClick={() => go('email')}>
-          Continuer avec un e-mail
-        </button>
+        <div className={s.actions}>
+          {/* ponytail: Apple et Google affichés pour l'aperçu, branchés par KWT-9 (Better Auth) */}
+          <button
+            type="button"
+            className="kw-btn kw-btn--ink"
+            onClick={() => setProviderSoon(true)}
+          >
+            Continuer avec Apple
+          </button>
+          <button
+            type="button"
+            className="kw-btn kw-btn--ghost"
+            onClick={() => setProviderSoon(true)}
+          >
+            Continuer avec Google
+          </button>
+          <button type="button" className="kw-btn kw-btn--room" onClick={() => go('email')}>
+            Continuer avec un e-mail
+          </button>
+        </div>
         {providerSoon ? (
           <p className="kw-note" role="status">
             La connexion avec Apple ou Google arrive bientôt. Utilise ton e-mail en attendant.
