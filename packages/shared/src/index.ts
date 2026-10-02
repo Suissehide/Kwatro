@@ -1,3 +1,5 @@
 export * from './constants'
 export * from './kwote'
+export * from './schemas/game'
 export * from './schemas/room'
+export * from './schemas/user'

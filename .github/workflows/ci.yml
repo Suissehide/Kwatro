@@ -37,3 +37,8 @@ jobs:
 
       - name: Build API + site
         run: pnpm turbo run build --filter=@kwatro/api --filter=@kwatro/web
+
+      - name: Client API à jour avec l'OpenAPI
+        run: |
+          pnpm api:generate
+          git diff --exit-code packages/api-client || { echo "Client API périmé : lance 'pnpm api:generate' et committe le résultat"; exit 1; }

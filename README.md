@@ -58,6 +58,18 @@ Vérifier que tout marche : http://localhost:3000/health doit répondre `{"statu
 | `pnpm db:studio` | Explorer la base dans le navigateur |
 | `pnpm db:down` | Arrêter les conteneurs |
 | `pnpm db:restore <fichier>` | Restaurer une sauvegarde dans la base locale |
+| `pnpm api:generate` | Régénérer l'OpenAPI et le client typé (`packages/api-client`) après un changement de route |
+
+## API : ajouter une route
+
+Documentation interactive en dev : http://localhost:3000/docs (OpenAPI brut : `/openapi.json`).
+
+1. **Schémas dans `packages/shared`** (Zod) : ce que l'API reçoit et ce qu'elle renvoie, partagés avec l'app.
+2. **Contrôleur** : `@ZodBody(schema)` valide le corps (400 détaillé sinon), `@ZodResponse(schema)` documente la réponse **et retire tout champ non déclaré** (rien ne fuit par erreur). Voir `apps/api/src/common/zod.ts`.
+3. **Permissions** : toute route exige un utilisateur connecté par défaut ; `@Public()` pour l'ouvrir, `@Roles('ADMIN')` pour la restreindre, `@CurrentUser()` pour lire l'utilisateur (`apps/api/src/auth/`). Les règles fines (mineurs, staff d'un lieu, hôte d'une room) vont dans des guards dédiés, avec des tests.
+4. `pnpm api:generate`, puis côté app : `const { data, error } = await api.GET('/games')` (typé). La CI échoue si le client n'est pas à jour.
+
+> En attendant Better Auth (KWT-9), la connexion en dev se simule avec l'en-tête `x-dev-user-id: <id d'un User>` (`DEV_AUTH_HEADER=true`, refusé en production). Bouton « Authorize » dans `/docs`.
 
 ## Base de données
 

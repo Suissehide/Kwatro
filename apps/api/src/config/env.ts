@@ -5,15 +5,25 @@ config({ path: ['.env', '../../.env'], quiet: true })
 
 import { z } from 'zod'
 
-const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  API_PORT: z.coerce.number().int().default(3000),
-  DATABASE_URL: z.string().url(),
-  CORS_ORIGINS: z
-    .string()
-    .default('http://localhost:3001,http://localhost:8081')
-    .transform((value) => value.split(',').map((origin) => origin.trim())),
-})
+const envSchema = z
+  .object({
+    NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+    API_PORT: z.coerce.number().int().default(3000),
+    DATABASE_URL: z.string().url(),
+    CORS_ORIGINS: z
+      .string()
+      .default('http://localhost:3001,http://localhost:8081')
+      .transform((value) => value.split(',').map((origin) => origin.trim())),
+    /** Dev uniquement : accepte l'en-tête `x-dev-user-id` comme connexion, en attendant Better Auth (KWT-9). */
+    DEV_AUTH_HEADER: z
+      .enum(['true', 'false'])
+      .default('false')
+      .transform((value) => value === 'true'),
+  })
+  .refine((env) => !(env.NODE_ENV === 'production' && env.DEV_AUTH_HEADER), {
+    message: 'DEV_AUTH_HEADER est interdit en production',
+    path: ['DEV_AUTH_HEADER'],
+  })
 
 export type Env = z.infer<typeof envSchema>
 
