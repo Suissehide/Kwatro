@@ -23,6 +23,7 @@ export default function ConnexionScreen() {
   const insets = useSafeAreaInsets()
   const [step, setStep] = useState<Step>('welcome')
   const [email, setEmail] = useState('')
+  const [providerSoon, setProviderSoon] = useState(false)
 
   if (step === 'welcome') {
     return (
@@ -31,7 +32,19 @@ export default function ConnexionScreen() {
         scroll={false}
         footer={
           <>
+            {/* ponytail: Apple et Google affichés pour l'aperçu, branchés par KWT-9 (Better Auth) */}
+            <Button label="Continuer avec Apple" kind="ink" onPress={() => setProviderSoon(true)} />
+            <Button
+              label="Continuer avec Google"
+              kind="ghost"
+              onPress={() => setProviderSoon(true)}
+            />
             <Button label="Continuer avec un e-mail" onPress={() => setStep('email')} />
+            {providerSoon ? (
+              <Note>
+                La connexion avec Apple ou Google arrive bientôt. Utilise ton e-mail en attendant.
+              </Note>
+            ) : null}
             <Typography variant="small" style={{ textAlign: 'center' }}>
               En continuant, tu acceptes les conditions d'utilisation et la politique de
               confidentialité.
