@@ -2,11 +2,15 @@ packages:
   - apps/*
   - packages/*
 
-onlyBuiltDependencies:
-  - '@biomejs/biome'
-  - '@prisma/engines'
-  - '@nestjs/core'
-  - esbuild
-  - lefthook
-  - prisma
-  - sharp
+# React Native / Expo fonctionnent de façon plus fiable avec des node_modules « à plat »
+nodeLinker: hoisted
+
+allowBuilds:
+  '@prisma/engines': true
+  '@scarf/scarf': false
+  esbuild: true
+  lefthook: true
+  prisma: true
+  '@biomejs/biome': true
+  '@nestjs/core': true
+  sharp: true
