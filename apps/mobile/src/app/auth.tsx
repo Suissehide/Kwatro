@@ -14,12 +14,11 @@ import { router } from 'expo-router'
 import { useRef, useState } from 'react'
 import { Text, type TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { IntroDeck } from '@/components/IntroDeck'
 
 type Step = 'welcome' | 'email' | 'birth' | AgeRegime
 
 /** Accueil (A1), e-mail (A2) et date de naissance obligatoire (A3, KWT-44). */
-export default function ConnexionScreen() {
+export default function AuthScreen() {
   const insets = useSafeAreaInsets()
   const [step, setStep] = useState<Step>('welcome')
   const [email, setEmail] = useState('')
@@ -52,14 +51,11 @@ export default function ConnexionScreen() {
           </>
         }
       >
-        <View style={{ flex: 1, justifyContent: 'space-evenly', gap: 20, paddingTop: 12 }}>
-          <View style={{ gap: 6 }}>
-            <Typography variant="display">Kwatro</Typography>
-            <Typography style={{ ...font('body', 600), fontSize: 17, lineHeight: 24 }}>
-              Trouve où jouer ce soir, et avec qui.
-            </Typography>
-          </View>
-          <IntroDeck />
+        <View style={{ flex: 1, justifyContent: 'center', gap: 10 }}>
+          <Typography variant="display">Kwatro</Typography>
+          <Typography style={{ ...font('body', 600), fontSize: 17, lineHeight: 24 }}>
+            Trouve où jouer ce soir, et avec qui.
+          </Typography>
         </View>
       </MobileScreen>
     )
