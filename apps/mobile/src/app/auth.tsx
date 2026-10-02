@@ -9,10 +9,19 @@ import {
   Raised,
   radius,
   ScreenHeader,
+  Segmented,
   TextField,
   Typography,
 } from '@kwatro/design-system'
-import { type AgeRegime, ageRegime, emailSchema, MIN_AGE, parseBirthDate } from '@kwatro/shared'
+import {
+  type AgeRegime,
+  ageRegime,
+  emailSchema,
+  MIN_AGE,
+  PASSWORD_MIN,
+  parseBirthDate,
+  passwordSchema,
+} from '@kwatro/shared'
 import { router } from 'expo-router'
 import { createContext, type ReactNode, useContext, useRef, useState } from 'react'
 import { ScrollView, Text, type TextInput, useWindowDimensions, View } from 'react-native'
@@ -31,6 +40,7 @@ export default function AuthScreen() {
   const { width } = useWindowDimensions()
   const [step, setStep] = useState<Step>('welcome')
   const [email, setEmail] = useState('')
+  const [mode, setMode] = useState<AccountMode>('login')
   const [providerSoon, setProviderSoon] = useState(false)
   const wide = width >= WIDE
 
@@ -70,13 +80,13 @@ export default function AuthScreen() {
         }
       >
         {wide ? (
-          <Typography>Un seul compte pour l’app et le site. Pas de mot de passe.</Typography>
+          <Typography>Connecte-toi ou crée ton compte Kwatro.</Typography>
         ) : (
           <View style={{ flex: 1, justifyContent: 'center', gap: 12 }}>
             <Logo size={44} />
             <Typography variant="display">Kwatro</Typography>
             <Typography style={{ ...font('body', 600), fontSize: 17, lineHeight: 24 }}>
-              Trouve où jouer ce soir, et avec qui.
+              Trouve où jouer ce soir et avec qui.
             </Typography>
           </View>
         )}
@@ -84,10 +94,12 @@ export default function AuthScreen() {
     )
   } else if (step === 'email') {
     content = (
-      <EmailStep
+      <AccountStep
         email={email}
+        mode={mode}
+        onMode={setMode}
         onBack={() => setStep('welcome')}
-        onDone={(e) => {
+        onCreate={(e) => {
           setEmail(e)
           setStep('birth')
         }}
@@ -157,7 +169,7 @@ function WideLayout({ children }: { children: ReactNode }) {
               maxWidth: 560,
             }}
           >
-            Trouve où jouer ce soir, et avec qui.
+            Trouve où jouer ce soir et avec qui.
           </Text>
           <View style={{ height: 300, marginTop: 56 }}>
             <TableScene />
@@ -251,47 +263,92 @@ function StepButton(props: { label: string; kind?: 'room' | 'ghost'; onPress: ()
   )
 }
 
-function EmailStep({
+type AccountMode = 'login' | 'create'
+
+/** E-mail + mot de passe : connexion à un compte existant, ou début de la création (suivie de la date de naissance). */
+function AccountStep({
   email: initial,
+  mode,
+  onMode,
   onBack,
-  onDone,
+  onCreate,
 }: {
   email: string
+  mode: AccountMode
+  onMode: (mode: AccountMode) => void
   onBack: () => void
-  onDone: (email: string) => void
+  onCreate: (email: string) => void
 }) {
   const [email, setEmail] = useState(initial)
-  const [error, setError] = useState<string>()
+  const [password, setPassword] = useState('')
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const passwordRef = useRef<TextInput>(null)
+  const create = mode === 'create'
 
   const submit = () => {
-    const parsed = emailSchema.safeParse(email)
-    if (!parsed.success) return setError('Cette adresse e-mail ne semble pas valide. Vérifie-la.')
-    // ponytail: pas encore d'envoi de lien magique, branché par KWT-9 (Better Auth)
-    onDone(parsed.data)
+    const parsedEmail = emailSchema.safeParse(email)
+    const passwordError = create
+      ? passwordSchema.safeParse(password).error?.issues[0]?.message
+      : password
+        ? undefined
+        : 'Saisis ton mot de passe.'
+    if (!parsedEmail.success || passwordError)
+      return setErrors({
+        email: parsedEmail.success
+          ? undefined
+          : 'Cette adresse e-mail ne semble pas valide. Vérifie-la.',
+        password: passwordError,
+      })
+    // ponytail: ni connexion ni création côté API pour l'instant, branchées par KWT-9 (Better Auth)
+    if (create) onCreate(parsedEmail.data)
+    else router.replace('/')
   }
 
   return (
     <Frame
-      title="Ton e-mail"
+      title={create ? 'Créer un compte' : 'Se connecter'}
       onBack={onBack}
-      progress={1}
-      footer={<StepButton label="Continuer" onPress={submit} />}
+      progress={create ? 1 : undefined}
+      footer={<StepButton label={create ? 'Continuer' : 'Se connecter'} onPress={submit} />}
     >
-      <Typography>On t'envoie un lien pour te connecter, sans mot de passe.</Typography>
+      <Segmented
+        items={['Se connecter', 'Créer un compte']}
+        value={create ? 1 : 0}
+        onChange={(i) => {
+          onMode(i ? 'create' : 'login')
+          setErrors({})
+        }}
+      />
       <TextField
         label="Adresse e-mail"
         placeholder="toi@exemple.fr"
         value={email}
         onChangeText={(v) => {
           setEmail(v)
-          setError(undefined)
+          setErrors((e) => ({ ...e, email: undefined }))
         }}
-        error={error}
+        error={errors.email}
         autoFocus
         autoCapitalize="none"
         autoComplete="email"
         keyboardType="email-address"
         returnKeyType="next"
+        onSubmitEditing={() => passwordRef.current?.focus()}
+      />
+      <TextField
+        ref={passwordRef}
+        label="Mot de passe"
+        value={password}
+        onChangeText={(v) => {
+          setPassword(v)
+          setErrors((e) => ({ ...e, password: undefined }))
+        }}
+        error={errors.password}
+        help={create ? `${PASSWORD_MIN} caractères minimum` : undefined}
+        secureTextEntry
+        autoCapitalize="none"
+        autoComplete={create ? 'new-password' : 'current-password'}
+        returnKeyType="done"
         onSubmitEditing={submit}
       />
     </Frame>
@@ -381,12 +438,12 @@ const OUTCOMES: Record<
 > = {
   adult: {
     title: 'C’est parti',
-    text: 'Encore ton pseudo, ta ville et tes jeux, et tu vois les parties près de chez toi.',
+    text: 'Il reste ton pseudo, ta ville et tes jeux. Ensuite, tu vois les parties près de chez toi.',
     tone: 'venue',
   },
   minor: {
     title: 'C’est parti',
-    text: 'Ton compte est protégé : pas de messages privés d’adultes inconnus, pas de parties à domicile, et ta ville exacte reste cachée.',
+    text: 'Ton compte est protégé : pas de messages privés d’adultes inconnus, pas de parties à domicile et ta ville exacte reste cachée.',
     tone: 'venue',
   },
   'parental-consent': {
