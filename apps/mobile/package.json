@@ -15,6 +15,7 @@
     "@expo-google-fonts/archivo": "^0.4.2",
     "@expo-google-fonts/archivo-black": "^0.4.1",
     "@expo-google-fonts/space-mono": "^0.4.2",
+    "@kwatro/api-client": "workspace:*",
     "@kwatro/design-system": "workspace:*",
     "@kwatro/shared": "workspace:*",
     "expo": "~57.0.26",

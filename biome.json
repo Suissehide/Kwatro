@@ -17,7 +17,9 @@
       "!**/src/generated",
       "!**/expo-env.d.ts",
       "!**/next-env.d.ts",
-      "!**/prisma/migrations"
+      "!**/prisma/migrations",
+      "!**/packages/api-client/openapi.json",
+      "!**/packages/api-client/src/schema.d.ts"
     ]
   },
   "formatter": {

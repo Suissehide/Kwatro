@@ -14,5 +14,9 @@ export type GameKind = (typeof GAME_KINDS)[number]
 export const ROOM_MODES = ['RANKED', 'CASUAL'] as const
 export type RoomMode = (typeof ROOM_MODES)[number]
 
+/** Rôle global d'un compte (identique à l'enum Prisma UserRole). Les rôles par lieu sont dans VenueStaff. */
+export const USER_ROLES = ['PLAYER', 'VENUE_STAFF', 'ADMIN'] as const
+export type UserRole = (typeof USER_ROLES)[number]
+
 export const VENUE_TYPES = ['GAME_BAR', 'TCG_SHOP', 'LUDOTHEQUE', 'ASSOCIATION', 'OTHER'] as const
 export type VenueType = (typeof VENUE_TYPES)[number]

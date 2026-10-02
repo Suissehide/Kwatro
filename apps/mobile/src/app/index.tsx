@@ -7,8 +7,9 @@ export default function HomeScreen() {
   const [apiStatus, setApiStatus] = useState('…')
 
   useEffect(() => {
-    api<{ status: string }>('/health')
-      .then((health) => setApiStatus(health.status))
+    api
+      .GET('/health')
+      .then(({ data }) => setApiStatus(data?.status ?? 'injoignable'))
       .catch(() => setApiStatus('injoignable'))
   }, [])
 
