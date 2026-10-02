@@ -19,6 +19,7 @@ src/
 ├── organisms/   DataTable, Accordion, BarChart, ConfirmDialog, BottomSheet,
 │                PlayerTabBar / VenueTabBar, Sidebar
 ├── templates/   MobileScreen, WebSidebarLayout
+├── scene/       HeroScene : pièces 3D Three.js, web uniquement (import séparé : @kwatro/design-system/scene)
 └── catalogue/   vitrine de tous les composants (import séparé : @kwatro/design-system/catalogue)
 ```
 

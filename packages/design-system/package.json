@@ -8,6 +8,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./catalogue": "./src/catalogue/Catalogue.tsx",
+    "./scene": "./src/scene/HeroScene.tsx",
     "./kwatro.css": "./css/kwatro.css"
   },
   "sideEffects": [
@@ -23,9 +24,14 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "@types/three": "^0.186.0",
     "react": "19.2.3",
     "react-native": "0.86.3",
     "typescript": "~6.0.3",
     "vitest": "^5.0.3"
+  },
+  "dependencies": {
+    "gsap": "^3.15.0",
+    "three": "^0.186.1"
   }
 }

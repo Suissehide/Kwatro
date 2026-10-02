@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react'
+import { type ReactNode, type Ref, useState } from 'react'
 import {
   Platform,
   Text,
@@ -21,9 +21,10 @@ const focusRing: ViewStyle =
         shadowOffset: { width: 0, height: 0 },
       }
 
-// Web : l'anneau de focus est sur le cadre ; on retire celui de :focus-visible (kwatro.css) sur le texte
+// Web : l'anneau de focus est sur le cadre ; on retire celui du navigateur sur le texte (style « solid » de largeur 0 :
+// avec le style « auto » par défaut, Chrome ignore la largeur et dessine quand même un rectangle bleu)
 const noOutline: TextStyle | null =
-  Platform.OS === 'web' ? { outlineWidth: 0, boxShadow: 'none' } : null
+  Platform.OS === 'web' ? { outlineWidth: 0, outlineStyle: 'solid', boxShadow: 'none' } : null
 
 /** Champ : libellé, aide ou erreur dessous, compteur si `multiline` + `maxLength`. */
 export function TextField({
@@ -42,6 +43,7 @@ export function TextField({
   error?: string
   disabled?: boolean
   right?: ReactNode
+  ref?: Ref<TextInput>
 } & Omit<TextInputProps, 'editable' | 'style'>) {
   const [focus, setFocus] = useState(false)
   const bg = disabled ? colors.disabledBg : error ? colors.roomSoft : colors.white

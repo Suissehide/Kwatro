@@ -43,6 +43,8 @@ export function Button({
       aria-disabled={disabled}
       onPress={onPress}
       disabled={disabled}
+      // Même arrondi que la face : l'anneau de focus clavier (web) suit le bouton au lieu d'un rectangle
+      style={{ borderRadius: r }}
     >
       {({ pressed }) => {
         const face = (
@@ -73,7 +75,10 @@ export function Button({
             </Text>
           </View>
         )
-        return kind === 'ghost' || disabled || pressed ? (
+        // Structure fixe pendant l'appui : la face glisse pile sur son ombre, qui disparaît dessous.
+        // Retirer <Raised> à l'appui recréait la face sous le curseur : sur le web, Chrome n'envoie
+        // alors pas de « click » au relâchement et onPress n'était jamais appelé.
+        return kind === 'ghost' || disabled ? (
           face
         ) : (
           <Raised offset={off} r={r}>

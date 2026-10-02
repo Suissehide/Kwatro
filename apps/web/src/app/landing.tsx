@@ -11,7 +11,7 @@ import { WaitlistForm } from './waitlist-form'
 gsap.registerPlugin(ScrollTrigger, useGSAP)
 
 // Three.js (~150 ko) chargé à part, après l'hydratation : le texte du hero reste le premier affichage
-const HeroScene = dynamic(() => import('./hero-scene'), { ssr: false })
+const HeroScene = dynamic(() => import('@kwatro/design-system/scene'), { ssr: false })
 
 const games = [
   'Magic: The Gathering',
@@ -39,7 +39,7 @@ const steps = [
   },
   {
     title: 'Viens jouer',
-    text: 'Inscris-toi en un geste, passe au lieu, et ta partie compte pour ta Kwote et ton XP.',
+    text: 'Inscris-toi en un geste, passe au lieu et ta partie compte pour ta Kwote et ton XP.',
   },
 ]
 
@@ -104,7 +104,7 @@ export function Landing() {
               </div>
             </div>
             <div className={s.stack} aria-hidden="true">
-              <HeroScene />
+              <HeroScene className={s.scene} />
               <article data-hero-card className={`kw-card kw-card--raised ${s.mock} ${s.mock1}`}>
                 <div className="kw-card__stripe" style={{ background: 'var(--kw-event)' }} />
                 <div className="kw-card__body">
@@ -180,7 +180,7 @@ export function Landing() {
         </section>
 
         <section id="comment" className={`${s.wrap} ${s.section} ${s.how}`}>
-          <h2 className={`${s.h2} ${s.pinned}`}>Trois gestes, et tu joues.</h2>
+          <h2 className={`${s.h2} ${s.pinned}`}>Trois gestes et tu joues.</h2>
           <ol className={s.steps}>
             {steps.map((step) => (
               <li key={step.title} data-reveal className={`kw-card kw-card--raised ${s.step}`}>

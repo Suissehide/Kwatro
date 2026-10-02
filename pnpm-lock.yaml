@@ -370,10 +370,20 @@ importers:
         version: 6.0.3
 
   packages/design-system:
+    dependencies:
+      gsap:
+        specifier: ^3.15.0
+        version: 3.15.0
+      three:
+        specifier: ^0.186.1
+        version: 0.186.1
     devDependencies:
       '@types/react':
         specifier: ~19.2.2
         version: 19.2.18
+      '@types/three':
+        specifier: ^0.186.0
+        version: 0.186.0
       react:
         specifier: 19.2.3
         version: 19.2.3
