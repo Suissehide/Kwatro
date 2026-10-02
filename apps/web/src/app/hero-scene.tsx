@@ -14,7 +14,7 @@ const VENUE = 0x157a55
 const WHITE = 0xffffff
 
 /** Largeur de table visible, en unités monde : les pièces gardent la même taille relative à l'écran. */
-const TABLE_WIDTH = 10
+const TABLE_WIDTH = 12
 const ELEVATION = THREE.MathUtils.degToRad(58)
 
 /** Dégradé à 3 tons, rendu « cartoon » qui va avec les ombres dures du design system. */
@@ -244,10 +244,11 @@ export default function HeroScene() {
     let halfDepth = 3
     function resize() {
       if (!el) return
-      const { width, height } = el.getBoundingClientRect()
-      if (!width || !height) return
-      renderer.setSize(width, height, false)
-      const aspect = width / height
+      const frame = el.getBoundingClientRect()
+      const canvas = renderer.domElement.getBoundingClientRect()
+      if (!frame.width || !frame.height || !canvas.width || !canvas.height) return
+      renderer.setSize(canvas.width, canvas.height, false)
+      const aspect = frame.width / frame.height
       camera.aspect = aspect
       // Recule la caméra pour que TABLE_WIDTH remplisse toujours la largeur
       const vFov = THREE.MathUtils.degToRad(camera.fov)
@@ -255,7 +256,15 @@ export default function HeroScene() {
       const distance = TABLE_WIDTH / 2 / Math.tan(hFov / 2)
       camera.position.set(0, Math.sin(ELEVATION) * distance, Math.cos(ELEVATION) * distance)
       camera.lookAt(0, 0, 0)
-      camera.updateProjectionMatrix()
+      // Cadrage calculé sur .scene, rendu sur tout le canvas (qui déborde autour)
+      camera.setViewOffset(
+        frame.width,
+        frame.height,
+        canvas.left - frame.left,
+        canvas.top - frame.top,
+        canvas.width,
+        canvas.height,
+      )
       halfDepth = TABLE_WIDTH / 2 / aspect / Math.sin(ELEVATION)
       pieces.forEach(({ home }, i) => {
         // x et z seulement : y appartient à l'animation de lancer
@@ -276,12 +285,20 @@ export default function HeroScene() {
     const ctx = gsap.context(() => {})
 
     /** Lancer : chute avec rebonds et tours complets, qui retombent pile sur la pose de repos. */
-    function toss(target: THREE.Object3D, delay: number, height = 7) {
+    function toss(target: THREE.Object3D, delay: number, height = 3) {
       ctx.add(() => {
         gsap.fromTo(
           target.position,
           { y: height },
-          { y: 0, duration: 1.1, delay, ease: 'bounce.out' },
+          {
+            y: 0,
+            duration: 1.1,
+            delay,
+            ease: 'bounce.out',
+            onStart: () => {
+              target.visible = true
+            },
+          },
         )
         gsap.fromTo(
           target.rotation,
@@ -308,7 +325,7 @@ export default function HeroScene() {
     }
 
     holders.forEach((holder, i) => {
-      holder.position.y = 7 // hors champ jusqu'au lancer
+      holder.visible = false // caché jusqu'au lancer : il part de l'intérieur du canvas
       toss(holder, 0.25 + i * 0.14)
     })
     gsap.to(el, { opacity: 1, duration: 0.3 })
@@ -317,8 +334,8 @@ export default function HeroScene() {
     const raycaster = new THREE.Raycaster()
     const ndc = new THREE.Vector2()
     function hitsDie(event: PointerEvent) {
-      if (!el || !die) return false
-      const r = el.getBoundingClientRect()
+      if (!die) return false
+      const r = renderer.domElement.getBoundingClientRect()
       ndc.set(
         ((event.clientX - r.left) / r.width) * 2 - 1,
         -((event.clientY - r.top) / r.height) * 2 + 1,
