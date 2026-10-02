@@ -147,9 +147,11 @@ export function Landing() {
         <h2 className={s.h2}>De quoi remplir tes soirées</h2>
         <div className={s.bento}>
           <article data-reveal className={`${s.tile} ${s.tileEvent}`}>
-            <span className={s.tileMeta}>Jeudi, 20 h</span>
-            <h3 className={s.tileTitle}>Draft Lorcana au bar du coin.</h3>
-            <p className={s.tileText}>Encore 3 places. Tu t’inscris, tu viens.</p>
+            <span className={s.tileMeta}>Ce soir</span>
+            <h3 className={s.tileTitle}>Une soirée jeux à deux pas.</h3>
+            <p className={s.tileText}>
+              Tournoi, initiation ou partie libre. Tu choisis, tu t’inscris, tu viens.
+            </p>
           </article>
           <article data-reveal className={`${s.tile} ${s.tileKwote}`}>
             <span className={s.tileNumber}>{KWOTE_START.toLocaleString('fr-FR')}</span>
