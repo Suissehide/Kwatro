@@ -1,141 +1,256 @@
 'use client'
-import { createApiClient } from '@kwatro/api-client'
-import {
-  Banner,
-  Button,
-  breakpoints,
-  Checkbox,
-  ContentCard,
-  type ContentKind,
-  space,
-  TextField,
-  Typography,
-} from '@kwatro/design-system'
-import { joinWaitlistSchema } from '@kwatro/shared'
-import { useState } from 'react'
-import { View } from 'react-native'
+import { useGSAP } from '@gsap/react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { type CSSProperties, useRef } from 'react'
+import s from './landing.module.css'
+import { WaitlistForm } from './waitlist-form'
 
-const api = createApiClient(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000')
+gsap.registerPlugin(ScrollTrigger, useGSAP)
 
-const pitches: { kind: ContentKind; title: string; text: string }[] = [
+const games = [
+  'Magic: The Gathering',
+  'Pokémon',
+  'One Piece',
+  'Lorcana',
+  'Yu-Gi-Oh!',
+  'Flesh and Blood',
+  'Catan',
+  'Dixit',
+  'Les Aventuriers du Rail',
+  'Codenames',
+  '7 Wonders',
+  'Échecs',
+]
+
+const slices = [
   {
-    kind: 'event',
-    title: 'Les soirées du coin',
-    text: 'Soirées jeux, initiations, tournois TCG : tout l’agenda des bars à jeux, boutiques et assos près de chez toi.',
+    color: 'var(--kw-event)',
+    title: 'Soirées',
+    text: 'L’agenda des soirées jeux, initiations, avant-premières et tournois, lieu par lieu.',
   },
   {
-    kind: 'room',
-    title: 'Des joueurs à ton niveau',
-    text: 'Rejoins une table ou ouvre la tienne. Ta Kwote suit ton niveau pour des parties équilibrées.',
+    color: 'var(--kw-room)',
+    title: 'Tables',
+    text: 'Ouvre une table ou rejoins-en une. En partie classée, ta Kwote suit ton niveau pour des parties équilibrées.',
   },
   {
-    kind: 'venue',
-    title: 'Des avantages sur place',
-    text: 'Les lieux partenaires réservent des avantages aux joueurs venus avec Kwatro.',
+    color: 'var(--kw-venue)',
+    title: 'Lieux',
+    text: 'Horaires, droit de jeu, jeux sur place, et des avantages réservés dans les lieux partenaires.',
+  },
+  {
+    color: 'var(--kw-kwote)',
+    title: 'XP',
+    text: 'Chaque soirée te rapporte de l’XP. Tu montes de niveau en jouant, tout simplement.',
   },
 ]
 
-type Status = { tone: 'ok' | 'err'; message: string } | null
+const steps = [
+  {
+    title: 'Dis-nous à quoi tu joues',
+    text: 'Tes jeux, tes formats, ton niveau. Kwatro s’en sert pour te proposer les bonnes soirées.',
+  },
+  {
+    title: 'Choisis ta soirée',
+    text: 'Carte et liste des lieux ouverts ce soir, avec les places restantes et le droit de jeu.',
+  },
+  {
+    title: 'Viens jouer',
+    text: 'Inscris-toi en un geste, passe au lieu, et ta partie compte pour ta Kwote et ton XP.',
+  },
+]
 
-function WaitlistForm() {
-  const [email, setEmail] = useState('')
-  const [city, setCity] = useState('')
-  const [digitalMajority, setDigitalMajority] = useState(false)
-  const [sending, setSending] = useState(false)
-  const [status, setStatus] = useState<Status>(null)
+const manifesto =
+  'Chaque semaine, des centaines de bars à jeux, de boutiques et d’associations ouvrent leurs tables. Le plus dur, c’est de savoir où aller ce soir. Kwatro te le dit.'
 
-  async function submit() {
-    const parsed = joinWaitlistSchema.safeParse({ email, city, digitalMajority })
-    if (!parsed.success) {
-      setStatus({ tone: 'err', message: parsed.error.issues[0]?.message ?? 'Données invalides' })
-      return
-    }
-    setSending(true)
-    const { error } = await api
-      .POST('/waitlist', { body: parsed.data })
-      .catch(() => ({ error: true }))
-    setSending(false)
-    setStatus(
-      error
-        ? { tone: 'err', message: 'Inscription impossible pour le moment, réessaie plus tard.' }
-        : { tone: 'ok', message: 'C’est noté ! On te prévient dès l’ouverture.' },
-    )
-  }
-
-  if (status?.tone === 'ok') return <Banner tone="ok" message={status.message} />
-
-  return (
-    <View style={{ gap: space.lg }}>
-      <TextField
-        label="E-mail"
-        value={email}
-        onChangeText={setEmail}
-        inputMode="email"
-        autoComplete="email"
-        placeholder="toi@exemple.fr"
-        onSubmitEditing={submit}
-      />
-      <TextField
-        label="Ville (facultatif)"
-        value={city}
-        onChangeText={setCity}
-        placeholder="Bordeaux"
-        maxLength={80}
-        onSubmitEditing={submit}
-      />
-      <Checkbox label="J’ai 15 ans ou plus" value={digitalMajority} onChange={setDigitalMajority} />
-      {status ? <Banner tone="err" message={status.message} /> : null}
-      <Button
-        label={sending ? 'Envoi…' : 'Rejoindre la liste'}
-        disabled={sending}
-        onPress={submit}
-      />
-      <Typography variant="small">
-        Ton e-mail sert uniquement à te prévenir du lancement de Kwatro.
-      </Typography>
-    </View>
-  )
-}
-
-/** Landing joueurs : promesse + inscription à la liste d'attente (KWT-3). */
+/** Landing joueurs : promesse, fonctionnement, inscription à la liste d'attente (KWT-3). */
 export function Landing() {
+  const root = useRef<HTMLDivElement>(null)
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia()
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        gsap
+          .timeline({ defaults: { ease: 'power3.out', duration: 0.9 } })
+          .from('[data-hero-line]', { yPercent: 40, opacity: 0, stagger: 0.12 })
+          .from(
+            '[data-hero-card]',
+            { y: 80, opacity: 0, stagger: 0.12, clearProps: 'transform,opacity' },
+            '-=0.6',
+          )
+
+        gsap.fromTo(
+          '[data-word]',
+          { opacity: 0.12 },
+          {
+            opacity: 1,
+            stagger: 0.1,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: '[data-manifesto]',
+              start: 'top 75%',
+              end: 'bottom 40%',
+              scrub: true,
+            },
+          },
+        )
+
+        for (const step of gsap.utils.toArray<HTMLElement>('[data-step]')) {
+          gsap.from(step, {
+            y: 60,
+            opacity: 0,
+            duration: 0.8,
+            ease: 'power3.out',
+            scrollTrigger: { trigger: step, start: 'top 85%' },
+          })
+        }
+      })
+    },
+    { scope: root },
+  )
+
   return (
-    <View
-      style={{
-        width: '100%',
-        maxWidth: breakpoints.maxForm,
-        marginHorizontal: 'auto',
-        paddingHorizontal: space.screen,
-        paddingVertical: space.xxxl * 2,
-        gap: space.xxxl,
-      }}
-    >
-      <View style={{ gap: space.md }}>
-        <Typography variant="label">Bordeaux · bientôt</Typography>
-        <Typography variant="display" aria-level={1}>
-          Où jouer ce soir&nbsp;?
-        </Typography>
-        <Typography>
-          Kwatro te montre où jouer aux jeux de société et aux TCG près de chez toi : les soirées,
-          les tournois et les joueurs qui cherchent une table.
-        </Typography>
-      </View>
+    <div ref={root} className={s.page}>
+      <nav className={s.nav} aria-label="Principale">
+        <span className={s.logo}>Kwatro</span>
+        <a className="kw-btn kw-btn--sm kw-btn--ink" href="#liste">
+          Rejoindre la liste
+        </a>
+      </nav>
 
-      <View style={{ gap: space.lg }}>
-        {pitches.map((p) => (
-          <ContentCard key={p.title} kind={p.kind}>
-            <Typography variant="title">{p.title}</Typography>
-            <Typography>{p.text}</Typography>
-          </ContentCard>
-        ))}
-      </View>
+      <header className={`${s.wrap} ${s.hero}`}>
+        <h1 data-hero-line className={s.heroTitle}>
+          Trouve une table
+          <span className={s.tokens} aria-hidden="true">
+            <i />
+            <i />
+            <i />
+            <i />
+          </span>
+          ce soir, près de chez toi.
+        </h1>
+        <div className={s.heroSplit}>
+          <div className={s.heroText}>
+            <p data-hero-line className={s.lead}>
+              Soirées jeux, tournois TCG, joueurs qui cherchent un adversaire : Kwatro réunit les
+              bars à jeux, boutiques et associations de toute la France dans une seule app.
+            </p>
+            <div data-hero-line className={s.ctas}>
+              <a className="kw-btn kw-btn--room" href="#liste">
+                Rejoindre la liste
+              </a>
+              <a className="kw-btn kw-btn--ghost" href="#comment">
+                Comment ça marche
+              </a>
+            </div>
+          </div>
+          <div className={s.stack} aria-hidden="true">
+            <article data-hero-card className={`kw-card kw-card--raised ${s.mock} ${s.mock1}`}>
+              <div className="kw-card__stripe" style={{ background: 'var(--kw-event)' }} />
+              <div className="kw-card__body">
+                <span className="kw-label">Soirée · jeudi 20 h</span>
+                <span className="kw-title">Commander entre amis</span>
+                <span className="kw-small">Bar à jeux · 1,2 km · 4 places</span>
+              </div>
+            </article>
+            <article data-hero-card className={`kw-card kw-card--raised ${s.mock} ${s.mock2}`}>
+              <div className="kw-card__stripe" style={{ background: 'var(--kw-room)' }} />
+              <div className="kw-card__body">
+                <span className="kw-label">Partie classée · Pokémon</span>
+                <span className="kw-title">Il manque 2 joueurs</span>
+                <span>
+                  <span className="kw-kwote">1 180 – 1 260</span>
+                </span>
+              </div>
+            </article>
+            <article data-hero-card className={`kw-card kw-card--raised ${s.mock} ${s.mock3}`}>
+              <div className="kw-card__stripe" style={{ background: 'var(--kw-venue)' }} />
+              <div className="kw-card__body">
+                <span>
+                  <span className="kw-tag kw-tag--partner">Partenaire</span>
+                </span>
+                <span className="kw-title">-10 % sur les boosters</span>
+                <span className="kw-small">Boutique TCG · 800 m</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </header>
 
-      <ContentCard kind="kwote" raised>
-        <Typography variant="h2" aria-level={2}>
-          Sois prévenu du lancement
-        </Typography>
-        <WaitlistForm />
-      </ContentCard>
-    </View>
+      <section className={s.marquee} aria-label="Jeux">
+        <div className={s.marqueeTrack}>
+          {[0, 1].map((copy) => (
+            <ul key={copy} aria-hidden={copy === 1 || undefined}>
+              {games.map((game) => (
+                <li key={game}>{game}</li>
+              ))}
+            </ul>
+          ))}
+        </div>
+      </section>
+
+      <section className={`${s.wrap} ${s.section}`}>
+        <h2 className={s.h2}>Tout ce qui se joue autour de toi</h2>
+        <div className={s.slices}>
+          {slices.map((slice) => (
+            <article
+              key={slice.title}
+              className={s.slice}
+              style={{ '--slice': slice.color } as CSSProperties}
+              // biome-ignore lint/a11y/noNoninteractiveTabindex: le volet s'ouvre aussi au clavier
+              tabIndex={0}
+            >
+              <h3 className={s.sliceTitle}>{slice.title}</h3>
+              <p className={s.sliceText}>{slice.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={`${s.wrap} ${s.section}`} data-manifesto>
+        <p className={s.manifesto}>
+          {manifesto.split(' ').map((word, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: texte fixe, l'ordre ne change jamais
+            <span key={i} data-word>
+              {word}{' '}
+            </span>
+          ))}
+        </p>
+      </section>
+
+      <section id="comment" className={`${s.wrap} ${s.section} ${s.how}`}>
+        <h2 className={`${s.h2} ${s.pinned}`}>Trois gestes, et tu joues.</h2>
+        <ol className={s.steps}>
+          {steps.map((step) => (
+            <li key={step.title} data-step className={`kw-card kw-card--raised ${s.step}`}>
+              <h3 className={s.stepTitle}>{step.title}</h3>
+              <p>{step.text}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section id="liste" className={s.action}>
+        <div className={`${s.wrap} ${s.actionGrid}`}>
+          <div>
+            <h2 className={s.actionTitle}>Sois là au lancement.</h2>
+            <p className={s.actionLead}>
+              Kwatro ouvre ville par ville. Laisse ton e-mail, on te prévient dès que l’app arrive
+              près de chez toi.
+            </p>
+          </div>
+          <div className={`kw-card ${s.formCard}`}>
+            <WaitlistForm />
+          </div>
+        </div>
+      </section>
+
+      <footer className={`${s.wrap} ${s.footer}`}>
+        <span className={s.logo}>Kwatro</span>
+        <span className="kw-small">Où jouer ce soir ? · 2026</span>
+      </footer>
+    </div>
   )
 }
