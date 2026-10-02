@@ -40,6 +40,7 @@ services:
       args:
         # Figée au build (variable publique Next.js)
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
     image: ${APP_IMAGE_NAME:-kwatro}-web:${VERSION:-latest}
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
