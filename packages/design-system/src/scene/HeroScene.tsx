@@ -1,9 +1,11 @@
+/// <reference lib="dom" />
 'use client'
+// Web uniquement (Three.js + DOM) : importé à part via `@kwatro/design-system/scene`,
+// jamais depuis l'index (l'app native ne doit pas l'embarquer).
 import gsap from 'gsap'
-import { useEffect, useRef } from 'react'
+import { type CSSProperties, useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
-import s from './landing.module.css'
 
 // Couleurs « Plateau pop » (packages/design-system/css/kwatro.css)
 const INK = 0x16130f
@@ -175,10 +177,17 @@ type Piece = {
 }
 
 /**
- * Quatre pièces lancées sur les cartes du hero : un dé (qui tombe sur 4, Kwatro), un pion,
+ * Quatre pièces lancées sur la table (hero de la landing, accueil de l'app sur desktop) : un dé (qui tombe sur 4, Kwatro), un pion,
  * une carte et un jeton. Purement décoratif (aria-hidden), chargé après l'hydratation.
  */
-export default function HeroScene({ className = s.scene }: { className?: string }) {
+export default function HeroScene({
+  className,
+  style,
+}: {
+  /** Placement de la scène (position absolue sur son conteneur) ; elle démarre à opacity 0. */
+  className?: string
+  style?: CSSProperties
+}) {
   const host = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -194,6 +203,7 @@ export default function HeroScene({ className = s.scene }: { className?: string 
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFShadowMap
+    renderer.domElement.style.cssText = 'display:block;width:100%;height:100%'
     el.appendChild(renderer.domElement)
 
     const scene = new THREE.Scene()
@@ -377,5 +387,5 @@ export default function HeroScene({ className = s.scene }: { className?: string 
     }
   }, [])
 
-  return <div ref={host} className={className} aria-hidden="true" />
+  return <div ref={host} className={className} style={style} aria-hidden="true" />
 }

@@ -1,70 +1,90 @@
 import {
   Button,
+  border,
   colors,
   font,
   MobileScreen,
   Note,
   ProgressSteps,
+  Raised,
+  radius,
   ScreenHeader,
   TextField,
   Typography,
 } from '@kwatro/design-system'
 import { type AgeRegime, ageRegime, emailSchema, MIN_AGE, parseBirthDate } from '@kwatro/shared'
 import { router } from 'expo-router'
-import { useRef, useState } from 'react'
-import { Text, type TextInput, View } from 'react-native'
+import { createContext, type ReactNode, useContext, useRef, useState } from 'react'
+import { ScrollView, Text, type TextInput, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Logo } from '@/components/Logo'
+import { TableScene } from '@/components/TableScene'
 
 type Step = 'welcome' | 'email' | 'birth' | AgeRegime
 
-/** Accueil (A1), e-mail (A2) et date de naissance obligatoire (A3, KWT-44). */
+/** Largeur à partir de laquelle l'écran passe en deux colonnes (navigateur desktop, tablette paysage). */
+const WIDE = 900
+const Wide = createContext(false)
+
+/** Accueil (A1), e-mail (A2) et date de naissance obligatoire (A3, KWT-44). Téléphone et navigateur desktop. */
 export default function AuthScreen() {
-  const insets = useSafeAreaInsets()
+  const { width } = useWindowDimensions()
   const [step, setStep] = useState<Step>('welcome')
   const [email, setEmail] = useState('')
   const [providerSoon, setProviderSoon] = useState(false)
+  const wide = width >= WIDE
 
+  let content: ReactNode
   if (step === 'welcome') {
-    return (
-      <MobileScreen
-        insets={insets}
-        scroll={false}
+    content = (
+      <Frame
+        title="Connexion"
+        phoneTitle={false}
         footer={
           <>
-            {/* ponytail: Apple et Google affichés pour l'aperçu, branchés par KWT-9 (Better Auth) */}
-            <Button label="Continuer avec Apple" kind="ink" onPress={() => setProviderSoon(true)} />
-            <Button
-              label="Continuer avec Google"
-              kind="ghost"
-              onPress={() => setProviderSoon(true)}
-            />
-            <Button label="Continuer avec un e-mail" onPress={() => setStep('email')} />
+            {/* Desktop : le trio prend la largeur du plus long bouton, pas toute la carte */}
+            <View style={wide ? { alignSelf: 'flex-start', gap: 12 } : { gap: 10 }}>
+              {/* ponytail: Apple et Google affichés pour l'aperçu, branchés par KWT-9 (Better Auth) */}
+              <Button
+                label="Continuer avec Apple"
+                kind="ink"
+                onPress={() => setProviderSoon(true)}
+              />
+              <Button
+                label="Continuer avec Google"
+                kind="ghost"
+                onPress={() => setProviderSoon(true)}
+              />
+              <Button label="Continuer avec un e-mail" onPress={() => setStep('email')} />
+            </View>
             {providerSoon ? (
               <Note>
                 La connexion avec Apple ou Google arrive bientôt. Utilise ton e-mail en attendant.
               </Note>
             ) : null}
-            <Typography variant="small" style={{ textAlign: 'center' }}>
+            <Typography variant="small" style={wide ? null : { textAlign: 'center' }}>
               En continuant, tu acceptes les conditions d'utilisation et la politique de
               confidentialité.
             </Typography>
           </>
         }
       >
-        <View style={{ flex: 1, justifyContent: 'center', gap: 10 }}>
-          <Typography variant="display">Kwatro</Typography>
-          <Typography style={{ ...font('body', 600), fontSize: 17, lineHeight: 24 }}>
-            Trouve où jouer ce soir, et avec qui.
-          </Typography>
-        </View>
-      </MobileScreen>
+        {wide ? (
+          <Typography>Un seul compte pour l’app et le site. Pas de mot de passe.</Typography>
+        ) : (
+          <View style={{ flex: 1, justifyContent: 'center', gap: 12 }}>
+            <Logo size={44} />
+            <Typography variant="display">Kwatro</Typography>
+            <Typography style={{ ...font('body', 600), fontSize: 17, lineHeight: 24 }}>
+              Trouve où jouer ce soir, et avec qui.
+            </Typography>
+          </View>
+        )}
+      </Frame>
     )
-  }
-
-  if (step === 'email') {
-    return (
+  } else if (step === 'email') {
+    content = (
       <EmailStep
-        insets={insets}
         email={email}
         onBack={() => setStep('welcome')}
         onDone={(e) => {
@@ -73,24 +93,169 @@ export default function AuthScreen() {
         }}
       />
     )
+  } else if (step === 'birth') {
+    content = <BirthStep onBack={() => setStep('email')} onDone={setStep} />
+  } else {
+    content = <Outcome regime={step} onRestart={() => setStep('welcome')} />
   }
 
-  if (step === 'birth') {
-    return <BirthStep insets={insets} onBack={() => setStep('email')} onDone={setStep} />
-  }
-
-  return <Outcome insets={insets} regime={step} onRestart={() => setStep('welcome')} />
+  return (
+    <Wide.Provider value={wide}>
+      {wide ? <WideLayout>{content}</WideLayout> : content}
+    </Wide.Provider>
+  )
 }
 
-type Insets = { top: number; bottom: number }
+/** Navigateur desktop : barre du site (favicon + Kwatro), accroche et pièces 3D à gauche, étape à droite. */
+function WideLayout({ children }: { children: ReactNode }) {
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.cream }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 10,
+          paddingVertical: 12,
+          paddingHorizontal: 32,
+          borderBottomWidth: border.base,
+          borderColor: colors.ink,
+        }}
+      >
+        <Logo size={32} />
+        <Text
+          style={{
+            ...font('display'),
+            fontSize: 22,
+            textTransform: 'uppercase',
+            color: colors.ink,
+          }}
+        >
+          Kwatro
+        </Text>
+      </View>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 72,
+          width: '100%',
+          maxWidth: 1200,
+          alignSelf: 'center',
+          paddingHorizontal: 32,
+          paddingVertical: 48,
+        }}
+      >
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text
+            style={{
+              ...font('display'),
+              fontSize: 56,
+              lineHeight: 55,
+              textTransform: 'uppercase',
+              color: colors.ink,
+              maxWidth: 560,
+            }}
+          >
+            Trouve où jouer ce soir, et avec qui.
+          </Text>
+          <View style={{ height: 300, marginTop: 56 }}>
+            <TableScene />
+          </View>
+        </View>
+        <View style={{ width: 440 }}>{children}</View>
+      </ScrollView>
+    </View>
+  )
+}
+
+/**
+ * Cadre d'une étape. Téléphone : écran plein (en-tête, contenu, pied fixe).
+ * Desktop : carte blanche relevée, titre de l'étape, contenu puis actions.
+ */
+function Frame({
+  title,
+  onBack,
+  progress,
+  phoneTitle = true,
+  footer,
+  children,
+}: {
+  title: string
+  /** Téléphone, étape sans retour : affiche le titre en tête du contenu (l'accueil a son propre bloc). */
+  phoneTitle?: boolean
+  onBack?: () => void
+  /** Étape courante sur 2 (e-mail, date de naissance). */
+  progress?: number
+  footer: ReactNode
+  children: ReactNode
+}) {
+  const wide = useContext(Wide)
+  const insets = useSafeAreaInsets()
+  const bar = progress ? <ProgressSteps current={progress} total={2} /> : null
+
+  if (!wide) {
+    return (
+      <MobileScreen
+        insets={insets}
+        scroll={!!onBack}
+        header={onBack ? <ScreenHeader title={title} onBack={onBack} /> : undefined}
+        footer={footer}
+      >
+        {!onBack && phoneTitle ? (
+          <Typography variant="h1" style={{ paddingTop: 40 }}>
+            {title}
+          </Typography>
+        ) : null}
+        {bar}
+        {children}
+      </MobileScreen>
+    )
+  }
+
+  return (
+    <Raised offset={5} r={radius.card}>
+      <View
+        style={{
+          backgroundColor: colors.white,
+          borderWidth: border.base,
+          borderColor: colors.ink,
+          borderRadius: radius.card,
+          padding: 28,
+          gap: 16,
+        }}
+      >
+        {onBack ? (
+          // ScreenHeader a ses marges d'écran : on les annule dans la carte
+          <View style={{ marginHorizontal: -16, marginVertical: -6 }}>
+            <ScreenHeader title={title} onBack={onBack} />
+          </View>
+        ) : (
+          <Typography variant="h1">{title}</Typography>
+        )}
+        {bar}
+        {children}
+        {footer}
+      </View>
+    </Raised>
+  )
+}
+
+/** Bouton d'étape : pleine largeur sur téléphone (pied d'écran), à sa taille sur desktop. */
+function StepButton(props: { label: string; kind?: 'room' | 'ghost'; onPress: () => void }) {
+  const wide = useContext(Wide)
+  return (
+    <View style={wide ? { alignSelf: 'flex-start' } : null}>
+      <Button {...props} />
+    </View>
+  )
+}
 
 function EmailStep({
-  insets,
   email: initial,
   onBack,
   onDone,
 }: {
-  insets: Insets
   email: string
   onBack: () => void
   onDone: (email: string) => void
@@ -106,12 +271,12 @@ function EmailStep({
   }
 
   return (
-    <MobileScreen
-      insets={insets}
-      header={<ScreenHeader title="Ton e-mail" onBack={onBack} />}
-      footer={<Button label="Continuer" onPress={submit} />}
+    <Frame
+      title="Ton e-mail"
+      onBack={onBack}
+      progress={1}
+      footer={<StepButton label="Continuer" onPress={submit} />}
     >
-      <ProgressSteps current={1} total={2} />
       <Typography>On t'envoie un lien pour te connecter, sans mot de passe.</Typography>
       <TextField
         label="Adresse e-mail"
@@ -129,16 +294,14 @@ function EmailStep({
         returnKeyType="next"
         onSubmitEditing={submit}
       />
-    </MobileScreen>
+    </Frame>
   )
 }
 
 function BirthStep({
-  insets,
   onBack,
   onDone,
 }: {
-  insets: Insets
   onBack: () => void
   onDone: (regime: AgeRegime) => void
 }) {
@@ -188,12 +351,12 @@ function BirthStep({
   )
 
   return (
-    <MobileScreen
-      insets={insets}
-      header={<ScreenHeader title="Ta date de naissance" onBack={onBack} />}
-      footer={<Button label="Continuer" onPress={submit} />}
+    <Frame
+      title="Ta date de naissance"
+      onBack={onBack}
+      progress={2}
+      footer={<StepButton label="Continuer" onPress={submit} />}
     >
-      <ProgressSteps current={2} total={2} />
       <Typography>
         Kwatro est ouvert dès {MIN_AGE} ans. Ta date de naissance règle ce que ton compte permet,
         elle n’est jamais affichée.
@@ -208,7 +371,7 @@ function BirthStep({
           {error}
         </Text>
       ) : null}
-    </MobileScreen>
+    </Frame>
   )
 }
 
@@ -238,32 +401,21 @@ const OUTCOMES: Record<
   },
 }
 
-function Outcome({
-  insets,
-  regime,
-  onRestart,
-}: {
-  insets: Insets
-  regime: AgeRegime
-  onRestart: () => void
-}) {
+function Outcome({ regime, onRestart }: { regime: AgeRegime; onRestart: () => void }) {
   const o = OUTCOMES[regime]
   return (
-    <MobileScreen
-      insets={insets}
+    <Frame
+      title={o.title}
       footer={
         regime === 'too-young' ? (
-          <Button label="Revenir à l’accueil" kind="ghost" onPress={onRestart} />
+          <StepButton label="Revenir à l’accueil" kind="ghost" onPress={onRestart} />
         ) : (
           // ponytail: l'onboarding (A4-A6, KWT-45) et le consentement parent (A7, KWT-49) ne sont pas encore faits
-          <Button label="Continuer" onPress={() => router.replace('/')} />
+          <StepButton label="Continuer" onPress={() => router.replace('/')} />
         )
       }
     >
-      <View style={{ gap: 14, paddingTop: 40 }}>
-        <Typography variant="h1">{o.title}</Typography>
-        <Note tone={o.tone}>{o.text}</Note>
-      </View>
-    </MobileScreen>
+      <Note tone={o.tone}>{o.text}</Note>
+    </Frame>
   )
 }

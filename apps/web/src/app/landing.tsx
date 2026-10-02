@@ -11,7 +11,7 @@ import { WaitlistForm } from './waitlist-form'
 gsap.registerPlugin(ScrollTrigger, useGSAP)
 
 // Three.js (~150 ko) chargé à part, après l'hydratation : le texte du hero reste le premier affichage
-const HeroScene = dynamic(() => import('./hero-scene'), { ssr: false })
+const HeroScene = dynamic(() => import('@kwatro/design-system/scene'), { ssr: false })
 
 const games = [
   'Magic: The Gathering',
@@ -104,7 +104,7 @@ export function Landing() {
               </div>
             </div>
             <div className={s.stack} aria-hidden="true">
-              <HeroScene />
+              <HeroScene className={s.scene} />
               <article data-hero-card className={`kw-card kw-card--raised ${s.mock} ${s.mock1}`}>
                 <div className="kw-card__stripe" style={{ background: 'var(--kw-event)' }} />
                 <div className="kw-card__body">
