@@ -10,6 +10,7 @@ const FACES: Record<1 | 2 | 3 | 4, [Slot, Slot, Slot, Slot]> = {
   3: ['tl', 'c', 'c', 'br'],
   4: ['tl', 'tr', 'bl', 'br'],
 }
+const PIPS = [0, 1, 2, 3] as const
 const STEP = 110
 
 export function Logo({ size = 32, rolling }: { size?: number; rolling?: boolean }) {
@@ -73,13 +74,12 @@ export function Logo({ size = 32, rolling }: { size?: number; rolling?: boolean 
         }}
       >
         <View style={{ flex: 1 }}>
-          {FACES[face].map((slot, i) => (
+          {PIPS.map((pip) => (
             <View
-              // biome-ignore lint/suspicious/noArrayIndexKey: les quatre points sont fixes, seule leur place change
-              key={i}
+              key={pip}
               style={{
                 position: 'absolute',
-                ...at[slot],
+                ...at[FACES[face][pip]],
                 width: dot,
                 height: dot,
                 borderRadius: dot,

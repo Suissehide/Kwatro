@@ -45,10 +45,12 @@ export function Pagination({
           icon={<Text style={mono}>‹</Text>}
           onPress={() => onChange(Math.max(1, page - 1))}
         />
-        {pageList(page, pages).map((p, i) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: « … » peut apparaître deux fois
-          <PageButton key={i} p={p} current={p === page} onChange={onChange} />
-        ))}
+        {pageList(page, pages)
+          // « … » peut apparaître deux fois : sa clé vient de la page qui le suit
+          .map((p, i, all) => ({ p, key: typeof p === 'number' ? String(p) : `…${all[i + 1]}` }))
+          .map(({ p, key }) => (
+            <PageButton key={key} p={p} current={p === page} onChange={onChange} />
+          ))}
         <IconButton
           size={32}
           label="Page suivante"

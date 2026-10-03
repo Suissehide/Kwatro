@@ -1,5 +1,5 @@
 import type { EventListItem, RoomListItem, VenueListItem } from '@kwatro/shared'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from './api'
 import { localDay } from './explore'
 import { useLocation } from './useLocation'
@@ -10,12 +10,11 @@ export function useTonight(radiusKm = 10) {
   const { place, ready } = useLocation()
   const [data, setData] = useState<Tonight | null>(null)
   const [failed, setFailed] = useState(false)
-  const [attempt, setAttempt] = useState(0)
+  const latest = useRef(0)
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `attempt` relance volontairement le chargement
-  useEffect(() => {
-    if (!ready) return
-    let cancelled = false
+  const load = useCallback(() => {
+    // Seule la dernière requête met à jour l'écran (position arrivée en cours de chargement)
+    const request = ++latest.current
     const query = { lat: place.lat, lng: place.lng, radiusKm, days: 1 }
     setFailed(false)
     Promise.all([
@@ -24,7 +23,7 @@ export function useTonight(radiusKm = 10) {
       api.GET('/venues', { params: { query } }),
     ])
       .then(([events, rooms, venues]) => {
-        if (cancelled) return
+        if (request !== latest.current) return
         if (!events.data || !rooms.data || !venues.data) throw new Error('Réponse invalide')
         const today = localDay(new Date())
         setData({
@@ -33,11 +32,12 @@ export function useTonight(radiusKm = 10) {
           venues: venues.data.filter((v) => v.openNow),
         })
       })
-      .catch(() => !cancelled && setFailed(true))
-    return () => {
-      cancelled = true
-    }
-  }, [ready, place, radiusKm, attempt])
+      .catch(() => request === latest.current && setFailed(true))
+  }, [place, radiusKm])
 
-  return { place, data, failed, retry: () => setAttempt((n) => n + 1) }
+  useEffect(() => {
+    if (ready) load()
+  }, [ready, load])
+
+  return { place, data, failed, retry: load }
 }

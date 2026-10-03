@@ -20,17 +20,16 @@ export function ProgressSteps({
       aria-label={`Étape ${current} sur ${total}`}
       style={{ flexDirection: 'row', gap: 6 }}
     >
-      {Array.from({ length: total }, (_, i) => (
+      {Array.from({ length: total }, (_, i) => i + 1).map((step) => (
         <View
-          // biome-ignore lint/suspicious/noArrayIndexKey: liste fixe de segments
-          key={i}
+          key={step}
           style={{
             flex: 1,
             height: 10,
             borderWidth: border.thin,
             borderColor: colors.ink,
             borderRadius: 99,
-            backgroundColor: i < current ? color : colors.white,
+            backgroundColor: step <= current ? color : colors.white,
           }}
         />
       ))}
