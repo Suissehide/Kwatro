@@ -1,11 +1,11 @@
 import { Pressable, Text, View } from 'react-native'
 import { Logo } from '../atoms/Logo'
 import { useHover } from '../atoms/useHover'
-import { colors, font, motion, transition } from '../tokens'
+import { colors, font } from '../tokens'
 
 /**
  * Logo + « Kwatro » : barre du site (32 px) et en-tête des écrans téléphone (28 px).
- * Avec `onPress` : lien vers l'accueil, le dé pivote avec un petit rebond au survol.
+ * Avec `onPress` : lien vers l'accueil ; au survol, le dé roule et compte jusqu'à quatre.
  */
 export function Brand({
   size = 32,
@@ -19,14 +19,7 @@ export function Brand({
   const { hovered, hoverProps } = useHover()
   const content = (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-      <View
-        style={{
-          transform: hovered ? [{ rotate: '-14deg' }, { scale: 1.12 }] : [],
-          ...transition(['transform'], motion.slow, motion.spring),
-        }}
-      >
-        <Logo size={size} />
-      </View>
+      <Logo size={size} rolling={hovered} />
       <Text style={{ ...font('display'), fontSize, textTransform: 'uppercase', color: colors.ink }}>
         Kwatro
       </Text>

@@ -156,7 +156,8 @@ export const motion = {
   spring: [0.34, 1.56, 0.64, 1] as const,
 } as const
 
-const reducedMotion = () =>
+/** L'utilisateur a demandé moins d'animations (réglage du système, web). */
+export const prefersReducedMotion = () =>
   (globalThis as { matchMedia?: (query: string) => { matches: boolean } }).matchMedia?.(
     '(prefers-reduced-motion: reduce)',
   ).matches ?? false
@@ -170,7 +171,7 @@ export function transition(
   duration: number = motion.normal,
   easing: readonly number[] = motion.easing,
 ): Record<never, never> {
-  if (Platform.OS !== 'web' || reducedMotion()) return {}
+  if (Platform.OS !== 'web' || prefersReducedMotion()) return {}
   // Propriétés CSS passées telles quelles par react-native-web : absentes des types React Native,
   // d'où le type vide, qui s'étale dans le style d'une View comme d'un Text
   return {
