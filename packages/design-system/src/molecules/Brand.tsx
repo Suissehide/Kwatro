@@ -3,10 +3,6 @@ import { Logo } from '../atoms/Logo'
 import { useHover } from '../atoms/useHover'
 import { colors, font } from '../tokens'
 
-/**
- * Logo + « Kwatro » : barre du site (32 px) et en-tête des écrans téléphone (28 px).
- * Avec `onPress` : lien vers l'accueil ; au survol, le dé roule et compte jusqu'à quatre.
- */
 export function Brand({
   size = 32,
   fontSize = 22,

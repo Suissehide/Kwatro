@@ -3,10 +3,6 @@ import { Pressable, Text, View } from 'react-native'
 import { useHover } from '../atoms/useHover'
 import { border, colors, font, sizes, transition } from '../tokens'
 
-/**
- * Ligne de liste. Avec `onPress` : cliquable, fond crème clair au survol.
- * `inset` : marge horizontale quand la ligne remplit une carte (le survol va alors jusqu'aux bords).
- */
 export function ListRow({
   left,
   title,
@@ -20,7 +16,6 @@ export function ListRow({
   left?: ReactNode
   title: string
   subtitle?: string
-  /** Troisième ligne mise en avant (vert lieu), ex. l'avantage Kwatro d'un partenaire. */
   note?: string
   right?: ReactNode
   last?: boolean

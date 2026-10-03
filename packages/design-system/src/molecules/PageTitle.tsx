@@ -1,7 +1,6 @@
 import { View } from 'react-native'
 import { Typography } from '../atoms/Typography'
 
-/** Titre de page précédé d'une ligne de contexte (date, ville…). `hero` : grand titre desktop. */
 export function PageTitle({
   eyebrow,
   title,

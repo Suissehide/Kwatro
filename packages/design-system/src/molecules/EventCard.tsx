@@ -6,10 +6,6 @@ import { Typography } from '../atoms/Typography'
 import { colors, font } from '../tokens'
 import { ContentCard } from './ContentCard'
 
-/**
- * Événement d'un lieu. Desktop (`wide`) : en ligne, places dans le texte et `action` à droite.
- * Téléphone : DateBlock en haut, places et badge partenaire en pied, la carte entière ouvre le détail.
- */
 export function EventCard({
   day,
   time,
@@ -23,23 +19,16 @@ export function EventCard({
   raised,
   onPress,
 }: {
-  /** Jour du mois, « 03 ». */
   day: string
-  /** Heure dans le bandeau du DateBlock, « 19H30 ». */
   time: string
-  /** Type et jeux, « Tournoi · Pokémon ». */
   label: string
   title: string
-  /** Lieu et distance, « Le Dé Fêlé · 1,2 km ». */
   meta: string
-  /** « 4 places sur 12 », « Accès libre »… */
   places?: string | null
   partner?: boolean
-  /** Desktop : bouton S'inscrire / Voir. */
   action?: ReactNode
   wide?: boolean
   raised?: boolean
-  /** Téléphone : ouvre le détail. */
   onPress?: () => void
 }) {
   const tag = partner ? <Tag label="Partenaire" variant="partner" /> : null

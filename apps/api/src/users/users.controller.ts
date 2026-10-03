@@ -11,7 +11,6 @@ import { PrismaService } from '../prisma/prisma.service'
 export class UsersController {
   constructor(private readonly prisma: PrismaService) {}
 
-  /** Profil du joueur connecté, avec la Kwote de son format le plus joué en classé. */
   @Get('me')
   @ZodResponse(meSchema)
   async me(@CurrentUser() user: User) {

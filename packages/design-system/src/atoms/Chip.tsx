@@ -2,7 +2,7 @@ import { Pressable, Text } from 'react-native'
 import { border, colors, font, radius, textOn, transition } from '../tokens'
 import { useHover } from './useHover'
 
-/** Pastille de filtre ; active = fond kwote (ou `color`), survol = fond crème clair. */
+/** Pastille de filtre ; active = fond kwote (ou `color`). */
 export function Chip({
   label,
   active,

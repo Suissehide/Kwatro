@@ -6,10 +6,6 @@ import { useLocation } from './useLocation'
 
 export type Tonight = { events: EventListItem[]; rooms: RoomListItem[]; venues: VenueListItem[] }
 
-/**
- * Ce soir autour du joueur : soirées du jour, rooms ouvertes des prochaines 24 h, lieux ouverts.
- * `data` reste null pendant le chargement ; `retry` relance après une erreur.
- */
 export function useTonight(radiusKm = 10) {
   const { place, ready } = useLocation()
   const [data, setData] = useState<Tonight | null>(null)

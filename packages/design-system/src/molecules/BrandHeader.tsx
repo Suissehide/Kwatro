@@ -3,7 +3,6 @@ import { View } from 'react-native'
 import { space } from '../tokens'
 import { Brand } from './Brand'
 
-/** En-tête des écrans d'onglet sur téléphone : marque (lien vers l'accueil) à gauche, `right` (ex. KwoteBadge) à droite. */
 export function BrandHeader({ right, onHome }: { right?: ReactNode; onHome?: () => void }) {
   return (
     <View

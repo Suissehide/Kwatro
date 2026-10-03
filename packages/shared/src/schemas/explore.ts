@@ -46,7 +46,6 @@ export const eventListItemSchema = z.object({
   }),
 })
 
-/** Room ouverte qui cherche des joueurs (accueil, « Il manque des joueurs »). */
 export const roomListItemSchema = z.object({
   id: z.string(),
   mode: z.enum(ROOM_MODES),
@@ -62,7 +61,6 @@ export const roomListItemSchema = z.object({
   }),
   /** Joueurs acceptés (hôte compris) : initiales seulement, la liste est publique. */
   players: z.array(z.object({ initial: z.string() })),
-  /** Fourchette de Kwote des joueurs déjà dans une room classée. */
   kwoteRange: z.object({ min: z.number().int(), max: z.number().int() }).nullable(),
 })
 

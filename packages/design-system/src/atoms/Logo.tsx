@@ -3,23 +3,15 @@ import { View } from 'react-native'
 import { colors, motion, prefersReducedMotion, transition } from '../tokens'
 
 type Slot = 'tl' | 'tr' | 'c' | 'bl' | 'br'
-/**
- * Position des quatre points pour chaque face du dé (1 à 4). Les points en trop se superposent :
- * en passant de 1 à 4, ils naissent au centre, se séparent puis rejoignent les quatre coins.
- */
+// Toujours quatre points : ceux en trop se superposent pour former les faces 1 à 3
 const FACES: Record<1 | 2 | 3 | 4, [Slot, Slot, Slot, Slot]> = {
   1: ['c', 'c', 'c', 'c'],
   2: ['tl', 'tl', 'br', 'br'],
   3: ['tl', 'c', 'c', 'br'],
   4: ['tl', 'tr', 'bl', 'br'],
 }
-const STEP = 110 // ms entre deux faces : un, deux, trois, quatre en ~1/3 s
+const STEP = 110
 
-/**
- * Logo Kwatro, comme le favicon du site (apps/web/src/app/icon.svg) : carré jaune, quatre points.
- * `rolling` (survol du lien de la marque) : le dé se soulève de son ombre, fait un quart de tour
- * et compte jusqu'à quatre. Animations réduites : il se soulève seulement.
- */
 export function Logo({ size = 32, rolling }: { size?: number; rolling?: boolean }) {
   const [face, setFace] = useState<keyof typeof FACES>(4)
   const [turns, setTurns] = useState(0)
@@ -51,7 +43,6 @@ export function Logo({ size = 32, rolling }: { size?: number; rolling?: boolean 
   }
   const r = size * 0.2
   const lift = rolling ? Math.max(1.5, size * 0.06) : 0
-  // Même rotation pour le dé et son ombre : l'ombre reste décalée en bas à droite pendant le tour
   const spin = { rotate: `${turns * 90}deg` }
   const roll = transition(['transform'], motion.slow, motion.spring)
 

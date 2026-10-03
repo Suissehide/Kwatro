@@ -2,7 +2,6 @@ import { Text, View } from 'react-native'
 import { border, colors, font } from '../tokens'
 import { ListRow } from './ListRow'
 
-/** Lieu dans une liste : pastille verte si partenaire, avantage Kwatro en option, distance à droite. */
 export function VenueRow({
   name,
   subtitle,
@@ -14,7 +13,6 @@ export function VenueRow({
   onPress,
 }: {
   name: string
-  /** Type et horaires, « Bar à jeux · jusqu'à 1 h ». */
   subtitle: string
   distance: string
   partner?: boolean

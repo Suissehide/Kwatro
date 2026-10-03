@@ -12,10 +12,7 @@ import {
   transition,
 } from '../tokens'
 
-/**
- * Carte de contenu avec bandeau de 8 px à la couleur du type ; `raised` pour la carte en tête de liste.
- * Avec `onPress`, la carte entière est cliquable (fond crème clair au survol).
- */
+/** Carte de contenu avec bandeau de 8 px à la couleur du type ; `raised` pour la carte en tête de liste. */
 export function ContentCard({
   kind,
   raised,
@@ -26,7 +23,6 @@ export function ContentCard({
   kind?: ContentKind
   raised?: boolean
   onPress?: () => void
-  /** Nom lu par les lecteurs d'écran quand la carte est cliquable. */
   label?: string
   children: ReactNode
 }) {

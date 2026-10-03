@@ -2,7 +2,6 @@ import type { ReactNode } from 'react'
 import { ScrollView } from 'react-native'
 import { space } from '../tokens'
 
-/** Défilement horizontal qui déborde jusqu'aux bords de l'écran téléphone (chips, cartes). */
 export function Carousel({ gap = 12, children }: { gap?: number; children: ReactNode }) {
   return (
     <ScrollView

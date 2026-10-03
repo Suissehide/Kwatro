@@ -74,7 +74,6 @@ export class ExploreService {
       )
   }
 
-  /** Rooms ouvertes dans un lieu autour du point, par date puis distance. */
   async rooms(query: EventsQuery): Promise<z.output<typeof roomListItemSchema>[]> {
     const distances = await this.distances(query)
     const now = new Date()

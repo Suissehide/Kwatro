@@ -8,7 +8,6 @@ export type VenueTab = 'ce-soir' | 'scanner' | 'evenements' | 'lieu'
 
 // ponytail: pictogrammes = formes des maquettes (rond / carré) ; passer à Phosphor « bold » quand le jeu d'icônes est choisi.
 export type TabItem<K extends string> = { key: K; label: string; round: boolean }
-/** Onglets joueur : les mêmes libellés servent aux liens de la TopNav sur desktop. */
 export const playerItems: TabItem<PlayerTab>[] = [
   { key: 'explorer', label: 'Explorer', round: true },
   { key: 'parties', label: 'Mes parties', round: false },

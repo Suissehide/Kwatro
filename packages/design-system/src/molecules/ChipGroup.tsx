@@ -4,7 +4,6 @@ import { Carousel } from './Carousel'
 
 export type ChipItem<K> = { key: K; label: string }
 
-/** Filtre à choix unique : chips qui passent à la ligne, ou en carrousel sur téléphone (`scroll`). */
 export function ChipGroup<K>({
   items,
   value,

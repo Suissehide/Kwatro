@@ -16,7 +16,7 @@ export function useLocation() {
 
   useEffect(() => {
     let cancelled = false
-    // Demande de position restée sans réponse : on charge autour de Bordeaux sans attendre
+    // La demande de position peut rester sans réponse
     const timer = setTimeout(() => setReady(true), 3000)
     ;(async () => {
       try {

@@ -35,7 +35,6 @@ export class ExploreController {
     return this.explore.events(query)
   }
 
-  /** Rooms ouvertes qui cherchent des joueurs autour d'un point, par date puis distance. */
   @Get('rooms')
   @ZodResponse(z.array(roomListItemSchema))
   rooms(@ZodQuery(eventsQuerySchema) query: EventsQuery) {

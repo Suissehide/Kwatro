@@ -5,7 +5,6 @@ import { AvatarStack } from './AvatarStack'
 import { ContentCard } from './ContentCard'
 import { KwoteBadge } from './KwoteBadge'
 
-/** Room qui cherche des joueurs. `wide` : avatars des joueurs et fourchette de Kwote en pied. */
 export function RoomCard({
   label,
   title,
@@ -16,16 +15,11 @@ export function RoomCard({
   wide,
   onPress,
 }: {
-  /** Mode et jeu, « Partie classée · Pokémon ». */
   label: string
-  /** « Il manque 2 joueurs ». */
   title: string
-  /** Lieu et heure, « Le Dé Fêlé · 21 h ». */
   meta: string
-  /** Noms (ou initiales) des joueurs déjà dans la room. */
   players: string[]
   capacity: number
-  /** Fourchette de Kwote des parties classées, « 1 180 – 1 260 ». */
   kwote?: string | null
   wide?: boolean
   onPress?: () => void

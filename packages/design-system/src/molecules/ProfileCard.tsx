@@ -5,7 +5,6 @@ import { border, colors, radius, shadow } from '../tokens'
 import { KwoteBadge } from './KwoteBadge'
 import { XpBar } from './XpBar'
 
-/** Carte joueur : pseudo, Kwote d'un format et niveau d'XP. */
 export function ProfileCard({
   pseudo,
   format,
@@ -13,7 +12,6 @@ export function ProfileCard({
   xp,
 }: {
   pseudo: string
-  /** Format de la Kwote affichée, « Commander ». */
   format?: string
   kwote?: string
   xp: { level: number; name: string; current: number; max: number }

@@ -80,7 +80,6 @@ export function font<F extends FontFamily>(family: F, weight?: FontWeight<F>): T
 
 export const type = {
   display: { ...font('display'), fontSize: 52, lineHeight: 52, textTransform: 'uppercase' },
-  /** Titre de page desktop (accueil, connexion) */
   hero: { ...font('display'), fontSize: 56, lineHeight: 55, textTransform: 'uppercase' },
   h1: { ...font('display'), fontSize: 28, lineHeight: 29, textTransform: 'uppercase' },
   h2: { ...font('display'), fontSize: 22, lineHeight: 23, textTransform: 'uppercase' },
@@ -152,20 +151,14 @@ export const motion = {
   normal: 240,
   slow: 400,
   easing: [0.2, 0.8, 0.2, 1] as const, // cubic-bezier
-  /** Léger rebond (dépasse puis revient), pour les petits éléments ludiques comme le dé du logo */
   spring: [0.34, 1.56, 0.64, 1] as const,
 } as const
 
-/** L'utilisateur a demandé moins d'animations (réglage du système, web). */
 export const prefersReducedMotion = () =>
   (globalThis as { matchMedia?: (query: string) => { matches: boolean } }).matchMedia?.(
     '(prefers-reduced-motion: reduce)',
   ).matches ?? false
 
-/**
- * Transition CSS sur le web (survol, appui) : `style={{ ...transition(['transform']) }}`.
- * Rien sur iOS / Android, ni quand l'utilisateur a demandé moins d'animations.
- */
 export function transition(
   properties: string[],
   duration: number = motion.normal,

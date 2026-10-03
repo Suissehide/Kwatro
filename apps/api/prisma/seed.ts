@@ -119,7 +119,6 @@ async function main() {
       create: { ...user, birthDate: new Date('1995-06-15'), city: 'Bordeaux' },
     })
   }
-  // Accueil (KWT-112) : XP et Kwote du joueur de démo, joueurs des rooms
   await prisma.user.update({ where: { id: 'joueur-demo' }, data: { xp: 1840 } })
   for (const pseudo of ['maya', 'sam', 'theo', 'alix', 'jade']) {
     await prisma.user.upsert({
@@ -247,7 +246,6 @@ async function main() {
     create: { eventId: 'demo-commander-1', userId: 'joueur-demo' },
   })
 
-  // Rooms ouvertes ce soir : il manque des joueurs
   const rooms = [
     {
       id: 'demo-room-pokemon',
@@ -313,7 +311,6 @@ function nextWeekday(weekday: number, hours: number, minutes: number, weeksLater
   return date
 }
 
-/** Aujourd'hui à hh:mm, heure locale de la machine. */
 function today(hours: number, minutes: number) {
   const date = new Date()
   date.setHours(hours, minutes, 0, 0)

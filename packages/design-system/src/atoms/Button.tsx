@@ -21,7 +21,7 @@ const fg: Record<ButtonKind, string> = {
   ghost: colors.ink,
 }
 
-/** Bouton : au survol il se soulève d'1 px, à l'appui il glisse de la taille de son ombre, qui disparaît. */
+/** Bouton : à l'appui il glisse de la taille de son ombre, qui disparaît. */
 export function Button({
   label,
   kind = 'room',

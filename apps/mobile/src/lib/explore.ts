@@ -13,7 +13,6 @@ import {
   type VenueListItem,
 } from '@kwatro/shared'
 
-/** Filtres par jeu : slug du catalogue (seed) et nom court affiché ; `null` = tous les jeux. */
 export const GAMES: { key: string | null; label: string }[] = [
   { key: null, label: 'Tous' },
   { key: 'magic', label: 'Magic' },
@@ -24,19 +23,16 @@ export const GAMES: { key: string | null; label: string }[] = [
   { key: 'jeux-de-societe', label: 'Jeux de société' },
 ]
 
-/** Nom court d'un jeu (« Magic » plutôt que « Magic: The Gathering »). */
 export const gameLabel = (game: { slug: string; name: string }) =>
   GAMES.find((g) => g.key === game.slug)?.label ?? game.name
 
-/** Le filtre `game` laisse passer ces jeux ? Une liste vide = tous jeux (soirée libre). */
+// Liste vide = tous jeux (soirée libre)
 export const matchesGame = (game: string | null, games: { slug: string }[]) =>
   !game || games.length === 0 || games.some((g) => g.slug === game)
 
-/** Date locale du lieu, « 2026-10-03 » : sert à garder ce qui a lieu aujourd'hui. */
 export const localDay = (date: Date | string) =>
   new Intl.DateTimeFormat('en-CA', { timeZone: VENUE_TIME_ZONE }).format(new Date(date))
 
-/** « Samedi 3 octobre · Bordeaux » (mois abrégé si `short`). */
 export function todayLine(city: string, short?: boolean) {
   const date = new Intl.DateTimeFormat('fr-FR', {
     timeZone: VENUE_TIME_ZONE,
@@ -47,7 +43,6 @@ export function todayLine(city: string, short?: boolean) {
   return `${date.charAt(0).toUpperCase()}${date.slice(1)} · ${city}`
 }
 
-/** Places restantes, ou mode d'inscription quand il n'y a pas de jauge. */
 export function eventPlaces(event: EventListItem) {
   if (event.registrationMode === 'NONE') return 'Accès libre'
   if (event.registrationMode === 'EXTERNAL') return 'Inscription externe'
@@ -56,7 +51,6 @@ export function eventPlaces(event: EventListItem) {
   return left ? `${left} place${left > 1 ? 's' : ''} sur ${event.capacity}` : 'Complet'
 }
 
-/** Props d'EventCard (design system) pour un événement de l'API. */
 export function eventCardProps(event: EventListItem) {
   const games = event.games.length ? event.games.map(gameLabel).join(', ') : 'Tous jeux'
   return {
@@ -70,7 +64,6 @@ export function eventCardProps(event: EventListItem) {
   }
 }
 
-/** Props de RoomCard (design system) pour une room de l'API. */
 export function roomCardProps(room: RoomListItem) {
   const missing = Math.max(0, room.capacity - room.players.length)
   return {
@@ -85,7 +78,6 @@ export function roomCardProps(room: RoomListItem) {
   }
 }
 
-/** Props de VenueRow (design system) pour un lieu de l'API. */
 export function venueRowProps(venue: VenueListItem) {
   const closes =
     venue.closesAtMinute !== null ? ` · jusqu'à ${formatMinuteOfDay(venue.closesAtMinute)}` : ''

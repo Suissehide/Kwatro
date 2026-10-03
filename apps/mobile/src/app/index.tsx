@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Banner,
   BrandHeader,
   Button,
@@ -20,7 +19,6 @@ import {
   radius,
   Section,
   SkeletonCard,
-  sizes,
   TopNav,
   Typography,
   VenueRow,
@@ -42,10 +40,8 @@ import { notYet, openHome, openTab } from '@/lib/navigation'
 import { useMe } from '@/lib/useMe'
 import { useTonight } from '@/lib/useTonight'
 
-/** Largeur à partir de laquelle l'écran passe en mise en page desktop (même seuil que auth.tsx). */
 const WIDE = 900
 
-/** Accueil joueur (onglet Explorer) : soirées ce soir, rooms qui cherchent des joueurs, lieux ouverts. */
 export default function HomeScreen() {
   const wide = useWindowDimensions().width >= WIDE
   const insets = useSafeAreaInsets()
@@ -179,16 +175,9 @@ export default function HomeScreen() {
           active="explorer"
           onSelect={openTab}
           onHome={openHome}
-          right={
-            <>
-              <Button small kind="kwote" label="+ Créer une room" onPress={notYet} />
-              {me ? (
-                <View style={{ marginLeft: 8 }}>
-                  <Avatar name={me.pseudo} size={sizes.avatar.s} />
-                </View>
-              ) : null}
-            </>
-          }
+          right={<Button small kind="kwote" label="+ Créer une room" onPress={notYet} />}
+          avatar={me?.pseudo ?? ''}
+          onAvatar={() => openTab('profil')}
         />
       }
     >

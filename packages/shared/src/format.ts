@@ -40,19 +40,16 @@ export function formatMinuteOfDay(minute: number): string {
   return m ? `${h} h ${String(m).padStart(2, '0')}` : `${h} h`
 }
 
-/** Heure locale du lieu en toutes lettres : « 21 h », « 20 h 30 ». */
 export function formatHour(date: Date | string, timeZone = VENUE_TIME_ZONE): string {
   const [h = 0, m = 0] = formatTime(date, timeZone).split(':').map(Number)
   return formatMinuteOfDay(h * 60 + m)
 }
 
-/** Heure compacte pour le bandeau d'un bloc date : « 21H », « 19H30 ». */
 export function formatHourBand(date: Date | string, timeZone = VENUE_TIME_ZONE): string {
   const [h = '0', m = '00'] = formatTime(date, timeZone).split(':')
   return `${Number(h)}H${m === '00' ? '' : m}`
 }
 
-/** Kwote avec séparateur de milliers : « 1 214 ». */
 export function formatKwote(value: number): string {
   return value.toLocaleString('fr-FR')
 }

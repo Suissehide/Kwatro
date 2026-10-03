@@ -3,7 +3,6 @@ import { View } from 'react-native'
 import { TextLink } from '../atoms/TextLink'
 import { Typography } from '../atoms/Typography'
 
-/** Section titrée (h2) avec un lien optionnel à droite (« Tout le programme », « Carte »). */
 export function Section({
   title,
   link,
