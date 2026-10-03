@@ -15,17 +15,19 @@ export function Logo({ size = 32 }: { size?: number }) {
         borderColor: colors.ink,
         borderRadius: size * 0.2,
         padding: size * 0.14,
-        flexDirection: 'row',
-        flexWrap: 'wrap',
         justifyContent: 'space-between',
-        alignContent: 'space-between',
       }}
     >
-      {[0, 1, 2, 3].map((i) => (
-        <View
-          key={i}
-          style={{ width: dot, height: dot, borderRadius: dot, backgroundColor: colors.ink }}
-        />
+      {/* Deux rangées explicites : avec flexWrap, l'arrondi des tailles en 28 px mettait 3 points par ligne */}
+      {[0, 1].map((row) => (
+        <View key={row} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          {[0, 1].map((i) => (
+            <View
+              key={i}
+              style={{ width: dot, height: dot, borderRadius: dot, backgroundColor: colors.ink }}
+            />
+          ))}
+        </View>
       ))}
     </View>
   )

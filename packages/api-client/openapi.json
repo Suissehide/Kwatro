@@ -160,6 +160,28 @@
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
+                    },
+                    "mainKwote": {
+                      "nullable": true,
+                      "type": "object",
+                      "properties": {
+                        "game": {
+                          "type": "string"
+                        },
+                        "format": {
+                          "type": "string"
+                        },
+                        "kwote": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "game",
+                        "format",
+                        "kwote"
+                      ]
                     }
                   },
                   "required": [
@@ -168,7 +190,8 @@
                     "pseudo",
                     "role",
                     "city",
-                    "xp"
+                    "xp",
+                    "mainKwote"
                   ]
                 }
               }
@@ -472,6 +495,185 @@
                       "registrationMode",
                       "games",
                       "venue"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "explore"
+        ]
+      }
+    },
+    "/rooms": {
+      "get": {
+        "operationId": "ExploreController_rooms",
+        "parameters": [
+          {
+            "name": "lat",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          {
+            "name": "lng",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          {
+            "name": "radiusKm",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": true,
+              "maximum": 50
+            }
+          },
+          {
+            "name": "days",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 7,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 31
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "mode": {
+                        "type": "string",
+                        "enum": [
+                          "RANKED",
+                          "CASUAL"
+                        ]
+                      },
+                      "startsAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                      },
+                      "capacity": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "game": {
+                        "type": "object",
+                        "properties": {
+                          "slug": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "slug",
+                          "name"
+                        ]
+                      },
+                      "format": {
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "venue": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "isPartner": {
+                            "type": "boolean"
+                          },
+                          "distanceMeters": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "isPartner",
+                          "distanceMeters"
+                        ]
+                      },
+                      "players": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "initial": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "initial"
+                          ]
+                        }
+                      },
+                      "kwoteRange": {
+                        "nullable": true,
+                        "type": "object",
+                        "properties": {
+                          "min": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "max": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "min",
+                          "max"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "mode",
+                      "startsAt",
+                      "capacity",
+                      "game",
+                      "format",
+                      "venue",
+                      "players",
+                      "kwoteRange"
                     ]
                   }
                 }

@@ -23,6 +23,8 @@ export const meSchema = z.object({
   role: z.enum(USER_ROLES),
   city: z.string().nullable(),
   xp: z.number().int(),
+  /** Kwote du format le plus joué en classé (null sans profil TCG). */
+  mainKwote: z.object({ game: z.string(), format: z.string(), kwote: z.number().int() }).nullable(),
 })
 
 export type Me = z.infer<typeof meSchema>

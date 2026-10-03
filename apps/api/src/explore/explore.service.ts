@@ -1,4 +1,10 @@
-import type { EventsQuery, eventListItemSchema, GeoQuery, VenueListItem } from '@kwatro/shared'
+import type {
+  EventsQuery,
+  eventListItemSchema,
+  GeoQuery,
+  roomListItemSchema,
+  VenueListItem,
+} from '@kwatro/shared'
 import { Injectable } from '@nestjs/common'
 import type { z } from 'zod'
 import { PrismaService } from '../prisma/prisma.service'
@@ -62,6 +68,53 @@ export class ExploreService {
         registeredCount: _count.registrations,
         venue: { ...venue, distanceMeters: distances.get(venue.id) ?? 0 },
       }))
+      .sort(
+        (a, b) =>
+          a.startsAt.getTime() - b.startsAt.getTime() || compareByDistance(a.venue, b.venue),
+      )
+  }
+
+  /** Rooms ouvertes dans un lieu autour du point, par date puis distance. */
+  async rooms(query: EventsQuery): Promise<z.output<typeof roomListItemSchema>[]> {
+    const distances = await this.distances(query)
+    const now = new Date()
+    // ponytail: rooms à domicile exclues (zone floue à afficher, KWT des rooms à domicile)
+    const rooms = await this.prisma.room.findMany({
+      where: {
+        status: 'OPEN',
+        venueId: { in: [...distances.keys()] },
+        startsAt: { gte: now, lt: new Date(now.getTime() + query.days * DAY_MS) },
+      },
+      include: {
+        game: { select: { slug: true, name: true } },
+        format: { select: { name: true } },
+        venue: { select: { id: true, name: true, isPartner: true } },
+        participants: {
+          where: { status: 'ACCEPTED' },
+          orderBy: { createdAt: 'asc' },
+          select: { user: { select: { pseudo: true, gameProfiles: true } } },
+        },
+      },
+    })
+    return rooms
+      .flatMap(({ venue, format, participants, ...room }) => {
+        if (!venue) return []
+        const kwotes = participants.flatMap(({ user }) =>
+          user.gameProfiles.filter((p) => p.formatId === room.formatId).map((p) => p.kwote),
+        )
+        return [
+          {
+            ...room,
+            format: format?.name ?? null,
+            venue: { ...venue, distanceMeters: distances.get(venue.id) ?? 0 },
+            players: participants.map(({ user }) => ({ initial: user.pseudo.slice(0, 1) })),
+            kwoteRange:
+              room.mode === 'RANKED' && kwotes.length
+                ? { min: Math.min(...kwotes), max: Math.max(...kwotes) }
+                : null,
+          },
+        ]
+      })
       .sort(
         (a, b) =>
           a.startsAt.getTime() - b.startsAt.getTime() || compareByDistance(a.venue, b.venue),

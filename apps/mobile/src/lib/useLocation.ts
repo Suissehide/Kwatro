@@ -8,7 +8,7 @@ const fallback: Place = { lat: DEFAULT_CITY.lat, lng: DEFAULT_CITY.lng, label: D
 
 /**
  * Position du joueur pour l'exploration. Refus, erreur ou attente : centre de Bordeaux.
- * `ready` passe à true une fois la position connue (ou le repli choisi), pour ne charger qu'une fois.
+ * `ready` passe à true une fois la position connue, le repli choisi ou après 3 s sans réponse.
  */
 export function useLocation() {
   const [place, setPlace] = useState<Place>(fallback)
@@ -16,6 +16,8 @@ export function useLocation() {
 
   useEffect(() => {
     let cancelled = false
+    // Demande de position restée sans réponse : on charge autour de Bordeaux sans attendre
+    const timer = setTimeout(() => setReady(true), 3000)
     ;(async () => {
       try {
         const { granted } = await Location.requestForegroundPermissionsAsync()
@@ -29,11 +31,13 @@ export function useLocation() {
       } catch {
         // Position indisponible (web sans HTTPS, GPS coupé…) : on garde Bordeaux.
       } finally {
+        clearTimeout(timer)
         if (!cancelled) setReady(true)
       }
     })()
     return () => {
       cancelled = true
+      clearTimeout(timer)
     }
   }, [])
 

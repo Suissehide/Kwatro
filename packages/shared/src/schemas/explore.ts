@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { EVENT_TYPES, REGISTRATION_MODES, VENUE_TYPES } from '../constants'
+import { EVENT_TYPES, REGISTRATION_MODES, ROOM_MODES, VENUE_TYPES } from '../constants'
 import { geoQuerySchema, isoDateTime } from './common'
 
 /** Lieu dans la carte / la liste « Où jouer ce soir » (B1, B2). */
@@ -46,7 +46,28 @@ export const eventListItemSchema = z.object({
   }),
 })
 
+/** Room ouverte qui cherche des joueurs (accueil, « Il manque des joueurs »). */
+export const roomListItemSchema = z.object({
+  id: z.string(),
+  mode: z.enum(ROOM_MODES),
+  startsAt: isoDateTime,
+  capacity: z.number().int(),
+  game: z.object({ slug: z.string(), name: z.string() }),
+  format: z.string().nullable(),
+  venue: z.object({
+    id: z.string(),
+    name: z.string(),
+    isPartner: z.boolean(),
+    distanceMeters: z.number().int(),
+  }),
+  /** Joueurs acceptés (hôte compris) : initiales seulement, la liste est publique. */
+  players: z.array(z.object({ initial: z.string() })),
+  /** Fourchette de Kwote des joueurs déjà dans une room classée. */
+  kwoteRange: z.object({ min: z.number().int(), max: z.number().int() }).nullable(),
+})
+
 export type VenueListItem = z.infer<typeof venueListItemSchema>
 /** Forme JSON reçue par l'app (dates en chaînes ISO). Côté API, `z.output` donne les `Date`. */
 export type EventListItem = z.input<typeof eventListItemSchema>
 export type EventsQuery = z.infer<typeof eventsQuerySchema>
+export type RoomListItem = z.input<typeof roomListItemSchema>

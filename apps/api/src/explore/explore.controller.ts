@@ -4,6 +4,7 @@ import {
   eventsQuerySchema,
   type GeoQuery,
   geoQuerySchema,
+  roomListItemSchema,
   venueListItemSchema,
 } from '@kwatro/shared'
 import { Controller, Get } from '@nestjs/common'
@@ -32,5 +33,12 @@ export class ExploreController {
   @ZodResponse(z.array(eventListItemSchema))
   events(@ZodQuery(eventsQuerySchema) query: EventsQuery) {
     return this.explore.events(query)
+  }
+
+  /** Rooms ouvertes qui cherchent des joueurs autour d'un point, par date puis distance. */
+  @Get('rooms')
+  @ZodResponse(z.array(roomListItemSchema))
+  rooms(@ZodQuery(eventsQuerySchema) query: EventsQuery) {
+    return this.explore.rooms(query)
   }
 }
