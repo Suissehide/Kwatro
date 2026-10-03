@@ -1,14 +1,15 @@
 import type { ReactNode } from 'react'
 import { Pressable, Text, View } from 'react-native'
+import { Raised } from '../atoms/Raised'
 import { useHover } from '../atoms/useHover'
 import { Brand } from '../molecules/Brand'
-import { border, colors, font, radius, transition } from '../tokens'
+import { border, colors, font, motion, radius, shadow, textOn, transition } from '../tokens'
 
 export type TopNavItem = { key: string; label: string }
 
 /**
- * Barre du site sur desktop : logo + Kwatro, liens vers les pages (la page active est soulignée)
- * et actions à droite. Sans `items`, simple barre de marque (écran de connexion).
+ * Barre du site sur desktop : logo + Kwatro, liens vers les pages (page active en pastille relevée,
+ * les autres soulignées au survol) et actions à droite. Sans `items`, simple barre de marque (écran de connexion).
  */
 export function TopNav({
   items = [],
@@ -20,7 +21,7 @@ export function TopNav({
   items?: TopNavItem[]
   active?: string
   onSelect?: (key: string) => void
-  /** Soulignement de la page active (rouge room côté joueur, vert lieu côté espace lieu). */
+  /** Fond de la page active (rouge room côté joueur, vert lieu côté espace lieu). */
   color?: string
   right?: ReactNode
 }) {
@@ -68,31 +69,62 @@ function NavLink({
   onPress: () => void
 }) {
   const { hovered, hoverProps } = useHover()
+  const pill = (
+    <View
+      style={{
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: radius.field,
+        borderWidth: border.thin,
+        borderColor: active ? colors.ink : 'transparent',
+        backgroundColor: active ? color : 'transparent',
+        // Page active : pastille relevée qui se soulève d'1 px au survol, comme un bouton
+        transform: active && hovered ? [{ translateX: -1 }, { translateY: -1 }] : [],
+        ...transition(['transform'], motion.fast),
+      }}
+    >
+      <Text
+        style={{
+          ...font('body', active ? 800 : 600),
+          fontSize: 14,
+          color: active ? textOn(color) : colors.ink,
+        }}
+      >
+        {label}
+      </Text>
+      {active ? null : (
+        // Autres pages : soulignement qui se déroule au survol
+        <View
+          style={{
+            position: 'absolute',
+            left: 12,
+            right: 12,
+            bottom: 2,
+            height: border.base,
+            borderRadius: border.base,
+            backgroundColor: colors.ink,
+            transform: [{ scaleX: hovered ? 1 : 0 }],
+            ...transition(['transform']),
+          }}
+        />
+      )}
+    </View>
+  )
   return (
     <Pressable
       role="link"
       aria-current={active ? 'page' : undefined}
       onPress={onPress}
       {...hoverProps}
-      style={{ paddingVertical: 8, paddingHorizontal: 12, borderRadius: radius.tag }}
+      style={{ borderRadius: radius.field }}
     >
-      <Text style={{ ...font('body', active ? 800 : 600), fontSize: 14, color: colors.ink }}>
-        {label}
-      </Text>
-      {/* Soulignement : plein et à la couleur du joueur sur la page active, qui se déroule au survol */}
-      <View
-        style={{
-          position: 'absolute',
-          left: 12,
-          right: 12,
-          bottom: 2,
-          height: border.base,
-          borderRadius: border.base,
-          backgroundColor: active ? color : colors.ink,
-          transform: [{ scaleX: active || hovered ? 1 : 0 }],
-          ...transition(['transform']),
-        }}
-      />
+      {active ? (
+        <Raised offset={shadow.sm} r={radius.field}>
+          {pill}
+        </Raised>
+      ) : (
+        pill
+      )}
     </Pressable>
   )
 }
