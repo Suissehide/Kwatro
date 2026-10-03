@@ -28,6 +28,7 @@ import { formatKwote, xpLevel } from '@kwatro/shared'
 import { useState } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { ExploreMap } from '@/components/explore/ExploreMap'
 import {
   eventCardProps,
   GAMES,
@@ -48,6 +49,7 @@ export default function HomeScreen() {
   const me = useMe()
   const { place, data, failed, retry } = useTonight()
   const [game, setGame] = useState<string | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const events = data?.events.filter((e) => matchesGame(game, e.games)) ?? []
   const rooms = data?.rooms.filter((r) => matchesGame(game, [r.game])) ?? []
@@ -114,6 +116,26 @@ export default function HomeScreen() {
     <Carousel>{roomCards}</Carousel>
   )
 
+  const map = (height: number) => (
+    <View
+      style={{
+        height,
+        borderWidth: border.base,
+        borderColor: colors.ink,
+        borderRadius: radius.card,
+        overflow: 'hidden',
+        backgroundColor: colors.creamDark,
+      }}
+    >
+      <ExploreMap
+        center={place}
+        venues={data?.venues ?? []}
+        selectedId={selectedId}
+        onSelect={setSelectedId}
+      />
+    </View>
+  )
+
   const venueList = !data ? (
     <SkeletonCard />
   ) : data.venues.length === 0 ? (
@@ -162,7 +184,10 @@ export default function HomeScreen() {
         {error}
         <Section title="Soirées ce soir">{eventList}</Section>
         <Section title="Il manque des joueurs">{roomList}</Section>
-        <Section title="Lieux ouverts">{venueList}</Section>
+        <Section title="Lieux ouverts">
+          {map(200)}
+          {venueList}
+        </Section>
       </MobileScreen>
     )
   }
@@ -207,17 +232,7 @@ export default function HomeScreen() {
         </View>
         <View style={{ flex: 5, minWidth: 0 }}>
           <Section title="Lieux ouverts" link="Carte" onLink={notYet}>
-            {/* ponytail: carte des lieux à brancher plus tard, encart vide en attendant */}
-            <View
-              aria-label="Carte des lieux, bientôt disponible"
-              style={{
-                height: 280,
-                borderWidth: border.base,
-                borderColor: colors.ink,
-                borderRadius: radius.card,
-                backgroundColor: colors.creamDark,
-              }}
-            />
+            {map(280)}
             {venueList}
           </Section>
         </View>
