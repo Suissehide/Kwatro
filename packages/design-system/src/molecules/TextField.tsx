@@ -1,5 +1,13 @@
-import { type ReactNode, useState } from 'react'
-import { Platform, Text, TextInput, type TextInputProps, View, type ViewStyle } from 'react-native'
+import { type ReactNode, type Ref, useState } from 'react'
+import {
+  Platform,
+  Text,
+  TextInput,
+  type TextInputProps,
+  type TextStyle,
+  View,
+  type ViewStyle,
+} from 'react-native'
 import { Typography } from '../atoms/Typography'
 import { border, colors, font, radius } from '../tokens'
 
@@ -12,6 +20,11 @@ const focusRing: ViewStyle =
         shadowRadius: 0,
         shadowOffset: { width: 0, height: 0 },
       }
+
+// Web : l'anneau de focus est sur le cadre ; on retire celui du navigateur sur le texte (style « solid » de largeur 0 :
+// avec le style « auto » par défaut, Chrome ignore la largeur et dessine quand même un rectangle bleu)
+const noOutline: TextStyle | null =
+  Platform.OS === 'web' ? { outlineWidth: 0, outlineStyle: 'solid', boxShadow: 'none' } : null
 
 /** Champ : libellé, aide ou erreur dessous, compteur si `multiline` + `maxLength`. */
 export function TextField({
@@ -30,6 +43,7 @@ export function TextField({
   error?: string
   disabled?: boolean
   right?: ReactNode
+  ref?: Ref<TextInput>
 } & Omit<TextInputProps, 'editable' | 'style'>) {
   const [focus, setFocus] = useState(false)
   const bg = disabled ? colors.disabledBg : error ? colors.roomSoft : colors.white
@@ -70,14 +84,17 @@ export function TextField({
             setFocus(false)
             rest.onBlur?.(e)
           }}
-          style={{
-            flex: 1,
-            ...font('body', 600),
-            fontSize: 15,
-            color: disabled ? colors.disabledText : colors.ink,
-            paddingVertical: 12,
-            minHeight: multiline ? 64 : undefined,
-          }}
+          style={[
+            {
+              flex: 1,
+              ...font('body', 600),
+              fontSize: 15,
+              color: disabled ? colors.disabledText : colors.ink,
+              paddingVertical: 12,
+              minHeight: multiline ? 64 : undefined,
+            },
+            noOutline,
+          ]}
         />
         {right}
       </View>

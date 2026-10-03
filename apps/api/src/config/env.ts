@@ -12,7 +12,7 @@ const envSchema = z
     DATABASE_URL: z.string().url(),
     CORS_ORIGINS: z
       .string()
-      .default('http://localhost:3001,http://localhost:8081')
+      .default('http://localhost:3010,http://localhost:8081')
       .transform((value) => value.split(',').map((origin) => origin.trim())),
     /** Dev uniquement : accepte l'en-tête `x-dev-user-id` comme connexion, en attendant Better Auth (KWT-9). */
     DEV_AUTH_HEADER: z

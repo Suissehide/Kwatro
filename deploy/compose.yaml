@@ -61,7 +61,7 @@ services:
       NODE_ENV: production
       API_PORT: 3000
       DATABASE_URL: postgresql://kwatro:kwatro@postgres:5432/kwatro?schema=public
-      CORS_ORIGINS: http://localhost:3001,http://localhost:8081
+      CORS_ORIGINS: http://localhost:3010,http://localhost:8081
     ports:
       - "127.0.0.1:3000:3000"
     networks:
@@ -78,8 +78,9 @@ services:
       dockerfile: deploy/web/Dockerfile
       args:
         NEXT_PUBLIC_API_URL: http://localhost:3000
+        NEXT_PUBLIC_SITE_URL: http://localhost:3010
     ports:
-      - "127.0.0.1:3001:3000"
+      - "127.0.0.1:3010:3000"
 
 volumes:
   postgres-data:

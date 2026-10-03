@@ -62,7 +62,8 @@ a {
   color: var(--kw-event);
   text-decoration: none;
 }
-a:hover {
+/* Pas sur les boutons-liens : la couleur du texte vient de leur variante (.kw-btn--room…) */
+a:not(.kw-btn):hover {
   color: var(--kw-room);
 }
 

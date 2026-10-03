@@ -1,7 +1,7 @@
 {
   "name": "kwatro",
   "private": true,
-  "packageManager": "pnpm@10.34.6",
+  "packageManager": "pnpm@12.8.1",
   "engines": {
     "node": ">=22"
   },

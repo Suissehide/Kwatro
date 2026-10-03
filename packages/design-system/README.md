@@ -4,7 +4,7 @@ Design system « Plateau pop » de Kwatro : tokens + composants React Native, ut
 l'app Expo (`apps/mobile`) et par le site Next.js (`apps/web`, via react-native-web).
 
 Référence visuelle : handoff design « Kwatro MVP » (`Kwatro DS Plateau pop v2`). Catalogue vivant :
-http://localhost:3001/design-system (web) et `/design-system` dans l'app Expo.
+http://localhost:3010/design-system (web) et `/design-system` dans l'app Expo.
 
 ## Organisation (atomic design)
 
@@ -19,6 +19,7 @@ src/
 ├── organisms/   DataTable, Accordion, BarChart, ConfirmDialog, BottomSheet,
 │                PlayerTabBar / VenueTabBar, Sidebar
 ├── templates/   MobileScreen, WebSidebarLayout
+├── scene/       HeroScene : pièces 3D Three.js, web uniquement (import séparé : @kwatro/design-system/scene)
 └── catalogue/   vitrine de tous les composants (import séparé : @kwatro/design-system/catalogue)
 ```
 

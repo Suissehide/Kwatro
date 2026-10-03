@@ -335,3 +335,13 @@ model Visit {
 
   @@unique([userId, venueId, businessDate])
 }
+
+// ---------- Liste d'attente (landing) ----------
+
+/// Joueur inscrit à la liste d'attente du site, avant l'ouverture de l'app (KWT-3).
+model WaitlistEntry {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  city      String?
+  createdAt DateTime @default(now())
+}

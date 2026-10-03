@@ -483,6 +483,49 @@
           "explore"
         ]
       }
+    },
+    "/waitlist": {
+      "post": {
+        "operationId": "WaitlistController_join",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "city": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "digitalMajority": {
+                    "type": "boolean",
+                    "enum": [
+                      true
+                    ]
+                  }
+                },
+                "required": [
+                  "email",
+                  "digitalMajority"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "waitlist"
+        ]
+      }
     }
   },
   "info": {
