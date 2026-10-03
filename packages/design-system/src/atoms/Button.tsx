@@ -1,6 +1,7 @@
 import { Pressable, Text, View } from 'react-native'
 import { border, colors, font, onColor, radius, shadow } from '../tokens'
 import { Raised } from './Raised'
+import { useHover } from './useHover'
 
 export type ButtonKind = 'room' | 'event' | 'venue' | 'kwote' | 'ink' | 'ghost'
 const bg: Record<ButtonKind, string> = {
@@ -20,7 +21,7 @@ const fg: Record<ButtonKind, string> = {
   ghost: colors.ink,
 }
 
-/** Bouton : à l'appui il glisse de la taille de son ombre, qui disparaît. */
+/** Bouton : au survol il se soulève d'1 px, à l'appui il glisse de la taille de son ombre, qui disparaît. */
 export function Button({
   label,
   kind = 'room',
@@ -36,6 +37,8 @@ export function Button({
 }) {
   const off = small ? shadow.sm : shadow.md
   const r = small ? 9 : radius.button
+  const { hovered, hoverProps } = useHover()
+  const lifted = hovered && !disabled && kind !== 'ghost'
   return (
     <Pressable
       role="button"
@@ -43,6 +46,7 @@ export function Button({
       aria-disabled={disabled}
       onPress={onPress}
       disabled={disabled}
+      {...hoverProps}
       // Même arrondi que la face : l'anneau de focus clavier (web) suit le bouton au lieu d'un rectangle
       style={{ borderRadius: r }}
     >
@@ -50,7 +54,11 @@ export function Button({
         const face = (
           <View
             style={{
-              backgroundColor: disabled ? colors.disabledBg : bg[kind],
+              backgroundColor: disabled
+                ? colors.disabledBg
+                : kind === 'ghost' && hovered
+                  ? colors.hover
+                  : bg[kind],
               borderWidth: small ? border.thin : border.base,
               borderColor: disabled ? colors.disabledBorder : colors.ink,
               borderRadius: r,
@@ -60,7 +68,11 @@ export function Button({
               alignItems: 'center',
               justifyContent: 'center',
               transform:
-                pressed && kind !== 'ghost' ? [{ translateX: off }, { translateY: off }] : [],
+                pressed && kind !== 'ghost'
+                  ? [{ translateX: off }, { translateY: off }]
+                  : lifted
+                    ? [{ translateX: -1 }, { translateY: -1 }]
+                    : [],
             }}
           >
             <Text

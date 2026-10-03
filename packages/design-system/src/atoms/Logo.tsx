@@ -1,5 +1,5 @@
-import { colors } from '@kwatro/design-system'
 import { View } from 'react-native'
+import { colors } from '../tokens'
 
 /** Logo Kwatro, comme le favicon du site (apps/web/src/app/icon.svg) : carré jaune, quatre points. */
 export function Logo({ size = 32 }: { size?: number }) {

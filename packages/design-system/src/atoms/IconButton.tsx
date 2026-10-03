@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Pressable, View } from 'react-native'
 import { border, colors, shadow, sizes } from '../tokens'
 import { Raised } from './Raised'
+import { useHover } from './useHover'
 
 /** Bouton carré à pictogramme. `label` est obligatoire : c'est le nom lu par les lecteurs d'écran. */
 export function IconButton({
@@ -18,6 +19,8 @@ export function IconButton({
   onPress?: () => void
 }) {
   const r = size > 36 ? 12 : 10
+  const { hovered, hoverProps } = useHover()
+  const plain = bg === colors.white
   const face = (
     <View
       style={{
@@ -26,9 +29,10 @@ export function IconButton({
         borderWidth: size > 36 ? border.base : border.thin,
         borderColor: colors.ink,
         borderRadius: r,
-        backgroundColor: bg,
+        backgroundColor: plain && hovered ? colors.hover : bg,
         alignItems: 'center',
         justifyContent: 'center',
+        transform: !plain && hovered ? [{ translateX: -1 }, { translateY: -1 }] : [],
       }}
     >
       {icon}
@@ -40,8 +44,9 @@ export function IconButton({
       aria-label={label}
       onPress={onPress}
       hitSlop={Math.max(0, (sizes.touch - size) / 2)}
+      {...hoverProps}
     >
-      {bg === colors.white ? (
+      {plain ? (
         face
       ) : (
         <Raised offset={shadow.sm} r={r}>

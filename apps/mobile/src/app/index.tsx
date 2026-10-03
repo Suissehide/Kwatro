@@ -10,8 +10,12 @@ import {
   EmptyState,
   font,
   KwoteBadge,
+  ListRow,
+  Logo,
   MobileScreen,
+  type PlayerTab,
   PlayerTabBar,
+  playerItems,
   Raised,
   radius,
   SkeletonCard,
@@ -19,6 +23,8 @@ import {
   sizes,
   space,
   Tag,
+  TextLink,
+  TopNav,
   Typography,
   XpBar,
 } from '@kwatro/design-system'
@@ -36,15 +42,23 @@ import {
   type VenueListItem,
   xpLevel,
 } from '@kwatro/shared'
+import { router } from 'expo-router'
 import { type ReactNode, useEffect, useState } from 'react'
 import { ScrollView, Text, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Logo } from '@/components/Logo'
 import { api } from '@/lib/api'
 import { useLocation } from '@/lib/useLocation'
 
-// ponytail: fiches événement, room et lieu, inscription, création de room et autres onglets pas encore faits :
-// boutons, liens et onglets sans action pour l'instant.
+// ponytail: fiches événement, room et lieu, inscription, création de room et pages Mes parties, Messages
+// et Profil pas encore faites : leurs boutons et liens passent par `notYet` en attendant.
+const notYet = () => {}
+
+/** Page de chaque onglet joueur (TopNav desktop, PlayerTabBar téléphone) ; seules les pages existantes y sont. */
+const TAB_ROUTES: Partial<Record<PlayerTab, '/'>> = { explorer: '/' }
+const goTo = (tab: string) => {
+  const route = TAB_ROUTES[tab as PlayerTab]
+  if (route) router.navigate(route)
+}
 
 /** Largeur à partir de laquelle l'écran passe en mise en page desktop (même seuil que auth.tsx). */
 const WIDE = 900
@@ -60,7 +74,6 @@ const GAMES: { slug: string | null; label: string }[] = [
   { slug: 'yugioh', label: 'Yu-Gi-Oh!' },
   { slug: 'jeux-de-societe', label: 'Jeux de société' },
 ]
-const NAV = ['Explorer', 'Mes parties', 'Messages', 'Profil']
 const PLAYER_COLORS = [colors.event, colors.venue, colors.room, colors.kwote]
 
 type Data = { events: EventListItem[]; rooms: RoomListItem[]; venues: VenueListItem[] }
@@ -216,8 +229,8 @@ export default function HomeScreen() {
         tabBar={
           <PlayerTabBar
             active="explorer"
-            onSelect={() => {}}
-            onCreate={() => {}}
+            onSelect={goTo}
+            onCreate={notYet}
             bottomInset={Math.max(22, insets.bottom)}
           />
         }
@@ -262,7 +275,21 @@ export default function HomeScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.cream }}>
-      <TopBar pseudo={me?.pseudo} />
+      <TopNav
+        items={playerItems}
+        active="explorer"
+        onSelect={goTo}
+        right={
+          <>
+            <Button small kind="kwote" label="+ Créer une room" onPress={notYet} />
+            {me ? (
+              <View style={{ marginLeft: 8 }}>
+                <Avatar name={me.pseudo} size={sizes.avatar.s} />
+              </View>
+            ) : null}
+          </>
+        }
+      />
       <ScrollView>
         <View
           style={{
@@ -339,73 +366,6 @@ export default function HomeScreen() {
 /** Kwote avec séparateur de milliers : « 1 214 ». */
 const kwote = (value: number) => value.toLocaleString('fr-FR')
 
-/** Barre du site (comme WideLayout de auth.tsx) + navigation joueur, création de room et avatar. */
-function TopBar({ pseudo }: { pseudo?: string }) {
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10,
-        paddingVertical: 12,
-        paddingHorizontal: 32,
-        borderBottomWidth: border.base,
-        borderColor: colors.ink,
-      }}
-    >
-      <Logo size={32} />
-      <Text
-        style={{ ...font('display'), fontSize: 22, textTransform: 'uppercase', color: colors.ink }}
-      >
-        Kwatro
-      </Text>
-      <View role="navigation" style={{ flexDirection: 'row', gap: 6, marginLeft: 40 }}>
-        {NAV.map((label, i) => {
-          const on = i === 0
-          const item = (
-            <View
-              key={label}
-              aria-current={on ? 'page' : undefined}
-              style={{
-                paddingVertical: 8,
-                paddingHorizontal: 12,
-                borderRadius: radius.field,
-                borderWidth: border.thin,
-                borderColor: on ? colors.ink : 'transparent',
-                backgroundColor: on ? colors.room : 'transparent',
-              }}
-            >
-              <Text
-                style={{
-                  ...font('body', on ? 800 : 600),
-                  fontSize: 14,
-                  color: on ? colors.white : colors.ink,
-                }}
-              >
-                {label}
-              </Text>
-            </View>
-          )
-          return on ? (
-            <Raised key={label} offset={shadow.sm} r={radius.field}>
-              {item}
-            </Raised>
-          ) : (
-            item
-          )
-        })}
-      </View>
-      <View style={{ flex: 1 }} />
-      <Button small kind="kwote" label="+ Créer une room" />
-      {pseudo ? (
-        <View style={{ marginLeft: 8 }}>
-          <Avatar name={pseudo} size={sizes.avatar.s} />
-        </View>
-      ) : null}
-    </View>
-  )
-}
-
 /** Carte profil (desktop) : pseudo, Kwote du format principal et niveau d'XP. */
 function ProfileCard({ me }: { me: Me }) {
   const xp = xpLevel(me.xp)
@@ -452,9 +412,7 @@ function Section({ title, link, children }: { title: string; link: string; child
         style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}
       >
         <Typography variant="h2">{title}</Typography>
-        <Text role="link" style={{ ...font('body', 800), fontSize: 13, color: colors.event }}>
-          {link}
-        </Text>
+        <TextLink label={link} onPress={notYet} />
       </View>
       {children}
     </View>
@@ -485,7 +443,13 @@ function EventCard({
   const places = spots(event)
   const partner = event.venue.isPartner ? <Tag label="Partenaire" variant="partner" /> : null
   return (
-    <ContentCard kind="event" raised={raised}>
+    <ContentCard
+      kind="event"
+      raised={raised}
+      // Téléphone : la carte entière ouvre le détail ; desktop : les boutons
+      onPress={wide ? undefined : notYet}
+      label={event.title}
+    >
       <View
         style={{
           flexDirection: 'row',
@@ -523,9 +487,9 @@ function EventCard({
         </View>
         {wide ? (
           event.registrationMode === 'NONE' ? (
-            <Button small kind="ghost" label="Voir" />
+            <Button small kind="ghost" label="Voir" onPress={notYet} />
           ) : (
-            <Button small label="S'inscrire" />
+            <Button small label="S'inscrire" onPress={notYet} />
           )
         ) : null}
       </View>
@@ -542,7 +506,7 @@ function RoomCard({ room, wide }: { room: RoomListItem; wide: boolean }) {
     </Text>
   )
   const card = (
-    <ContentCard kind="room">
+    <ContentCard kind="room" onPress={notYet} label={`Room ${gameLabel(room.game)}`}>
       <Typography variant="label">
         {room.mode === 'RANKED' ? 'Partie classée' : 'Partie libre'} · {gameLabel(room.game)}
       </Typography>
@@ -601,47 +565,35 @@ function VenueList({ venues, wide }: { venues: VenueListItem[]; wide: boolean })
       }}
     >
       {venues.map((v, i) => (
-        <View
+        <ListRow
           key={v.id}
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 12,
-            paddingVertical: wide ? 13 : 12,
-            paddingHorizontal: wide ? 16 : 14,
-            borderTopWidth: i ? border.thin : 0,
-            borderColor: colors.line,
-          }}
-        >
-          <View
-            aria-label={v.isPartner ? 'Lieu partenaire' : undefined}
-            style={{
-              width: 12,
-              height: 12,
-              borderRadius: 6,
-              borderWidth: border.thin,
-              borderColor: colors.ink,
-              backgroundColor: v.isPartner ? colors.venue : colors.white,
-            }}
-          />
-          <View style={{ flex: 1, minWidth: 0, gap: wide ? 3 : 2 }}>
-            <Text style={{ ...font('body', 800), fontSize: 15, color: colors.ink }}>{v.name}</Text>
-            <Typography variant="small">
-              {VENUE_TYPE_LABELS[v.type]}
-              {v.closesAtMinute !== null ? ` · jusqu'à ${formatMinuteOfDay(v.closesAtMinute)}` : ''}
-            </Typography>
-            {wide && v.isPartner && v.kwatroPerk ? (
-              <Text
-                style={{ ...font('body', 600), fontSize: 13, lineHeight: 18, color: colors.venue }}
-              >
-                {v.kwatroPerk}
-              </Text>
-            ) : null}
-          </View>
-          <Text style={{ ...font('mono', 700), fontSize: 13, color: colors.ink }}>
-            {formatDistance(v.distanceMeters)}
-          </Text>
-        </View>
+          inset={wide ? 16 : 14}
+          last={i === venues.length - 1}
+          onPress={notYet}
+          left={
+            <View
+              aria-label={v.isPartner ? 'Lieu partenaire' : undefined}
+              style={{
+                width: 12,
+                height: 12,
+                borderRadius: 6,
+                borderWidth: border.thin,
+                borderColor: colors.ink,
+                backgroundColor: v.isPartner ? colors.venue : colors.white,
+              }}
+            />
+          }
+          title={v.name}
+          subtitle={`${VENUE_TYPE_LABELS[v.type]}${
+            v.closesAtMinute !== null ? ` · jusqu'à ${formatMinuteOfDay(v.closesAtMinute)}` : ''
+          }`}
+          note={wide && v.isPartner ? (v.kwatroPerk ?? undefined) : undefined}
+          right={
+            <Text style={{ ...font('mono', 700), fontSize: 13, color: colors.ink }}>
+              {formatDistance(v.distanceMeters)}
+            </Text>
+          }
+        />
       ))}
     </View>
   )

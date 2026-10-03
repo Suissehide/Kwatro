@@ -9,6 +9,7 @@ import {
   CountBadge,
   DateBlock,
   IconButton,
+  Logo,
   Note,
   ProgressSteps,
   Radio,
@@ -16,6 +17,7 @@ import {
   Spinner,
   StatusPill,
   Tag,
+  TextLink,
   Toggle,
   Typography,
 } from '../atoms'
@@ -44,8 +46,10 @@ import {
   DataTable,
   type PlayerTab,
   PlayerTabBar,
+  playerItems,
   Sidebar,
   type Sort,
+  TopNav,
   VenueTabBar,
 } from '../organisms'
 import { colors, font, space } from '../tokens'
@@ -262,6 +266,16 @@ export function Catalogue() {
             { q: 'Comment marche la Kwote ?', a: 'Elle mesure ta force par format TCG.' },
             { q: "Et l'XP ?", a: "Elle récompense l'assiduité, pas la victoire." },
           ]}
+        />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+          <Logo size={44} />
+          <TextLink label="Tout le programme" onPress={() => {}} />
+        </View>
+        <TopNav
+          items={playerItems}
+          active={tab}
+          onSelect={(key) => setTab(key as PlayerTab)}
+          right={<Button small kind="kwote" label="+ Créer une room" />}
         />
         <View style={{ maxWidth: 420, width: '100%', gap: 12 }}>
           <PlayerTabBar active={tab} onSelect={setTab} onCreate={() => {}} bottomInset={10} />

@@ -3,6 +3,7 @@ import {
   border,
   colors,
   font,
+  Logo,
   MobileScreen,
   Note,
   ProgressSteps,
@@ -11,6 +12,7 @@ import {
   ScreenHeader,
   Segmented,
   TextField,
+  TopNav,
   Typography,
 } from '@kwatro/design-system'
 import {
@@ -26,7 +28,6 @@ import { router } from 'expo-router'
 import { createContext, type ReactNode, useContext, useRef, useState } from 'react'
 import { ScrollView, Text, type TextInput, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Logo } from '@/components/Logo'
 import { TableScene } from '@/components/TableScene'
 
 type Step = 'welcome' | 'email' | 'birth' | AgeRegime
@@ -122,29 +123,7 @@ export default function AuthScreen() {
 function WideLayout({ children }: { children: ReactNode }) {
   return (
     <View style={{ flex: 1, backgroundColor: colors.cream }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 10,
-          paddingVertical: 12,
-          paddingHorizontal: 32,
-          borderBottomWidth: border.base,
-          borderColor: colors.ink,
-        }}
-      >
-        <Logo size={32} />
-        <Text
-          style={{
-            ...font('display'),
-            fontSize: 22,
-            textTransform: 'uppercase',
-            color: colors.ink,
-          }}
-        >
-          Kwatro
-        </Text>
-      </View>
+      <TopNav />
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
