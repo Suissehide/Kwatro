@@ -1,6 +1,6 @@
 import { Pressable, Text, View } from 'react-native'
 import { useHover } from '../atoms/useHover'
-import { border, colors, font, radius, textOn } from '../tokens'
+import { border, colors, font, radius, textOn, transition } from '../tokens'
 
 /** Segments égaux ; l'actif prend la couleur du contenu (Rooms rouge, Événements bleu…). */
 export function Segmented({
@@ -55,6 +55,7 @@ function Segment({
         borderColor: colors.ink,
         borderRadius: radius.sm,
         backgroundColor: active ? color : hovered ? colors.hover : colors.white,
+        ...transition(['background-color']),
       }}
     >
       <Text

@@ -22,13 +22,21 @@ import {
   Typography,
 } from '../atoms'
 import {
+  AvatarStack,
   Banner,
+  Brand,
   ChatBubble,
+  ChipGroup,
   ContentCard,
   EmptyState,
+  EventCard,
   KwoteBadge,
+  ListCard,
   ListRow,
+  PageTitle,
   Pagination,
+  ProfileCard,
+  RoomCard,
   RoomStatusTimeline,
   ScreenHeader,
   Segmented,
@@ -37,7 +45,9 @@ import {
   StatCard,
   Stepper,
   TextField,
+  Section as TitledSection,
   Toast,
+  VenueRow,
   XpBar,
 } from '../molecules'
 import {
@@ -82,6 +92,7 @@ const statusLabel: Record<string, string> = { ok: 'Ouvert', warn: 'Complet', inf
 /** Vitrine de tous les composants, utilisée par les routes /design-system du web et du mobile. */
 export function Catalogue() {
   const [seg, setSeg] = useState(0)
+  const [game, setGame] = useState<string | null>(null)
   const [chip, setChip] = useState(true)
   const [toggle, setToggle] = useState(true)
   const [check, setCheck] = useState(true)
@@ -223,6 +234,82 @@ export function Catalogue() {
           action={<Button label="Créer une room" small />}
         />
         <SkeletonCard />
+        <Brand />
+        <PageTitle eyebrow="Samedi 3 octobre · Bordeaux" title="Ce soir près de toi" />
+        <ChipGroup
+          items={[
+            { key: null, label: 'Tous' },
+            { key: 'magic', label: 'Magic' },
+            { key: 'pokemon', label: 'Pokémon' },
+          ]}
+          value={game}
+          onChange={setGame}
+        />
+        <TitledSection title="Soirées ce soir" link="Tout le programme" onLink={() => {}}>
+          <EventCard
+            wide
+            raised
+            day="03"
+            time="19H30"
+            label="Soirée jeux · Magic"
+            title="Soirée Commander"
+            meta="Le Dé Fêlé · 1,2 km"
+            places="4 places sur 12"
+            partner
+            action={<Button small label="S'inscrire" />}
+          />
+          <EventCard
+            day="03"
+            time="20H"
+            label="Tournoi · Pokémon"
+            title="Tournoi Standard"
+            meta="Carte Blanche · 800 m"
+            places="2 places sur 16"
+            onPress={() => {}}
+          />
+        </TitledSection>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
+          <View style={{ width: 300 }}>
+            <RoomCard
+              wide
+              label="Partie classée · Pokémon"
+              title="Il manque 2 joueurs"
+              meta="Le Dé Fêlé · 21 h"
+              players={['M', 'S']}
+              capacity={4}
+              kwote="1 180 – 1 260"
+              onPress={() => {}}
+            />
+          </View>
+          <View style={{ width: 300 }}>
+            <ProfileCard
+              pseudo="Léa"
+              format="Commander"
+              kwote="1 214"
+              xp={{ level: 4, name: 'Pilier de table', current: 340, max: 500 }}
+            />
+          </View>
+        </View>
+        <AvatarStack names={['T', 'A', 'J']} />
+        <ListCard>
+          <VenueRow
+            inset={16}
+            name="Le Dé Fêlé"
+            subtitle="Bar à jeux · jusqu'à 1 h"
+            distance="1,2 km"
+            partner
+            perk="Droit de jeu offert avec Kwatro"
+            onPress={() => {}}
+          />
+          <VenueRow
+            inset={16}
+            last
+            name="Carte Blanche"
+            subtitle="Boutique TCG · jusqu'à 22 h"
+            distance="800 m"
+            onPress={() => {}}
+          />
+        </ListCard>
       </Section>
 
       <Section title="Organismes">
@@ -298,8 +385,9 @@ export function Catalogue() {
 
       <Section title="Templates">
         <Typography variant="small">
-          MobileScreen (écran mobile : en-tête, contenu, pied, onglets) et WebSidebarLayout (espace
-          lieu, admin) : voir packages/design-system/README.md.
+          MobileScreen (écran mobile : en-tête, contenu, pied, onglets), WebScreen (web à barre du
+          haut : accueil, connexion) et WebSidebarLayout (espace lieu, admin) : voir
+          packages/design-system/README.md.
         </Typography>
       </Section>
     </ScrollView>

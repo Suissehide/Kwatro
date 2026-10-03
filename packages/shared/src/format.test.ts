@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   formatDayMonth,
   formatDistance,
+  formatHour,
+  formatHourBand,
+  formatKwote,
   formatMinuteOfDay,
   formatPrice,
   formatTime,
@@ -31,5 +34,17 @@ describe('formats d’affichage', () => {
   it('heure de fermeture', () => {
     expect(formatMinuteOfDay(60)).toBe('1 h')
     expect(formatMinuteOfDay(19 * 60 + 30)).toBe('19 h 30')
+  })
+
+  it('heure', () => {
+    // 19:30 UTC = 21:30 à Paris en octobre (heure d'été)
+    expect(formatHour('2026-10-03T19:30:00Z')).toBe('21 h 30')
+    expect(formatHour('2026-10-03T19:00:00Z')).toBe('21 h')
+    expect(formatHourBand('2026-10-03T19:00:00Z')).toBe('21H')
+    expect(formatHourBand('2026-10-03T17:30:00Z')).toBe('19H30')
+  })
+
+  it('kwote', () => {
+    expect(formatKwote(1214).replace(/\s/g, ' ')).toBe('1 214')
   })
 })

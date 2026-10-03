@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import { useHover } from '../atoms/useHover'
-import { border, colors, font, sizes } from '../tokens'
+import { border, colors, font, sizes, transition } from '../tokens'
 
 /**
  * Ligne de liste. Avec `onPress` : cliquable, fond crème clair au survol.
@@ -43,7 +43,8 @@ export function ListRow({
         paddingHorizontal: inset,
         borderBottomWidth: last ? 0 : border.thin,
         borderColor: colors.line,
-        backgroundColor: onPress && hovered ? colors.hover : undefined,
+        backgroundColor: onPress && hovered ? colors.hover : 'transparent',
+        ...transition(['background-color']),
       }}
     >
       {left}

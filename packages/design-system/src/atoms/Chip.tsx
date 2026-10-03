@@ -1,5 +1,5 @@
 import { Pressable, Text } from 'react-native'
-import { border, colors, font, radius, textOn } from '../tokens'
+import { border, colors, font, radius, textOn, transition } from '../tokens'
 import { useHover } from './useHover'
 
 /** Pastille de filtre ; active = fond kwote (ou `color`), survol = fond crème clair. */
@@ -28,6 +28,7 @@ export function Chip({
         paddingVertical: 5,
         paddingHorizontal: 11,
         backgroundColor: active ? color : hovered ? colors.hover : colors.white,
+        ...transition(['background-color']),
       }}
     >
       <Text

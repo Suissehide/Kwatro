@@ -1,167 +1,74 @@
 import {
   Avatar,
   Banner,
+  BrandHeader,
   Button,
   border,
-  Chip,
-  ContentCard,
+  Carousel,
+  ChipGroup,
   colors,
-  DateBlock,
   EmptyState,
-  font,
+  EventCard,
   KwoteBadge,
-  ListRow,
-  Logo,
+  ListCard,
   MobileScreen,
-  type PlayerTab,
+  PageTitle,
   PlayerTabBar,
+  ProfileCard,
   playerItems,
-  Raised,
+  RoomCard,
   radius,
+  Section,
   SkeletonCard,
-  shadow,
   sizes,
-  space,
-  Tag,
-  TextLink,
   TopNav,
   Typography,
-  XpBar,
+  VenueRow,
+  WebScreen,
 } from '@kwatro/design-system'
-import {
-  EVENT_TYPE_LABELS,
-  type EventListItem,
-  formatDayMonth,
-  formatDistance,
-  formatMinuteOfDay,
-  formatTime,
-  type Me,
-  type RoomListItem,
-  VENUE_TIME_ZONE,
-  VENUE_TYPE_LABELS,
-  type VenueListItem,
-  xpLevel,
-} from '@kwatro/shared'
-import { router } from 'expo-router'
-import { type ReactNode, useEffect, useState } from 'react'
-import { ScrollView, Text, useWindowDimensions, View } from 'react-native'
+import { formatKwote, xpLevel } from '@kwatro/shared'
+import { useState } from 'react'
+import { useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { api } from '@/lib/api'
-import { useLocation } from '@/lib/useLocation'
-
-// ponytail: fiches événement, room et lieu, inscription, création de room et pages Mes parties, Messages
-// et Profil pas encore faites : leurs boutons et liens passent par `notYet` en attendant.
-const notYet = () => {}
-
-/** Page de chaque onglet joueur (TopNav desktop, PlayerTabBar téléphone) ; seules les pages existantes y sont. */
-const TAB_ROUTES: Partial<Record<PlayerTab, '/'>> = { explorer: '/' }
-const goTo = (tab: string) => {
-  const route = TAB_ROUTES[tab as PlayerTab]
-  if (route) router.navigate(route)
-}
+import {
+  eventCardProps,
+  GAMES,
+  matchesGame,
+  roomCardProps,
+  todayLine,
+  venueRowProps,
+} from '@/lib/explore'
+import { notYet, openTab } from '@/lib/navigation'
+import { useMe } from '@/lib/useMe'
+import { useTonight } from '@/lib/useTonight'
 
 /** Largeur à partir de laquelle l'écran passe en mise en page desktop (même seuil que auth.tsx). */
 const WIDE = 900
-const RADIUS_KM = 10
-
-/** Filtres par jeu : slug du catalogue (seed) et nom court affiché. */
-const GAMES: { slug: string | null; label: string }[] = [
-  { slug: null, label: 'Tous' },
-  { slug: 'magic', label: 'Magic' },
-  { slug: 'pokemon', label: 'Pokémon' },
-  { slug: 'lorcana', label: 'Lorcana' },
-  { slug: 'one-piece', label: 'One Piece' },
-  { slug: 'yugioh', label: 'Yu-Gi-Oh!' },
-  { slug: 'jeux-de-societe', label: 'Jeux de société' },
-]
-const PLAYER_COLORS = [colors.event, colors.venue, colors.room, colors.kwote]
-
-type Data = { events: EventListItem[]; rooms: RoomListItem[]; venues: VenueListItem[] }
-
-const gameLabel = (game: { slug: string; name: string }) =>
-  GAMES.find((g) => g.slug === game.slug)?.label ?? game.name
-
-/** Date locale du lieu, « 2026-10-03 » : sert à garder les soirées du jour. */
-const localDay = (date: Date | string) =>
-  new Intl.DateTimeFormat('en-CA', { timeZone: VENUE_TIME_ZONE }).format(new Date(date))
-
-/** « 21 h », « 20 h 30 » et, pour le bandeau du DateBlock, « 21H », « 20H30 ». */
-function hours(date: string) {
-  const [h = 0, m = 0] = formatTime(date).split(':').map(Number)
-  return {
-    text: formatMinuteOfDay(h * 60 + m),
-    band: `${h}H${m ? String(m).padStart(2, '0') : ''}`,
-  }
-}
 
 /** Accueil joueur (onglet Explorer) : soirées ce soir, rooms qui cherchent des joueurs, lieux ouverts. */
 export default function HomeScreen() {
   const wide = useWindowDimensions().width >= WIDE
   const insets = useSafeAreaInsets()
-  const { place, ready } = useLocation()
-  const [me, setMe] = useState<Me | null>(null)
-  const [data, setData] = useState<Data | null>(null)
-  const [failed, setFailed] = useState(false)
-  const [reload, setReload] = useState(0)
+  const me = useMe()
+  const { place, data, failed, retry } = useTonight()
   const [game, setGame] = useState<string | null>(null)
 
-  useEffect(() => {
-    // Sans session (ou API sans DEV_AUTH_HEADER), l'écran s'affiche sans pseudo ni Kwote
-    api.GET('/me').then(
-      ({ data }) => setMe(data ?? null),
-      () => setMe(null),
-    )
-  }, [])
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `reload` relance volontairement le chargement
-  useEffect(() => {
-    if (!ready) return
-    let cancelled = false
-    const query = { lat: place.lat, lng: place.lng, radiusKm: RADIUS_KM, days: 1 }
-    setFailed(false)
-    Promise.all([
-      api.GET('/events', { params: { query } }),
-      api.GET('/rooms', { params: { query } }),
-      api.GET('/venues', { params: { query } }),
-    ])
-      .then(([events, rooms, venues]) => {
-        if (cancelled) return
-        if (!events.data || !rooms.data || !venues.data) throw new Error('Réponse invalide')
-        const today = localDay(new Date())
-        setData({
-          events: events.data.filter((e) => localDay(e.startsAt) === today),
-          rooms: rooms.data,
-          venues: venues.data.filter((v) => v.openNow),
-        })
-      })
-      .catch(() => !cancelled && setFailed(true))
-    return () => {
-      cancelled = true
-    }
-  }, [ready, place, reload])
-
-  const matches = (games: { slug: string }[]) =>
-    !game || games.length === 0 || games.some((g) => g.slug === game)
-  const events = data?.events.filter((e) => matches(e.games)) ?? []
-  const rooms = data?.rooms.filter((r) => matches([r.game])) ?? []
-  const date = new Intl.DateTimeFormat('fr-FR', {
-    timeZone: VENUE_TIME_ZONE,
-    weekday: 'long',
-    day: 'numeric',
-    month: wide ? 'long' : 'short',
-  }).format(new Date())
-  const dateLine = `${date.charAt(0).toUpperCase()}${date.slice(1)} · ${me?.city ?? place.label}`
-
-  const chips = GAMES.map((g) => (
-    <Chip key={g.label} label={g.label} active={g.slug === game} onPress={() => setGame(g.slug)} />
-  ))
-
+  const events = data?.events.filter((e) => matchesGame(game, e.games)) ?? []
+  const rooms = data?.rooms.filter((r) => matchesGame(game, [r.game])) ?? []
+  const title = (
+    <PageTitle
+      eyebrow={todayLine(me?.city ?? place.label, !wide)}
+      title="Ce soir près de toi"
+      hero={wide}
+    />
+  )
+  const filters = <ChipGroup items={GAMES} value={game} onChange={setGame} scroll={!wide} />
   const error = failed ? (
     <Banner
       tone="err"
       message="Impossible de charger les soirées et les lieux."
       action="Réessayer"
-      onAction={() => setReload((n) => n + 1)}
+      onAction={retry}
     />
   ) : null
 
@@ -178,22 +85,59 @@ export default function HomeScreen() {
       }
     />
   ) : (
-    events.map((e, i) => <EventCard key={e.id} event={e} raised={i === 0} wide={wide} />)
+    events.map((e, i) => (
+      <EventCard
+        key={e.id}
+        {...eventCardProps(e)}
+        wide={wide}
+        raised={i === 0}
+        onPress={notYet}
+        action={
+          e.registrationMode === 'NONE' ? (
+            <Button small kind="ghost" label="Voir" onPress={notYet} />
+          ) : (
+            <Button small label="S'inscrire" onPress={notYet} />
+          )
+        }
+      />
+    ))
   )
 
-  const roomCards = rooms.map((r) => <RoomCard key={r.id} room={r} wide={wide} />)
+  const roomCards = rooms.map((r) => (
+    <View key={r.id} style={wide ? { width: '48%', flexGrow: 1, maxWidth: '50%' } : { width: 250 }}>
+      <RoomCard {...roomCardProps(r)} wide={wide} onPress={notYet} />
+    </View>
+  ))
   const roomList = !data ? (
     <SkeletonCard />
   ) : rooms.length === 0 ? (
     <Typography variant="small">Aucune room ne cherche de joueurs pour l'instant.</Typography>
-  ) : null
+  ) : wide ? (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>{roomCards}</View>
+  ) : (
+    <Carousel>{roomCards}</Carousel>
+  )
 
   const venueList = !data ? (
     <SkeletonCard />
   ) : data.venues.length === 0 ? (
     <Typography variant="small">Aucun lieu ouvert en ce moment autour de toi.</Typography>
   ) : (
-    <VenueList venues={data.venues} wide={wide} />
+    <ListCard>
+      {data.venues.map((v, i) => {
+        const props = venueRowProps(v)
+        return (
+          <VenueRow
+            key={v.id}
+            {...props}
+            perk={wide ? props.perk : null}
+            inset={wide ? 16 : 14}
+            last={i === data.venues.length - 1}
+            onPress={notYet}
+          />
+        )
+      })}
+    </ListCard>
   )
 
   if (!wide) {
@@ -201,400 +145,92 @@ export default function HomeScreen() {
       <MobileScreen
         insets={insets}
         header={
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 10,
-              paddingHorizontal: space.screen,
-              paddingTop: 6,
-              paddingBottom: 12,
-            }}
-          >
-            <Logo size={28} />
-            <Text
-              style={{
-                ...font('display'),
-                fontSize: 20,
-                textTransform: 'uppercase',
-                color: colors.ink,
-              }}
-            >
-              Kwatro
-            </Text>
-            <View style={{ flex: 1 }} />
-            {me?.mainKwote ? <KwoteBadge value={kwote(me.mainKwote.kwote)} /> : null}
-          </View>
+          <BrandHeader
+            right={
+              me?.mainKwote ? <KwoteBadge value={formatKwote(me.mainKwote.kwote)} /> : undefined
+            }
+          />
         }
         tabBar={
           <PlayerTabBar
             active="explorer"
-            onSelect={goTo}
+            onSelect={openTab}
             onCreate={notYet}
             bottomInset={Math.max(22, insets.bottom)}
           />
         }
       >
-        <View style={{ gap: 6, paddingTop: 8 }}>
-          <Typography variant="label">{dateLine}</Typography>
-          <Typography variant="h1">Ce soir près de toi</Typography>
-        </View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={{ marginHorizontal: -space.screen, flexGrow: 0 }}
-          contentContainerStyle={{ gap: 8, paddingHorizontal: space.screen, paddingVertical: 2 }}
-        >
-          {chips}
-        </ScrollView>
+        {title}
+        {filters}
         {error}
-        <Typography variant="h2" style={{ marginTop: 8 }}>
-          Soirées ce soir
-        </Typography>
-        {eventList}
-        <Typography variant="h2" style={{ marginTop: 8 }}>
-          Il manque des joueurs
-        </Typography>
-        {roomList ?? (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={{ marginHorizontal: -space.screen, flexGrow: 0 }}
-            contentContainerStyle={{ gap: 12, paddingHorizontal: space.screen, paddingBottom: 6 }}
-          >
-            {roomCards}
-          </ScrollView>
-        )}
-        <Typography variant="h2" style={{ marginTop: 8 }}>
-          Lieux ouverts
-        </Typography>
-        {venueList}
+        <Section title="Soirées ce soir">{eventList}</Section>
+        <Section title="Il manque des joueurs">{roomList}</Section>
+        <Section title="Lieux ouverts">{venueList}</Section>
       </MobileScreen>
     )
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.cream }}>
-      <TopNav
-        items={playerItems}
-        active="explorer"
-        onSelect={goTo}
-        right={
-          <>
-            <Button small kind="kwote" label="+ Créer une room" onPress={notYet} />
-            {me ? (
-              <View style={{ marginLeft: 8 }}>
-                <Avatar name={me.pseudo} size={sizes.avatar.s} />
-              </View>
-            ) : null}
-          </>
-        }
-      />
-      <ScrollView>
-        <View
-          style={{
-            width: '100%',
-            maxWidth: 1200,
-            alignSelf: 'center',
-            paddingHorizontal: 32,
-            paddingTop: 48,
-            paddingBottom: 72,
-            gap: 32,
-          }}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 72 }}>
-            <View style={{ flex: 1, minWidth: 0, gap: 12 }}>
-              <Typography variant="label">{dateLine}</Typography>
-              <Text
-                role="heading"
-                style={{
-                  ...font('display'),
-                  fontSize: 56,
-                  lineHeight: 55,
-                  textTransform: 'uppercase',
-                  color: colors.ink,
-                  maxWidth: 640,
-                }}
-              >
-                Ce soir près de toi
-              </Text>
-            </View>
-            {me ? <ProfileCard me={me} /> : null}
-          </View>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>{chips}</View>
-          {error}
-          <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 40 }}>
-            <View style={{ flex: 7, minWidth: 0, gap: 40 }}>
-              <Section title="Soirées ce soir" link="Tout le programme">
-                {eventList}
-              </Section>
-              <Section title="Il manque des joueurs" link="Voir les rooms">
-                {roomList ?? (
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
-                    {roomCards.map((card) => (
-                      <View key={card.key} style={{ width: '48%', flexGrow: 1, maxWidth: '50%' }}>
-                        {card}
-                      </View>
-                    ))}
-                  </View>
-                )}
-              </Section>
-            </View>
-            <View style={{ flex: 5, minWidth: 0 }}>
-              <Section title="Lieux ouverts" link="Carte">
-                {/* ponytail: carte des lieux à brancher plus tard, encart vide en attendant */}
-                <View
-                  aria-label="Carte des lieux, bientôt disponible"
-                  style={{
-                    height: 280,
-                    borderWidth: border.base,
-                    borderColor: colors.ink,
-                    borderRadius: radius.card,
-                    backgroundColor: colors.creamDark,
-                  }}
-                />
-                {venueList}
-              </Section>
-            </View>
-          </View>
-        </View>
-      </ScrollView>
-    </View>
-  )
-}
-
-/** Kwote avec séparateur de milliers : « 1 214 ». */
-const kwote = (value: number) => value.toLocaleString('fr-FR')
-
-/** Carte profil (desktop) : pseudo, Kwote du format principal et niveau d'XP. */
-function ProfileCard({ me }: { me: Me }) {
-  const xp = xpLevel(me.xp)
-  return (
-    <Raised offset={shadow.card} r={radius.card} style={{ width: 380 }}>
-      <View
-        style={{
-          backgroundColor: colors.white,
-          borderWidth: border.base,
-          borderColor: colors.ink,
-          borderRadius: radius.card,
-          paddingVertical: 16,
-          paddingHorizontal: 18,
-          gap: 14,
-        }}
-      >
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 8,
-          }}
-        >
-          <Typography variant="title">{me.pseudo}</Typography>
-          {me.mainKwote ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Typography variant="small">{me.mainKwote.format}</Typography>
-              <KwoteBadge value={kwote(me.mainKwote.kwote)} />
-            </View>
-          ) : null}
-        </View>
-        <XpBar level={xp.level} name={xp.name} current={xp.current} max={xp.max} />
-      </View>
-    </Raised>
-  )
-}
-
-/** En-tête de section desktop : titre et lien à droite. */
-function Section({ title, link, children }: { title: string; link: string; children: ReactNode }) {
-  return (
-    <View style={{ gap: 14 }}>
-      <View
-        style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}
-      >
-        <Typography variant="h2">{title}</Typography>
-        <TextLink label={link} onPress={notYet} />
-      </View>
-      {children}
-    </View>
-  )
-}
-
-/** Places restantes, ou mode d'inscription quand il n'y a pas de jauge. */
-function spots(event: EventListItem) {
-  if (event.registrationMode === 'NONE') return 'Accès libre'
-  if (event.registrationMode === 'EXTERNAL') return 'Inscription externe'
-  if (event.capacity === null) return null
-  const left = Math.max(0, event.capacity - event.registeredCount)
-  return left ? `${left} place${left > 1 ? 's' : ''} sur ${event.capacity}` : 'Complet'
-}
-
-/** Soirée du jour. Desktop : bouton S'inscrire / Voir ; téléphone : la carte entière ouvre le détail. */
-function EventCard({
-  event,
-  raised,
-  wide,
-}: {
-  event: EventListItem
-  raised: boolean
-  wide: boolean
-}) {
-  const games = event.games.length ? event.games.map(gameLabel).join(', ') : 'Tous jeux'
-  const where = [event.venue.name, formatDistance(event.venue.distanceMeters)]
-  const places = spots(event)
-  const partner = event.venue.isPartner ? <Tag label="Partenaire" variant="partner" /> : null
-  return (
-    <ContentCard
-      kind="event"
-      raised={raised}
-      // Téléphone : la carte entière ouvre le détail ; desktop : les boutons
-      onPress={wide ? undefined : notYet}
-      label={event.title}
-    >
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: wide ? 'center' : 'flex-start',
-          gap: wide ? 16 : 12,
-        }}
-      >
-        <DateBlock day={formatDayMonth(event.startsAt).day} month={hours(event.startsAt).band} />
-        <View style={{ flex: 1, minWidth: 0, gap: 6 }}>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
-            <Typography variant="label">
-              {EVENT_TYPE_LABELS[event.type]} · {games}
-            </Typography>
-            {wide ? partner : null}
-          </View>
-          <Typography variant="title">{event.title}</Typography>
-          <Typography variant="small">
-            {(wide && places ? [...where, places] : where).join(' · ')}
-          </Typography>
-          {wide ? null : (
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginTop: 2,
-              }}
-            >
-              <Text style={{ ...font('mono', 700), fontSize: 12, color: colors.ink }}>
-                {places}
-              </Text>
-              {partner}
-            </View>
-          )}
-        </View>
-        {wide ? (
-          event.registrationMode === 'NONE' ? (
-            <Button small kind="ghost" label="Voir" onPress={notYet} />
-          ) : (
-            <Button small label="S'inscrire" onPress={notYet} />
-          )
-        ) : null}
-      </View>
-    </ContentCard>
-  )
-}
-
-/** Room ouverte : places prises, joueurs (desktop) et fourchette de Kwote des parties classées. */
-function RoomCard({ room, wide }: { room: RoomListItem; wide: boolean }) {
-  const missing = Math.max(0, room.capacity - room.players.length)
-  const count = (
-    <Text style={{ ...font('mono', 700), fontSize: 12, color: colors.ink }}>
-      {room.players.length}/{room.capacity}
-    </Text>
-  )
-  const card = (
-    <ContentCard kind="room" onPress={notYet} label={`Room ${gameLabel(room.game)}`}>
-      <Typography variant="label">
-        {room.mode === 'RANKED' ? 'Partie classée' : 'Partie libre'} · {gameLabel(room.game)}
-      </Typography>
-      <Typography variant="title">
-        {missing ? `Il manque ${missing} joueur${missing > 1 ? 's' : ''}` : 'Room complète'}
-      </Typography>
-      <Typography variant="small">
-        {room.venue.name} · {hours(room.startsAt).text}
-      </Typography>
-      {wide ? (
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginTop: 4,
-          }}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <View style={{ flexDirection: 'row' }}>
-              {room.players.map((p, i) => (
-                // biome-ignore lint/suspicious/noArrayIndexKey: initiales seules, pas d'identifiant public
-                <View key={i} style={{ marginRight: -6 }}>
-                  <Avatar
-                    name={p.initial}
-                    color={PLAYER_COLORS[i % PLAYER_COLORS.length]}
-                    size={28}
-                  />
-                </View>
-              ))}
-            </View>
-            <View style={{ marginLeft: 6 }}>{count}</View>
-          </View>
-          {room.kwoteRange ? (
-            <KwoteBadge value={`${kwote(room.kwoteRange.min)} – ${kwote(room.kwoteRange.max)}`} />
-          ) : null}
-        </View>
-      ) : (
-        count
-      )}
-    </ContentCard>
-  )
-  return wide ? card : <View style={{ width: 250 }}>{card}</View>
-}
-
-/** Lieux ouverts, dans l'ordre de l'API (distance, partenaires en premier à distance égale). */
-function VenueList({ venues, wide }: { venues: VenueListItem[]; wide: boolean }) {
-  return (
-    <View
-      style={{
-        backgroundColor: colors.white,
-        borderWidth: border.base,
-        borderColor: colors.ink,
-        borderRadius: radius.card,
-        overflow: 'hidden',
-      }}
-    >
-      {venues.map((v, i) => (
-        <ListRow
-          key={v.id}
-          inset={wide ? 16 : 14}
-          last={i === venues.length - 1}
-          onPress={notYet}
-          left={
-            <View
-              aria-label={v.isPartner ? 'Lieu partenaire' : undefined}
-              style={{
-                width: 12,
-                height: 12,
-                borderRadius: 6,
-                borderWidth: border.thin,
-                borderColor: colors.ink,
-                backgroundColor: v.isPartner ? colors.venue : colors.white,
-              }}
-            />
-          }
-          title={v.name}
-          subtitle={`${VENUE_TYPE_LABELS[v.type]}${
-            v.closesAtMinute !== null ? ` · jusqu'à ${formatMinuteOfDay(v.closesAtMinute)}` : ''
-          }`}
-          note={wide && v.isPartner ? (v.kwatroPerk ?? undefined) : undefined}
+    <WebScreen
+      nav={
+        <TopNav
+          items={playerItems}
+          active="explorer"
+          onSelect={openTab}
           right={
-            <Text style={{ ...font('mono', 700), fontSize: 13, color: colors.ink }}>
-              {formatDistance(v.distanceMeters)}
-            </Text>
+            <>
+              <Button small kind="kwote" label="+ Créer une room" onPress={notYet} />
+              {me ? (
+                <View style={{ marginLeft: 8 }}>
+                  <Avatar name={me.pseudo} size={sizes.avatar.s} />
+                </View>
+              ) : null}
+            </>
           }
         />
-      ))}
-    </View>
+      }
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 72 }}>
+        <View style={{ flex: 1, minWidth: 0 }}>{title}</View>
+        {me ? (
+          <View style={{ width: 380 }}>
+            <ProfileCard
+              pseudo={me.pseudo}
+              format={me.mainKwote?.format}
+              kwote={me.mainKwote ? formatKwote(me.mainKwote.kwote) : undefined}
+              xp={xpLevel(me.xp)}
+            />
+          </View>
+        ) : null}
+      </View>
+      {filters}
+      {error}
+      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 40 }}>
+        <View style={{ flex: 7, minWidth: 0, gap: 40 }}>
+          <Section title="Soirées ce soir" link="Tout le programme" onLink={notYet}>
+            {eventList}
+          </Section>
+          <Section title="Il manque des joueurs" link="Voir les rooms" onLink={notYet}>
+            {roomList}
+          </Section>
+        </View>
+        <View style={{ flex: 5, minWidth: 0 }}>
+          <Section title="Lieux ouverts" link="Carte" onLink={notYet}>
+            {/* ponytail: carte des lieux à brancher plus tard, encart vide en attendant */}
+            <View
+              aria-label="Carte des lieux, bientôt disponible"
+              style={{
+                height: 280,
+                borderWidth: border.base,
+                borderColor: colors.ink,
+                borderRadius: radius.card,
+                backgroundColor: colors.creamDark,
+              }}
+            />
+            {venueList}
+          </Section>
+        </View>
+      </View>
+    </WebScreen>
   )
 }

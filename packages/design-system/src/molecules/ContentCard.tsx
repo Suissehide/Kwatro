@@ -2,7 +2,15 @@ import type { ReactNode } from 'react'
 import { Pressable, View } from 'react-native'
 import { Raised } from '../atoms/Raised'
 import { useHover } from '../atoms/useHover'
-import { border, type ContentKind, colors, contentColor, radius, shadow } from '../tokens'
+import {
+  border,
+  type ContentKind,
+  colors,
+  contentColor,
+  radius,
+  shadow,
+  transition,
+} from '../tokens'
 
 /**
  * Carte de contenu avec bandeau de 8 px à la couleur du type ; `raised` pour la carte en tête de liste.
@@ -27,6 +35,7 @@ export function ContentCard({
     <View
       style={{
         backgroundColor: onPress && hovered ? colors.hover : colors.white,
+        ...transition(['background-color']),
         borderWidth: border.base,
         borderColor: colors.ink,
         borderRadius: radius.card,

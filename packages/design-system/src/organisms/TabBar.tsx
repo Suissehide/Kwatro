@@ -1,7 +1,7 @@
 import { Pressable, Text, View } from 'react-native'
 import { Raised } from '../atoms/Raised'
 import { useHover } from '../atoms/useHover'
-import { border, colors, font, shadow } from '../tokens'
+import { border, colors, font, motion, shadow, transition } from '../tokens'
 
 export type PlayerTab = 'explorer' | 'parties' | 'messages' | 'profil'
 export type VenueTab = 'ce-soir' | 'scanner' | 'evenements' | 'lieu'
@@ -54,6 +54,7 @@ function Tab<K extends string>({
           backgroundColor: active ? activeColor : 'transparent',
           borderWidth: border.thin,
           borderColor: strong ? colors.ink : colors.muted,
+          ...transition(['border-color', 'background-color']),
         }}
       />
       <Text
@@ -61,6 +62,7 @@ function Tab<K extends string>({
           ...font('body', active ? 800 : 600),
           fontSize: 11,
           color: strong ? colors.ink : colors.muted,
+          ...transition(['color']),
         }}
       >
         {item.label}
@@ -125,6 +127,7 @@ export function PlayerTabBar({
                 alignItems: 'center',
                 justifyContent: 'center',
                 transform: create.hovered ? [{ translateX: -1 }, { translateY: -1 }] : [],
+                ...transition(['transform'], motion.fast),
               }}
             >
               <Text style={{ ...font('display'), fontSize: 28, color: colors.ink }}>+</Text>

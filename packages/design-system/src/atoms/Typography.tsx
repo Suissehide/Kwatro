@@ -4,7 +4,7 @@ import { colors, type } from '../tokens'
 
 export type TypographyVariant = keyof typeof type
 
-/** Texte aux styles du design system : display, h1, h2, title, body, small, button, label, number. */
+/** Texte aux styles du design system : display, hero, h1, h2, title, body, small, button, label, number. */
 export function Typography({
   variant = 'body',
   color,
@@ -17,7 +17,7 @@ export function Typography({
   style?: StyleProp<TextStyle>
   children: ReactNode
 } & Omit<TextProps, 'style'>) {
-  const isHeading = variant === 'display' || variant === 'h1' || variant === 'h2'
+  const isHeading = ['display', 'hero', 'h1', 'h2'].includes(variant)
   return (
     <Text
       role={isHeading ? 'heading' : undefined}

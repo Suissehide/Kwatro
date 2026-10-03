@@ -3,7 +3,7 @@ import { Pressable, Text, View } from 'react-native'
 import { Raised } from '../atoms/Raised'
 import { Typography } from '../atoms/Typography'
 import { useHover } from '../atoms/useHover'
-import { border, colors, font, grid, radius, shadow, textOn } from '../tokens'
+import { border, colors, font, grid, radius, shadow, textOn, transition } from '../tokens'
 
 export type SidebarItem = {
   key: string
@@ -90,6 +90,7 @@ function SidebarLink({
         borderWidth: border.thin,
         borderColor: on ? colors.ink : 'transparent',
         backgroundColor: on ? color : hovered && !it.later ? colors.hover : 'transparent',
+        ...transition(['background-color']),
       }}
     >
       <Text

@@ -2,7 +2,7 @@ import { Pressable, Text, View } from 'react-native'
 import { IconButton } from '../atoms/IconButton'
 import { Typography } from '../atoms/Typography'
 import { useHover } from '../atoms/useHover'
-import { border, colors, font } from '../tokens'
+import { border, colors, font, transition } from '../tokens'
 
 import { pageList } from './pageList'
 
@@ -86,6 +86,7 @@ function PageButton({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: current ? colors.ink : hovered && p !== '…' ? colors.hover : colors.white,
+        ...transition(['background-color']),
       }}
     >
       <Text style={[mono, { color: current ? colors.white : colors.ink }]}>{p}</Text>

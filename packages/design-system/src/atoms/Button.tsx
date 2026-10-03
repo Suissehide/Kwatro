@@ -1,5 +1,5 @@
 import { Pressable, Text, View } from 'react-native'
-import { border, colors, font, onColor, radius, shadow } from '../tokens'
+import { border, colors, font, motion, onColor, radius, shadow, transition } from '../tokens'
 import { Raised } from './Raised'
 import { useHover } from './useHover'
 
@@ -67,6 +67,7 @@ export function Button({
               minHeight: small ? 36 : 52,
               alignItems: 'center',
               justifyContent: 'center',
+              ...transition(['transform', 'background-color'], motion.fast),
               transform:
                 pressed && kind !== 'ghost'
                   ? [{ translateX: off }, { translateY: off }]

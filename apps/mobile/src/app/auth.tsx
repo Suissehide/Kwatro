@@ -14,6 +14,7 @@ import {
   TextField,
   TopNav,
   Typography,
+  WebScreen,
 } from '@kwatro/design-system'
 import {
   type AgeRegime,
@@ -26,7 +27,7 @@ import {
 } from '@kwatro/shared'
 import { router } from 'expo-router'
 import { createContext, type ReactNode, useContext, useRef, useState } from 'react'
-import { ScrollView, Text, type TextInput, useWindowDimensions, View } from 'react-native'
+import { Text, type TextInput, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { TableScene } from '@/components/TableScene'
 
@@ -122,41 +123,20 @@ export default function AuthScreen() {
 /** Navigateur desktop : barre du site (favicon + Kwatro), accroche et pièces 3D à gauche, étape à droite. */
 function WideLayout({ children }: { children: ReactNode }) {
   return (
-    <View style={{ flex: 1, backgroundColor: colors.cream }}>
-      <TopNav />
-      <ScrollView
-        contentContainerStyle={{
-          flexGrow: 1,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 72,
-          width: '100%',
-          maxWidth: 1200,
-          alignSelf: 'center',
-          paddingHorizontal: 32,
-          paddingVertical: 48,
-        }}
-      >
-        <View style={{ flex: 1, minWidth: 0 }}>
-          <Text
-            style={{
-              ...font('display'),
-              fontSize: 56,
-              lineHeight: 55,
-              textTransform: 'uppercase',
-              color: colors.ink,
-              maxWidth: 560,
-            }}
-          >
-            Trouve où jouer ce soir et avec qui.
-          </Text>
-          <View style={{ height: 300, marginTop: 56 }}>
-            <TableScene />
-          </View>
+    <WebScreen
+      nav={<TopNav />}
+      contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 72, paddingBottom: 48 }}
+    >
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <Typography variant="hero" style={{ maxWidth: 560 }}>
+          Trouve où jouer ce soir et avec qui.
+        </Typography>
+        <View style={{ height: 300, marginTop: 56 }}>
+          <TableScene />
         </View>
-        <View style={{ width: 440 }}>{children}</View>
-      </ScrollView>
-    </View>
+      </View>
+      <View style={{ width: 440 }}>{children}</View>
+    </WebScreen>
   )
 }
 

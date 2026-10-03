@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Pressable, View } from 'react-native'
-import { border, colors, shadow, sizes } from '../tokens'
+import { border, colors, motion, shadow, sizes, transition } from '../tokens'
 import { Raised } from './Raised'
 import { useHover } from './useHover'
 
@@ -33,6 +33,7 @@ export function IconButton({
         alignItems: 'center',
         justifyContent: 'center',
         transform: !plain && hovered ? [{ translateX: -1 }, { translateY: -1 }] : [],
+        ...transition(['transform', 'background-color'], motion.fast),
       }}
     >
       {icon}
