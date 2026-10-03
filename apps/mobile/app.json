@@ -18,7 +18,16 @@
       "output": "single",
       "lang": "fr"
     },
-    "plugins": ["expo-router", "expo-font"],
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Kwatro utilise ta position pour te montrer les lieux et les soirées de jeu autour de toi."
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
     }

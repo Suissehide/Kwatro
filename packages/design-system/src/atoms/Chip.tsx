@@ -1,5 +1,6 @@
 import { Pressable, Text } from 'react-native'
-import { border, colors, font, radius, textOn } from '../tokens'
+import { border, colors, font, radius, textOn, transition } from '../tokens'
+import { useHover } from './useHover'
 
 /** Pastille de filtre ; active = fond kwote (ou `color`). */
 export function Chip({
@@ -13,18 +14,21 @@ export function Chip({
   color?: string
   onPress?: () => void
 }) {
+  const { hovered, hoverProps } = useHover()
   return (
     <Pressable
       role="button"
       aria-pressed={!!active}
       onPress={onPress}
+      {...hoverProps}
       style={{
         borderWidth: border.thin,
         borderColor: colors.ink,
         borderRadius: radius.pill,
         paddingVertical: 5,
         paddingHorizontal: 11,
-        backgroundColor: active ? color : colors.white,
+        backgroundColor: active ? color : hovered ? colors.hover : colors.white,
+        ...transition(['background-color']),
       }}
     >
       <Text

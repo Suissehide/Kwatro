@@ -6,6 +6,7 @@ node_modules/
 
 # Builds
 dist/
+.openapi/
 build/
 .next/
 out/

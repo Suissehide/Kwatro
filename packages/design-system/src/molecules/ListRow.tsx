@@ -1,35 +1,45 @@
 import type { ReactNode } from 'react'
 import { Pressable, Text, View } from 'react-native'
-import { border, colors, font, sizes } from '../tokens'
+import { useHover } from '../atoms/useHover'
+import { border, colors, font, sizes, transition } from '../tokens'
 
 export function ListRow({
   left,
   title,
   subtitle,
+  note,
   right,
   last,
+  inset = 0,
   onPress,
 }: {
   left?: ReactNode
   title: string
   subtitle?: string
+  note?: string
   right?: ReactNode
   last?: boolean
+  inset?: number
   onPress?: () => void
 }) {
+  const { hovered, hoverProps } = useHover()
   return (
     <Pressable
       onPress={onPress}
       disabled={!onPress}
       role={onPress ? 'button' : undefined}
+      {...hoverProps}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
         minHeight: sizes.rowComfort,
         paddingVertical: 10,
+        paddingHorizontal: inset,
         borderBottomWidth: last ? 0 : border.thin,
         borderColor: colors.line,
+        backgroundColor: onPress && hovered ? colors.hover : 'transparent',
+        ...transition(['background-color']),
       }}
     >
       {left}
@@ -43,6 +53,11 @@ export function ListRow({
             style={{ ...font('body', 400), fontSize: 13, color: colors.muted }}
           >
             {subtitle}
+          </Text>
+        ) : null}
+        {note ? (
+          <Text style={{ ...font('body', 600), fontSize: 13, lineHeight: 18, color: colors.venue }}>
+            {note}
           </Text>
         ) : null}
       </View>

@@ -1,22 +1,37 @@
 import type { ReactNode } from 'react'
-import { View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import { Raised } from '../atoms/Raised'
-import { border, type ContentKind, colors, contentColor, radius, shadow } from '../tokens'
+import { useHover } from '../atoms/useHover'
+import {
+  border,
+  type ContentKind,
+  colors,
+  contentColor,
+  radius,
+  shadow,
+  transition,
+} from '../tokens'
 
 /** Carte de contenu avec bandeau de 8 px à la couleur du type ; `raised` pour la carte en tête de liste. */
 export function ContentCard({
   kind,
   raised,
+  onPress,
+  label,
   children,
 }: {
   kind?: ContentKind
   raised?: boolean
+  onPress?: () => void
+  label?: string
   children: ReactNode
 }) {
+  const { hovered, hoverProps } = useHover()
   const inner = (
     <View
       style={{
-        backgroundColor: colors.white,
+        backgroundColor: onPress && hovered ? colors.hover : colors.white,
+        ...transition(['background-color']),
         borderWidth: border.base,
         borderColor: colors.ink,
         borderRadius: radius.card,
@@ -36,5 +51,12 @@ export function ContentCard({
       <View style={{ paddingVertical: 12, paddingHorizontal: 14, gap: 8 }}>{children}</View>
     </View>
   )
-  return raised ? <Raised offset={shadow.card}>{inner}</Raised> : inner
+  const card = raised ? <Raised offset={shadow.card}>{inner}</Raised> : inner
+  return onPress ? (
+    <Pressable role="link" aria-label={label} onPress={onPress} {...hoverProps}>
+      {card}
+    </Pressable>
+  ) : (
+    card
+  )
 }

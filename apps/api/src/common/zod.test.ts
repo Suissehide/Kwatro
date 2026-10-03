@@ -42,6 +42,7 @@ describe('schémas de réponse', () => {
       role: 'PLAYER',
       city: null,
       xp: 0,
+      mainKwote: null,
       birthDate: new Date('2010-01-01'),
     }
     expect(meSchema.parse(user)).not.toHaveProperty('birthDate')

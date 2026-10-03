@@ -1,6 +1,7 @@
 import { Pressable, Text, View } from 'react-native'
-import { border, colors, font, onColor, radius, shadow } from '../tokens'
+import { border, colors, font, motion, onColor, radius, shadow, transition } from '../tokens'
 import { Raised } from './Raised'
+import { useHover } from './useHover'
 
 export type ButtonKind = 'room' | 'event' | 'venue' | 'kwote' | 'ink' | 'ghost'
 const bg: Record<ButtonKind, string> = {
@@ -36,6 +37,8 @@ export function Button({
 }) {
   const off = small ? shadow.sm : shadow.md
   const r = small ? 9 : radius.button
+  const { hovered, hoverProps } = useHover()
+  const lifted = hovered && !disabled && kind !== 'ghost'
   return (
     <Pressable
       role="button"
@@ -43,6 +46,7 @@ export function Button({
       aria-disabled={disabled}
       onPress={onPress}
       disabled={disabled}
+      {...hoverProps}
       // Même arrondi que la face : l'anneau de focus clavier (web) suit le bouton au lieu d'un rectangle
       style={{ borderRadius: r }}
     >
@@ -50,7 +54,11 @@ export function Button({
         const face = (
           <View
             style={{
-              backgroundColor: disabled ? colors.disabledBg : bg[kind],
+              backgroundColor: disabled
+                ? colors.disabledBg
+                : kind === 'ghost' && hovered
+                  ? colors.hover
+                  : bg[kind],
               borderWidth: small ? border.thin : border.base,
               borderColor: disabled ? colors.disabledBorder : colors.ink,
               borderRadius: r,
@@ -59,8 +67,13 @@ export function Button({
               minHeight: small ? 36 : 52,
               alignItems: 'center',
               justifyContent: 'center',
+              ...transition(['transform', 'background-color'], motion.fast),
               transform:
-                pressed && kind !== 'ghost' ? [{ translateX: off }, { translateY: off }] : [],
+                pressed && kind !== 'ghost'
+                  ? [{ translateX: off }, { translateY: off }]
+                  : lifted
+                    ? [{ translateX: -1 }, { translateY: -1 }]
+                    : [],
             }}
           >
             <Text

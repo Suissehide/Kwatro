@@ -1,19 +1,20 @@
 import { Pressable, Text, View } from 'react-native'
 import { Raised } from '../atoms/Raised'
-import { border, colors, font, shadow } from '../tokens'
+import { useHover } from '../atoms/useHover'
+import { border, colors, font, motion, shadow, transition } from '../tokens'
 
 export type PlayerTab = 'explorer' | 'parties' | 'messages' | 'profil'
 export type VenueTab = 'ce-soir' | 'scanner' | 'evenements' | 'lieu'
 
 // ponytail: pictogrammes = formes des maquettes (rond / carré) ; passer à Phosphor « bold » quand le jeu d'icônes est choisi.
-type Item<K extends string> = { key: K; label: string; round: boolean }
-const playerItems: Item<PlayerTab>[] = [
+export type TabItem<K extends string> = { key: K; label: string; round: boolean }
+export const playerItems: TabItem<PlayerTab>[] = [
   { key: 'explorer', label: 'Explorer', round: true },
   { key: 'parties', label: 'Mes parties', round: false },
   { key: 'messages', label: 'Messages', round: false },
   { key: 'profil', label: 'Profil', round: true },
 ]
-const venueItems: Item<VenueTab>[] = [
+const venueItems: TabItem<VenueTab>[] = [
   { key: 'ce-soir', label: 'Ce soir', round: true },
   { key: 'scanner', label: 'Scanner', round: false },
   { key: 'evenements', label: 'Événements', round: true },
@@ -27,18 +28,21 @@ function Tab<K extends string>({
   bottomInset,
   onPress,
 }: {
-  item: Item<K>
+  item: TabItem<K>
   active: boolean
   activeColor: string
   bottomInset: number
   onPress: () => void
 }) {
+  const { hovered, hoverProps } = useHover()
+  const strong = active || hovered
   return (
     <Pressable
       role="tab"
       aria-selected={active}
       aria-label={item.label}
       onPress={onPress}
+      {...hoverProps}
       style={{ flex: 1, alignItems: 'center', gap: 4, paddingTop: 10, paddingBottom: bottomInset }}
     >
       <View
@@ -48,14 +52,16 @@ function Tab<K extends string>({
           borderRadius: item.round ? 11 : 4,
           backgroundColor: active ? activeColor : 'transparent',
           borderWidth: border.thin,
-          borderColor: active ? colors.ink : colors.muted,
+          borderColor: strong ? colors.ink : colors.muted,
+          ...transition(['border-color', 'background-color']),
         }}
       />
       <Text
         style={{
           ...font('body', active ? 800 : 600),
           fontSize: 11,
-          color: active ? colors.ink : colors.muted,
+          color: strong ? colors.ink : colors.muted,
+          ...transition(['color']),
         }}
       >
         {item.label}
@@ -83,7 +89,7 @@ export function PlayerTabBar({
   /** Marge basse (zone de sécurité de l'appareil). */
   bottomInset?: number
 }) {
-  const tab = (item: Item<PlayerTab>) => (
+  const tab = (item: TabItem<PlayerTab>) => (
     <Tab
       key={item.key}
       item={item}
@@ -93,6 +99,7 @@ export function PlayerTabBar({
       onPress={() => onSelect(item.key)}
     />
   )
+  const create = useHover()
   return (
     <View
       role="tablist"
@@ -104,6 +111,7 @@ export function PlayerTabBar({
           role="button"
           aria-label="Créer une room"
           onPress={onCreate}
+          {...create.hoverProps}
           style={{ marginTop: -20 }}
         >
           <Raised offset={shadow.sm} r={27}>
@@ -117,6 +125,8 @@ export function PlayerTabBar({
                 borderColor: colors.ink,
                 alignItems: 'center',
                 justifyContent: 'center',
+                transform: create.hovered ? [{ translateX: -1 }, { translateY: -1 }] : [],
+                ...transition(['transform'], motion.fast),
               }}
             >
               <Text style={{ ...font('display'), fontSize: 28, color: colors.ink }}>+</Text>

@@ -52,6 +52,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/venues": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ExploreController_venues"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ExploreController_events"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rooms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ExploreController_rooms"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/waitlist": {
         parameters: {
             query?: never;
@@ -158,7 +206,146 @@ export interface operations {
                         role: "PLAYER" | "VENUE_STAFF" | "ADMIN";
                         city: string | null;
                         xp: number;
+                        mainKwote: {
+                            game: string;
+                            format: string;
+                            kwote: number;
+                        } | null;
                     };
+                };
+            };
+        };
+    };
+    ExploreController_venues: {
+        parameters: {
+            query: {
+                lat: number;
+                lng: number;
+                radiusKm?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        slug: string;
+                        name: string;
+                        /** @enum {string} */
+                        type: "GAME_BAR" | "TCG_SHOP" | "LUDOTHEQUE" | "ASSOCIATION" | "OTHER";
+                        address: string;
+                        latitude: number;
+                        longitude: number;
+                        isPartner: boolean;
+                        kwatroPerk: string | null;
+                        distanceMeters: number;
+                        openNow: boolean | null;
+                        closesAtMinute: number | null;
+                        upcomingEventCount: number;
+                    }[];
+                };
+            };
+        };
+    };
+    ExploreController_events: {
+        parameters: {
+            query: {
+                lat: number;
+                lng: number;
+                radiusKm?: number;
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        title: string;
+                        /** @enum {string} */
+                        type: "GAME_NIGHT" | "INITIATION" | "TOURNAMENT" | "PRERELEASE" | "THEMED";
+                        /** Format: date-time */
+                        startsAt: string;
+                        priceCents: number | null;
+                        capacity: number | null;
+                        registeredCount: number;
+                        /** @enum {string} */
+                        registrationMode: "NONE" | "IN_APP" | "EXTERNAL";
+                        games: {
+                            slug: string;
+                            name: string;
+                        }[];
+                        venue: {
+                            id: string;
+                            slug: string;
+                            name: string;
+                            isPartner: boolean;
+                            distanceMeters: number;
+                        };
+                    }[];
+                };
+            };
+        };
+    };
+    ExploreController_rooms: {
+        parameters: {
+            query: {
+                lat: number;
+                lng: number;
+                radiusKm?: number;
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        /** @enum {string} */
+                        mode: "RANKED" | "CASUAL";
+                        /** Format: date-time */
+                        startsAt: string;
+                        capacity: number;
+                        game: {
+                            slug: string;
+                            name: string;
+                        };
+                        format: string | null;
+                        venue: {
+                            id: string;
+                            name: string;
+                            isPartner: boolean;
+                            distanceMeters: number;
+                        };
+                        players: {
+                            initial: string;
+                        }[];
+                        kwoteRange: {
+                            min: number;
+                            max: number;
+                        } | null;
+                    }[];
                 };
             };
         };

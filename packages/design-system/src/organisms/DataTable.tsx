@@ -237,10 +237,9 @@ export function DataTable<T extends { id: string }>({
         {rowActions ? <View style={{ width: 32 }} /> : null}
       </View>
       {loading ? (
-        Array.from({ length: 5 }, (_, i) => (
+        Array.from({ length: 5 }, (_, i) => `chargement-${i}`).map((row) => (
           <View
-            // biome-ignore lint/suspicious/noArrayIndexKey: lignes de chargement interchangeables
-            key={i}
+            key={row}
             style={{
               flexDirection: 'row',
               gap: 10,

@@ -119,6 +119,35 @@ async function main() {
       create: { ...user, birthDate: new Date('1995-06-15'), city: 'Bordeaux' },
     })
   }
+  await prisma.user.update({ where: { id: 'joueur-demo' }, data: { xp: 1840 } })
+  for (const pseudo of ['maya', 'sam', 'theo', 'alix', 'jade']) {
+    await prisma.user.upsert({
+      where: { id: `demo-${pseudo}` },
+      update: {},
+      create: {
+        id: `demo-${pseudo}`,
+        email: `${pseudo}@demo.kwatro.local`,
+        pseudo,
+        birthDate: new Date('1998-03-02'),
+        city: 'Bordeaux',
+      },
+    })
+  }
+  const format = (game: string, slug: string) =>
+    prisma.gameFormat.findFirstOrThrow({ where: { slug, game: { slug: game } } })
+  const commander = await format('magic', 'commander')
+  const pokemon = await format('pokemon', 'standard')
+  for (const [userId, f, kwote, rankedGames] of [
+    ['joueur-demo', commander, 1214, 12],
+    ['demo-maya', pokemon, 1180, 8],
+    ['demo-sam', pokemon, 1260, 15],
+  ] as const) {
+    await prisma.playerGameProfile.upsert({
+      where: { userId_formatId: { userId, formatId: f.id } },
+      update: { kwote, rankedGames },
+      create: { userId, formatId: f.id, kwote, rankedGames },
+    })
+  }
 
   // Événements, datés par rapport au jour du seed (relancer le seed les remet dans le futur)
   const commanderSeries = 'demo-serie-commander-mardi'
@@ -165,6 +194,43 @@ async function main() {
       externalUrl: 'https://example.com/avant-premiere-lorcana',
       games: ['lorcana'],
     },
+    // Ce soir (accueil) : relancer le seed chaque jour pour les remettre à la date du jour
+    {
+      id: 'demo-ce-soir-commander',
+      venueId: bar.id,
+      type: 'GAME_NIGHT' as const,
+      title: 'Soirée Commander',
+      startsAt: today(19, 30),
+      capacity: 12,
+      games: ['magic'],
+    },
+    {
+      id: 'demo-ce-soir-lorcana',
+      venueId: shop.id,
+      type: 'PRERELEASE' as const,
+      title: 'Avant-première Lorcana',
+      startsAt: today(20, 0),
+      capacity: 16,
+      games: ['lorcana'],
+    },
+    {
+      id: 'demo-ce-soir-jeux-libre',
+      venueId: bar.id,
+      type: 'GAME_NIGHT' as const,
+      title: 'Jeux de société en accès libre',
+      startsAt: today(19, 0),
+      registrationMode: 'NONE' as const,
+      games: ['jeux-de-societe'],
+    },
+    {
+      id: 'demo-ce-soir-pokemon',
+      venueId: shop.id,
+      type: 'TOURNAMENT' as const,
+      title: 'Tournoi Standard',
+      startsAt: today(20, 0),
+      capacity: 16,
+      games: ['pokemon'],
+    },
   ]
   for (const { games: slugs, ...event } of events) {
     const games = { set: slugs.map((slug) => ({ slug })) }
@@ -179,6 +245,41 @@ async function main() {
     update: {},
     create: { eventId: 'demo-commander-1', userId: 'joueur-demo' },
   })
+
+  const rooms = [
+    {
+      id: 'demo-room-pokemon',
+      hostId: 'demo-maya',
+      gameId: pokemon.gameId,
+      formatId: pokemon.id,
+      mode: 'RANKED' as const,
+      venueId: bar.id,
+      startsAt: today(21, 0),
+      capacity: 4,
+      players: ['demo-maya', 'demo-sam'],
+    },
+    {
+      id: 'demo-room-commander',
+      hostId: 'demo-theo',
+      gameId: commander.gameId,
+      formatId: commander.id,
+      mode: 'CASUAL' as const,
+      venueId: shop.id,
+      startsAt: today(20, 30),
+      capacity: 4,
+      players: ['demo-theo', 'demo-alix', 'demo-jade'],
+    },
+  ]
+  for (const { players, ...room } of rooms) {
+    await prisma.room.upsert({ where: { id: room.id }, update: room, create: room })
+    for (const userId of players) {
+      await prisma.roomParticipant.upsert({
+        where: { roomId_userId: { roomId: room.id, userId } },
+        update: { status: 'ACCEPTED' },
+        create: { roomId: room.id, userId, status: 'ACCEPTED' },
+      })
+    }
+  }
 
   console.log('Seed terminé ✔')
 }
@@ -206,6 +307,12 @@ function nextWeekday(weekday: number, hours: number, minutes: number, weeksLater
   const date = new Date()
   const today = date.getDay() || 7
   date.setDate(date.getDate() + ((weekday - today + 7) % 7 || 7) + weeksLater * 7)
+  date.setHours(hours, minutes, 0, 0)
+  return date
+}
+
+function today(hours: number, minutes: number) {
+  const date = new Date()
   date.setHours(hours, minutes, 0, 0)
   return date
 }

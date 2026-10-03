@@ -1,5 +1,6 @@
 import { Pressable, Text, View } from 'react-native'
-import { border, colors, font, radius, textOn } from '../tokens'
+import { useHover } from '../atoms/useHover'
+import { border, colors, font, radius, textOn, transition } from '../tokens'
 
 /** Segments égaux ; l'actif prend la couleur du contenu (Rooms rouge, Événements bleu…). */
 export function Segmented({
@@ -15,36 +16,57 @@ export function Segmented({
 }) {
   return (
     <View role="tablist" style={{ flexDirection: 'row', gap: 6 }}>
-      {items.map((label, i) => {
-        const active = i === value
-        return (
-          <Pressable
-            key={label}
-            role="tab"
-            aria-selected={active}
-            onPress={() => onChange?.(i)}
-            style={{
-              flex: 1,
-              paddingVertical: 8,
-              alignItems: 'center',
-              borderWidth: border.thin,
-              borderColor: colors.ink,
-              borderRadius: radius.sm,
-              backgroundColor: active ? color : colors.white,
-            }}
-          >
-            <Text
-              style={{
-                ...font('body', active ? 800 : 600),
-                fontSize: 13,
-                color: active ? textOn(color) : colors.ink,
-              }}
-            >
-              {label}
-            </Text>
-          </Pressable>
-        )
-      })}
+      {items.map((label, i) => (
+        <Segment
+          key={label}
+          label={label}
+          active={i === value}
+          color={color}
+          onPress={() => onChange?.(i)}
+        />
+      ))}
     </View>
+  )
+}
+
+function Segment({
+  label,
+  active,
+  color,
+  onPress,
+}: {
+  label: string
+  active: boolean
+  color: string
+  onPress: () => void
+}) {
+  const { hovered, hoverProps } = useHover()
+  return (
+    <Pressable
+      role="tab"
+      aria-selected={active}
+      onPress={onPress}
+      {...hoverProps}
+      style={{
+        flex: 1,
+        paddingVertical: 8,
+        alignItems: 'center',
+        borderWidth: border.thin,
+        borderColor: colors.ink,
+        borderRadius: radius.sm,
+        backgroundColor: active ? color : hovered ? colors.hover : colors.white,
+        ...transition(['background-color']),
+      }}
+    >
+      <Text
+        style={{
+          ...font('body', active ? 800 : 600),
+          fontSize: 13,
+          color: active ? textOn(color) : colors.ink,
+        }}
+      >
+        {label}
+      </Text>
+    </Pressable>
   )
 }

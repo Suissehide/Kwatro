@@ -80,6 +80,7 @@ export function font<F extends FontFamily>(family: F, weight?: FontWeight<F>): T
 
 export const type = {
   display: { ...font('display'), fontSize: 52, lineHeight: 52, textTransform: 'uppercase' },
+  hero: { ...font('display'), fontSize: 56, lineHeight: 55, textTransform: 'uppercase' },
   h1: { ...font('display'), fontSize: 28, lineHeight: 29, textTransform: 'uppercase' },
   h2: { ...font('display'), fontSize: 22, lineHeight: 23, textTransform: 'uppercase' },
   title: { ...font('body', 800), fontSize: 17, lineHeight: 20 },
@@ -150,7 +151,28 @@ export const motion = {
   normal: 240,
   slow: 400,
   easing: [0.2, 0.8, 0.2, 1] as const, // cubic-bezier
+  spring: [0.34, 1.56, 0.64, 1] as const,
 } as const
+
+export const prefersReducedMotion = () =>
+  (globalThis as { matchMedia?: (query: string) => { matches: boolean } }).matchMedia?.(
+    '(prefers-reduced-motion: reduce)',
+  ).matches ?? false
+
+export function transition(
+  properties: string[],
+  duration: number = motion.normal,
+  easing: readonly number[] = motion.easing,
+): Record<never, never> {
+  if (Platform.OS !== 'web' || prefersReducedMotion()) return {}
+  // Propriétés CSS passées telles quelles par react-native-web : absentes des types React Native,
+  // d'où le type vide, qui s'étale dans le style d'une View comme d'un Text
+  return {
+    transitionProperty: properties.join(', '),
+    transitionDuration: `${duration}ms`,
+    transitionTimingFunction: `cubic-bezier(${easing.join(', ')})`,
+  }
+}
 
 export const z = { base: 0, sticky: 10, popover: 20, sheet: 30, dialog: 40, toast: 50 } as const
 
