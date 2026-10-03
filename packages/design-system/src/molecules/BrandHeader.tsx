@@ -3,8 +3,8 @@ import { View } from 'react-native'
 import { space } from '../tokens'
 import { Brand } from './Brand'
 
-/** En-tête des écrans d'onglet sur téléphone : marque à gauche, `right` (ex. KwoteBadge) à droite. */
-export function BrandHeader({ right }: { right?: ReactNode }) {
+/** En-tête des écrans d'onglet sur téléphone : marque (lien vers l'accueil) à gauche, `right` (ex. KwoteBadge) à droite. */
+export function BrandHeader({ right, onHome }: { right?: ReactNode; onHome?: () => void }) {
   return (
     <View
       style={{
@@ -16,7 +16,7 @@ export function BrandHeader({ right }: { right?: ReactNode }) {
         paddingBottom: 12,
       }}
     >
-      <Brand size={28} fontSize={20} />
+      <Brand size={28} fontSize={20} onPress={onHome} />
       {right}
     </View>
   )

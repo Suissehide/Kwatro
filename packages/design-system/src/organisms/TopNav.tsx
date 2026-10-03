@@ -17,6 +17,7 @@ export function TopNav({
   onSelect,
   color = colors.room,
   right,
+  onHome,
 }: {
   items?: TopNavItem[]
   active?: string
@@ -24,6 +25,8 @@ export function TopNav({
   /** Fond de la page active (rouge room côté joueur, vert lieu côté espace lieu). */
   color?: string
   right?: ReactNode
+  /** Clic sur la marque : retour à l'accueil. */
+  onHome?: () => void
 }) {
   return (
     <View
@@ -37,7 +40,7 @@ export function TopNav({
         borderColor: colors.ink,
       }}
     >
-      <Brand />
+      <Brand onPress={onHome} />
       {items.length ? (
         <View role="navigation" style={{ flexDirection: 'row', gap: 6, marginLeft: 40 }}>
           {items.map((item) => (

@@ -30,6 +30,7 @@ import { createContext, type ReactNode, useContext, useRef, useState } from 'rea
 import { Text, type TextInput, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { TableScene } from '@/components/TableScene'
+import { openHome } from '@/lib/navigation'
 
 type Step = 'welcome' | 'email' | 'birth' | AgeRegime
 
@@ -124,7 +125,7 @@ export default function AuthScreen() {
 function WideLayout({ children }: { children: ReactNode }) {
   return (
     <WebScreen
-      nav={<TopNav />}
+      nav={<TopNav onHome={openHome} />}
       contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 72, paddingBottom: 48 }}
     >
       <View style={{ flex: 1, minWidth: 0 }}>

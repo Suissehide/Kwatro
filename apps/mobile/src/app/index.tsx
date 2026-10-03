@@ -38,7 +38,7 @@ import {
   todayLine,
   venueRowProps,
 } from '@/lib/explore'
-import { notYet, openTab } from '@/lib/navigation'
+import { notYet, openHome, openTab } from '@/lib/navigation'
 import { useMe } from '@/lib/useMe'
 import { useTonight } from '@/lib/useTonight'
 
@@ -146,6 +146,7 @@ export default function HomeScreen() {
         insets={insets}
         header={
           <BrandHeader
+            onHome={openHome}
             right={
               me?.mainKwote ? <KwoteBadge value={formatKwote(me.mainKwote.kwote)} /> : undefined
             }
@@ -177,6 +178,7 @@ export default function HomeScreen() {
           items={playerItems}
           active="explorer"
           onSelect={openTab}
+          onHome={openHome}
           right={
             <>
               <Button small kind="kwote" label="+ Créer une room" onPress={notYet} />

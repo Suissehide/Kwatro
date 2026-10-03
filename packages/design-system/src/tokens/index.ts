@@ -152,6 +152,8 @@ export const motion = {
   normal: 240,
   slow: 400,
   easing: [0.2, 0.8, 0.2, 1] as const, // cubic-bezier
+  /** Léger rebond (dépasse puis revient), pour les petits éléments ludiques comme le dé du logo */
+  spring: [0.34, 1.56, 0.64, 1] as const,
 } as const
 
 const reducedMotion = () =>
@@ -166,6 +168,7 @@ const reducedMotion = () =>
 export function transition(
   properties: string[],
   duration: number = motion.normal,
+  easing: readonly number[] = motion.easing,
 ): Record<never, never> {
   if (Platform.OS !== 'web' || reducedMotion()) return {}
   // Propriétés CSS passées telles quelles par react-native-web : absentes des types React Native,
@@ -173,7 +176,7 @@ export function transition(
   return {
     transitionProperty: properties.join(', '),
     transitionDuration: `${duration}ms`,
-    transitionTimingFunction: `cubic-bezier(${motion.easing.join(', ')})`,
+    transitionTimingFunction: `cubic-bezier(${easing.join(', ')})`,
   }
 }
 
