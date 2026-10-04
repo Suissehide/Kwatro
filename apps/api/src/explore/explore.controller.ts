@@ -5,9 +5,10 @@ import {
   type GeoQuery,
   geoQuerySchema,
   roomListItemSchema,
+  venueDetailSchema,
   venueListItemSchema,
 } from '@kwatro/shared'
-import { Controller, Get } from '@nestjs/common'
+import { Controller, Get, Param } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
 import { Public } from '../auth/auth.decorators'
@@ -26,6 +27,13 @@ export class ExploreController {
   @ZodResponse(z.array(venueListItemSchema))
   venues(@ZodQuery(geoQuerySchema) query: GeoQuery) {
     return this.explore.venues(query)
+  }
+
+  /** Fiche lieu (B3). */
+  @Get('venues/:slug')
+  @ZodResponse(venueDetailSchema)
+  venue(@Param('slug') slug: string) {
+    return this.explore.venue(slug)
   }
 
   /** Événements des prochains jours autour d'un point, par date puis distance. */

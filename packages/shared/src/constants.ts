@@ -50,6 +50,10 @@ export const EVENT_TYPE_LABELS: Record<EventType, string> = {
 export const REGISTRATION_MODES = ['NONE', 'IN_APP', 'EXTERNAL'] as const
 export type RegistrationMode = (typeof REGISTRATION_MODES)[number]
 
+/** Inscription active à un événement (l'enum Prisma a aussi CANCELLED, jamais renvoyé à l'app). */
+export const REGISTRATION_STATUSES = ['REGISTERED', 'WAITLISTED'] as const
+export type RegistrationStatus = (typeof REGISTRATION_STATUSES)[number]
+
 /** Fuseau de référence des lieux (Bordeaux au lancement). */
 export const VENUE_TIME_ZONE = 'Europe/Paris'
 

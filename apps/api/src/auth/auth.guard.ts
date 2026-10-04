@@ -24,12 +24,12 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext) {
     const targets = [context.getHandler(), context.getClass()]
-    if (this.reflector.getAllAndOverride<boolean>(IS_PUBLIC, targets)) return true
-
     const request = context.switchToHttp().getRequest<AuthRequest>()
     const user = await this.auth.resolveUser(request)
+    // Route publique : l'utilisateur est quand même posé s'il est connecté (ex. « inscrit » sur une fiche)
+    if (user) request.user = user
+    if (this.reflector.getAllAndOverride<boolean>(IS_PUBLIC, targets)) return true
     if (!user) throw new UnauthorizedException('Connexion requise')
-    request.user = user
 
     const roles = this.reflector.getAllAndOverride<UserRole[] | undefined>(ROLES, targets)
     if (roles?.length && !roles.includes(user.role)) throw new ForbiddenException('Accès refusé')

@@ -84,6 +84,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/venues/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ExploreController_venue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events": {
         parameters: {
             query?: never;
@@ -111,6 +127,38 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["EventsController_detail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events/{id}/registration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["EventsController_register"];
+        delete: operations["EventsController_cancel"];
         options?: never;
         head?: never;
         patch?: never;
@@ -312,6 +360,71 @@ export interface operations {
             };
         };
     };
+    ExploreController_venue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        slug: string;
+                        name: string;
+                        /** @enum {string} */
+                        type: "GAME_BAR" | "TCG_SHOP" | "LUDOTHEQUE" | "ASSOCIATION" | "OTHER";
+                        address: string;
+                        latitude: number;
+                        longitude: number;
+                        isPartner: boolean;
+                        kwatroPerk: string | null;
+                        openNow: boolean | null;
+                        closesAtMinute: number | null;
+                        city: string;
+                        description: string | null;
+                        playFeeCents: number | null;
+                        minSpendCents: number | null;
+                        acceptsUnaccompaniedMinors: boolean;
+                        openingHours: {
+                            weekday: number;
+                            opensAtMinute: number;
+                            closesAtMinute: number;
+                        }[];
+                        games: {
+                            slug: string;
+                            name: string;
+                        }[];
+                        events: {
+                            id: string;
+                            title: string;
+                            /** @enum {string} */
+                            type: "GAME_NIGHT" | "INITIATION" | "TOURNAMENT" | "PRERELEASE" | "THEMED";
+                            /** Format: date-time */
+                            startsAt: string;
+                            priceCents: number | null;
+                            capacity: number | null;
+                            registeredCount: number;
+                            /** @enum {string} */
+                            registrationMode: "NONE" | "IN_APP" | "EXTERNAL";
+                            games: {
+                                slug: string;
+                                name: string;
+                            }[];
+                        }[];
+                    };
+                };
+            };
+        };
+    };
     ExploreController_events: {
         parameters: {
             query: {
@@ -404,6 +517,165 @@ export interface operations {
                             max: number;
                         } | null;
                     }[];
+                };
+            };
+        };
+    };
+    EventsController_detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        title: string;
+                        /** @enum {string} */
+                        type: "GAME_NIGHT" | "INITIATION" | "TOURNAMENT" | "PRERELEASE" | "THEMED";
+                        description: string | null;
+                        /** Format: date-time */
+                        startsAt: string;
+                        /** Format: date-time */
+                        endsAt: string | null;
+                        /** Format: date-time */
+                        cancelledAt: string | null;
+                        priceCents: number | null;
+                        capacity: number | null;
+                        minAge: number | null;
+                        /** @enum {string} */
+                        registrationMode: "NONE" | "IN_APP" | "EXTERNAL";
+                        externalUrl: string | null;
+                        registeredCount: number;
+                        games: {
+                            slug: string;
+                            name: string;
+                        }[];
+                        venue: {
+                            id: string;
+                            slug: string;
+                            name: string;
+                            address: string;
+                            isPartner: boolean;
+                        };
+                        /** @enum {string|null} */
+                        myRegistration: "REGISTERED" | "WAITLISTED" | null;
+                    };
+                };
+            };
+        };
+    };
+    EventsController_register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        title: string;
+                        /** @enum {string} */
+                        type: "GAME_NIGHT" | "INITIATION" | "TOURNAMENT" | "PRERELEASE" | "THEMED";
+                        description: string | null;
+                        /** Format: date-time */
+                        startsAt: string;
+                        /** Format: date-time */
+                        endsAt: string | null;
+                        /** Format: date-time */
+                        cancelledAt: string | null;
+                        priceCents: number | null;
+                        capacity: number | null;
+                        minAge: number | null;
+                        /** @enum {string} */
+                        registrationMode: "NONE" | "IN_APP" | "EXTERNAL";
+                        externalUrl: string | null;
+                        registeredCount: number;
+                        games: {
+                            slug: string;
+                            name: string;
+                        }[];
+                        venue: {
+                            id: string;
+                            slug: string;
+                            name: string;
+                            address: string;
+                            isPartner: boolean;
+                        };
+                        /** @enum {string|null} */
+                        myRegistration: "REGISTERED" | "WAITLISTED" | null;
+                    };
+                };
+            };
+        };
+    };
+    EventsController_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        title: string;
+                        /** @enum {string} */
+                        type: "GAME_NIGHT" | "INITIATION" | "TOURNAMENT" | "PRERELEASE" | "THEMED";
+                        description: string | null;
+                        /** Format: date-time */
+                        startsAt: string;
+                        /** Format: date-time */
+                        endsAt: string | null;
+                        /** Format: date-time */
+                        cancelledAt: string | null;
+                        priceCents: number | null;
+                        capacity: number | null;
+                        minAge: number | null;
+                        /** @enum {string} */
+                        registrationMode: "NONE" | "IN_APP" | "EXTERNAL";
+                        externalUrl: string | null;
+                        registeredCount: number;
+                        games: {
+                            slug: string;
+                            name: string;
+                        }[];
+                        venue: {
+                            id: string;
+                            slug: string;
+                            name: string;
+                            address: string;
+                            isPartner: boolean;
+                        };
+                        /** @enum {string|null} */
+                        myRegistration: "REGISTERED" | "WAITLISTED" | null;
+                    };
                 };
             };
         };

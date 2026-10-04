@@ -383,6 +383,255 @@
         ]
       }
     },
+    "/venues/{slug}": {
+      "get": {
+        "operationId": "ExploreController_venue",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "slug": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "GAME_BAR",
+                        "TCG_SHOP",
+                        "LUDOTHEQUE",
+                        "ASSOCIATION",
+                        "OTHER"
+                      ]
+                    },
+                    "address": {
+                      "type": "string"
+                    },
+                    "latitude": {
+                      "type": "number"
+                    },
+                    "longitude": {
+                      "type": "number"
+                    },
+                    "isPartner": {
+                      "type": "boolean"
+                    },
+                    "kwatroPerk": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "openNow": {
+                      "nullable": true,
+                      "type": "boolean"
+                    },
+                    "closesAtMinute": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "city": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "playFeeCents": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "minSpendCents": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "acceptsUnaccompaniedMinors": {
+                      "type": "boolean"
+                    },
+                    "openingHours": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "weekday": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "opensAtMinute": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "closesAtMinute": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "weekday",
+                          "opensAtMinute",
+                          "closesAtMinute"
+                        ]
+                      }
+                    },
+                    "games": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "slug": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "slug",
+                          "name"
+                        ]
+                      }
+                    },
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "GAME_NIGHT",
+                              "INITIATION",
+                              "TOURNAMENT",
+                              "PRERELEASE",
+                              "THEMED"
+                            ]
+                          },
+                          "startsAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "priceCents": {
+                            "nullable": true,
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "capacity": {
+                            "nullable": true,
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "registeredCount": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "registrationMode": {
+                            "type": "string",
+                            "enum": [
+                              "NONE",
+                              "IN_APP",
+                              "EXTERNAL"
+                            ]
+                          },
+                          "games": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "slug": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "slug",
+                                "name"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "type",
+                          "startsAt",
+                          "priceCents",
+                          "capacity",
+                          "registeredCount",
+                          "registrationMode",
+                          "games"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "slug",
+                    "name",
+                    "type",
+                    "address",
+                    "latitude",
+                    "longitude",
+                    "isPartner",
+                    "kwatroPerk",
+                    "openNow",
+                    "closesAtMinute",
+                    "city",
+                    "description",
+                    "playFeeCents",
+                    "minSpendCents",
+                    "acceptsUnaccompaniedMinors",
+                    "openingHours",
+                    "games",
+                    "events"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "explore"
+        ]
+      }
+    },
     "/events": {
       "get": {
         "operationId": "ExploreController_events",
@@ -734,6 +983,529 @@
         },
         "tags": [
           "explore"
+        ]
+      }
+    },
+    "/events/{id}": {
+      "get": {
+        "operationId": "EventsController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "GAME_NIGHT",
+                        "INITIATION",
+                        "TOURNAMENT",
+                        "PRERELEASE",
+                        "THEMED"
+                      ]
+                    },
+                    "description": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "startsAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "endsAt": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "cancelledAt": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "priceCents": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "capacity": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "minAge": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "registrationMode": {
+                      "type": "string",
+                      "enum": [
+                        "NONE",
+                        "IN_APP",
+                        "EXTERNAL"
+                      ]
+                    },
+                    "externalUrl": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "registeredCount": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "games": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "slug": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "slug",
+                          "name"
+                        ]
+                      }
+                    },
+                    "venue": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "slug": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "address": {
+                          "type": "string"
+                        },
+                        "isPartner": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "slug",
+                        "name",
+                        "address",
+                        "isPartner"
+                      ]
+                    },
+                    "myRegistration": {
+                      "nullable": true,
+                      "type": "string",
+                      "enum": [
+                        "REGISTERED",
+                        "WAITLISTED"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "type",
+                    "description",
+                    "startsAt",
+                    "endsAt",
+                    "cancelledAt",
+                    "priceCents",
+                    "capacity",
+                    "minAge",
+                    "registrationMode",
+                    "externalUrl",
+                    "registeredCount",
+                    "games",
+                    "venue",
+                    "myRegistration"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/events/{id}/registration": {
+      "post": {
+        "operationId": "EventsController_register",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "GAME_NIGHT",
+                        "INITIATION",
+                        "TOURNAMENT",
+                        "PRERELEASE",
+                        "THEMED"
+                      ]
+                    },
+                    "description": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "startsAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "endsAt": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "cancelledAt": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "priceCents": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "capacity": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "minAge": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "registrationMode": {
+                      "type": "string",
+                      "enum": [
+                        "NONE",
+                        "IN_APP",
+                        "EXTERNAL"
+                      ]
+                    },
+                    "externalUrl": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "registeredCount": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "games": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "slug": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "slug",
+                          "name"
+                        ]
+                      }
+                    },
+                    "venue": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "slug": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "address": {
+                          "type": "string"
+                        },
+                        "isPartner": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "slug",
+                        "name",
+                        "address",
+                        "isPartner"
+                      ]
+                    },
+                    "myRegistration": {
+                      "nullable": true,
+                      "type": "string",
+                      "enum": [
+                        "REGISTERED",
+                        "WAITLISTED"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "type",
+                    "description",
+                    "startsAt",
+                    "endsAt",
+                    "cancelledAt",
+                    "priceCents",
+                    "capacity",
+                    "minAge",
+                    "registrationMode",
+                    "externalUrl",
+                    "registeredCount",
+                    "games",
+                    "venue",
+                    "myRegistration"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "events"
+        ]
+      },
+      "delete": {
+        "operationId": "EventsController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "GAME_NIGHT",
+                        "INITIATION",
+                        "TOURNAMENT",
+                        "PRERELEASE",
+                        "THEMED"
+                      ]
+                    },
+                    "description": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "startsAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "endsAt": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "cancelledAt": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "priceCents": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "capacity": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "minAge": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "registrationMode": {
+                      "type": "string",
+                      "enum": [
+                        "NONE",
+                        "IN_APP",
+                        "EXTERNAL"
+                      ]
+                    },
+                    "externalUrl": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "registeredCount": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "games": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "slug": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "slug",
+                          "name"
+                        ]
+                      }
+                    },
+                    "venue": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "slug": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "address": {
+                          "type": "string"
+                        },
+                        "isPartner": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "slug",
+                        "name",
+                        "address",
+                        "isPartner"
+                      ]
+                    },
+                    "myRegistration": {
+                      "nullable": true,
+                      "type": "string",
+                      "enum": [
+                        "REGISTERED",
+                        "WAITLISTED"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "type",
+                    "description",
+                    "startsAt",
+                    "endsAt",
+                    "cancelledAt",
+                    "priceCents",
+                    "capacity",
+                    "minAge",
+                    "registrationMode",
+                    "externalUrl",
+                    "registeredCount",
+                    "games",
+                    "venue",
+                    "myRegistration"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "events"
         ]
       }
     },
