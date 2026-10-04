@@ -14,7 +14,7 @@ import {
   PageTitle,
   PlayerTabBar,
   ProfileCard,
-  playerItems,
+  playerNavItems,
   RoomCard,
   radius,
   Section,
@@ -200,7 +200,7 @@ export default function HomeScreen() {
     <WebScreen
       nav={
         <TopNav
-          items={playerItems}
+          items={playerNavItems}
           active="explorer"
           onSelect={openTab}
           onHome={openHome}

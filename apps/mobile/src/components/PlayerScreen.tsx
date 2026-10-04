@@ -3,7 +3,7 @@ import {
   MobileScreen,
   type PlayerTab,
   PlayerTabBar,
-  playerItems,
+  playerNavItems,
   TopNav,
   WebScreen,
 } from '@kwatro/design-system'
@@ -54,7 +54,7 @@ export function PlayerScreen({
     <WebScreen
       nav={
         <TopNav
-          items={playerItems}
+          items={playerNavItems}
           active={tab}
           onSelect={openTab}
           onHome={openHome}

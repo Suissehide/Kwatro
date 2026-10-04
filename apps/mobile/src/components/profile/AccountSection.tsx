@@ -3,6 +3,7 @@ import { router } from 'expo-router'
 import { useState } from 'react'
 import { View } from 'react-native'
 import { api } from '@/lib/api'
+import { setStoredMe } from '@/lib/useMe'
 
 /** Compte : suppression du compte depuis l'app (exigence Apple, KWT-18). */
 export function AccountSection({ wide }: { wide: boolean }) {
@@ -12,8 +13,10 @@ export function AccountSection({ wide }: { wide: boolean }) {
   async function deleteAccount() {
     setConfirming(false)
     const { response } = await api.DELETE('/me').catch(() => ({ response: null }))
-    if (response?.ok) router.replace('/auth')
-    else setFailed(true)
+    if (response?.ok) {
+      setStoredMe(null)
+      router.replace('/auth')
+    } else setFailed(true)
   }
 
   return (

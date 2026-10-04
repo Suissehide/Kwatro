@@ -14,6 +14,8 @@ export const playerItems: TabItem<PlayerTab>[] = [
   { key: 'messages', label: 'Messages', round: false },
   { key: 'profil', label: 'Profil', round: true },
 ]
+/** Barre du site (desktop) : le profil s'ouvre par l'avatar à droite, pas par un onglet. */
+export const playerNavItems = playerItems.filter((item) => item.key !== 'profil')
 const venueItems: TabItem<VenueTab>[] = [
   { key: 'ce-soir', label: 'Ce soir', round: true },
   { key: 'scanner', label: 'Scanner', round: false },

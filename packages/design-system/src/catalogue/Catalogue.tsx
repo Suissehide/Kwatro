@@ -65,7 +65,7 @@ import {
   DataTable,
   type PlayerTab,
   PlayerTabBar,
-  playerItems,
+  playerNavItems,
   Sidebar,
   type Sort,
   TopNav,
@@ -448,7 +448,7 @@ export function Catalogue() {
           <TextLink label="Tout le programme" onPress={() => {}} />
         </View>
         <TopNav
-          items={playerItems}
+          items={playerNavItems}
           active={tab}
           onSelect={(key) => setTab(key as PlayerTab)}
           right={<Button small kind="kwote" label="+ Créer une room" />}

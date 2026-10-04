@@ -9,7 +9,7 @@ import { WhereFields } from '@/components/profile/WhereFields'
 import { Frame, StepButton, StepLayout, WIDE, Wide } from '@/components/StepFrame'
 import { api } from '@/lib/api'
 import { useCityField } from '@/lib/useCityField'
-import { useMe } from '@/lib/useMe'
+import { setStoredMe, useMe } from '@/lib/useMe'
 
 type Step = 'intro' | 'pseudo' | 'where'
 
@@ -96,6 +96,7 @@ function PseudoStep({
     setBusy(false)
     if (response?.status === 409) return setError('Ce pseudo est déjà pris. Essaie une variante.')
     if (!data) return setError('Impossible d’enregistrer ton pseudo pour l’instant. Réessaie.')
+    setStoredMe(data)
     onDone()
   }
 
@@ -144,6 +145,7 @@ function WhereStep({ me, onBack }: { me: Me; onBack: () => void }) {
       .catch(() => ({ data: undefined }))
     setBusy(false)
     if (!data) return setFailed(true)
+    setStoredMe(data)
     finish()
   }
 

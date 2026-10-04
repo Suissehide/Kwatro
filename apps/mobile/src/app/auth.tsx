@@ -25,6 +25,7 @@ import { Frame, StepButton, StepLayout, WIDE, Wide } from '@/components/StepFram
 import { TableScene } from '@/components/TableScene'
 import { api } from '@/lib/api'
 import { authClient } from '@/lib/auth'
+import { setStoredMe } from '@/lib/useMe'
 
 type Step = 'welcome' | 'email' | 'birth' | AgeRegime
 
@@ -54,8 +55,10 @@ export default function AuthScreen() {
     setStep('birth')
   }, [])
 
-  // Retour d'Apple / Google sur le web (la page est rechargée sur /auth), ou joueur déjà connecté
+  // Retour d'Apple / Google sur le web (la page est rechargée sur /auth), ou joueur déjà connecté.
+  // Le profil gardé en mémoire peut être celui d'un autre compte : on l'oublie
   useEffect(() => {
+    setStoredMe(null)
     void resume()
   }, [resume])
 

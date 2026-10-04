@@ -22,7 +22,7 @@ import { WhereFields } from '@/components/profile/WhereFields'
 import { api } from '@/lib/api'
 import { visibleAvatar } from '@/lib/profile'
 import { useCityField } from '@/lib/useCityField'
-import { useMe } from '@/lib/useMe'
+import { setStoredMe, useMe } from '@/lib/useMe'
 
 const WIDE = 900
 
@@ -108,6 +108,7 @@ function EditForm({ me, wide }: { me: Me; wide: boolean }) {
     setBusy(false)
     if (response?.status === 409) return setPseudoError('Ce pseudo est déjà pris.')
     if (!data) return setFailed(true)
+    setStoredMe(data)
     setSaved(JSON.stringify({ ...draft, pseudo: data.pseudo ?? '', city: data.city ?? '' }))
     setDone(true)
   }
