@@ -4,8 +4,9 @@ import type {
   GeoQuery,
   roomListItemSchema,
   VenueListItem,
+  venueDetailSchema,
 } from '@kwatro/shared'
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import type { z } from 'zod'
 import { PrismaService } from '../prisma/prisma.service'
 import { compareByDistance, openingStatus } from './explore.rules'
@@ -44,6 +45,38 @@ export class ExploreService {
         upcomingEventCount: _count.events,
       }))
       .sort(compareByDistance)
+  }
+
+  /** Fiche lieu : infos pratiques, horaires, jeux sur place et événements des 30 prochains jours. */
+  async venue(slug: string): Promise<z.output<typeof venueDetailSchema>> {
+    const now = new Date()
+    const venue = await this.prisma.venue.findUnique({
+      where: { slug },
+      include: {
+        openingHours: { orderBy: [{ weekday: 'asc' }, { opensAtMinute: 'asc' }] },
+        games: { select: { slug: true, name: true }, orderBy: { name: 'asc' } },
+        events: {
+          where: {
+            startsAt: { gte: now, lt: new Date(now.getTime() + 30 * DAY_MS) },
+            cancelledAt: null,
+          },
+          orderBy: { startsAt: 'asc' },
+          include: {
+            games: { select: { slug: true, name: true }, orderBy: { name: 'asc' } },
+            _count: { select: { registrations: { where: { status: 'REGISTERED' } } } },
+          },
+        },
+      },
+    })
+    if (!venue) throw new NotFoundException('Lieu introuvable')
+    return {
+      ...venue,
+      ...openingStatus(venue.openingHours, now),
+      events: venue.events.map(({ _count, ...event }) => ({
+        ...event,
+        registeredCount: _count.registrations,
+      })),
+    }
   }
 
   /** Agenda des prochains jours autour du point : trié par date, puis distance (même règle que les lieux). */

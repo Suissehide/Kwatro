@@ -10,6 +10,7 @@ import {
   type RoomListItem,
   VENUE_TIME_ZONE,
   VENUE_TYPE_LABELS,
+  type VenueDetail,
   type VenueListItem,
 } from '@kwatro/shared'
 
@@ -43,7 +44,9 @@ export function todayLine(city: string, short?: boolean) {
   return `${date.charAt(0).toUpperCase()}${date.slice(1)} · ${city}`
 }
 
-export function eventPlaces(event: EventListItem) {
+export function eventPlaces(
+  event: Pick<EventListItem, 'registrationMode' | 'capacity' | 'registeredCount'>,
+) {
   if (event.registrationMode === 'NONE') return 'Accès libre'
   if (event.registrationMode === 'EXTERNAL') return 'Inscription externe'
   if (event.capacity === null) return null
@@ -51,17 +54,62 @@ export function eventPlaces(event: EventListItem) {
   return left ? `${left} place${left > 1 ? 's' : ''} sur ${event.capacity}` : 'Complet'
 }
 
-export function eventCardProps(event: EventListItem) {
+export const isFull = (event: Pick<EventListItem, 'capacity' | 'registeredCount'>) =>
+  event.capacity !== null && event.registeredCount >= event.capacity
+
+const capitalize = (text: string) => `${text.charAt(0).toUpperCase()}${text.slice(1)}`
+
+/** « Sam. 10 oct. » */
+export const shortDay = (date: Date | string) =>
+  capitalize(
+    new Intl.DateTimeFormat('fr-FR', {
+      timeZone: VENUE_TIME_ZONE,
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    }).format(new Date(date)),
+  )
+
+/** « Samedi 10 octobre · 19 h – 23 h » */
+export function eventWhen(startsAt: string, endsAt: string | null) {
+  const day = new Intl.DateTimeFormat('fr-FR', {
+    timeZone: VENUE_TIME_ZONE,
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(new Date(startsAt))
+  const hours = endsAt ? `${formatHour(startsAt)} – ${formatHour(endsAt)}` : formatHour(startsAt)
+  return `${capitalize(day)} · ${hours}`
+}
+
+/** Carte événement ; sans `venue` (fiche lieu), la date complète remplace le lieu. */
+export function eventCardProps(
+  event: Omit<EventListItem, 'venue'> & { venue?: EventListItem['venue'] },
+) {
   const games = event.games.length ? event.games.map(gameLabel).join(', ') : 'Tous jeux'
   return {
     day: formatDayMonth(event.startsAt).day,
     time: formatHourBand(event.startsAt),
     label: `${EVENT_TYPE_LABELS[event.type]} · ${games}`,
     title: event.title,
-    meta: `${event.venue.name} · ${formatDistance(event.venue.distanceMeters)}`,
+    meta: event.venue
+      ? `${event.venue.name} · ${formatDistance(event.venue.distanceMeters)}`
+      : shortDay(event.startsAt),
     places: eventPlaces(event),
-    partner: event.venue.isPartner,
+    partner: event.venue?.isPartner,
   }
+}
+
+const WEEKDAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
+
+/** Horaires de la semaine, une ligne par jour : « 17 h – 1 h », plusieurs plages séparées par une virgule. */
+export function openingLines(hours: VenueDetail['openingHours']) {
+  return WEEKDAYS.map((label, i) => {
+    const ranges = hours
+      .filter((h) => h.weekday === i + 1)
+      .map((h) => `${formatMinuteOfDay(h.opensAtMinute)} – ${formatMinuteOfDay(h.closesAtMinute)}`)
+    return { label, value: ranges.length ? ranges.join(', ') : 'Fermé' }
+  })
 }
 
 export function roomCardProps(room: RoomListItem) {

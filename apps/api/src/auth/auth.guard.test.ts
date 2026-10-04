@@ -34,6 +34,12 @@ describe('AuthGuard', () => {
     await expect(guard.canActivate(context)).resolves.toBe(true)
   })
 
+  it("pose l'utilisateur connecté sur une route @Public", async () => {
+    const { guard, context, request } = setup(player, 'open')
+    await expect(guard.canActivate(context)).resolves.toBe(true)
+    expect(request.user).toBe(player)
+  })
+
   it('refuse par défaut une route sans utilisateur connecté (401)', async () => {
     const { guard, context } = setup(null, 'any')
     await expect(guard.canActivate(context)).rejects.toBeInstanceOf(UnauthorizedException)
