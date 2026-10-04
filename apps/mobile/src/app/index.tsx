@@ -38,7 +38,7 @@ import {
   todayLine,
   venueRowProps,
 } from '@/lib/explore'
-import { notYet, openHome, openTab } from '@/lib/navigation'
+import { notYet, openEvent, openHome, openTab, openVenue } from '@/lib/navigation'
 import { useTonightQuery } from '@/queries/useExplore'
 import { useMeQuery } from '@/queries/useMe'
 
@@ -93,12 +93,12 @@ export default function HomeScreen() {
         {...eventCardProps(e)}
         wide={wide}
         raised={i === 0}
-        onPress={notYet}
+        onPress={() => openEvent(e.id)}
         action={
           e.registrationMode === 'NONE' ? (
-            <Button small kind="ghost" label="Voir" onPress={notYet} />
+            <Button small kind="ghost" label="Voir" onPress={() => openEvent(e.id)} />
           ) : (
-            <Button small label="S'inscrire" onPress={notYet} />
+            <Button small label="S'inscrire" onPress={() => openEvent(e.id)} />
           )
         }
       />
@@ -155,7 +155,7 @@ export default function HomeScreen() {
             perk={wide ? props.perk : null}
             inset={wide ? 16 : 14}
             last={i === data.venues.length - 1}
-            onPress={notYet}
+            onPress={() => openVenue(v.slug)}
           />
         )
       })}

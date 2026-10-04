@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { AuthModule } from './auth/auth.module'
+import { EventsModule } from './events/events.module'
 import { ExploreModule } from './explore/explore.module'
 import { GamesModule } from './games/games.module'
 import { HealthModule } from './health/health.module'
@@ -15,6 +16,7 @@ import { WaitlistModule } from './waitlist/waitlist.module'
     GamesModule,
     UsersModule,
     ExploreModule,
+    EventsModule,
     WaitlistModule,
   ],
 })
