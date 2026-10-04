@@ -6,11 +6,13 @@ import { colors, radius } from '../tokens'
 export function Raised({
   offset = 4,
   r = radius.card,
+  color = colors.ink,
   style,
   children,
 }: {
   offset?: number
   r?: number
+  color?: string
   style?: StyleProp<ViewStyle>
   children: ReactNode
 }) {
@@ -23,7 +25,7 @@ export function Raised({
           left: offset,
           right: -offset,
           bottom: -offset,
-          backgroundColor: colors.ink,
+          backgroundColor: color,
           borderRadius: r,
         }}
       />

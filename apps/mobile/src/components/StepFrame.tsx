@@ -24,6 +24,7 @@ export const Wide = createContext(false)
 export function StepLayout({ aside, children }: { aside: ReactNode; children: ReactNode }) {
   return (
     <WebScreen
+      siteFooter={false}
       nav={<TopNav onHome={openHome} />}
       contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 72, paddingBottom: 48 }}
     >
@@ -63,6 +64,7 @@ export function Frame({
   if (!wide) {
     return (
       <MobileScreen
+        siteFooter={false}
         insets={insets}
         scroll={!!onBack}
         header={onBack ? <ScreenHeader title={title} onBack={onBack} /> : undefined}

@@ -1,5 +1,6 @@
 import {
   Archivo_400Regular,
+  Archivo_500Medium,
   Archivo_600SemiBold,
   Archivo_700Bold,
   Archivo_800ExtraBold,
@@ -16,6 +17,7 @@ export default function RootLayout() {
   // Noms identiques à ceux du design system (tokens `font()`)
   const [fontsLoaded] = useFonts({
     Archivo_400Regular,
+    Archivo_500Medium,
     Archivo_600SemiBold,
     Archivo_700Bold,
     Archivo_800ExtraBold,

@@ -67,6 +67,7 @@ import {
   PlayerTabBar,
   playerNavItems,
   Sidebar,
+  SiteFooter,
   type Sort,
   TopNav,
   VenueTabBar,
@@ -469,6 +470,10 @@ export function Catalogue() {
               { key: 'factures', label: 'Factures', later: true },
             ]}
           />
+        </View>
+        <SiteFooter compact={false} />
+        <View style={{ maxWidth: 420, width: '100%' }}>
+          <SiteFooter compact />
         </View>
       </Section>
 
