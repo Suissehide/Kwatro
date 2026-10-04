@@ -3,6 +3,7 @@ import {
   border,
   colors,
   font,
+  InlineLink,
   Logo,
   MobileScreen,
   Note,
@@ -11,6 +12,7 @@ import {
   radius,
   ScreenHeader,
   Segmented,
+  SITE_URL,
   TextField,
   TopNav,
   Typography,
@@ -137,8 +139,9 @@ export default function AuthScreen() {
               </Note>
             ) : null}
             <Typography variant="small" style={wide ? null : { textAlign: 'center' }}>
-              En continuant, tu acceptes les conditions d'utilisation et la politique de
-              confidentialité.
+              En continuant, tu acceptes les{' '}
+              <InlineLink href={`${SITE_URL}/terms`}>conditions d'utilisation</InlineLink> et la{' '}
+              <InlineLink href={`${SITE_URL}/privacy`}>politique de confidentialité</InlineLink>.
             </Typography>
           </>
         }
