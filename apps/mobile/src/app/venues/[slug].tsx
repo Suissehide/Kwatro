@@ -17,7 +17,6 @@ import {
   PhotoCarousel,
   PhotoGallery,
   PhotoViewer,
-  playerItems,
   RoomCard,
   ScreenHeader,
   Section,
@@ -26,7 +25,6 @@ import {
   StatusPill,
   Tag,
   TextLink,
-  TopNav,
   Typography,
   WebScreen,
 } from '@kwatro/design-system'
@@ -36,11 +34,11 @@ import { type ReactNode, useState } from 'react'
 import { Linking, Text, useWindowDimensions, View, type ViewStyle } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ExploreMap } from '@/components/explore/ExploreMap'
+import { PlayerNav } from '@/components/PlayerNav'
 import { VenueAgenda } from '@/components/venue/VenueAgenda'
 import { roomCardProps } from '@/lib/explore'
-import { goBack, notYet, openHome, openTab } from '@/lib/navigation'
+import { goBack, notYet } from '@/lib/navigation'
 import { useLocation } from '@/lib/useLocation'
-import { useMe } from '@/lib/useMe'
 import {
   accessibilityItems,
   gameTabs,
@@ -66,22 +64,12 @@ export default function VenueScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>()
   const wide = useWindowDimensions().width >= WIDE
   const insets = useSafeAreaInsets()
-  const me = useMe()
   const { place, located } = useLocation()
   const { data: venue, isError: failed, refetch } = useVenueQuery(slug)
   const [gameTab, setGameTab] = useState(0)
   const [viewer, setViewer] = useState(false)
 
-  const nav = (
-    <TopNav
-      items={playerItems}
-      active="explorer"
-      onSelect={openTab}
-      onHome={openHome}
-      avatar={me?.pseudo ?? ''}
-      onAvatar={() => openTab('profil')}
-    />
-  )
+  const nav = <PlayerNav active="explorer" />
 
   if (!venue) {
     const body = failed ? (
