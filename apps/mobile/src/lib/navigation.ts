@@ -14,10 +14,9 @@ export const openHome = () => router.navigate('/')
 export const goBack = () => (router.canGoBack() ? router.back() : openHome())
 
 export const openVenue = (slug: string) =>
-  router.push({ pathname: '/lieux/[slug]', params: { slug } })
+  router.push({ pathname: '/venues/[slug]', params: { slug } })
 
-export const openEvent = (id: string) =>
-  router.push({ pathname: '/evenements/[id]', params: { id } })
+export const openEvent = (id: string) => router.push({ pathname: '/events/[id]', params: { id } })
 
 export function openTab(tab: string) {
   const route = TAB_ROUTES[tab as PlayerTab]

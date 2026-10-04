@@ -114,10 +114,15 @@ export function StepButton(props: {
   disabled?: boolean
   onPress: () => void
 }) {
-  const wide = useContext(Wide)
   return (
-    <View style={wide ? { alignSelf: 'flex-start' } : null}>
+    <StepAction>
       <Button {...props} />
-    </View>
+    </StepAction>
   )
+}
+
+/** Action d'étape (bouton, `form.SubmitButton`) : pleine largeur sur téléphone, à sa taille sur desktop. */
+export function StepAction({ children }: { children: ReactNode }) {
+  const wide = useContext(Wide)
+  return <View style={wide ? { alignSelf: 'flex-start' } : null}>{children}</View>
 }

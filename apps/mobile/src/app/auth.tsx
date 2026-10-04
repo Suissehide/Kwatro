@@ -1,13 +1,4 @@
-import {
-  Button,
-  colors,
-  font,
-  Logo,
-  Note,
-  Segmented,
-  TextField,
-  Typography,
-} from '@kwatro/design-system'
+import { Button, font, Logo, Note, Segmented, Typography } from '@kwatro/design-system'
 import {
   type AgeRegime,
   ageRegime,
@@ -20,9 +11,10 @@ import {
 import * as Linking from 'expo-linking'
 import { router } from 'expo-router'
 import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
-import { Text, type TextInput, useWindowDimensions, View } from 'react-native'
-import { Frame, StepButton, StepLayout, WIDE, Wide } from '@/components/StepFrame'
+import { type TextInput, useWindowDimensions, View } from 'react-native'
+import { Frame, StepAction, StepButton, StepLayout, WIDE, Wide } from '@/components/StepFrame'
 import { TableScene } from '@/components/TableScene'
+import { useAppForm } from '@/hooks/formConfig'
 import { authClient } from '@/lib/auth'
 import { ApiError, queryClient } from '@/lib/queryClient'
 import { forgetMe, meQueryOptions, useMeMutations } from '@/queries/useMe'
@@ -204,7 +196,7 @@ type AccountMode = 'login' | 'create'
 
 /** E-mail + mot de passe : connexion à un compte existant, ou début de la création (suivie de la date de naissance). */
 function AccountStep({
-  email: initial,
+  email,
   mode,
   onMode,
   onBack,
@@ -216,35 +208,22 @@ function AccountStep({
   onBack: () => void
   onCreate: (email: string, password: string) => void
 }) {
-  const [email, setEmail] = useState(initial)
-  const [password, setPassword] = useState('')
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
-  const [busy, setBusy] = useState(false)
   const passwordRef = useRef<TextInput>(null)
   const create = mode === 'create'
-
-  const submit = async () => {
-    const parsedEmail = emailSchema.safeParse(email)
-    const passwordError = create
-      ? passwordSchema.safeParse(password).error?.issues[0]?.message
-      : password
-        ? undefined
-        : 'Saisis ton mot de passe.'
-    if (!parsedEmail.success || passwordError)
-      return setErrors({
-        email: parsedEmail.success
-          ? undefined
-          : 'Cette adresse e-mail ne semble pas valide. Vérifie-la.',
-        password: passwordError,
-      })
-    // Création : le compte n'est créé qu'après la date de naissance (âge vérifié par l'API)
-    if (create) return onCreate(parsedEmail.data, password)
-    setBusy(true)
-    const { error } = await authClient.signIn.email({ email: parsedEmail.data, password })
-    setBusy(false)
-    if (error) return setErrors({ password: 'E-mail ou mot de passe incorrect.' })
-    router.replace('/')
-  }
+  const form = useAppForm({
+    defaultValues: { email, password: '' },
+    onSubmit: async ({ value, formApi }) => {
+      const address = emailSchema.parse(value.email)
+      // Création : le compte n'est créé qu'après la date de naissance (âge vérifié par l'API)
+      if (create) return onCreate(address, value.password)
+      const { error } = await authClient.signIn.email({ email: address, password: value.password })
+      if (error)
+        return formApi.setErrorMap({
+          onSubmit: { fields: { password: 'E-mail ou mot de passe incorrect.' } },
+        })
+      router.replace('/')
+    },
+  })
 
   return (
     <Frame
@@ -252,11 +231,11 @@ function AccountStep({
       onBack={onBack}
       progress={create ? 1 : undefined}
       footer={
-        <StepButton
-          label={create ? 'Continuer' : 'Se connecter'}
-          disabled={busy}
-          onPress={() => void submit()}
-        />
+        <form.AppForm>
+          <StepAction>
+            <form.SubmitButton label={create ? 'Continuer' : 'Se connecter'} />
+          </StepAction>
+        </form.AppForm>
       }
     >
       <Segmented
@@ -264,41 +243,56 @@ function AccountStep({
         value={create ? 1 : 0}
         onChange={(i) => {
           onMode(i ? 'create' : 'login')
-          setErrors({})
+          // Les erreurs de l'autre mode ne valent plus : on garde la saisie
+          form.reset(form.state.values)
         }}
       />
-      <TextField
-        label="Adresse e-mail"
-        placeholder="toi@exemple.fr"
-        value={email}
-        onChangeText={(v) => {
-          setEmail(v)
-          setErrors((e) => ({ ...e, email: undefined }))
+      <form.AppField
+        name="email"
+        validators={{
+          onSubmit: ({ value }) =>
+            emailSchema.safeParse(value).success
+              ? undefined
+              : 'Cette adresse e-mail ne semble pas valide. Vérifie-la.',
         }}
-        error={errors.email}
-        autoFocus
-        autoCapitalize="none"
-        autoComplete="email"
-        keyboardType="email-address"
-        returnKeyType="next"
-        onSubmitEditing={() => passwordRef.current?.focus()}
-      />
-      <TextField
-        ref={passwordRef}
-        label="Mot de passe"
-        value={password}
-        onChangeText={(v) => {
-          setPassword(v)
-          setErrors((e) => ({ ...e, password: undefined }))
+      >
+        {(field) => (
+          <field.Text
+            label="Adresse e-mail"
+            placeholder="toi@exemple.fr"
+            autoFocus
+            autoCapitalize="none"
+            autoComplete="email"
+            keyboardType="email-address"
+            returnKeyType="next"
+            onSubmitEditing={() => passwordRef.current?.focus()}
+          />
+        )}
+      </form.AppField>
+      <form.AppField
+        name="password"
+        validators={{
+          onSubmit: ({ value }) =>
+            create
+              ? passwordSchema.safeParse(value).error?.issues[0]?.message
+              : value
+                ? undefined
+                : 'Saisis ton mot de passe.',
         }}
-        error={errors.password}
-        help={create ? `${PASSWORD_MIN} caractères minimum` : undefined}
-        secureTextEntry
-        autoCapitalize="none"
-        autoComplete={create ? 'new-password' : 'current-password'}
-        returnKeyType="done"
-        onSubmitEditing={() => void submit()}
-      />
+      >
+        {(field) => (
+          <field.Text
+            ref={passwordRef}
+            label="Mot de passe"
+            help={create ? `${PASSWORD_MIN} caractères minimum` : undefined}
+            secureTextEntry
+            autoCapitalize="none"
+            autoComplete={create ? 'new-password' : 'current-password'}
+            returnKeyType="done"
+            onSubmitEditing={() => void form.handleSubmit()}
+          />
+        )}
+      </form.AppField>
     </Frame>
   )
 }
@@ -311,76 +305,78 @@ function BirthStep({
   /** Renvoie un message d'erreur si le compte n'a pas pu être créé ou complété. */
   onDone: (date: Date) => Promise<string | undefined>
 }) {
-  const [day, setDay] = useState('')
-  const [month, setMonth] = useState('')
-  const [year, setYear] = useState('')
-  const [error, setError] = useState<string>()
-  const [busy, setBusy] = useState(false)
   const monthRef = useRef<TextInput>(null)
   const yearRef = useRef<TextInput>(null)
-
-  const submit = async () => {
-    const date = parseBirthDate(day, month, year)
-    if (!date || date > new Date())
-      return setError(
-        'Cette date n’existe pas. Saisis le jour, le mois et l’année, ex. 14 07 2004.',
-      )
-    setBusy(true)
-    const failure = await onDone(date)
-    setBusy(false)
-    if (failure) setError(failure)
-  }
-
-  // Champ à 2 ou 4 chiffres qui passe au suivant une fois rempli
-  const part = (
-    label: string,
-    value: string,
-    set: (v: string) => void,
-    max: 2 | 4,
-    next?: React.RefObject<TextInput | null>,
-    ref?: React.RefObject<TextInput | null>,
-  ) => (
-    <View style={{ flex: max === 4 ? 1.6 : 1 }}>
-      <TextField
-        ref={ref}
-        label={label}
-        placeholder={max === 4 ? 'AAAA' : label === 'Jour' ? 'JJ' : 'MM'}
-        value={value}
-        onChangeText={(v) => {
-          const digits = v.replace(/\D/g, '').slice(0, max)
-          set(digits)
-          setError(undefined)
-          if (digits.length === max) next?.current?.focus()
-        }}
-        keyboardType="number-pad"
-        maxLength={max}
-        returnKeyType={next ? 'next' : 'done'}
-        onSubmitEditing={next ? () => next.current?.focus() : () => void submit()}
-      />
-    </View>
-  )
+  const form = useAppForm({
+    defaultValues: { day: '', month: '', year: '' },
+    validators: {
+      onSubmit: ({ value }) => {
+        const date = parseBirthDate(value.day, value.month, value.year)
+        return !date || date > new Date()
+          ? 'Cette date n’existe pas. Saisis le jour, le mois et l’année, ex. 14 07 2004.'
+          : undefined
+      },
+    },
+    onSubmit: async ({ value, formApi }) => {
+      const date = parseBirthDate(value.day, value.month, value.year)
+      const failure = date ? await onDone(date) : undefined
+      if (failure) formApi.setErrorMap({ onSubmit: { form: failure, fields: {} } })
+    },
+  })
 
   return (
     <Frame
       title="Ta date de naissance"
       onBack={onBack}
       progress={2}
-      footer={<StepButton label="Continuer" disabled={busy} onPress={() => void submit()} />}
+      footer={
+        <form.AppForm>
+          <StepAction>
+            <form.SubmitButton label="Continuer" />
+          </StepAction>
+        </form.AppForm>
+      }
     >
       <Typography>
         Kwatro est ouvert dès {MIN_AGE} ans. Ta date de naissance règle ce que ton compte permet,
         elle n’est jamais affichée.
       </Typography>
       <View style={{ flexDirection: 'row', gap: 10 }}>
-        {part('Jour', day, setDay, 2, monthRef)}
-        {part('Mois', month, setMonth, 2, yearRef, monthRef)}
-        {part('Année', year, setYear, 4, undefined, yearRef)}
+        <View style={{ flex: 1 }}>
+          <form.AppField name="day">
+            {(field) => <field.Digits label="Jour" placeholder="JJ" length={2} next={monthRef} />}
+          </form.AppField>
+        </View>
+        <View style={{ flex: 1 }}>
+          <form.AppField name="month">
+            {(field) => (
+              <field.Digits
+                ref={monthRef}
+                label="Mois"
+                placeholder="MM"
+                length={2}
+                next={yearRef}
+              />
+            )}
+          </form.AppField>
+        </View>
+        <View style={{ flex: 1.6 }}>
+          <form.AppField name="year">
+            {(field) => (
+              <field.Digits
+                ref={yearRef}
+                label="Année"
+                placeholder="AAAA"
+                length={4}
+                onSubmitEditing={() => void form.handleSubmit()}
+              />
+            )}
+          </form.AppField>
+        </View>
       </View>
-      {error ? (
-        <Text role="alert" style={{ ...font('body', 700), fontSize: 13, color: colors.room }}>
-          {error}
-        </Text>
-      ) : null}
+      <form.AppForm>
+        <form.FormError />
+      </form.AppForm>
     </Frame>
   )
 }

@@ -4,17 +4,28 @@ import { focusManager, QueryClient } from '@tanstack/react-query'
 import { AppState, Platform } from 'react-native'
 import { ME } from '@/constants/queryKeys'
 
-/** Réponse de l'API en erreur : `status` permet de traiter un 401 ou un 409 à part. */
+/**
+ * Réponse de l'API en erreur : `status` permet de traiter un 401 ou un 409 à part,
+ * `message` est celui renvoyé par l'API (NestJS) quand il y en a un, à afficher tel quel.
+ */
 export class ApiError extends Error {
-  constructor(readonly status: number) {
-    super(`API : ${status}`)
+  constructor(
+    readonly status: number,
+    message = 'Une erreur est survenue, réessaie.',
+  ) {
+    super(message)
   }
 }
 
 /** Résultat d'un appel du client typé (`api.GET(…)`) → données, ou ApiError. Pour les `queryFn` et `mutationFn`. */
-export async function unwrap<T>(request: Promise<{ data?: T; response: Response }>): Promise<T> {
-  const { data, response } = await request
-  if (!response.ok) throw new ApiError(response.status)
+export async function unwrap<T>(
+  request: Promise<{ data?: T; error?: unknown; response: Response }>,
+): Promise<T> {
+  const { data, error, response } = await request
+  if (!response.ok) {
+    const message = (error as { message?: unknown } | undefined)?.message
+    throw new ApiError(response.status, typeof message === 'string' ? message : undefined)
+  }
   return data as T
 }
 

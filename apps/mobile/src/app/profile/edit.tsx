@@ -1,17 +1,13 @@
 import {
-  AvailabilityGrid,
-  Banner,
-  Button,
-  Chip,
   ConfirmDialog,
-  OptionCard,
   Panel,
   ScreenHeader,
   SkeletonCard,
   TextLink,
   Typography,
 } from '@kwatro/design-system'
-import { type Me, PLAY_VIBE_LABELS, PLAY_VIBES, type PlayVibe, pseudoSchema } from '@kwatro/shared'
+import { type Me, PLAY_VIBE_LABELS, PLAY_VIBES } from '@kwatro/shared'
+import { useStore } from '@tanstack/react-form'
 import { router, useNavigation } from 'expo-router'
 import { usePreventRemove } from 'expo-router/react-navigation'
 import { type ReactNode, useEffect, useState } from 'react'
@@ -19,12 +15,15 @@ import { useWindowDimensions, View } from 'react-native'
 import { PlayerScreen } from '@/components/PlayerScreen'
 import { IdentityFields } from '@/components/profile/IdentityFields'
 import { WhereFields } from '@/components/profile/WhereFields'
+import { profileBody, profileDefaults, profileFormOpts } from '@/forms/profile.form'
+import { useAppForm } from '@/hooks/formConfig'
 import { visibleAvatar } from '@/lib/profile'
 import { ApiError } from '@/lib/queryClient'
-import { useCityField } from '@/lib/useCityField'
 import { useMeMutations, useMeQuery } from '@/queries/useMe'
 
 const WIDE = 900
+
+const VIBE_OPTIONS = PLAY_VIBES.map((key) => ({ key, ...PLAY_VIBE_LABELS[key] }))
 
 const backToProfile = () => (router.canGoBack() ? router.back() : router.replace('/profile'))
 
@@ -48,29 +47,30 @@ export default function EditProfileScreen() {
 function EditForm({ me, wide }: { me: Me; wide: boolean }) {
   const navigation = useNavigation()
   const { updateProfile } = useMeMutations()
-  const initial = {
-    pseudo: me.pseudo ?? '',
-    name: me.name,
-    city: me.city ?? '',
-    radius: me.searchRadiusKm,
-    availability: me.availability,
-    vibes: me.vibes,
-  }
-  const [saved, setSaved] = useState(JSON.stringify(initial))
-  const [pseudo, setPseudo] = useState(initial.pseudo)
-  const [name, setName] = useState(initial.name)
-  const cityField = useCityField(me)
-  const [radius, setRadius] = useState(initial.radius)
-  const [availability, setAvailability] = useState(initial.availability)
-  const [vibes, setVibes] = useState(initial.vibes)
-  const [pseudoError, setPseudoError] = useState<string>()
-  const [failed, setFailed] = useState(false)
-  const [busy, setBusy] = useState(false)
   const [done, setDone] = useState(false)
   const [leaving, setLeaving] = useState<(() => void) | null>(null)
 
-  const draft = { pseudo, name, city: cityField.city, radius, availability, vibes }
-  const dirty = JSON.stringify(draft) !== saved
+  const form = useAppForm({
+    ...profileFormOpts,
+    defaultValues: profileDefaults(me),
+    onSubmit: async ({ value, formApi }) => {
+      try {
+        const saved = await updateProfile.mutateAsync(await profileBody(value))
+        // Les valeurs enregistrées deviennent la référence : plus de « modifications non enregistrées »
+        formApi.reset(profileDefaults(saved))
+        setDone(true)
+      } catch (error) {
+        formApi.setErrorMap({
+          onSubmit:
+            error instanceof ApiError && error.status === 409
+              ? { fields: { pseudo: 'Ce pseudo est déjà pris.' } }
+              : { form: 'L’enregistrement a échoué. Réessaie dans un instant.', fields: {} },
+        })
+      }
+    },
+  })
+  const dirty = !useStore(form.store, (state) => state.isDefaultValue)
+  const slots = useStore(form.store, (state) => state.values.availability.length)
 
   usePreventRemove(dirty, ({ data }) => setLeaving(() => () => navigation.dispatch(data.action)))
   // Une fois enregistré (dirty repassé à false), on peut revenir au profil
@@ -78,67 +78,26 @@ function EditForm({ me, wide }: { me: Me; wide: boolean }) {
     if (done) backToProfile()
   }, [done])
 
-  const toggleSlot = (slot: number) =>
-    setAvailability((slots) =>
-      slots.includes(slot)
-        ? slots.filter((s) => s !== slot)
-        : [...slots, slot].sort((a, b) => a - b),
-    )
-  const toggleVibe = (vibe: PlayVibe) =>
-    setVibes((list) => (list.includes(vibe) ? list.filter((v) => v !== vibe) : [...list, vibe]))
-
-  const save = async () => {
-    const parsed = pseudoSchema.safeParse(pseudo)
-    if (!parsed.success) return setPseudoError(parsed.error.issues[0]?.message)
-    setBusy(true)
-    setFailed(false)
-    const place = await cityField.resolve()
-    if (!place) return setBusy(false)
-    const result = await updateProfile
-      .mutateAsync({
-        pseudo: parsed.data,
-        name,
-        ...place,
-        searchRadiusKm: radius,
-        availability,
-        vibes,
-      })
-      .catch((error: unknown) => error)
-    setBusy(false)
-    if (result instanceof ApiError && result.status === 409)
-      return setPseudoError('Ce pseudo est déjà pris.')
-    if (result instanceof Error) return setFailed(true)
-    const data = result as Me
-    setSaved(JSON.stringify({ ...draft, pseudo: data.pseudo ?? '', city: data.city ?? '' }))
-    setDone(true)
-  }
-
   const identity = (
     <IdentityFields
+      form={form}
       compact={!wide}
-      pseudo={pseudo}
-      onPseudo={(v) => {
-        setPseudo(v)
-        setPseudoError(undefined)
-      }}
-      pseudoError={pseudoError}
       avatarUri={visibleAvatar(me)}
       avatarStatus={me.avatarStatus}
-      name={name}
-      onName={setName}
+      withName
     />
   )
-  const where = (
-    <WhereFields compact={!wide} cityField={cityField} radius={radius} onRadius={setRadius} />
-  )
+  const where = <WhereFields form={form} compact={!wide} />
   const slotCount = (
     <Typography variant="label">
-      {availability.length} créneau{availability.length > 1 ? 'x' : ''}
+      {slots} créneau{slots > 1 ? 'x' : ''}
     </Typography>
   )
-  const error = failed ? (
-    <Banner tone="err" message="L’enregistrement a échoué. Réessaie dans un instant." />
-  ) : null
+  const error = (
+    <form.AppForm>
+      <form.FormError />
+    </form.AppForm>
+  )
   const confirm = (
     <ConfirmDialog
       visible={!!leaving}
@@ -166,13 +125,9 @@ function EditForm({ me, wide }: { me: Me; wide: boolean }) {
             title="Modifier"
             onBack={backToProfile}
             right={
-              <Button
-                small
-                kind={dirty ? 'room' : 'ghost'}
-                label="Enregistrer"
-                disabled={busy}
-                onPress={() => void save()}
-              />
+              <form.AppForm>
+                <form.SubmitButton small kind={dirty ? 'room' : 'ghost'} label="Enregistrer" />
+              </form.AppForm>
             }
           />
         }
@@ -182,19 +137,13 @@ function EditForm({ me, wide }: { me: Me; wide: boolean }) {
         <Typography variant="h2">Où tu joues</Typography>
         <Panel compact>{where}</Panel>
         <Heading title="Disponibilités" right={slotCount} />
-        <AvailabilityGrid compact value={availability} onToggle={toggleSlot} />
+        <form.AppField name="availability">
+          {(field) => <field.Availability compact />}
+        </form.AppField>
         <Typography variant="h2">Ambiance</Typography>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-          {PLAY_VIBES.map((vibe) => (
-            <Chip
-              key={vibe}
-              tall
-              label={PLAY_VIBE_LABELS[vibe].label}
-              active={vibes.includes(vibe)}
-              onPress={() => toggleVibe(vibe)}
-            />
-          ))}
-        </View>
+        <form.AppField name="vibes">
+          {(field) => <field.MultiChoice compact options={VIBE_OPTIONS} />}
+        </form.AppField>
         {confirm}
       </PlayerScreen>
     )
@@ -209,7 +158,9 @@ function EditForm({ me, wide }: { me: Me; wide: boolean }) {
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
           {dirty ? <Typography variant="small">Modifications non enregistrées</Typography> : null}
-          <Button label="Enregistrer" disabled={busy} onPress={() => void save()} />
+          <form.AppForm>
+            <form.SubmitButton label="Enregistrer" />
+          </form.AppForm>
         </View>
       </View>
       {error}
@@ -224,7 +175,7 @@ function EditForm({ me, wide }: { me: Me; wide: boolean }) {
               Touche les créneaux où tu peux jouer. On te propose les rooms et soirées qui tombent
               dedans.
             </Typography>
-            <AvailabilityGrid value={availability} onToggle={toggleSlot} />
+            <form.AppField name="availability">{(field) => <field.Availability />}</form.AppField>
             <Typography variant="label">
               Matin 9 h – 12 h · Après-midi 12 h – 18 h · Soir 18 h – minuit
             </Typography>
@@ -233,17 +184,9 @@ function EditForm({ me, wide }: { me: Me; wide: boolean }) {
             <Typography variant="small">
               Comment tu aimes jouer. Affiché sur ton profil et utilisé pour te proposer des tables.
             </Typography>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-              {PLAY_VIBES.map((vibe) => (
-                <View key={vibe} style={{ width: '48%', flexGrow: 1 }}>
-                  <OptionCard
-                    {...PLAY_VIBE_LABELS[vibe]}
-                    value={vibes.includes(vibe)}
-                    onChange={() => toggleVibe(vibe)}
-                  />
-                </View>
-              ))}
-            </View>
+            <form.AppField name="vibes">
+              {(field) => <field.MultiChoice options={VIBE_OPTIONS} />}
+            </form.AppField>
           </Panel>
         </View>
       </View>

@@ -14,3 +14,18 @@ export const AGENDA = {
 export const EXPLORE = {
   TONIGHT: 'explore_tonight',
 } as const
+
+export const EVENT = {
+  GET: 'event',
+  REGISTER: 'register_event',
+  UNREGISTER: 'unregister_event',
+} as const
+
+export const VENUE = {
+  GET: 'venue',
+} as const
+
+export const GEOCODE = {
+  SEARCH: 'geocode_search',
+  REVERSE: 'geocode_reverse',
+} as const

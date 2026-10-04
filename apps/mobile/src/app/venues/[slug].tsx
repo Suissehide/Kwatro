@@ -13,21 +13,18 @@ import {
   Tag,
   Typography,
 } from '@kwatro/design-system'
-import { formatMinuteOfDay, formatPrice, VENUE_TYPE_LABELS, type VenueDetail } from '@kwatro/shared'
+import { formatMinuteOfDay, formatPrice, VENUE_TYPE_LABELS } from '@kwatro/shared'
 import { useLocalSearchParams } from 'expo-router'
-import { useCallback } from 'react'
 import { Linking, View } from 'react-native'
 import { DetailScreen } from '@/components/DetailScreen'
-import { api } from '@/lib/api'
 import { eventCardProps, gameLabel, openingLines } from '@/lib/explore'
 import { openEvent } from '@/lib/navigation'
-import { useDetail } from '@/lib/useDetail'
+import { useVenueQuery } from '@/queries/useVenue'
 
 /** Fiche lieu (B3, KWT-11) : infos pratiques, horaires, jeux sur place et prochains événements. */
 export default function VenueScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>()
-  const load = useCallback(() => api.GET('/venues/{slug}', { params: { path: { slug } } }), [slug])
-  const { data: venue, failed, retry } = useDetail<VenueDetail>(load)
+  const { data: venue, isError: failed, refetch } = useVenueQuery(slug)
 
   if (!venue) {
     return (
@@ -37,7 +34,7 @@ export default function VenueScreen() {
             tone="err"
             message="Impossible de charger ce lieu."
             action="Réessayer"
-            onAction={retry}
+            onAction={() => void refetch()}
           />
         ) : (
           <SkeletonCard />

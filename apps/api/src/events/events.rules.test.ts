@@ -40,4 +40,10 @@ describe('registrationOutcome', () => {
       status: 'REGISTERED',
     })
   })
+
+  it('refuse un compte sans date de naissance (âge invérifiable)', () => {
+    expect(registrationOutcome(event, 0, null, now)).toEqual({
+      refused: 'Renseigne ta date de naissance pour t’inscrire',
+    })
+  })
 })

@@ -1,6 +1,6 @@
 import {
   MobileScreen,
-  playerItems,
+  playerNavItems,
   ScreenHeader,
   TextLink,
   TopNav,
@@ -10,7 +10,7 @@ import type { ReactNode } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { goBack, openHome, openTab } from '@/lib/navigation'
-import { useMe } from '@/lib/useMe'
+import { useMeQuery } from '@/queries/useMe'
 
 const WIDE = 900
 
@@ -29,7 +29,7 @@ export function DetailScreen({
 }) {
   const wide = useWindowDimensions().width >= WIDE
   const insets = useSafeAreaInsets()
-  const me = useMe()
+  const me = useMeQuery()
 
   if (!wide) {
     return (
@@ -47,7 +47,7 @@ export function DetailScreen({
     <WebScreen
       nav={
         <TopNav
-          items={playerItems}
+          items={playerNavItems}
           active="explorer"
           onSelect={openTab}
           onHome={openHome}
