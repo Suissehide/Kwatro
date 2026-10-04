@@ -11,26 +11,29 @@ import {
   Tag,
   Typography,
 } from '@kwatro/design-system'
-import { EVENT_TYPE_LABELS, type EventDetail, formatPrice } from '@kwatro/shared'
+import { EVENT_TYPE_LABELS, formatPrice } from '@kwatro/shared'
 import { router, useLocalSearchParams } from 'expo-router'
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { Linking, View } from 'react-native'
 import { DetailScreen } from '@/components/DetailScreen'
-import { api } from '@/lib/api'
 import { eventPlaces, eventWhen, gameLabel, isFull } from '@/lib/explore'
 import { openVenue } from '@/lib/navigation'
-import { apiMessage, useDetail } from '@/lib/useDetail'
 import { useMe } from '@/lib/useMe'
+import { useEventMutations, useEventQuery } from '@/queries/useEvent'
 
 /** Fiche événement (B4, KWT-11) et inscription dans l'app, avec liste d'attente quand c'est complet. */
 export default function EventScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const me = useMe()
-  const load = useCallback(() => api.GET('/events/{id}', { params: { path: { id } } }), [id])
-  const { data: event, setData, failed, retry } = useDetail<EventDetail>(load)
-  const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { data: event, isError: failed, refetch } = useEventQuery(id)
+  const { register, unregister } = useEventMutations(id)
   const [confirmCancel, setConfirmCancel] = useState(false)
+  const pending = register.isPending || unregister.isPending
+  const error = register.error ?? unregister.error
+  const clearError = () => {
+    register.reset()
+    unregister.reset()
+  }
 
   if (!event) {
     return (
@@ -40,26 +43,13 @@ export default function EventScreen() {
             tone="err"
             message="Impossible de charger cet événement."
             action="Réessayer"
-            onAction={retry}
+            onAction={() => void refetch()}
           />
         ) : (
           <SkeletonCard />
         )}
       </DetailScreen>
     )
-  }
-
-  const mutate = async (method: 'POST' | 'DELETE') => {
-    setPending(true)
-    setError(null)
-    const params = { params: { path: { id } } }
-    const { data, error } = await (method === 'POST'
-      ? api.POST('/events/{id}/registration', params)
-      : api.DELETE('/events/{id}/registration', params)
-    ).catch((cause: unknown) => ({ data: undefined, error: cause }))
-    setPending(false)
-    if (data) setData(data)
-    else setError(apiMessage(error))
   }
 
   const games = event.games.length ? event.games.map(gameLabel).join(', ') : 'Tous jeux'
@@ -99,7 +89,7 @@ export default function EventScreen() {
         kind="event"
         label={isFull(event) ? "Rejoindre la liste d'attente" : "S'inscrire"}
         disabled={pending}
-        onPress={() => mutate('POST')}
+        onPress={() => register.mutate()}
       />
     )
   }
@@ -115,7 +105,7 @@ export default function EventScreen() {
         ) : null}
         {event.venue.isPartner ? <Tag variant="partner" label="Lieu partenaire" /> : null}
       </View>
-      {error ? <Banner tone="err" message={error} onClose={() => setError(null)} /> : null}
+      {error ? <Banner tone="err" message={error.message} onClose={clearError} /> : null}
       {event.registrationMode === 'NONE' && !event.cancelledAt ? (
         <Note tone="plain">Entrée libre : pas besoin de s'inscrire, viens directement.</Note>
       ) : null}
@@ -152,7 +142,7 @@ export default function EventScreen() {
         destructive
         onConfirm={() => {
           setConfirmCancel(false)
-          mutate('DELETE')
+          unregister.mutate()
         }}
         onCancel={() => setConfirmCancel(false)}
       />
