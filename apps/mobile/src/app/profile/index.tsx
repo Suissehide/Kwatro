@@ -1,6 +1,8 @@
 import {
   AvailabilityGrid,
   Button,
+  font,
+  IconButton,
   LevelCard,
   ListCard,
   Panel,
@@ -15,7 +17,7 @@ import { xpLevel } from '@kwatro/shared'
 import { router } from 'expo-router'
 import { useWindowDimensions, View } from 'react-native'
 import { PlayerScreen } from '@/components/PlayerScreen'
-import { AccountSection } from '@/components/profile/AccountSection'
+import { openSettings } from '@/lib/navigation'
 import { placeLine, rankProps, vibeLabels, visibleAvatar } from '@/lib/profile'
 import { useMeQuery } from '@/queries/useMe'
 
@@ -23,7 +25,7 @@ const WIDE = 900
 
 const openEdit = () => router.push('/profile/edit')
 
-/** Profil du joueur (F1) : identité, niveau, Kwote par jeu, disponibilités et compte. Les parties sont dans Mes parties. */
+/** Profil du joueur (F1) : identité, niveau, Kwote par jeu, disponibilités. Les parties sont dans Mes parties. */
 export default function ProfileScreen() {
   const wide = useWindowDimensions().width >= WIDE
   const me = useMeQuery({ required: true })
@@ -40,7 +42,15 @@ export default function ProfileScreen() {
       }}
     >
       <Typography variant="h2">Profil</Typography>
-      <Button small kind="ghost" label="Modifier" onPress={openEdit} />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <IconButton
+          size={44}
+          label="Réglages"
+          onPress={openSettings}
+          icon={<Typography style={{ ...font('body', 800), fontSize: 18 }}>⚙</Typography>}
+        />
+        <Button small kind="ghost" label="Modifier" onPress={openEdit} />
+      </View>
     </View>
   )
 
@@ -97,20 +107,17 @@ export default function ProfileScreen() {
     </Typography>
   )
 
-  const account = <AccountSection wide={wide} />
-
   if (!wide) {
     return (
       <PlayerScreen tab="profil" wide={false} header={header}>
         {identity}
         <Section title="Classements">{rankings}</Section>
-        {account}
       </PlayerScreen>
     )
   }
 
   return (
-    <PlayerScreen tab="profil" wide pseudo={pseudo}>
+    <PlayerScreen tab="profil" wide>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 72 }}>
         <View style={{ flex: 1, minWidth: 0 }}>{identity}</View>
         <View style={{ width: 380 }}>
@@ -129,7 +136,6 @@ export default function ProfileScreen() {
           <AvailabilityGrid value={me.availability} />
         </Panel>
       </Section>
-      {account}
     </PlayerScreen>
   )
 }

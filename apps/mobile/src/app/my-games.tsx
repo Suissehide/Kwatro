@@ -26,7 +26,7 @@ const WIDE = 900
 /** Mes parties (D1) : à venir et historique, groupées par période, filtrables par jeu. */
 export default function MyGamesScreen() {
   const wide = useWindowDimensions().width >= WIDE
-  const me = useMeQuery({ required: true })
+  useMeQuery({ required: true })
   const { agenda, failed, retry } = useAgendaQuery()
   const { tab } = useLocalSearchParams<{ tab?: string }>()
   const past = tab === 'history'
@@ -95,7 +95,7 @@ export default function MyGamesScreen() {
   }
 
   return (
-    <PlayerScreen tab="parties" wide pseudo={me?.pseudo}>
+    <PlayerScreen tab="parties" wide>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 24 }}>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Typography variant="hero">Mes parties</Typography>

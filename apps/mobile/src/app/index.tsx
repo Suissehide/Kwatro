@@ -14,12 +14,10 @@ import {
   PageTitle,
   PlayerTabBar,
   ProfileCard,
-  playerNavItems,
   RoomCard,
   radius,
   Section,
   SkeletonCard,
-  TopNav,
   Typography,
   VenueRow,
   WebScreen,
@@ -30,6 +28,7 @@ import { useState } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ExploreMap } from '@/components/explore/ExploreMap'
+import { PlayerNav } from '@/components/PlayerNav'
 import {
   eventCardProps,
   GAMES,
@@ -197,19 +196,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <WebScreen
-      nav={
-        <TopNav
-          items={playerNavItems}
-          active="explorer"
-          onSelect={openTab}
-          onHome={openHome}
-          right={<Button small kind="kwote" label="+ Créer une room" onPress={notYet} />}
-          avatar={me?.pseudo ?? ''}
-          onAvatar={() => openTab('profil')}
-        />
-      }
-    >
+    <WebScreen nav={<PlayerNav active="explorer" />}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 72 }}>
         <View style={{ flex: 1, minWidth: 0 }}>{title}</View>
         {me ? (

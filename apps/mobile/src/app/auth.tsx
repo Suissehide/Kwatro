@@ -1,4 +1,4 @@
-import { Button, font, Logo, Note, Segmented, Typography } from '@kwatro/design-system'
+import { Banner, Button, font, Logo, Note, Segmented, Typography } from '@kwatro/design-system'
 import {
   type AgeRegime,
   ageRegime,
@@ -9,7 +9,7 @@ import {
   passwordSchema,
 } from '@kwatro/shared'
 import * as Linking from 'expo-linking'
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { type TextInput, useWindowDimensions, View } from 'react-native'
 import { Frame, StepAction, StepButton, StepLayout, WIDE, Wide } from '@/components/StepFrame'
@@ -34,6 +34,7 @@ export default function AuthScreen() {
   /** Connecté par Apple / Google, il ne manque que la date de naissance (le compte existe déjà). */
   const [social, setSocial] = useState(false)
   const [providerError, setProviderError] = useState(false)
+  const { signedOut } = useLocalSearchParams<{ signedOut?: string }>()
   const wide = width >= WIDE
   const { setBirthDate } = useMeMutations()
 
@@ -123,7 +124,10 @@ export default function AuthScreen() {
         }
       >
         {wide ? (
-          <Typography>Connecte-toi ou crée ton compte Kwatro.</Typography>
+          <>
+            {signedOut ? <Banner tone="ok" message="Tu es déconnecté·e." /> : null}
+            <Typography>Connecte-toi ou crée ton compte Kwatro.</Typography>
+          </>
         ) : (
           <View style={{ flex: 1, justifyContent: 'center', gap: 12 }}>
             <Logo size={44} />

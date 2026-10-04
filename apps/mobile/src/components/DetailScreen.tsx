@@ -1,16 +1,9 @@
-import {
-  MobileScreen,
-  playerNavItems,
-  ScreenHeader,
-  TextLink,
-  TopNav,
-  WebScreen,
-} from '@kwatro/design-system'
+import { MobileScreen, ScreenHeader, TextLink, WebScreen } from '@kwatro/design-system'
 import type { ReactNode } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { goBack, openHome, openTab } from '@/lib/navigation'
-import { useMeQuery } from '@/queries/useMe'
+import { goBack } from '@/lib/navigation'
+import { PlayerNav } from './PlayerNav'
 
 const WIDE = 900
 
@@ -29,7 +22,6 @@ export function DetailScreen({
 }) {
   const wide = useWindowDimensions().width >= WIDE
   const insets = useSafeAreaInsets()
-  const me = useMeQuery()
 
   if (!wide) {
     return (
@@ -44,18 +36,7 @@ export function DetailScreen({
   }
 
   return (
-    <WebScreen
-      nav={
-        <TopNav
-          items={playerNavItems}
-          active="explorer"
-          onSelect={openTab}
-          onHome={openHome}
-          avatar={me?.pseudo ?? ''}
-          onAvatar={() => openTab('profil')}
-        />
-      }
-    >
+    <WebScreen nav={<PlayerNav active="explorer" create={false} />}>
       <View style={{ width: '100%', maxWidth: 760, alignSelf: 'center', gap: 28 }}>
         <View style={{ alignSelf: 'flex-start' }}>
           <TextLink label="← Retour" onPress={goBack} />

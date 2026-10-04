@@ -1,28 +1,19 @@
-import {
-  Button,
-  MobileScreen,
-  type PlayerTab,
-  PlayerTabBar,
-  playerNavItems,
-  TopNav,
-  WebScreen,
-} from '@kwatro/design-system'
+import { MobileScreen, type PlayerTab, PlayerTabBar, WebScreen } from '@kwatro/design-system'
 import type { ReactNode } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { notYet, openHome, openTab } from '@/lib/navigation'
+import { notYet, openTab } from '@/lib/navigation'
+import { PlayerNav } from './PlayerNav'
 
 /** Écran d'un onglet joueur : barre du site sur desktop, barre d'onglets sur téléphone. */
 export function PlayerScreen({
   tab,
   wide,
-  pseudo,
   header,
   pushed,
   children,
 }: {
   tab: PlayerTab
   wide: boolean
-  pseudo?: string | null
   /** Téléphone : en-tête fixe au-dessus du contenu. */
   header?: ReactNode
   /** Écran poussé (édition) : pas de barre d'onglets sur téléphone. */
@@ -51,20 +42,7 @@ export function PlayerScreen({
     )
   }
   return (
-    <WebScreen
-      nav={
-        <TopNav
-          items={playerNavItems}
-          active={tab}
-          onSelect={openTab}
-          onHome={openHome}
-          right={<Button small kind="kwote" label="+ Créer une room" onPress={notYet} />}
-          avatar={pseudo ?? ''}
-          onAvatar={() => openTab('profil')}
-        />
-      }
-      contentStyle={{ gap: 40 }}
-    >
+    <WebScreen nav={<PlayerNav active={tab} />} contentStyle={{ gap: 40 }}>
       {children}
     </WebScreen>
   )

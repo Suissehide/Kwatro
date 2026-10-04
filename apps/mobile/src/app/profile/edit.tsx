@@ -150,7 +150,7 @@ function EditForm({ me, wide }: { me: Me; wide: boolean }) {
   }
 
   return (
-    <PlayerScreen tab="profil" wide pseudo={me.pseudo}>
+    <PlayerScreen tab="profil" wide>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 24 }}>
         <View style={{ flex: 1, minWidth: 0, gap: 12, alignItems: 'flex-start' }}>
           <TextLink label="← Profil" onPress={backToProfile} />

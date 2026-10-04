@@ -2,15 +2,25 @@ import { Pressable, Text } from 'react-native'
 import { colors, font, transition } from '../tokens'
 import { useHover } from './useHover'
 
-export function TextLink({ label, onPress }: { label: string; onPress?: () => void }) {
+/** `muted` : lien discret souligné (ex. « Supprimer mon compte »). */
+export function TextLink({
+  label,
+  muted,
+  onPress,
+}: {
+  label: string
+  muted?: boolean
+  onPress?: () => void
+}) {
   const { hovered, hoverProps } = useHover()
   return (
     <Pressable role="link" onPress={onPress} {...hoverProps}>
       <Text
         style={{
-          ...font('body', 800),
+          ...font('body', muted ? 600 : 800),
           fontSize: 13,
-          color: hovered ? colors.room : colors.event,
+          color: hovered ? colors.room : muted ? colors.muted : colors.event,
+          textDecorationLine: muted ? 'underline' : 'none',
           ...transition(['color']),
         }}
       >

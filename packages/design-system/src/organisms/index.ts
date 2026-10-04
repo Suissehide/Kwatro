@@ -1,5 +1,7 @@
 // Organismes : sections d'interface complètes, composées de molécules et d'atomes.
+
 export * from './Accordion'
+export * from './AccountMenu'
 export * from './BarChart'
 export * from './BottomSheet'
 export * from './ConfirmDialog'

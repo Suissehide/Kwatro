@@ -4,6 +4,7 @@ import { router } from 'expo-router'
 import { useEffect } from 'react'
 import { ME } from '@/constants/queryKeys'
 import { api } from '@/lib/api'
+import { authClient } from '@/lib/auth'
 import { ApiError, queryClient, unwrap } from '@/lib/queryClient'
 
 // * QUERIES
@@ -30,6 +31,13 @@ export function useMeQuery({ required = false } = {}) {
 
 /** Oublie le joueur connecté (déconnexion, changement de compte). */
 export const forgetMe = () => queryClient.removeQueries({ queryKey: [ME.GET] })
+
+/** Déconnexion : session Better Auth fermée, cache vidé, retour à la connexion. */
+export async function signOut() {
+  await authClient.signOut().catch(() => undefined)
+  queryClient.clear()
+  router.replace({ pathname: '/auth', params: { signedOut: '1' } })
+}
 
 // * MUTATIONS
 
