@@ -26,7 +26,7 @@ const WIDE = 900
 /** Mes parties (D1) : à venir et historique, groupées par période, filtrables par jeu. */
 export default function MyGamesScreen() {
   const wide = useWindowDimensions().width >= WIDE
-  const me = useMe()
+  const me = useMe({ required: true })
   const { agenda, failed, retry } = useAgenda()
   const { tab } = useLocalSearchParams<{ tab?: string }>()
   const past = tab === 'history'

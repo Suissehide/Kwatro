@@ -43,7 +43,7 @@ const openGames = (tab?: 'history') => router.navigate({ pathname: '/my-games', 
 /** Profil du joueur (F1) : identité, niveau, Kwote par jeu, prochaines et dernières parties, disponibilités. */
 export default function ProfileScreen() {
   const wide = useWindowDimensions().width >= WIDE
-  const me = useMe()
+  const me = useMe({ required: true })
   const { agenda, failed, retry } = useAgenda()
 
   const header = wide ? null : (

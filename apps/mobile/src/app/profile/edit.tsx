@@ -31,7 +31,7 @@ const backToProfile = () => (router.canGoBack() ? router.back() : router.replace
 /** Modifier le profil (F3) : pseudo, prénom et nom privés, ville et rayon, disponibilités, ambiance. */
 export default function EditProfileScreen() {
   const wide = useWindowDimensions().width >= WIDE
-  const me = useMe()
+  const me = useMe({ required: true })
   if (me) return <EditForm me={me} wide={wide} />
   return (
     <PlayerScreen

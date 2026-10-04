@@ -16,7 +16,7 @@ import { useMe } from '@/lib/useMe'
 /** Mon compte : suppression du compte depuis l'app (exigence Apple, KWT-18). */
 export default function AccountScreen() {
   const insets = useSafeAreaInsets()
-  const me = useMe()
+  const me = useMe({ required: true })
   const [confirming, setConfirming] = useState(false)
   const [failed, setFailed] = useState(false)
 

@@ -22,7 +22,7 @@ const finish = () => router.replace('/')
  */
 export default function OnboardingScreen() {
   const wide = useWindowDimensions().width >= WIDE
-  const me = useMe()
+  const me = useMe({ required: true })
   const [step, setStep] = useState<Step>('intro')
   const current = wide && step === 'intro' ? 'pseudo' : step
 
