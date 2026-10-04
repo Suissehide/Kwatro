@@ -4,13 +4,14 @@ import { border, colors, font, space } from '../tokens'
 
 /**
  * Squelette d'écran mobile : fond cream, pastille « MODE LIEU » optionnelle, en-tête,
- * contenu (défilant par défaut), pied fixe (actions) et barre d'onglets.
+ * contenu (défilant par défaut, suivi du pied de page du site), pied fixe (actions) et barre d'onglets.
  * Les marges de sécurité viennent de l'app (react-native-safe-area-context) via `insets`.
  */
 export function MobileScreen({
   header,
   children,
   footer,
+  siteFooter,
   tabBar,
   venueMode,
   scroll = true,
@@ -20,6 +21,8 @@ export function MobileScreen({
   children: ReactNode
   /** Pied fixe (boutons d'action), au-dessus de la barre d'onglets. */
   footer?: ReactNode
+  /** Pied de page du site (SiteFooter), en fin de contenu défilant. */
+  siteFooter?: ReactNode
   tabBar?: ReactNode
   /** Nom du lieu : affiche la pastille « MODE LIEU · <nom> ». */
   venueMode?: string
@@ -51,8 +54,9 @@ export function MobileScreen({
       ) : null}
       {header}
       {scroll ? (
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={body}>
-          {children}
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
+          <View style={[{ flexGrow: 1 }, body]}>{children}</View>
+          {siteFooter}
         </ScrollView>
       ) : (
         <View style={[{ flex: 1 }, body]}>{children}</View>

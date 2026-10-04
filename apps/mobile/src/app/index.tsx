@@ -18,6 +18,7 @@ import {
   RoomCard,
   radius,
   Section,
+  SiteFooter,
   SkeletonCard,
   TopNav,
   Typography,
@@ -37,7 +38,7 @@ import {
   todayLine,
   venueRowProps,
 } from '@/lib/explore'
-import { notYet, openHome, openTab } from '@/lib/navigation'
+import { notYet, openHome, openTab, SITE_URL } from '@/lib/navigation'
 import { useMe } from '@/lib/useMe'
 import { useTonight } from '@/lib/useTonight'
 
@@ -162,6 +163,7 @@ export default function HomeScreen() {
     return (
       <MobileScreen
         insets={insets}
+        siteFooter={<SiteFooter compact siteUrl={SITE_URL} />}
         header={
           <BrandHeader
             onHome={openHome}
@@ -194,6 +196,7 @@ export default function HomeScreen() {
 
   return (
     <WebScreen
+      footer={<SiteFooter siteUrl={SITE_URL} />}
       nav={
         <TopNav
           items={playerItems}

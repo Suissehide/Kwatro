@@ -385,15 +385,6 @@
 }
 
 /* ---- Pied de page ---- */
-.footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding-block: 40px;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .marqueeTrack {
     animation: none;

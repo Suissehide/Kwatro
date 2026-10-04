@@ -4,6 +4,9 @@ import { router } from 'expo-router'
 // ponytail: seules les pages existantes y sont ; ajouter Mes parties, Messages et Profil avec leurs écrans
 const TAB_ROUTES: Partial<Record<PlayerTab, '/'>> = { explorer: '/' }
 
+/** Site public : pages légales, aide, villes (liens du pied de page). */
+export const SITE_URL = process.env.EXPO_PUBLIC_SITE_URL ?? 'https://kwatro.fr'
+
 export const openHome = () => router.navigate('/')
 
 export function openTab(tab: string) {

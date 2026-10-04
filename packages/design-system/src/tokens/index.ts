@@ -7,6 +7,7 @@ export const colors = {
   white: '#FFFFFF', // surfaces, cartes, champs
   ink: '#16130F', // texte, traits, ombres
   muted: '#4B4339', // texte secondaire
+  creamMuted: '#E9DCC4', // texte secondaire sur fond ink
   line: '#E6D3AE', // séparateurs internes
   creamDark: '#FBE7C2', // en-têtes de tableau
   disabledBg: '#EFE4CF',
@@ -54,6 +55,7 @@ const families = {
   display: { 400: 'ArchivoBlack_400Regular' },
   body: {
     400: 'Archivo_400Regular',
+    500: 'Archivo_500Medium',
     600: 'Archivo_600SemiBold',
     700: 'Archivo_700Bold',
     800: 'Archivo_800ExtraBold',

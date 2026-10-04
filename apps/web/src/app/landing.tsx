@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import dynamic from 'next/dynamic'
 import { useRef } from 'react'
 import s from './landing.module.css'
+import { Footer } from './site-footer'
 import { WaitlistForm } from './waitlist-form'
 
 gsap.registerPlugin(ScrollTrigger, useGSAP)
@@ -207,10 +208,7 @@ export function Landing() {
         </section>
       </main>
 
-      <footer className={`${s.wrap} ${s.footer}`}>
-        <span className={s.logo}>Kwatro</span>
-        <span className="kw-small">Où jouer ce soir ? · 2026</span>
-      </footer>
+      <Footer />
     </div>
   )
 }
