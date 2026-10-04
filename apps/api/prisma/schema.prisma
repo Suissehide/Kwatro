@@ -22,9 +22,15 @@ enum UserRole {
 model User {
   id                 String    @id @default(cuid())
   email              String    @unique
-  pseudo             String    @unique
-  birthDate          DateTime  @db.Date
-  role               UserRole  @default(PLAYER)
+  /// Nom transmis par Apple / Google (champ `name` de Better Auth), jamais montré aux autres joueurs
+  name               String    @default("")
+  emailVerified      Boolean   @default(false)
+  image              String?
+  /// Choisi à l'onboarding (KWT-45) : null juste après la création du compte
+  pseudo             String?   @unique
+  /// Saisie à l'inscription par e-mail, demandée après une première connexion Apple / Google
+  birthDate          DateTime? @db.Date
+  role              UserRole  @default(PLAYER)
   city               String?
   searchRadiusKm     Int       @default(10)
   /// Compte parent lié (mineurs de 13-14 ans)
@@ -43,6 +49,55 @@ model User {
   visits           Visit[]
   staffOf          VenueStaff[]
   eventRegistrations EventRegistration[]
+  sessions           Session[]
+  accounts           Account[]
+}
+
+// ---------- Auth (tables Better Auth, KWT-9) ----------
+
+model Session {
+  id        String   @id
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+/// Moyen de connexion : `credential` (e-mail + mot de passe haché), `apple` ou `google`
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
 }
 
 // ---------- Jeux ----------

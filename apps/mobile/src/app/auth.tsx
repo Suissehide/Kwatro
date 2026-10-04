@@ -25,11 +25,22 @@ import {
   parseBirthDate,
   passwordSchema,
 } from '@kwatro/shared'
+import * as Linking from 'expo-linking'
 import { router } from 'expo-router'
-import { createContext, type ReactNode, useContext, useRef, useState } from 'react'
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { Text, type TextInput, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { TableScene } from '@/components/TableScene'
+import { api } from '@/lib/api'
+import { authClient } from '@/lib/auth'
 import { openHome } from '@/lib/navigation'
 
 type Step = 'welcome' | 'email' | 'birth' | AgeRegime
@@ -38,14 +49,65 @@ type Step = 'welcome' | 'email' | 'birth' | AgeRegime
 const WIDE = 900
 const Wide = createContext(false)
 
-/** Accueil (A1), e-mail (A2) et date de naissance obligatoire (A3, KWT-44). Téléphone et navigateur desktop. */
+/**
+ * Accueil (A1), e-mail (A2) et date de naissance obligatoire (A3, KWT-44), branchés sur Better Auth (KWT-9).
+ * Téléphone et navigateur desktop.
+ */
 export default function AuthScreen() {
   const { width } = useWindowDimensions()
   const [step, setStep] = useState<Step>('welcome')
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [mode, setMode] = useState<AccountMode>('login')
-  const [providerSoon, setProviderSoon] = useState(false)
+  /** Connecté par Apple / Google, il ne manque que la date de naissance (le compte existe déjà). */
+  const [social, setSocial] = useState(false)
+  const [providerError, setProviderError] = useState(false)
   const wide = width >= WIDE
+
+  /** Après une connexion : accueil, ou date de naissance si Apple / Google vient de créer le compte. */
+  const resume = useCallback(async () => {
+    const { data: session } = await authClient.getSession()
+    if (!session) return
+    const { data: me } = await api.GET('/me')
+    if (!me) return
+    if (me.hasBirthDate) return router.replace('/')
+    setSocial(true)
+    setStep('birth')
+  }, [])
+
+  // Retour d'Apple / Google sur le web (la page est rechargée sur /auth), ou joueur déjà connecté
+  useEffect(() => {
+    void resume()
+  }, [resume])
+
+  const signInWith = async (provider: 'apple' | 'google') => {
+    setProviderError(false)
+    const { error } = await authClient.signIn.social({
+      provider,
+      callbackURL: Linking.createURL('/auth'),
+    })
+    if (error) return setProviderError(true)
+    // Téléphone : le navigateur système est refermé, la session est là
+    await resume()
+  }
+
+  /** Fin de l'étape date de naissance : crée le compte e-mail, ou complète celui d'Apple / Google. */
+  const finishBirth = async (date: Date): Promise<string | undefined> => {
+    const regime = ageRegime(date)
+    const birthDate = date.toISOString().slice(0, 10)
+    if (social) {
+      const { response } = await api.POST('/me/birth-date', { body: { birthDate } })
+      // 403 : trop jeune, l'API a supprimé le compte créé par Apple / Google
+      if (response.status === 403) await authClient.signOut().catch(() => undefined)
+      else if (!response.ok) return 'Impossible d’enregistrer ta date de naissance. Réessaie.'
+    } else if (regime !== 'too-young') {
+      const { error } = await authClient.signUp.email({ email, password, name: '', birthDate })
+      if (error?.code?.startsWith('USER_ALREADY_EXISTS'))
+        return 'Un compte existe déjà avec cet e-mail. Reviens en arrière pour te connecter.'
+      if (error) return 'Impossible de créer ton compte pour l’instant. Réessaie.'
+    }
+    setStep(regime)
+  }
 
   let content: ReactNode
   if (step === 'welcome') {
@@ -57,22 +119,21 @@ export default function AuthScreen() {
           <>
             {/* Desktop : le trio prend la largeur du plus long bouton, pas toute la carte */}
             <View style={wide ? { alignSelf: 'flex-start', gap: 12 } : { gap: 10 }}>
-              {/* ponytail: Apple et Google affichés pour l'aperçu, branchés par KWT-9 (Better Auth) */}
               <Button
                 label="Continuer avec Apple"
                 kind="ink"
-                onPress={() => setProviderSoon(true)}
+                onPress={() => void signInWith('apple')}
               />
               <Button
                 label="Continuer avec Google"
                 kind="ghost"
-                onPress={() => setProviderSoon(true)}
+                onPress={() => void signInWith('google')}
               />
               <Button label="Continuer avec un e-mail" onPress={() => setStep('email')} />
             </View>
-            {providerSoon ? (
+            {providerError ? (
               <Note>
-                La connexion avec Apple ou Google arrive bientôt. Utilise ton e-mail en attendant.
+                La connexion avec Apple ou Google n’a pas marché. Réessaie, ou utilise ton e-mail.
               </Note>
             ) : null}
             <Typography variant="small" style={wide ? null : { textAlign: 'center' }}>
@@ -102,16 +163,27 @@ export default function AuthScreen() {
         mode={mode}
         onMode={setMode}
         onBack={() => setStep('welcome')}
-        onCreate={(e) => {
+        onCreate={(e, p) => {
           setEmail(e)
+          setPassword(p)
           setStep('birth')
         }}
       />
     )
   } else if (step === 'birth') {
-    content = <BirthStep onBack={() => setStep('email')} onDone={setStep} />
+    content = (
+      <BirthStep onBack={() => setStep(social ? 'welcome' : 'email')} onDone={finishBirth} />
+    )
   } else {
-    content = <Outcome regime={step} onRestart={() => setStep('welcome')} />
+    content = (
+      <Outcome
+        regime={step}
+        onRestart={() => {
+          setSocial(false)
+          setStep('welcome')
+        }}
+      />
+    )
   }
 
   return (
@@ -216,7 +288,12 @@ function Frame({
 }
 
 /** Bouton d'étape : pleine largeur sur téléphone (pied d'écran), à sa taille sur desktop. */
-function StepButton(props: { label: string; kind?: 'room' | 'ghost'; onPress: () => void }) {
+function StepButton(props: {
+  label: string
+  kind?: 'room' | 'ghost'
+  disabled?: boolean
+  onPress: () => void
+}) {
   const wide = useContext(Wide)
   return (
     <View style={wide ? { alignSelf: 'flex-start' } : null}>
@@ -239,15 +316,16 @@ function AccountStep({
   mode: AccountMode
   onMode: (mode: AccountMode) => void
   onBack: () => void
-  onCreate: (email: string) => void
+  onCreate: (email: string, password: string) => void
 }) {
   const [email, setEmail] = useState(initial)
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [busy, setBusy] = useState(false)
   const passwordRef = useRef<TextInput>(null)
   const create = mode === 'create'
 
-  const submit = () => {
+  const submit = async () => {
     const parsedEmail = emailSchema.safeParse(email)
     const passwordError = create
       ? passwordSchema.safeParse(password).error?.issues[0]?.message
@@ -261,9 +339,13 @@ function AccountStep({
           : 'Cette adresse e-mail ne semble pas valide. Vérifie-la.',
         password: passwordError,
       })
-    // ponytail: ni connexion ni création côté API pour l'instant, branchées par KWT-9 (Better Auth)
-    if (create) onCreate(parsedEmail.data)
-    else router.replace('/')
+    // Création : le compte n'est créé qu'après la date de naissance (âge vérifié par l'API)
+    if (create) return onCreate(parsedEmail.data, password)
+    setBusy(true)
+    const { error } = await authClient.signIn.email({ email: parsedEmail.data, password })
+    setBusy(false)
+    if (error) return setErrors({ password: 'E-mail ou mot de passe incorrect.' })
+    router.replace('/')
   }
 
   return (
@@ -271,7 +353,13 @@ function AccountStep({
       title={create ? 'Créer un compte' : 'Se connecter'}
       onBack={onBack}
       progress={create ? 1 : undefined}
-      footer={<StepButton label={create ? 'Continuer' : 'Se connecter'} onPress={submit} />}
+      footer={
+        <StepButton
+          label={create ? 'Continuer' : 'Se connecter'}
+          disabled={busy}
+          onPress={() => void submit()}
+        />
+      }
     >
       <Segmented
         items={['Se connecter', 'Créer un compte']}
@@ -311,7 +399,7 @@ function AccountStep({
         autoCapitalize="none"
         autoComplete={create ? 'new-password' : 'current-password'}
         returnKeyType="done"
-        onSubmitEditing={submit}
+        onSubmitEditing={() => void submit()}
       />
     </Frame>
   )
@@ -322,22 +410,27 @@ function BirthStep({
   onDone,
 }: {
   onBack: () => void
-  onDone: (regime: AgeRegime) => void
+  /** Renvoie un message d'erreur si le compte n'a pas pu être créé ou complété. */
+  onDone: (date: Date) => Promise<string | undefined>
 }) {
   const [day, setDay] = useState('')
   const [month, setMonth] = useState('')
   const [year, setYear] = useState('')
   const [error, setError] = useState<string>()
+  const [busy, setBusy] = useState(false)
   const monthRef = useRef<TextInput>(null)
   const yearRef = useRef<TextInput>(null)
 
-  const submit = () => {
+  const submit = async () => {
     const date = parseBirthDate(day, month, year)
     if (!date || date > new Date())
       return setError(
         'Cette date n’existe pas. Saisis le jour, le mois et l’année, ex. 14 07 2004.',
       )
-    onDone(ageRegime(date))
+    setBusy(true)
+    const failure = await onDone(date)
+    setBusy(false)
+    if (failure) setError(failure)
   }
 
   // Champ à 2 ou 4 chiffres qui passe au suivant une fois rempli
@@ -364,7 +457,7 @@ function BirthStep({
         keyboardType="number-pad"
         maxLength={max}
         returnKeyType={next ? 'next' : 'done'}
-        onSubmitEditing={next ? () => next.current?.focus() : submit}
+        onSubmitEditing={next ? () => next.current?.focus() : () => void submit()}
       />
     </View>
   )
@@ -374,7 +467,7 @@ function BirthStep({
       title="Ta date de naissance"
       onBack={onBack}
       progress={2}
-      footer={<StepButton label="Continuer" onPress={submit} />}
+      footer={<StepButton label="Continuer" disabled={busy} onPress={() => void submit()} />}
     >
       <Typography>
         Kwatro est ouvert dès {MIN_AGE} ans. Ta date de naissance règle ce que ton compte permet,
