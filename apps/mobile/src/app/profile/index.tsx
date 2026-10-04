@@ -97,7 +97,7 @@ export default function ProfileScreen() {
     </Typography>
   )
 
-  const account = <AccountSection email={me.email} wide={wide} />
+  const account = <AccountSection wide={wide} />
 
   if (!wide) {
     return (

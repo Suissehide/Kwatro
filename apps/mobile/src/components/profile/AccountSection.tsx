@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { View } from 'react-native'
 import { api } from '@/lib/api'
 
-/** Compte : e-mail de connexion et suppression du compte depuis l'app (exigence Apple, KWT-18). */
-export function AccountSection({ email, wide }: { email: string; wide: boolean }) {
+/** Compte : suppression du compte depuis l'app (exigence Apple, KWT-18). */
+export function AccountSection({ wide }: { wide: boolean }) {
   const [confirming, setConfirming] = useState(false)
   const [failed, setFailed] = useState(false)
 
@@ -19,7 +19,6 @@ export function AccountSection({ email, wide }: { email: string; wide: boolean }
   return (
     <Section title="Compte">
       <Panel compact={!wide}>
-        <Typography variant="small">Connecté avec {email}</Typography>
         <Typography variant="title">Supprimer mon compte</Typography>
         <Typography variant="small">
           Ton profil, tes niveaux et tes inscriptions à venir sont supprimés ; tes rooms à venir
