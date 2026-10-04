@@ -1,9 +1,20 @@
 import { Pressable, Text, View } from 'react-native'
-import { border, colors, font, motion, onColor, radius, shadow, transition } from '../tokens'
+import {
+  border,
+  colors,
+  font,
+  motion,
+  onColor,
+  radius,
+  semantic,
+  shadow,
+  transition,
+} from '../tokens'
 import { Raised } from './Raised'
 import { useHover } from './useHover'
 
-export type ButtonKind = 'room' | 'event' | 'venue' | 'kwote' | 'ink' | 'ghost'
+/** `ghost` et `soft` (action secondaire, liste d'attente) n'ont pas d'ombre. */
+export type ButtonKind = 'room' | 'event' | 'venue' | 'kwote' | 'ink' | 'ghost' | 'soft'
 const bg: Record<ButtonKind, string> = {
   room: colors.room,
   event: colors.event,
@@ -11,6 +22,7 @@ const bg: Record<ButtonKind, string> = {
   kwote: colors.kwote,
   ink: colors.ink,
   ghost: colors.white,
+  soft: semantic.neutralSoft,
 }
 const fg: Record<ButtonKind, string> = {
   room: onColor.room,
@@ -19,6 +31,7 @@ const fg: Record<ButtonKind, string> = {
   kwote: onColor.kwote,
   ink: onColor.ink,
   ghost: colors.ink,
+  soft: colors.ink,
 }
 
 /** Bouton : à l'appui il glisse de la taille de son ombre, qui disparaît. */
@@ -38,7 +51,8 @@ export function Button({
   const off = small ? shadow.sm : shadow.md
   const r = small ? 9 : radius.button
   const { hovered, hoverProps } = useHover()
-  const lifted = hovered && !disabled && kind !== 'ghost'
+  const flat = kind === 'ghost' || kind === 'soft'
+  const lifted = hovered && !disabled && !flat
   return (
     <Pressable
       role="button"
@@ -56,7 +70,7 @@ export function Button({
             style={{
               backgroundColor: disabled
                 ? colors.disabledBg
-                : kind === 'ghost' && hovered
+                : flat && hovered
                   ? colors.hover
                   : bg[kind],
               borderWidth: small ? border.thin : border.base,
@@ -69,7 +83,7 @@ export function Button({
               justifyContent: 'center',
               ...transition(['transform', 'background-color'], motion.fast),
               transform:
-                pressed && kind !== 'ghost'
+                pressed && !flat
                   ? [{ translateX: off }, { translateY: off }]
                   : lifted
                     ? [{ translateX: -1 }, { translateY: -1 }]
@@ -91,7 +105,7 @@ export function Button({
         // Structure fixe pendant l'appui : la face glisse pile sur son ombre, qui disparaît dessous.
         // Retirer <Raised> à l'appui recréait la face sous le curseur : sur le web, Chrome n'envoie
         // alors pas de « click » au relâchement et onPress n'était jamais appelé.
-        return kind === 'ghost' || disabled ? (
+        return flat || disabled ? (
           face
         ) : (
           <Raised offset={off} r={r}>

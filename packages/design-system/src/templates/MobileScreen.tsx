@@ -10,6 +10,7 @@ import { border, colors, font, space } from '../tokens'
  */
 export function MobileScreen({
   header,
+  hero,
   children,
   footer,
   siteFooter = true,
@@ -19,6 +20,8 @@ export function MobileScreen({
   insets = { top: 0, bottom: 0 },
 }: {
   header?: ReactNode
+  /** Pleine largeur en haut du contenu défilant (photo d'une fiche), sans marge ni encoche. */
+  hero?: ReactNode
   children: ReactNode
   /** Pied fixe (boutons d'action), au-dessus de la barre d'onglets. */
   footer?: ReactNode
@@ -32,7 +35,7 @@ export function MobileScreen({
 }) {
   const body = { paddingHorizontal: space.screen, paddingTop: 4, paddingBottom: 16, gap: 14 }
   return (
-    <View style={{ flex: 1, backgroundColor: colors.cream, paddingTop: insets.top }}>
+    <View style={{ flex: 1, backgroundColor: colors.cream, paddingTop: hero ? 0 : insets.top }}>
       {venueMode ? (
         <View style={{ alignItems: 'center', marginBottom: 6 }}>
           <Text
@@ -56,7 +59,10 @@ export function MobileScreen({
       {header}
       {scroll ? (
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
-          <View style={[{ flexGrow: 1 }, body]}>{children}</View>
+          {hero}
+          <View style={[{ flexGrow: 1 }, body, hero ? { paddingTop: space.screen } : null]}>
+            {children}
+          </View>
           {siteFooter ? <SiteFooter compact siteUrl={SITE_URL} /> : null}
         </ScrollView>
       ) : (

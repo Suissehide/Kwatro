@@ -390,19 +390,56 @@ export interface operations {
                         openNow: boolean | null;
                         closesAtMinute: number | null;
                         city: string;
+                        quarter: string | null;
                         description: string | null;
                         playFeeCents: number | null;
                         minSpendCents: number | null;
                         acceptsUnaccompaniedMinors: boolean;
+                        phone: string | null;
+                        website: string | null;
+                        transitInfo: string | null;
+                        nextOpening: {
+                            /** Format: date */
+                            date: string;
+                            minute: number;
+                        } | null;
+                        photos: {
+                            url: string;
+                            caption: string | null;
+                        }[];
                         openingHours: {
                             weekday: number;
                             opensAtMinute: number;
                             closesAtMinute: number;
                         }[];
+                        closures: {
+                            /** Format: date */
+                            startsOn: string;
+                            /** Format: date */
+                            endsOn: string;
+                            /** @enum {string} */
+                            kind: "CLOSED" | "SPECIAL_HOURS";
+                            label: string;
+                            note: string | null;
+                            opensAtMinute: number | null;
+                            closesAtMinute: number | null;
+                        }[];
+                        accessibility: {
+                            label: string;
+                            /** @enum {string} */
+                            status: "YES" | "NO" | "INFO";
+                            note?: string | null;
+                        }[];
                         games: {
                             slug: string;
                             name: string;
+                            /** @enum {string} */
+                            kind: "TCG" | "BOARD_GAME";
                         }[];
+                        tcgNote: string | null;
+                        boardGames: string[];
+                        boardGameCount: number | null;
+                        boardGameNote: string | null;
                         events: {
                             id: string;
                             title: string;
@@ -419,6 +456,28 @@ export interface operations {
                                 slug: string;
                                 name: string;
                             }[];
+                            seriesId: string | null;
+                            externalUrl: string | null;
+                        }[];
+                        rooms: {
+                            id: string;
+                            /** @enum {string} */
+                            mode: "RANKED" | "CASUAL";
+                            /** Format: date-time */
+                            startsAt: string;
+                            capacity: number;
+                            game: {
+                                slug: string;
+                                name: string;
+                            };
+                            format: string | null;
+                            players: {
+                                initial: string;
+                            }[];
+                            kwoteRange: {
+                                min: number;
+                                max: number;
+                            } | null;
                         }[];
                     };
                 };
