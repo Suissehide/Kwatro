@@ -25,6 +25,7 @@ import {
   AvatarStack,
   Banner,
   Brand,
+  CardFan,
   ChatBubble,
   ChipGroup,
   ContentCard,
@@ -235,6 +236,7 @@ export function Catalogue() {
           action={<Button label="Créer une room" small />}
         />
         <SkeletonCard />
+        <CardFan size="sm" />
         <Brand />
         <PageTitle eyebrow="Samedi 3 octobre · Bordeaux" title="Ce soir près de toi" />
         <ChipGroup
