@@ -15,6 +15,8 @@ export const colors = {
   disabledBorder: '#C9BBA1',
   placeholder: '#776B5C', // 5,2:1 sur blanc (l'ancien #8A7F70 échouait)
   hover: '#FFF8EA', // ligne de tableau survolée
+  creamPale: '#F7EBD3', // cases hors du mois (calendrier)
+  hatch: '#F6EEDD', // hachures des jours fermés
   skeleton: '#F3DFB8',
   skeletonSoft: '#FBEACB',
   scrim: 'rgba(22,19,15,0.55)',

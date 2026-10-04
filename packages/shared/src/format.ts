@@ -33,8 +33,23 @@ export function formatDayMonth(date: Date | string, timeZone = VENUE_TIME_ZONE) 
   return { day: get('day'), month: get('month').replace('.', '').slice(0, 3).toUpperCase() }
 }
 
-/** Minutes depuis minuit → « 1 h », « 19 h 30 ». */
+/** Distance à vol d'oiseau en mètres (haversine), assez précise pour « 1,2 km ». */
+export function metersBetween(
+  a: { latitude: number; longitude: number },
+  b: { latitude: number; longitude: number },
+) {
+  const rad = (deg: number) => (deg * Math.PI) / 180
+  const h =
+    Math.sin(rad(b.latitude - a.latitude) / 2) ** 2 +
+    Math.cos(rad(a.latitude)) *
+      Math.cos(rad(b.latitude)) *
+      Math.sin(rad(b.longitude - a.longitude) / 2) ** 2
+  return Math.round(2 * 6_371_000 * Math.asin(Math.sqrt(h)))
+}
+
+/** Minutes depuis minuit → « 1 h », « 19 h 30 », « minuit ». */
 export function formatMinuteOfDay(minute: number): string {
+  if (minute % (24 * 60) === 0) return 'minuit'
   const h = Math.floor(minute / 60)
   const m = minute % 60
   return m ? `${h} h ${String(m).padStart(2, '0')}` : `${h} h`

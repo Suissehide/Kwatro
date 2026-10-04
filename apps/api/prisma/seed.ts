@@ -170,12 +170,58 @@ async function main() {
       playFeeCents: 300,
       minSpendCents: 500,
       kwatroPerk: 'Droit de jeu offert sur présentation du QR Kwatro',
+      quarter: 'Saint-Pierre',
+      phone: '05 56 00 00 00',
+      website: 'https://example.com',
+      transitInfo: 'Tram C · Place de la Bourse, 2 min à pied',
+      accessibility: [
+        { label: 'Accès de plain-pied', status: 'YES', note: "Pas de marche à l'entrée" },
+        { label: 'Toilettes adaptées', status: 'YES', note: 'Au rez-de-chaussée' },
+        { label: "Salle TCG à l'étage", status: 'NO', note: 'Accès par escalier uniquement' },
+        { label: 'Chaises avec dossier', status: 'YES', note: 'Sur toutes les tables' },
+        { label: 'Niveau sonore', status: 'INFO', note: 'Calme en semaine, animé le samedi soir' },
+        { label: "Chiens d'assistance", status: 'YES', note: 'Acceptés' },
+      ],
+      tcgNote:
+        'Salle TCG de 12 tables. Apporte ton deck ; tapis et sleeves disponibles au comptoir.',
+      boardGames: ['Cascadia', 'Codenames', 'Azul', 'Les Aventuriers du Rail', 'Dixit', 'Skyjo'],
+      boardGameCount: 300,
+      boardGameNote:
+        "Ludothèque en libre accès, comprise dans le droit de jeu. Demande conseil à l'équipe.",
     },
     ['magic', 'pokemon', 'lorcana', 'jeux-de-societe'],
     [
       ...tuesdayToSaturday(17 * 60, 60),
       { weekday: 7, opensAtMinute: 14 * 60, closesAtMinute: 20 * 60 },
     ],
+    {
+      photos: ['salle', 'ludotheque', 'comptoir', 'tournoi', 'terrasse'].map((name, order) => ({
+        url: `https://picsum.photos/seed/kwatro-${name}/1200/800`,
+        caption: name,
+        order,
+      })),
+      closures: [
+        {
+          startsOn: nextWeekday(3, 0, 0, 1),
+          label: 'Fermé (inventaire)',
+          note: 'Réouverture le lendemain à 17 h',
+        },
+        {
+          startsOn: nextWeekday(3, 0, 0, 2),
+          kind: 'SPECIAL_HOURS',
+          label: 'Ouverture à 14 h',
+          note: 'Horaires du samedi',
+          opensAtMinute: 14 * 60,
+          closesAtMinute: 60,
+        },
+        {
+          startsOn: nextWeekday(2, 0, 0, 6),
+          endsOn: nextWeekday(6, 0, 0, 6),
+          label: 'Congés',
+          note: 'Fermé 5 jours',
+        },
+      ],
+    },
   )
   const shop = await upsertVenue(
     {
@@ -384,8 +430,8 @@ async function main() {
       minAge: 8,
       games: [],
     },
-    // Les prochaines semaines
-    ...[0, 1, 2, 3].map((week) => ({
+    // Les prochaines semaines (pas de soirée pendant les congés, semaine 6)
+    ...[0, 1, 2, 3, 4, 5, 7, 8, 9, 10].map((week) => ({
       id: `demo-commander-${week + 1}`,
       venueId: bar.id,
       type: 'GAME_NIGHT' as const,
@@ -427,6 +473,25 @@ async function main() {
       externalUrl: 'https://example.com/avant-premiere-lorcana',
       games: ['lorcana'],
     },
+    ...[
+      ['TOURNAMENT', 'Tournoi Standard', 6, 1, 'pokemon', 800],
+      ['INITIATION', 'Découvrir Lorcana', 4, 1, 'lorcana', 0],
+      ['TOURNAMENT', 'Tournoi mensuel', 6, 3, 'one-piece', 1000],
+      ['INITIATION', 'Apprendre Magic en 1 h', 5, 4, 'magic', 0],
+      ['THEMED', "Soirée Halloween : jeux d'enquête", 5, 5, 'jeux-de-societe', null],
+      ['TOURNAMENT', 'Tournoi Standard', 6, 7, 'pokemon', 800],
+      ['PRERELEASE', 'Avant-première Lorcana', 5, 9, 'lorcana', 2800],
+      ['THEMED', 'Soirée de Noël', 5, 11, 'jeux-de-societe', null],
+    ].map(([type, title, weekday, week, game, priceCents], i) => ({
+      id: `demo-agenda-${i + 1}`,
+      venueId: bar.id,
+      type: type as 'TOURNAMENT' | 'INITIATION' | 'THEMED' | 'PRERELEASE',
+      title: title as string,
+      startsAt: nextWeekday(weekday as number, type === 'INITIATION' ? 18 : 19, 30, week as number),
+      capacity: type === 'THEMED' ? 40 : type === 'INITIATION' ? 8 : 16,
+      priceCents: priceCents as number | null,
+      games: [game as string],
+    })),
     {
       id: 'demo-halloween',
       venueId: pixel.id,
@@ -649,9 +714,26 @@ async function main() {
 
 type VenueData = Parameters<typeof prisma.venue.create>[0]['data'] & { slug: string }
 type Hours = { weekday: number; opensAtMinute: number; closesAtMinute: number }
+type Closure = {
+  startsOn: Date
+  endsOn?: Date
+  kind?: 'CLOSED' | 'SPECIAL_HOURS'
+  label: string
+  note?: string
+  opensAtMinute?: number
+  closesAtMinute?: number
+}
 
-/** Crée ou met à jour un lieu, ses jeux sur place et ses horaires (remplacés à chaque seed). */
-async function upsertVenue(data: VenueData, gameSlugs: string[], hours: Hours[]) {
+/** Crée ou met à jour un lieu, ses jeux sur place, horaires, photos et fermetures (remplacés à chaque seed). */
+async function upsertVenue(
+  data: VenueData,
+  gameSlugs: string[],
+  hours: Hours[],
+  {
+    photos = [],
+    closures = [],
+  }: { photos?: { url: string; caption: string; order: number }[]; closures?: Closure[] } = {},
+) {
   const games = gameSlugs.map((slug) => ({ slug }))
   const venue = await prisma.venue.upsert({
     where: { slug: data.slug },
@@ -661,6 +743,17 @@ async function upsertVenue(data: VenueData, gameSlugs: string[], hours: Hours[])
   await prisma.venueOpeningHours.deleteMany({ where: { venueId: venue.id } })
   await prisma.venueOpeningHours.createMany({
     data: hours.map((h) => ({ ...h, venueId: venue.id })),
+  })
+  await prisma.venuePhoto.deleteMany({ where: { venueId: venue.id } })
+  await prisma.venuePhoto.createMany({ data: photos.map((p) => ({ ...p, venueId: venue.id })) })
+  await prisma.venueClosure.deleteMany({ where: { venueId: venue.id } })
+  await prisma.venueClosure.createMany({
+    data: closures.map((c) => ({
+      ...c,
+      startsOn: localDate(c.startsOn),
+      endsOn: localDate(c.endsOn ?? c.startsOn),
+      venueId: venue.id,
+    })),
   })
   return venue
 }
@@ -682,6 +775,11 @@ function daysLater(days: number, hours: number, minutes: number) {
 
 function daysAgo(days: number, hours: number, minutes: number) {
   return daysLater(-days, hours, minutes)
+}
+
+/** Colonne `@db.Date` : la date locale de la machine, à minuit UTC. */
+function localDate(date: Date) {
+  return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
 }
 
 function today(hours: number, minutes: number) {

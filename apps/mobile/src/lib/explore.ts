@@ -10,7 +10,6 @@ import {
   type RoomListItem,
   VENUE_TIME_ZONE,
   VENUE_TYPE_LABELS,
-  type VenueDetail,
   type VenueListItem,
 } from '@kwatro/shared'
 
@@ -100,24 +99,24 @@ export function eventCardProps(
   }
 }
 
-const WEEKDAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
-
-/** Horaires de la semaine, une ligne par jour : « 17 h – 1 h », plusieurs plages séparées par une virgule. */
-export function openingLines(hours: VenueDetail['openingHours']) {
-  return WEEKDAYS.map((label, i) => {
-    const ranges = hours
-      .filter((h) => h.weekday === i + 1)
-      .map((h) => `${formatMinuteOfDay(h.opensAtMinute)} – ${formatMinuteOfDay(h.closesAtMinute)}`)
-    return { label, value: ranges.length ? ranges.join(', ') : 'Fermé' }
-  })
+/** « Aujourd'hui », « Demain », sinon « Sam. 10 oct. ». */
+export function dayLabel(date: Date | string) {
+  const day = localDay(date)
+  const today = localDay(new Date())
+  if (day === today) return "Aujourd'hui"
+  if (day === localDay(new Date(Date.now() + 24 * 60 * 60 * 1000))) return 'Demain'
+  return shortDay(date)
 }
 
-export function roomCardProps(room: RoomListItem) {
+/** Carte room ; sans `venue` (fiche lieu), le jour remplace le lieu. */
+export function roomCardProps(
+  room: Omit<RoomListItem, 'venue'> & { venue?: RoomListItem['venue'] },
+) {
   const missing = Math.max(0, room.capacity - room.players.length)
   return {
     label: `${room.mode === 'RANKED' ? 'Partie classée' : 'Partie libre'} · ${gameLabel(room.game)}`,
     title: missing ? `Il manque ${missing} joueur${missing > 1 ? 's' : ''}` : 'Room complète',
-    meta: `${room.venue.name} · ${formatHour(room.startsAt)}`,
+    meta: `${room.venue ? room.venue.name : dayLabel(room.startsAt)} · ${formatHour(room.startsAt)}`,
     players: room.players.map((p) => p.initial),
     capacity: room.capacity,
     kwote: room.kwoteRange

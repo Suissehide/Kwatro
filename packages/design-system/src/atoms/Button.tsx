@@ -1,10 +1,20 @@
 import { Pressable, Text, View } from 'react-native'
-import { border, colors, font, motion, onColor, radius, shadow, transition } from '../tokens'
+import {
+  border,
+  colors,
+  font,
+  motion,
+  onColor,
+  radius,
+  semantic,
+  shadow,
+  transition,
+} from '../tokens'
 import { Raised } from './Raised'
 import { useHover } from './useHover'
 
-/** `danger` : contour comme `ghost`, texte rouge (déconnexion). */
-export type ButtonKind = 'room' | 'event' | 'venue' | 'kwote' | 'ink' | 'ghost' | 'danger'
+/** `danger` : contour comme `ghost`, texte rouge (déconnexion). `ghost`, `soft` et `danger` n'ont pas d'ombre. */
+export type ButtonKind = 'room' | 'event' | 'venue' | 'kwote' | 'ink' | 'ghost' | 'soft' | 'danger'
 const bg: Record<ButtonKind, string> = {
   room: colors.room,
   event: colors.event,
@@ -13,6 +23,7 @@ const bg: Record<ButtonKind, string> = {
   ink: colors.ink,
   ghost: colors.white,
   danger: colors.white,
+  soft: semantic.neutralSoft,
 }
 const fg: Record<ButtonKind, string> = {
   room: onColor.room,
@@ -22,6 +33,7 @@ const fg: Record<ButtonKind, string> = {
   ink: onColor.ink,
   ghost: colors.ink,
   danger: colors.room,
+  soft: colors.ink,
 }
 
 /** Bouton : à l'appui il glisse de la taille de son ombre, qui disparaît. */
@@ -41,7 +53,7 @@ export function Button({
   const off = small ? shadow.sm : shadow.md
   const r = small ? 9 : radius.button
   const { hovered, hoverProps } = useHover()
-  const flat = kind === 'ghost' || kind === 'danger'
+  const flat = kind === 'ghost' || kind === 'soft' || kind === 'danger'
   const lifted = hovered && !disabled && !flat
   return (
     <Pressable

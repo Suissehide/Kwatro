@@ -1,4 +1,14 @@
-import { Banner, Button, font, Logo, Note, Segmented, Typography } from '@kwatro/design-system'
+import {
+  Banner,
+  Button,
+  font,
+  InlineLink,
+  Logo,
+  Note,
+  Segmented,
+  SITE_URL,
+  Typography,
+} from '@kwatro/design-system'
 import {
   type AgeRegime,
   ageRegime,
@@ -117,8 +127,9 @@ export default function AuthScreen() {
               </Note>
             ) : null}
             <Typography variant="small" style={wide ? null : { textAlign: 'center' }}>
-              En continuant, tu acceptes les conditions d'utilisation et la politique de
-              confidentialité.
+              En continuant, tu acceptes les{' '}
+              <InlineLink href={`${SITE_URL}/terms`}>conditions d'utilisation</InlineLink> et la{' '}
+              <InlineLink href={`${SITE_URL}/privacy`}>politique de confidentialité</InlineLink>.
             </Typography>
           </>
         }

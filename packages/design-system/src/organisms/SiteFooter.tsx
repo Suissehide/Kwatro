@@ -1,4 +1,5 @@
-import { Linking, Platform, Pressable, Text, useWindowDimensions, View } from 'react-native'
+import { Pressable, Text, useWindowDimensions, View } from 'react-native'
+import { linkProps } from '../atoms/InlineLink'
 import { useHover } from '../atoms/useHover'
 import { Brand } from '../molecules/Brand'
 import { border, colors, font, radius, sizes, transition, type } from '../tokens'
@@ -8,14 +9,17 @@ export type FooterLink = { label: string; href: string; short?: string }
 // ponytail: adresse, comptes Instagram et Discord à confirmer avant la mise en ligne
 export const CONTACT_EMAIL = 'contact@kwatro.fr'
 
-/** Site public : préfixe des liens du pied de page dans l'app (pages légales, aide, villes). */
-export const SITE_URL = 'https://kwatro.fr'
+// Variable inlinée par Expo au bundle de l'app ; le design system n'a pas les types Node
+declare const process: { env: { EXPO_PUBLIC_SITE_URL?: string } }
+
+/** Site public : préfixe des liens du pied de page dans l'app (pages légales, aide, villes). Site local en dev. */
+export const SITE_URL = process.env.EXPO_PUBLIC_SITE_URL ?? 'https://kwatro.fr'
 
 /** Liens identiques sur toutes les pages. Chemins relatifs au site public (voir `siteUrl`). */
 export const FOOTER_LINKS = {
   kwatro: [
-    { label: 'À propos', href: '/a-propos' },
-    { label: 'Aide', href: '/aide' },
+    { label: 'À propos', href: '/about' },
+    { label: 'Aide', href: '/help' },
     { label: 'Contact', href: `mailto:${CONTACT_EMAIL}` },
   ],
   lieux: [
@@ -26,9 +30,9 @@ export const FOOTER_LINKS = {
     },
   ],
   legal: [
-    { label: "Conditions d'utilisation", href: '/cgu' },
-    { label: 'Politique de confidentialité', short: 'Confidentialité', href: '/confidentialite' },
-    { label: 'Mentions légales', href: '/mentions-legales' },
+    { label: "Conditions d'utilisation", href: '/terms' },
+    { label: 'Politique de confidentialité', short: 'Confidentialité', href: '/privacy' },
+    { label: 'Mentions légales', href: '/legal-notice' },
   ],
 } satisfies Record<string, FooterLink[]>
 
@@ -178,17 +182,6 @@ export function SiteFooter({
       </View>
     </View>
   )
-}
-
-/** Vraie ancre `<a href>` sur le web (référencement, clic molette), `Linking` sur mobile. */
-function linkProps(href: string): { onPress?: () => void } {
-  if (Platform.OS !== 'web') return { onPress: () => void Linking.openURL(href) }
-  const external = href.startsWith('http')
-  // `href` et `hrefAttrs` : props de react-native-web absentes des types React Native
-  return {
-    href,
-    hrefAttrs: external ? { target: '_blank', rel: 'noopener noreferrer' } : undefined,
-  } as { onPress?: () => void }
 }
 
 function FooterTextLink({

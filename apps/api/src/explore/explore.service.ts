@@ -1,17 +1,63 @@
-import type {
-  EventsQuery,
-  eventListItemSchema,
-  GeoQuery,
-  roomListItemSchema,
-  VenueListItem,
-  venueDetailSchema,
+import {
+  accessibilityItemSchema,
+  addDays,
+  type EventsQuery,
+  type eventListItemSchema,
+  type GeoQuery,
+  localDateTime,
+  openingStatus,
+  type roomListItemSchema,
+  VENUE_AGENDA_MONTHS,
+  type VenueListItem,
+  type venueDetailSchema,
 } from '@kwatro/shared'
 import { Injectable, NotFoundException } from '@nestjs/common'
 import type { z } from 'zod'
+import type { Prisma } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
-import { compareByDistance, openingStatus } from './explore.rules'
+import { compareByDistance } from './explore.rules'
 
 const DAY_MS = 24 * 60 * 60 * 1000
+
+/** Colonne `@db.Date` (minuit UTC) ↔ date locale « 2026-11-01 ». */
+const toLocalDate = (date: Date) => date.toISOString().slice(0, 10)
+const fromLocalDate = (date: string) => new Date(`${date}T00:00:00Z`)
+
+const closureRange = <T extends { startsOn: Date; endsOn: Date }>(closure: T) => ({
+  ...closure,
+  startsOn: toLocalDate(closure.startsOn),
+  endsOn: toLocalDate(closure.endsOn),
+})
+
+const roomInclude = {
+  game: { select: { slug: true, name: true } },
+  format: { select: { name: true } },
+  participants: {
+    where: { status: 'ACCEPTED' },
+    orderBy: { createdAt: 'asc' },
+    select: { user: { select: { pseudo: true, gameProfiles: true } } },
+  },
+} satisfies Prisma.RoomInclude
+
+/** Room publique : initiales des joueurs et fourchette de Kwote des parties classées. */
+function roomItem({
+  format,
+  participants,
+  ...room
+}: Prisma.RoomGetPayload<{ include: typeof roomInclude }>) {
+  const kwotes = participants.flatMap(({ user }) =>
+    user.gameProfiles.filter((p) => p.formatId === room.formatId).map((p) => p.kwote),
+  )
+  return {
+    ...room,
+    format: format?.name ?? null,
+    players: participants.map(({ user }) => ({ initial: user.pseudo?.slice(0, 1) ?? '?' })),
+    kwoteRange:
+      room.mode === 'RANKED' && kwotes.length
+        ? { min: Math.min(...kwotes), max: Math.max(...kwotes) }
+        : null,
+  }
+}
 
 @Injectable()
 export class ExploreService {
@@ -30,52 +76,78 @@ export class ExploreService {
   async venues(query: GeoQuery): Promise<VenueListItem[]> {
     const distances = await this.distances(query)
     const now = new Date()
+    const yesterday = fromLocalDate(addDays(localDateTime(now).date, -1))
     const venues = await this.prisma.venue.findMany({
       where: { id: { in: [...distances.keys()] } },
       include: {
         openingHours: true,
+        closures: { where: { endsOn: { gte: yesterday } } },
         _count: { select: { events: { where: { startsAt: { gte: now }, cancelledAt: null } } } },
       },
     })
     return venues
-      .map(({ openingHours, _count, ...venue }) => ({
-        ...venue,
-        distanceMeters: distances.get(venue.id) ?? 0,
-        ...openingStatus(openingHours, now),
-        upcomingEventCount: _count.events,
-      }))
+      .map(({ openingHours, closures, _count, ...venue }) => {
+        const { openNow, closesAtMinute } = openingStatus(
+          openingHours,
+          closures.map(closureRange),
+          now,
+        )
+        return {
+          ...venue,
+          distanceMeters: distances.get(venue.id) ?? 0,
+          openNow,
+          closesAtMinute,
+          upcomingEventCount: _count.events,
+        }
+      })
       .sort(compareByDistance)
   }
 
-  /** Fiche lieu : infos pratiques, horaires, jeux sur place et événements des 30 prochains jours. */
+  /**
+   * Fiche lieu : infos pratiques, photos, horaires et fermetures, jeux sur place, rooms ouvertes
+   * et agenda du mois en cours aux VENUE_AGENDA_MONTHS suivants (vue liste et calendrier).
+   */
   async venue(slug: string): Promise<z.output<typeof venueDetailSchema>> {
     const now = new Date()
+    const [year = 0, month = 1] = localDateTime(now).date.split('-').map(Number)
+    const monthStart = new Date(Date.UTC(year, month - 1, 1))
+    // Un jour de marge de chaque côté : l'app regroupe les événements par jour à l'heure de Paris
+    const agendaFrom = new Date(monthStart.getTime() - DAY_MS)
+    const agendaTo = new Date(Date.UTC(year, month - 1 + VENUE_AGENDA_MONTHS, 1) + DAY_MS)
     const venue = await this.prisma.venue.findUnique({
       where: { slug },
       include: {
         openingHours: { orderBy: [{ weekday: 'asc' }, { opensAtMinute: 'asc' }] },
-        games: { select: { slug: true, name: true }, orderBy: { name: 'asc' } },
+        closures: { where: { endsOn: { gte: monthStart } }, orderBy: { startsOn: 'asc' } },
+        photos: { orderBy: { order: 'asc' }, select: { url: true, caption: true } },
+        games: { select: { slug: true, name: true, kind: true }, orderBy: { name: 'asc' } },
         events: {
-          where: {
-            startsAt: { gte: now, lt: new Date(now.getTime() + 30 * DAY_MS) },
-            cancelledAt: null,
-          },
+          where: { startsAt: { gte: agendaFrom, lt: agendaTo }, cancelledAt: null },
           orderBy: { startsAt: 'asc' },
           include: {
             games: { select: { slug: true, name: true }, orderBy: { name: 'asc' } },
             _count: { select: { registrations: { where: { status: 'REGISTERED' } } } },
           },
         },
+        rooms: {
+          where: { status: 'OPEN', startsAt: { gte: now } },
+          orderBy: { startsAt: 'asc' },
+          include: roomInclude,
+        },
       },
     })
     if (!venue) throw new NotFoundException('Lieu introuvable')
+    const closures = venue.closures.map(closureRange)
     return {
       ...venue,
-      ...openingStatus(venue.openingHours, now),
+      ...openingStatus(venue.openingHours, closures, now),
+      closures,
+      accessibility: accessibilityItemSchema.array().parse(venue.accessibility),
       events: venue.events.map(({ _count, ...event }) => ({
         ...event,
         registeredCount: _count.registrations,
       })),
+      rooms: venue.rooms.map(roomItem),
     }
   }
 
@@ -117,36 +189,19 @@ export class ExploreService {
         venueId: { in: [...distances.keys()] },
         startsAt: { gte: now, lt: new Date(now.getTime() + query.days * DAY_MS) },
       },
-      include: {
-        game: { select: { slug: true, name: true } },
-        format: { select: { name: true } },
-        venue: { select: { id: true, name: true, isPartner: true } },
-        participants: {
-          where: { status: 'ACCEPTED' },
-          orderBy: { createdAt: 'asc' },
-          select: { user: { select: { pseudo: true, gameProfiles: true } } },
-        },
-      },
+      include: { ...roomInclude, venue: { select: { id: true, name: true, isPartner: true } } },
     })
     return rooms
-      .flatMap(({ venue, format, participants, ...room }) => {
-        if (!venue) return []
-        const kwotes = participants.flatMap(({ user }) =>
-          user.gameProfiles.filter((p) => p.formatId === room.formatId).map((p) => p.kwote),
-        )
-        return [
-          {
-            ...room,
-            format: format?.name ?? null,
-            venue: { ...venue, distanceMeters: distances.get(venue.id) ?? 0 },
-            players: participants.map(({ user }) => ({ initial: user.pseudo?.slice(0, 1) ?? '?' })),
-            kwoteRange:
-              room.mode === 'RANKED' && kwotes.length
-                ? { min: Math.min(...kwotes), max: Math.max(...kwotes) }
-                : null,
-          },
-        ]
-      })
+      .flatMap(({ venue, ...room }) =>
+        venue
+          ? [
+              {
+                ...roomItem(room),
+                venue: { ...venue, distanceMeters: distances.get(venue.id) ?? 0 },
+              },
+            ]
+          : [],
+      )
       .sort(
         (a, b) =>
           a.startsAt.getTime() - b.startsAt.getTime() || compareByDistance(a.venue, b.venue),

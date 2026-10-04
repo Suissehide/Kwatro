@@ -9,6 +9,7 @@ import {
   formatMinuteOfDay,
   formatPrice,
   formatTime,
+  metersBetween,
 } from './format'
 
 describe('formats d’affichage', () => {
@@ -16,6 +17,13 @@ describe('formats d’affichage', () => {
     expect(formatDistance(783)).toBe('780 m')
     expect(formatDistance(1234)).toBe('1,2 km')
     expect(formatDistance(12_400)).toBe('12 km')
+    // Place de la Bourse → cours Victor Hugo, Bordeaux : environ 700 m
+    const d = metersBetween(
+      { latitude: 44.8412, longitude: -0.5697 },
+      { latitude: 44.8352, longitude: -0.5712 },
+    )
+    expect(d).toBeGreaterThan(650)
+    expect(d).toBeLessThan(700)
   })
 
   it('prix', () => {
@@ -35,6 +43,7 @@ describe('formats d’affichage', () => {
   it('heure de fermeture', () => {
     expect(formatMinuteOfDay(60)).toBe('1 h')
     expect(formatMinuteOfDay(19 * 60 + 30)).toBe('19 h 30')
+    expect(formatMinuteOfDay(0)).toBe('minuit')
   })
 
   it('heure', () => {

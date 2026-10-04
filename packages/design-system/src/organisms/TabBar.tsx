@@ -85,7 +85,7 @@ export function PlayerTabBar({
   onCreate,
   bottomInset = 22,
 }: {
-  active: PlayerTab
+  active?: PlayerTab
   onSelect: (tab: PlayerTab) => void
   onCreate: () => void
   /** Marge basse (zone de sécurité de l'appareil). */

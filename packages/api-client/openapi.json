@@ -952,6 +952,10 @@
                     "city": {
                       "type": "string"
                     },
+                    "quarter": {
+                      "nullable": true,
+                      "type": "string"
+                    },
                     "description": {
                       "nullable": true,
                       "type": "string"
@@ -970,6 +974,57 @@
                     },
                     "acceptsUnaccompaniedMinors": {
                       "type": "boolean"
+                    },
+                    "phone": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "website": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "transitInfo": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "nextOpening": {
+                      "nullable": true,
+                      "type": "object",
+                      "properties": {
+                        "date": {
+                          "type": "string",
+                          "format": "date",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                        },
+                        "minute": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "date",
+                        "minute"
+                      ]
+                    },
+                    "photos": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "url": {
+                            "type": "string"
+                          },
+                          "caption": {
+                            "nullable": true,
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "url",
+                          "caption"
+                        ]
+                      }
                     },
                     "openingHours": {
                       "type": "array",
@@ -999,6 +1054,86 @@
                         ]
                       }
                     },
+                    "closures": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "startsOn": {
+                            "type": "string",
+                            "format": "date",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                          },
+                          "endsOn": {
+                            "type": "string",
+                            "format": "date",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "CLOSED",
+                              "SPECIAL_HOURS"
+                            ]
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "note": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "opensAtMinute": {
+                            "nullable": true,
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "closesAtMinute": {
+                            "nullable": true,
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "startsOn",
+                          "endsOn",
+                          "kind",
+                          "label",
+                          "note",
+                          "opensAtMinute",
+                          "closesAtMinute"
+                        ]
+                      }
+                    },
+                    "accessibility": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "label": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "YES",
+                              "NO",
+                              "INFO"
+                            ]
+                          },
+                          "note": {
+                            "nullable": true,
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "label",
+                          "status"
+                        ]
+                      }
+                    },
                     "games": {
                       "type": "array",
                       "items": {
@@ -1009,13 +1144,41 @@
                           },
                           "name": {
                             "type": "string"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "TCG",
+                              "BOARD_GAME"
+                            ]
                           }
                         },
                         "required": [
                           "slug",
-                          "name"
+                          "name",
+                          "kind"
                         ]
                       }
+                    },
+                    "tcgNote": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "boardGames": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "boardGameCount": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "boardGameNote": {
+                      "nullable": true,
+                      "type": "string"
                     },
                     "events": {
                       "type": "array",
@@ -1085,6 +1248,14 @@
                                 "name"
                               ]
                             }
+                          },
+                          "seriesId": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "externalUrl": {
+                            "nullable": true,
+                            "type": "string"
                           }
                         },
                         "required": [
@@ -1096,7 +1267,100 @@
                           "capacity",
                           "registeredCount",
                           "registrationMode",
-                          "games"
+                          "games",
+                          "seriesId",
+                          "externalUrl"
+                        ]
+                      }
+                    },
+                    "rooms": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "mode": {
+                            "type": "string",
+                            "enum": [
+                              "RANKED",
+                              "CASUAL"
+                            ]
+                          },
+                          "startsAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "capacity": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "game": {
+                            "type": "object",
+                            "properties": {
+                              "slug": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "slug",
+                              "name"
+                            ]
+                          },
+                          "format": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "players": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "initial": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "initial"
+                              ]
+                            }
+                          },
+                          "kwoteRange": {
+                            "nullable": true,
+                            "type": "object",
+                            "properties": {
+                              "min": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              },
+                              "max": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "min",
+                              "max"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "mode",
+                          "startsAt",
+                          "capacity",
+                          "game",
+                          "format",
+                          "players",
+                          "kwoteRange"
                         ]
                       }
                     }
@@ -1114,13 +1378,26 @@
                     "openNow",
                     "closesAtMinute",
                     "city",
+                    "quarter",
                     "description",
                     "playFeeCents",
                     "minSpendCents",
                     "acceptsUnaccompaniedMinors",
+                    "phone",
+                    "website",
+                    "transitInfo",
+                    "nextOpening",
+                    "photos",
                     "openingHours",
+                    "closures",
+                    "accessibility",
                     "games",
-                    "events"
+                    "tcgNote",
+                    "boardGames",
+                    "boardGameCount",
+                    "boardGameNote",
+                    "events",
+                    "rooms"
                   ]
                 }
               }
