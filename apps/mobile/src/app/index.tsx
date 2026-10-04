@@ -14,21 +14,21 @@ import {
   PageTitle,
   PlayerTabBar,
   ProfileCard,
-  playerItems,
   RoomCard,
   radius,
   Section,
   SkeletonCard,
-  TopNav,
   Typography,
   VenueRow,
   WebScreen,
 } from '@kwatro/design-system'
 import { formatKwote, xpLevel } from '@kwatro/shared'
+import { Redirect } from 'expo-router'
 import { useState } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ExploreMap } from '@/components/explore/ExploreMap'
+import { PlayerNav } from '@/components/PlayerNav'
 import {
   eventCardProps,
   GAMES,
@@ -38,18 +38,21 @@ import {
   venueRowProps,
 } from '@/lib/explore'
 import { notYet, openEvent, openHome, openTab, openVenue } from '@/lib/navigation'
-import { useMe } from '@/lib/useMe'
-import { useTonight } from '@/lib/useTonight'
+import { useTonightQuery } from '@/queries/useExplore'
+import { useMeQuery } from '@/queries/useMe'
 
 const WIDE = 900
 
 export default function HomeScreen() {
   const wide = useWindowDimensions().width >= WIDE
   const insets = useSafeAreaInsets()
-  const me = useMe()
-  const { place, data, failed, retry } = useTonight()
+  const me = useMeQuery()
+  const { place, data, failed, retry } = useTonightQuery()
   const [game, setGame] = useState<string | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+
+  // Compte tout juste créé : pseudo et ville avant l'accueil
+  if (me && me.pseudo === null) return <Redirect href="/onboarding" />
 
   const events = data?.events.filter((e) => matchesGame(game, e.games)) ?? []
   const rooms = data?.rooms.filter((r) => matchesGame(game, [r.game])) ?? []
@@ -193,19 +196,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <WebScreen
-      nav={
-        <TopNav
-          items={playerItems}
-          active="explorer"
-          onSelect={openTab}
-          onHome={openHome}
-          right={<Button small kind="kwote" label="+ Créer une room" onPress={notYet} />}
-          avatar={me?.pseudo ?? ''}
-          onAvatar={() => openTab('profil')}
-        />
-      }
-    >
+    <WebScreen nav={<PlayerNav active="explorer" />}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 72 }}>
         <View style={{ flex: 1, minWidth: 0 }}>{title}</View>
         {me ? (

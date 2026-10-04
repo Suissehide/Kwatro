@@ -18,13 +18,13 @@ import { Linking, View } from 'react-native'
 import { DetailScreen } from '@/components/DetailScreen'
 import { eventPlaces, eventWhen, gameLabel, isFull } from '@/lib/explore'
 import { openVenue } from '@/lib/navigation'
-import { useMe } from '@/lib/useMe'
 import { useEventMutations, useEventQuery } from '@/queries/useEvent'
+import { useMeQuery } from '@/queries/useMe'
 
 /** Fiche événement (B4, KWT-11) et inscription dans l'app, avec liste d'attente quand c'est complet. */
 export default function EventScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
-  const me = useMe()
+  const me = useMeQuery()
   const { data: event, isError: failed, refetch } = useEventQuery(id)
   const { register, unregister } = useEventMutations(id)
   const [confirmCancel, setConfirmCancel] = useState(false)

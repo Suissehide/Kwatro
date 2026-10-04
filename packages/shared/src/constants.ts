@@ -74,3 +74,34 @@ export const DEFAULT_CITY = { name: 'Bordeaux', lat: 44.8378, lng: -0.5792 } as 
  * au-delà, la distance l'emporte toujours. Valeur à affiner avec l'équipe (question ouverte n° 2).
  */
 export const PARTNER_TIE_METERS = 250
+
+/** Rayon de recherche autour de la ville du joueur, en km. */
+export const RADIUS_KM = { min: 1, max: 50, default: 10 } as const
+
+/** Ambiance recherchée (identique à l'enum Prisma PlayVibe). */
+export const PLAY_VIBES = [
+  'CHILL',
+  'COMPETITIVE',
+  'TEACHER',
+  'BEGINNER',
+  'HOMEBREW',
+  'SOCIAL',
+] as const
+export type PlayVibe = (typeof PLAY_VIBES)[number]
+
+// ponytail: noms et descriptions de la maquette, à valider côté produit
+export const PLAY_VIBE_LABELS: Record<PlayVibe, { label: string; description: string }> = {
+  CHILL: { label: 'Détente', description: 'On joue pour le plaisir, sans pression.' },
+  COMPETITIVE: { label: 'Compétitif', description: 'Parties classées, on joue pour gagner.' },
+  TEACHER: { label: 'Pédagogue', description: 'J’aime expliquer les règles aux nouveaux.' },
+  BEGINNER: { label: 'Débutant', description: 'J’apprends, soyez patients.' },
+  HOMEBREW: { label: 'Deck maison', description: 'Je teste mes propres decks.' },
+  SOCIAL: { label: 'Convivial', description: 'On discute et on boit un verre entre deux parties.' },
+}
+
+/** Disponibilités : créneau = jour × 3 + moment (jour 0 = lundi ; moment 0 matin, 1 après-midi, 2 soir). */
+export const AVAILABILITY_SLOT_COUNT = 21
+
+/** Modération de la photo de profil (identique à l'enum Prisma AvatarStatus). */
+export const AVATAR_STATUSES = ['PENDING', 'APPROVED', 'REJECTED'] as const
+export type AvatarStatus = (typeof AVATAR_STATUSES)[number]

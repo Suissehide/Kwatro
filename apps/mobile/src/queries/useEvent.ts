@@ -1,5 +1,5 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { EVENT } from '@/constants/queryKeys'
+import { AGENDA, EVENT, EXPLORE } from '@/constants/queryKeys'
 import { api } from '@/lib/api'
 import { unwrap } from '@/lib/queryClient'
 
@@ -19,8 +19,12 @@ export const useEventQuery = (id: string) => useQuery(eventQueryOptions(id))
 export function useEventMutations(id: string) {
   const client = useQueryClient()
   const params = { params: { path: { id } } }
-  const onSuccess = (event: EventDetail) =>
+  // La fiche prend la réponse ; Mes parties et les places restantes de l'accueil changent aussi
+  const onSuccess = (event: EventDetail) => {
     client.setQueryData(eventQueryOptions(id).queryKey, event)
+    void client.invalidateQueries({ queryKey: [AGENDA.GET] })
+    void client.invalidateQueries({ queryKey: [EXPLORE.TONIGHT] })
+  }
 
   const register = useMutation({
     mutationKey: [EVENT.REGISTER, id],

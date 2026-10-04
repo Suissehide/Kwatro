@@ -4,22 +4,19 @@ import {
   MobileScreen,
   NotFound,
   PlayerTabBar,
-  playerItems,
-  TopNav,
   WebScreen,
 } from '@kwatro/design-system'
 import { usePathname } from 'expo-router'
 import { Linking, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { PlayerNav } from '@/components/PlayerNav'
 import { notYet, openHome, openTab } from '@/lib/navigation'
-import { useMe } from '@/lib/useMe'
 
 const WIDE = 900
 
 export default function NotFoundScreen() {
   const wide = useWindowDimensions().width >= WIDE
   const insets = useSafeAreaInsets()
-  const me = useMe()
   const path = usePathname()
 
   const content = (
@@ -59,15 +56,7 @@ export default function NotFoundScreen() {
 
   return (
     <WebScreen
-      nav={
-        <TopNav
-          items={playerItems}
-          onSelect={openTab}
-          onHome={openHome}
-          avatar={me?.pseudo ?? ''}
-          onAvatar={() => openTab('profil')}
-        />
-      }
+      nav={<PlayerNav active="" />}
       contentStyle={{ paddingTop: 96, paddingBottom: 112, justifyContent: 'center' }}
     >
       {content}

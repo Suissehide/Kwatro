@@ -13,7 +13,6 @@ export function XpBar({
   current: number
   max: number
 }) {
-  const percent = max > 0 ? Math.min(100, Math.round((current / max) * 100)) : 0
   return (
     <View style={{ gap: 6 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -24,30 +23,38 @@ export function XpBar({
           {current} / {max} XP
         </Text>
       </View>
+      <XpTrack current={current} max={max} />
+    </View>
+  )
+}
+
+/** Barre d'XP seule (16 px, remplissage event). */
+export function XpTrack({ current, max }: { current: number; max: number }) {
+  const percent = max > 0 ? Math.min(100, Math.round((current / max) * 100)) : 0
+  return (
+    <View
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={max}
+      aria-valuenow={current}
+      style={{
+        height: 16,
+        borderWidth: border.base,
+        borderColor: colors.ink,
+        borderRadius: 99,
+        backgroundColor: colors.white,
+        overflow: 'hidden',
+      }}
+    >
       <View
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={max}
-        aria-valuenow={current}
         style={{
-          height: 16,
-          borderWidth: border.base,
+          width: `${percent}%`,
+          height: '100%',
+          backgroundColor: colors.event,
+          borderRightWidth: percent > 0 ? border.base : 0,
           borderColor: colors.ink,
-          borderRadius: 99,
-          backgroundColor: colors.white,
-          overflow: 'hidden',
         }}
-      >
-        <View
-          style={{
-            width: `${percent}%`,
-            height: '100%',
-            backgroundColor: colors.event,
-            borderRightWidth: percent > 0 ? border.base : 0,
-            borderColor: colors.ink,
-          }}
-        />
-      </View>
+      />
     </View>
   )
 }

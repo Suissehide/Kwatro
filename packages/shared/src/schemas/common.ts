@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { RADIUS_KM } from '../constants'
 
 /** Date-heure : `Date` côté serveur, chaîne ISO 8601 dans le JSON (et dans le client typé). */
 export const isoDateTime = z.codec(z.iso.datetime(), z.date(), {
@@ -10,7 +11,7 @@ export const isoDateTime = z.codec(z.iso.datetime(), z.date(), {
 export const geoQuerySchema = z.object({
   lat: z.coerce.number().min(-90).max(90),
   lng: z.coerce.number().min(-180).max(180),
-  radiusKm: z.coerce.number().positive().max(50).default(10),
+  radiusKm: z.coerce.number().positive().max(RADIUS_KM.max).default(RADIUS_KM.default),
 })
 
 export type GeoQuery = z.infer<typeof geoQuerySchema>

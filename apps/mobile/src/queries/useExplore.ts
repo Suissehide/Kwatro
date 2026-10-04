@@ -1,0 +1,38 @@
+import { queryOptions, useQuery } from '@tanstack/react-query'
+import { EXPLORE } from '@/constants/queryKeys'
+import { api } from '@/lib/api'
+import { localDay } from '@/lib/explore'
+import { unwrap } from '@/lib/queryClient'
+import { type Place, useLocation } from '@/lib/useLocation'
+
+// * QUERIES
+
+/** « Ce soir » autour d'un point : soirées du jour, rooms qui cherchent des joueurs, lieux ouverts. */
+export const tonightQueryOptions = (place: Place, radiusKm: number) =>
+  queryOptions({
+    queryKey: [EXPLORE.TONIGHT, place.lat, place.lng, radiusKm],
+    queryFn: async () => {
+      const query = { lat: place.lat, lng: place.lng, radiusKm, days: 1 }
+      const [events, rooms, venues] = await Promise.all([
+        unwrap(api.GET('/events', { params: { query } })),
+        unwrap(api.GET('/rooms', { params: { query } })),
+        unwrap(api.GET('/venues', { params: { query } })),
+      ])
+      const today = localDay(new Date())
+      return {
+        events: events.filter((e) => localDay(e.startsAt) === today),
+        rooms,
+        venues: venues.filter((v) => v.openNow),
+      }
+    },
+  })
+
+/** Accueil Explorer : attend la position (ou le repli sur Bordeaux) avant de charger. */
+export function useTonightQuery(radiusKm = 10) {
+  const { place, ready } = useLocation()
+  const { data, isError, refetch } = useQuery({
+    ...tonightQueryOptions(place, radiusKm),
+    enabled: ready,
+  })
+  return { place, data: data ?? null, failed: isError, retry: () => void refetch() }
+}

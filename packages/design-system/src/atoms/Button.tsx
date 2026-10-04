@@ -13,8 +13,8 @@ import {
 import { Raised } from './Raised'
 import { useHover } from './useHover'
 
-/** `ghost` et `soft` (action secondaire, liste d'attente) n'ont pas d'ombre. */
-export type ButtonKind = 'room' | 'event' | 'venue' | 'kwote' | 'ink' | 'ghost' | 'soft'
+/** `danger` : contour comme `ghost`, texte rouge (déconnexion). `ghost`, `soft` et `danger` n'ont pas d'ombre. */
+export type ButtonKind = 'room' | 'event' | 'venue' | 'kwote' | 'ink' | 'ghost' | 'soft' | 'danger'
 const bg: Record<ButtonKind, string> = {
   room: colors.room,
   event: colors.event,
@@ -22,6 +22,7 @@ const bg: Record<ButtonKind, string> = {
   kwote: colors.kwote,
   ink: colors.ink,
   ghost: colors.white,
+  danger: colors.white,
   soft: semantic.neutralSoft,
 }
 const fg: Record<ButtonKind, string> = {
@@ -31,6 +32,7 @@ const fg: Record<ButtonKind, string> = {
   kwote: onColor.kwote,
   ink: onColor.ink,
   ghost: colors.ink,
+  danger: colors.room,
   soft: colors.ink,
 }
 
@@ -51,7 +53,7 @@ export function Button({
   const off = small ? shadow.sm : shadow.md
   const r = small ? 9 : radius.button
   const { hovered, hoverProps } = useHover()
-  const flat = kind === 'ghost' || kind === 'soft'
+  const flat = kind === 'ghost' || kind === 'soft' || kind === 'danger'
   const lifted = hovered && !disabled && !flat
   return (
     <Pressable

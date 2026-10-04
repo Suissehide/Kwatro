@@ -1,9 +1,13 @@
 import {
+  type AgendaQuery,
+  agendaItemSchema,
+  agendaQuerySchema,
   ageRegime,
   MIN_AGE,
   meSchema,
   type SetBirthDateInput,
   setBirthDateSchema,
+  updateProfileSchema,
 } from '@kwatro/shared'
 import {
   ConflictException,
@@ -12,34 +16,46 @@ import {
   ForbiddenException,
   Get,
   HttpCode,
+  Patch,
   Post,
 } from '@nestjs/common'
 import { ApiNoContentResponse, ApiTags } from '@nestjs/swagger'
+import { z } from 'zod'
 import { CurrentUser } from '../auth/auth.decorators'
-import { ZodBody, ZodResponse } from '../common/zod'
+import { ZodBody, ZodQuery, ZodResponse } from '../common/zod'
 import type { User } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
+import { UsersService } from './users.service'
 
 @ApiTags('users')
 @Controller()
 export class UsersController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly users: UsersService,
+  ) {}
 
   @Get('me')
   @ZodResponse(meSchema)
-  async me(@CurrentUser() user: User) {
-    const main = await this.prisma.playerGameProfile.findFirst({
-      where: { userId: user.id },
-      orderBy: [{ rankedGames: 'desc' }, { kwote: 'desc' }],
-      include: { format: { include: { game: true } } },
-    })
-    return {
-      ...user,
-      hasBirthDate: user.birthDate !== null,
-      mainKwote: main
-        ? { game: main.format.game.name, format: main.format.name, kwote: main.kwote }
-        : null,
-    }
+  me(@CurrentUser() user: User) {
+    return this.users.profile(user)
+  }
+
+  /** Profil (F3) et onboarding (A4, A5) : seuls les champs envoyés changent. 409 si le pseudo est pris. */
+  @Patch('me')
+  @ZodResponse(meSchema)
+  async update(
+    @CurrentUser() user: User,
+    @ZodBody(updateProfileSchema) body: z.output<typeof updateProfileSchema>,
+  ) {
+    return this.users.profile(await this.users.update(user, body))
+  }
+
+  /** Mes parties (D1) : à venir par date croissante, historique du plus récent au plus ancien. */
+  @Get('me/agenda')
+  @ZodResponse(z.array(agendaItemSchema))
+  agenda(@CurrentUser() user: User, @ZodQuery(agendaQuerySchema) { period }: AgendaQuery) {
+    return this.users.agenda(user.id, period)
   }
 
   /**
@@ -92,7 +108,13 @@ export class UsersController {
           image: null,
           pseudo: null,
           birthDate: null,
+          avatarUrl: null,
+          avatarStatus: null,
           city: null,
+          latitude: null,
+          longitude: null,
+          availability: [],
+          vibes: [],
           parentId: null,
           parentalConsentAt: null,
           deletedAt: now,

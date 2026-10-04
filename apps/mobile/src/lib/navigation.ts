@@ -1,11 +1,12 @@
-import type { PlayerTab } from '@kwatro/design-system'
+import { type PlayerTab, SITE_URL } from '@kwatro/design-system'
 import { router } from 'expo-router'
+import { Linking } from 'react-native'
 
-// ponytail: seules les pages existantes y sont ; ajouter Mes parties et Messages avec leurs écrans,
-// Profil ouvre Mon compte en attendant l'écran profil
-const TAB_ROUTES: Partial<Record<PlayerTab, '/' | '/compte'>> = {
+// ponytail: Messages n'a pas encore d'écran
+const TAB_ROUTES: Partial<Record<PlayerTab, '/' | '/my-games' | '/profile'>> = {
   explorer: '/',
-  profil: '/compte',
+  parties: '/my-games',
+  profil: '/profile',
 }
 
 export const openHome = () => router.navigate('/')
@@ -17,6 +18,11 @@ export const openVenue = (slug: string) =>
   router.push({ pathname: '/venues/[slug]', params: { slug } })
 
 export const openEvent = (id: string) => router.push({ pathname: '/events/[id]', params: { id } })
+
+export const openSettings = () => router.push('/settings')
+
+/** Page du site public : aide, pages légales. */
+export const openSite = (path: string) => void Linking.openURL(SITE_URL + path)
 
 export function openTab(tab: string) {
   const route = TAB_ROUTES[tab as PlayerTab]

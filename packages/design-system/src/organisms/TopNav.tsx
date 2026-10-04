@@ -1,10 +1,10 @@
-import type { ReactNode } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import { Pressable, Text, View } from 'react-native'
-import { Avatar } from '../atoms/Avatar'
 import { Raised } from '../atoms/Raised'
 import { useHover } from '../atoms/useHover'
 import { Brand } from '../molecules/Brand'
-import { border, colors, font, motion, radius, shadow, sizes, textOn, transition } from '../tokens'
+import { border, colors, font, motion, radius, shadow, textOn, transition, z } from '../tokens'
+import { AccountMenu } from './AccountMenu'
 
 export type TopNavItem = { key: string; label: string }
 
@@ -15,8 +15,7 @@ export function TopNav({
   color = colors.room,
   right,
   onHome,
-  avatar,
-  onAvatar,
+  account,
 }: {
   items?: TopNavItem[]
   active?: string
@@ -24,8 +23,8 @@ export function TopNav({
   color?: string
   right?: ReactNode
   onHome?: () => void
-  avatar?: string
-  onAvatar?: () => void
+  /** Joueur connecté : avatar qui ouvre le menu du compte. */
+  account?: ComponentProps<typeof AccountMenu>
 }) {
   return (
     <View
@@ -37,6 +36,8 @@ export function TopNav({
         paddingHorizontal: 32,
         borderBottomWidth: border.base,
         borderColor: colors.ink,
+        // Le menu du compte déborde sur le contenu
+        zIndex: z.popover,
       }}
     >
       <Brand onPress={onHome} />
@@ -55,39 +56,8 @@ export function TopNav({
       ) : null}
       <View style={{ flex: 1 }} />
       {right}
-      {avatar !== undefined ? <AvatarLink name={avatar || '?'} onPress={onAvatar} /> : null}
+      {account ? <AccountMenu {...account} /> : null}
     </View>
-  )
-}
-
-function AvatarLink({ name, onPress }: { name: string; onPress?: () => void }) {
-  const { hovered, hoverProps } = useHover()
-  const size = sizes.avatar.s
-  const lift = hovered ? 2 : 0
-  const move = transition(['transform'], motion.fast)
-  return (
-    <Pressable
-      role="link"
-      aria-label="Ton profil"
-      onPress={onPress}
-      {...hoverProps}
-      style={{ marginLeft: 8, borderRadius: size / 2 }}
-    >
-      <View
-        style={{
-          position: 'absolute',
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          backgroundColor: colors.ink,
-          transform: [{ translateX: lift }, { translateY: lift }],
-          ...move,
-        }}
-      />
-      <View style={{ transform: [{ translateX: -lift / 2 }, { translateY: -lift / 2 }], ...move }}>
-        <Avatar name={name} size={size} />
-      </View>
-    </Pressable>
   )
 }
 

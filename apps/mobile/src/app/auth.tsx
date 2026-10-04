@@ -1,22 +1,13 @@
 import {
+  Banner,
   Button,
-  border,
-  colors,
   font,
   InlineLink,
   Logo,
-  MobileScreen,
   Note,
-  ProgressSteps,
-  Raised,
-  radius,
-  ScreenHeader,
   Segmented,
   SITE_URL,
-  TextField,
-  TopNav,
   Typography,
-  WebScreen,
 } from '@kwatro/design-system'
 import {
   type AgeRegime,
@@ -28,28 +19,17 @@ import {
   passwordSchema,
 } from '@kwatro/shared'
 import * as Linking from 'expo-linking'
-import { router } from 'expo-router'
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
-import { Text, type TextInput, useWindowDimensions, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { router, useLocalSearchParams } from 'expo-router'
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { type TextInput, useWindowDimensions, View } from 'react-native'
+import { Frame, StepAction, StepButton, StepLayout, WIDE, Wide } from '@/components/StepFrame'
 import { TableScene } from '@/components/TableScene'
-import { api } from '@/lib/api'
+import { useAppForm } from '@/hooks/formConfig'
 import { authClient } from '@/lib/auth'
-import { openHome } from '@/lib/navigation'
+import { ApiError, queryClient } from '@/lib/queryClient'
+import { forgetMe, meQueryOptions, useMeMutations } from '@/queries/useMe'
 
 type Step = 'welcome' | 'email' | 'birth' | AgeRegime
-
-/** Largeur à partir de laquelle l'écran passe en deux colonnes (navigateur desktop, tablette paysage). */
-const WIDE = 900
-const Wide = createContext(false)
 
 /**
  * Accueil (A1), e-mail (A2) et date de naissance obligatoire (A3, KWT-44), branchés sur Better Auth (KWT-9).
@@ -64,21 +44,25 @@ export default function AuthScreen() {
   /** Connecté par Apple / Google, il ne manque que la date de naissance (le compte existe déjà). */
   const [social, setSocial] = useState(false)
   const [providerError, setProviderError] = useState(false)
+  const { signedOut } = useLocalSearchParams<{ signedOut?: string }>()
   const wide = width >= WIDE
+  const { setBirthDate } = useMeMutations()
 
   /** Après une connexion : accueil, ou date de naissance si Apple / Google vient de créer le compte. */
   const resume = useCallback(async () => {
     const { data: session } = await authClient.getSession()
     if (!session) return
-    const { data: me } = await api.GET('/me')
+    const me = await queryClient.fetchQuery(meQueryOptions).catch(() => null)
     if (!me) return
     if (me.hasBirthDate) return router.replace('/')
     setSocial(true)
     setStep('birth')
   }, [])
 
-  // Retour d'Apple / Google sur le web (la page est rechargée sur /auth), ou joueur déjà connecté
+  // Retour d'Apple / Google sur le web (la page est rechargée sur /auth), ou joueur déjà connecté.
+  // Le profil gardé en mémoire peut être celui d'un autre compte : on l'oublie
   useEffect(() => {
+    forgetMe()
     void resume()
   }, [resume])
 
@@ -98,10 +82,14 @@ export default function AuthScreen() {
     const regime = ageRegime(date)
     const birthDate = date.toISOString().slice(0, 10)
     if (social) {
-      const { response } = await api.POST('/me/birth-date', { body: { birthDate } })
+      const error = await setBirthDate
+        .mutateAsync(birthDate)
+        .then(() => null)
+        .catch((e: unknown) => e)
       // 403 : trop jeune, l'API a supprimé le compte créé par Apple / Google
-      if (response.status === 403) await authClient.signOut().catch(() => undefined)
-      else if (!response.ok) return 'Impossible d’enregistrer ta date de naissance. Réessaie.'
+      if (error instanceof ApiError && error.status === 403)
+        await authClient.signOut().catch(() => undefined)
+      else if (error) return 'Impossible d’enregistrer ta date de naissance. Réessaie.'
     } else if (regime !== 'too-young') {
       const { error } = await authClient.signUp.email({ email, password, name: '', birthDate })
       if (error?.code?.startsWith('USER_ALREADY_EXISTS'))
@@ -147,7 +135,10 @@ export default function AuthScreen() {
         }
       >
         {wide ? (
-          <Typography>Connecte-toi ou crée ton compte Kwatro.</Typography>
+          <>
+            {signedOut ? <Banner tone="ok" message="Tu es déconnecté·e." /> : null}
+            <Typography>Connecte-toi ou crée ton compte Kwatro.</Typography>
+          </>
         ) : (
           <View style={{ flex: 1, justifyContent: 'center', gap: 12 }}>
             <Logo size={44} />
@@ -196,112 +187,23 @@ export default function AuthScreen() {
   )
 }
 
-/** Navigateur desktop : barre du site (favicon + Kwatro), accroche et pièces 3D à gauche, étape à droite. */
+/** Navigateur desktop : accroche et pièces 3D à gauche, étape à droite. */
 function WideLayout({ children }: { children: ReactNode }) {
   return (
-    <WebScreen
-      siteFooter={false}
-      nav={<TopNav onHome={openHome} />}
-      contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 72, paddingBottom: 48 }}
-    >
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <Typography variant="hero" style={{ maxWidth: 560 }}>
-          Trouve où jouer ce soir et avec qui.
-        </Typography>
-        <View style={{ height: 300, marginTop: 56 }}>
-          <TableScene />
-        </View>
-      </View>
-      <View style={{ width: 440 }}>{children}</View>
-    </WebScreen>
-  )
-}
-
-/**
- * Cadre d'une étape. Téléphone : écran plein (en-tête, contenu, pied fixe).
- * Desktop : carte blanche relevée, titre de l'étape, contenu puis actions.
- */
-function Frame({
-  title,
-  onBack,
-  progress,
-  phoneTitle = true,
-  footer,
-  children,
-}: {
-  title: string
-  /** Téléphone, étape sans retour : affiche le titre en tête du contenu (l'accueil a son propre bloc). */
-  phoneTitle?: boolean
-  onBack?: () => void
-  /** Étape courante sur 2 (e-mail, date de naissance). */
-  progress?: number
-  footer: ReactNode
-  children: ReactNode
-}) {
-  const wide = useContext(Wide)
-  const insets = useSafeAreaInsets()
-  const bar = progress ? <ProgressSteps current={progress} total={2} /> : null
-
-  if (!wide) {
-    return (
-      <MobileScreen
-        siteFooter={false}
-        insets={insets}
-        scroll={!!onBack}
-        header={onBack ? <ScreenHeader title={title} onBack={onBack} /> : undefined}
-        footer={footer}
-      >
-        {!onBack && phoneTitle ? (
-          <Typography variant="h1" style={{ paddingTop: 40 }}>
-            {title}
+    <StepLayout
+      aside={
+        <>
+          <Typography variant="hero" style={{ maxWidth: 560 }}>
+            Trouve où jouer ce soir et avec qui.
           </Typography>
-        ) : null}
-        {bar}
-        {children}
-      </MobileScreen>
-    )
-  }
-
-  return (
-    <Raised offset={5} r={radius.card}>
-      <View
-        style={{
-          backgroundColor: colors.white,
-          borderWidth: border.base,
-          borderColor: colors.ink,
-          borderRadius: radius.card,
-          padding: 28,
-          gap: 16,
-        }}
-      >
-        {onBack ? (
-          // ScreenHeader a ses marges d'écran : on les annule dans la carte
-          <View style={{ marginHorizontal: -16, marginVertical: -6 }}>
-            <ScreenHeader title={title} onBack={onBack} />
+          <View style={{ height: 300, marginTop: 56 }}>
+            <TableScene />
           </View>
-        ) : (
-          <Typography variant="h1">{title}</Typography>
-        )}
-        {bar}
-        {children}
-        {footer}
-      </View>
-    </Raised>
-  )
-}
-
-/** Bouton d'étape : pleine largeur sur téléphone (pied d'écran), à sa taille sur desktop. */
-function StepButton(props: {
-  label: string
-  kind?: 'room' | 'ghost'
-  disabled?: boolean
-  onPress: () => void
-}) {
-  const wide = useContext(Wide)
-  return (
-    <View style={wide ? { alignSelf: 'flex-start' } : null}>
-      <Button {...props} />
-    </View>
+        </>
+      }
+    >
+      {children}
+    </StepLayout>
   )
 }
 
@@ -309,7 +211,7 @@ type AccountMode = 'login' | 'create'
 
 /** E-mail + mot de passe : connexion à un compte existant, ou début de la création (suivie de la date de naissance). */
 function AccountStep({
-  email: initial,
+  email,
   mode,
   onMode,
   onBack,
@@ -321,35 +223,22 @@ function AccountStep({
   onBack: () => void
   onCreate: (email: string, password: string) => void
 }) {
-  const [email, setEmail] = useState(initial)
-  const [password, setPassword] = useState('')
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
-  const [busy, setBusy] = useState(false)
   const passwordRef = useRef<TextInput>(null)
   const create = mode === 'create'
-
-  const submit = async () => {
-    const parsedEmail = emailSchema.safeParse(email)
-    const passwordError = create
-      ? passwordSchema.safeParse(password).error?.issues[0]?.message
-      : password
-        ? undefined
-        : 'Saisis ton mot de passe.'
-    if (!parsedEmail.success || passwordError)
-      return setErrors({
-        email: parsedEmail.success
-          ? undefined
-          : 'Cette adresse e-mail ne semble pas valide. Vérifie-la.',
-        password: passwordError,
-      })
-    // Création : le compte n'est créé qu'après la date de naissance (âge vérifié par l'API)
-    if (create) return onCreate(parsedEmail.data, password)
-    setBusy(true)
-    const { error } = await authClient.signIn.email({ email: parsedEmail.data, password })
-    setBusy(false)
-    if (error) return setErrors({ password: 'E-mail ou mot de passe incorrect.' })
-    router.replace('/')
-  }
+  const form = useAppForm({
+    defaultValues: { email, password: '' },
+    onSubmit: async ({ value, formApi }) => {
+      const address = emailSchema.parse(value.email)
+      // Création : le compte n'est créé qu'après la date de naissance (âge vérifié par l'API)
+      if (create) return onCreate(address, value.password)
+      const { error } = await authClient.signIn.email({ email: address, password: value.password })
+      if (error)
+        return formApi.setErrorMap({
+          onSubmit: { fields: { password: 'E-mail ou mot de passe incorrect.' } },
+        })
+      router.replace('/')
+    },
+  })
 
   return (
     <Frame
@@ -357,11 +246,11 @@ function AccountStep({
       onBack={onBack}
       progress={create ? 1 : undefined}
       footer={
-        <StepButton
-          label={create ? 'Continuer' : 'Se connecter'}
-          disabled={busy}
-          onPress={() => void submit()}
-        />
+        <form.AppForm>
+          <StepAction>
+            <form.SubmitButton label={create ? 'Continuer' : 'Se connecter'} />
+          </StepAction>
+        </form.AppForm>
       }
     >
       <Segmented
@@ -369,41 +258,56 @@ function AccountStep({
         value={create ? 1 : 0}
         onChange={(i) => {
           onMode(i ? 'create' : 'login')
-          setErrors({})
+          // Les erreurs de l'autre mode ne valent plus : on garde la saisie
+          form.reset(form.state.values)
         }}
       />
-      <TextField
-        label="Adresse e-mail"
-        placeholder="toi@exemple.fr"
-        value={email}
-        onChangeText={(v) => {
-          setEmail(v)
-          setErrors((e) => ({ ...e, email: undefined }))
+      <form.AppField
+        name="email"
+        validators={{
+          onSubmit: ({ value }) =>
+            emailSchema.safeParse(value).success
+              ? undefined
+              : 'Cette adresse e-mail ne semble pas valide. Vérifie-la.',
         }}
-        error={errors.email}
-        autoFocus
-        autoCapitalize="none"
-        autoComplete="email"
-        keyboardType="email-address"
-        returnKeyType="next"
-        onSubmitEditing={() => passwordRef.current?.focus()}
-      />
-      <TextField
-        ref={passwordRef}
-        label="Mot de passe"
-        value={password}
-        onChangeText={(v) => {
-          setPassword(v)
-          setErrors((e) => ({ ...e, password: undefined }))
+      >
+        {(field) => (
+          <field.Text
+            label="Adresse e-mail"
+            placeholder="toi@exemple.fr"
+            autoFocus
+            autoCapitalize="none"
+            autoComplete="email"
+            keyboardType="email-address"
+            returnKeyType="next"
+            onSubmitEditing={() => passwordRef.current?.focus()}
+          />
+        )}
+      </form.AppField>
+      <form.AppField
+        name="password"
+        validators={{
+          onSubmit: ({ value }) =>
+            create
+              ? passwordSchema.safeParse(value).error?.issues[0]?.message
+              : value
+                ? undefined
+                : 'Saisis ton mot de passe.',
         }}
-        error={errors.password}
-        help={create ? `${PASSWORD_MIN} caractères minimum` : undefined}
-        secureTextEntry
-        autoCapitalize="none"
-        autoComplete={create ? 'new-password' : 'current-password'}
-        returnKeyType="done"
-        onSubmitEditing={() => void submit()}
-      />
+      >
+        {(field) => (
+          <field.Text
+            ref={passwordRef}
+            label="Mot de passe"
+            help={create ? `${PASSWORD_MIN} caractères minimum` : undefined}
+            secureTextEntry
+            autoCapitalize="none"
+            autoComplete={create ? 'new-password' : 'current-password'}
+            returnKeyType="done"
+            onSubmitEditing={() => void form.handleSubmit()}
+          />
+        )}
+      </form.AppField>
     </Frame>
   )
 }
@@ -416,76 +320,78 @@ function BirthStep({
   /** Renvoie un message d'erreur si le compte n'a pas pu être créé ou complété. */
   onDone: (date: Date) => Promise<string | undefined>
 }) {
-  const [day, setDay] = useState('')
-  const [month, setMonth] = useState('')
-  const [year, setYear] = useState('')
-  const [error, setError] = useState<string>()
-  const [busy, setBusy] = useState(false)
   const monthRef = useRef<TextInput>(null)
   const yearRef = useRef<TextInput>(null)
-
-  const submit = async () => {
-    const date = parseBirthDate(day, month, year)
-    if (!date || date > new Date())
-      return setError(
-        'Cette date n’existe pas. Saisis le jour, le mois et l’année, ex. 14 07 2004.',
-      )
-    setBusy(true)
-    const failure = await onDone(date)
-    setBusy(false)
-    if (failure) setError(failure)
-  }
-
-  // Champ à 2 ou 4 chiffres qui passe au suivant une fois rempli
-  const part = (
-    label: string,
-    value: string,
-    set: (v: string) => void,
-    max: 2 | 4,
-    next?: React.RefObject<TextInput | null>,
-    ref?: React.RefObject<TextInput | null>,
-  ) => (
-    <View style={{ flex: max === 4 ? 1.6 : 1 }}>
-      <TextField
-        ref={ref}
-        label={label}
-        placeholder={max === 4 ? 'AAAA' : label === 'Jour' ? 'JJ' : 'MM'}
-        value={value}
-        onChangeText={(v) => {
-          const digits = v.replace(/\D/g, '').slice(0, max)
-          set(digits)
-          setError(undefined)
-          if (digits.length === max) next?.current?.focus()
-        }}
-        keyboardType="number-pad"
-        maxLength={max}
-        returnKeyType={next ? 'next' : 'done'}
-        onSubmitEditing={next ? () => next.current?.focus() : () => void submit()}
-      />
-    </View>
-  )
+  const form = useAppForm({
+    defaultValues: { day: '', month: '', year: '' },
+    validators: {
+      onSubmit: ({ value }) => {
+        const date = parseBirthDate(value.day, value.month, value.year)
+        return !date || date > new Date()
+          ? 'Cette date n’existe pas. Saisis le jour, le mois et l’année, ex. 14 07 2004.'
+          : undefined
+      },
+    },
+    onSubmit: async ({ value, formApi }) => {
+      const date = parseBirthDate(value.day, value.month, value.year)
+      const failure = date ? await onDone(date) : undefined
+      if (failure) formApi.setErrorMap({ onSubmit: { form: failure, fields: {} } })
+    },
+  })
 
   return (
     <Frame
       title="Ta date de naissance"
       onBack={onBack}
       progress={2}
-      footer={<StepButton label="Continuer" disabled={busy} onPress={() => void submit()} />}
+      footer={
+        <form.AppForm>
+          <StepAction>
+            <form.SubmitButton label="Continuer" />
+          </StepAction>
+        </form.AppForm>
+      }
     >
       <Typography>
         Kwatro est ouvert dès {MIN_AGE} ans. Ta date de naissance règle ce que ton compte permet,
         elle n’est jamais affichée.
       </Typography>
       <View style={{ flexDirection: 'row', gap: 10 }}>
-        {part('Jour', day, setDay, 2, monthRef)}
-        {part('Mois', month, setMonth, 2, yearRef, monthRef)}
-        {part('Année', year, setYear, 4, undefined, yearRef)}
+        <View style={{ flex: 1 }}>
+          <form.AppField name="day">
+            {(field) => <field.Digits label="Jour" placeholder="JJ" length={2} next={monthRef} />}
+          </form.AppField>
+        </View>
+        <View style={{ flex: 1 }}>
+          <form.AppField name="month">
+            {(field) => (
+              <field.Digits
+                ref={monthRef}
+                label="Mois"
+                placeholder="MM"
+                length={2}
+                next={yearRef}
+              />
+            )}
+          </form.AppField>
+        </View>
+        <View style={{ flex: 1.6 }}>
+          <form.AppField name="year">
+            {(field) => (
+              <field.Digits
+                ref={yearRef}
+                label="Année"
+                placeholder="AAAA"
+                length={4}
+                onSubmitEditing={() => void form.handleSubmit()}
+              />
+            )}
+          </form.AppField>
+        </View>
       </View>
-      {error ? (
-        <Text role="alert" style={{ ...font('body', 700), fontSize: 13, color: colors.room }}>
-          {error}
-        </Text>
-      ) : null}
+      <form.AppForm>
+        <form.FormError />
+      </form.AppForm>
     </Frame>
   )
 }
@@ -525,7 +431,7 @@ function Outcome({ regime, onRestart }: { regime: AgeRegime; onRestart: () => vo
         regime === 'too-young' ? (
           <StepButton label="Revenir à l’accueil" kind="ghost" onPress={onRestart} />
         ) : (
-          // ponytail: l'onboarding (A4-A6, KWT-45) et le consentement parent (A7, KWT-49) ne sont pas encore faits
+          // ponytail: le consentement parent (A7, KWT-49) n'est pas encore fait ; l'accueil renvoie vers l'onboarding
           <StepButton label="Continuer" onPress={() => router.replace('/')} />
         )
       }

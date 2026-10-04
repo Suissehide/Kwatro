@@ -30,9 +30,18 @@ model User {
   pseudo             String?   @unique
   /// Saisie à l'inscription par e-mail, demandée après une première connexion Apple / Google
   birthDate          DateTime? @db.Date
-  role              UserRole  @default(PLAYER)
+  role               UserRole  @default(PLAYER)
+  /// Photo de profil : visible des autres joueurs seulement une fois validée (sinon l'initiale)
+  avatarUrl          String?
+  avatarStatus       AvatarStatus?
   city               String?
+  /// Centre de la ville choisie (géocodage IGN) ou position de l'appareil (« Me localiser »)
+  latitude           Float?
+  longitude          Float?
   searchRadiusKm     Int       @default(10)
+  /// Créneaux habituels : jour × 3 + moment (0 = lundi matin … 20 = dimanche soir)
+  availability       Int[]     @default([])
+  vibes              PlayVibe[] @default([])
   /// Compte parent lié (mineurs de 13-14 ans)
   parentId           String?
   parent             User?     @relation("ParentChild", fields: [parentId], references: [id])
@@ -51,6 +60,22 @@ model User {
   eventRegistrations EventRegistration[]
   sessions           Session[]
   accounts           Account[]
+}
+
+enum AvatarStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// Ambiance recherchée, affichée sur le profil
+enum PlayVibe {
+  CHILL
+  COMPETITIVE
+  TEACHER
+  BEGINNER
+  HOMEBREW
+  SOCIAL
 }
 
 // ---------- Auth (tables Better Auth, KWT-9) ----------

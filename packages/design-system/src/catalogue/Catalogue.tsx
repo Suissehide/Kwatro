@@ -15,6 +15,7 @@ import {
   ProgressSteps,
   Radio,
   Skeleton,
+  Slider,
   Spinner,
   StatusPill,
   Tag,
@@ -24,7 +25,9 @@ import {
 } from '../atoms'
 import {
   AccessibilityList,
+  AgendaCard,
   AgendaEventCard,
+  AvailabilityGrid,
   AvatarStack,
   Banner,
   Brand,
@@ -39,12 +42,18 @@ import {
   FactCard,
   HoursCard,
   KwoteBadge,
+  LevelCard,
   ListCard,
   ListRow,
+  OptionCard,
   PageTitle,
   Pagination,
+  Panel,
   PerkBanner,
   ProfileCard,
+  ProfileIdentity,
+  RankCard,
+  RankRow,
   RoomCard,
   RoomStatusTimeline,
   ScreenHeader,
@@ -67,7 +76,7 @@ import {
   MonthCalendar,
   type PlayerTab,
   PlayerTabBar,
-  playerItems,
+  playerNavItems,
   Sidebar,
   SiteFooter,
   type Sort,
@@ -115,6 +124,9 @@ export function Catalogue() {
   const [sort, setSort] = useState<Sort>({ key: 'date', dir: 'desc' })
   const [selected, setSelected] = useState<string[]>([])
   const [tab, setTab] = useState<PlayerTab>('explorer')
+  const [radiusKm, setRadiusKm] = useState(10)
+  const [slots, setSlots] = useState([5, 11, 14, 17])
+  const [vibe, setVibe] = useState(true)
 
   return (
     <ScrollView
@@ -206,6 +218,83 @@ export function Catalogue() {
           <KwoteBadge value="1 184" large />
         </Row>
         <XpBar level={7} name="Habitué" current={340} max={500} />
+        <Slider label="Rayon" value={radiusKm} min={1} max={50} onChange={setRadiusKm} />
+        <Panel title="Disponibilités">
+          <AvailabilityGrid
+            value={slots}
+            onToggle={(s) =>
+              setSlots((list) => (list.includes(s) ? list.filter((x) => x !== s) : [...list, s]))
+            }
+          />
+        </Panel>
+        <OptionCard
+          label="Détente"
+          description="On joue pour le plaisir, sans pression."
+          value={vibe}
+          onChange={setVibe}
+        />
+        <ProfileIdentity
+          pseudo="Léa"
+          place="Bordeaux · 10 km"
+          vibes={['Détente', 'Compétitif']}
+          xp={{ level: 4, name: 'Pilier de table', current: 340, max: 500 }}
+        />
+        <View style={{ width: 380 }}>
+          <LevelCard level={4} name="Pilier de table" current={340} max={500} />
+        </View>
+        <Row>
+          <View style={{ width: 240 }}>
+            <RankCard
+              color={colors.room}
+              game="Magic"
+              format="Commander"
+              kwote="1 214"
+              note="38 parties classées"
+            />
+          </View>
+          <View style={{ width: 240 }}>
+            <RankCard
+              color={colors.venue}
+              game="One Piece"
+              format="Standard"
+              kwote={null}
+              progress="3 / 5"
+              note="Encore 2 parties classées avant ta première Kwote"
+            />
+          </View>
+        </Row>
+        <ListCard>
+          <RankRow
+            color={colors.event}
+            game="Lorcana"
+            format="Core"
+            kwote="1 310"
+            note="12 parties"
+            last
+          />
+        </ListCard>
+        <AgendaCard
+          wide
+          color={colors.event}
+          day="06"
+          month="OCT"
+          label="Soirée jeux · Magic"
+          title="Soirée Commander"
+          meta="Le Dé Fêlé · 19 h 30"
+          count="8/12"
+          status={<StatusPill label="Place réservée" tone="ok" />}
+          onPress={() => {}}
+        />
+        <AgendaCard
+          color={colors.room}
+          day="04"
+          month="OCT"
+          label="Room classée · Pokémon"
+          title="Standard à 4"
+          meta="Carte Blanche · 21 h"
+          count="3/4"
+          status={<StatusPill label="Il manque 1 joueur" tone="warn" />}
+        />
         <ContentCard kind="room" raised>
           <Typography variant="title">Pioneer du jeudi</Typography>
           <Typography variant="small">La Taverne du Dé · 20 h 30 · 3 places</Typography>
@@ -441,7 +530,7 @@ export function Catalogue() {
           <TextLink label="Tout le programme" onPress={() => {}} />
         </View>
         <TopNav
-          items={playerItems}
+          items={playerNavItems}
           active={tab}
           onSelect={(key) => setTab(key as PlayerTab)}
           right={<Button small kind="kwote" label="+ Créer une room" />}
