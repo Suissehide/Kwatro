@@ -19,10 +19,10 @@ import { useWindowDimensions, View } from 'react-native'
 import { PlayerScreen } from '@/components/PlayerScreen'
 import { IdentityFields } from '@/components/profile/IdentityFields'
 import { WhereFields } from '@/components/profile/WhereFields'
-import { api } from '@/lib/api'
 import { visibleAvatar } from '@/lib/profile'
+import { ApiError } from '@/lib/queryClient'
 import { useCityField } from '@/lib/useCityField'
-import { setStoredMe, useMe } from '@/lib/useMe'
+import { useMeMutations, useMeQuery } from '@/queries/useMe'
 
 const WIDE = 900
 
@@ -31,7 +31,7 @@ const backToProfile = () => (router.canGoBack() ? router.back() : router.replace
 /** Modifier le profil (F3) : pseudo, prénom et nom privés, ville et rayon, disponibilités, ambiance. */
 export default function EditProfileScreen() {
   const wide = useWindowDimensions().width >= WIDE
-  const me = useMe({ required: true })
+  const me = useMeQuery({ required: true })
   if (me) return <EditForm me={me} wide={wide} />
   return (
     <PlayerScreen
@@ -47,6 +47,7 @@ export default function EditProfileScreen() {
 
 function EditForm({ me, wide }: { me: Me; wide: boolean }) {
   const navigation = useNavigation()
+  const { updateProfile } = useMeMutations()
   const initial = {
     pseudo: me.pseudo ?? '',
     name: me.name,
@@ -93,22 +94,21 @@ function EditForm({ me, wide }: { me: Me; wide: boolean }) {
     setFailed(false)
     const place = await cityField.resolve()
     if (!place) return setBusy(false)
-    const { data, response } = await api
-      .PATCH('/me', {
-        body: {
-          pseudo: parsed.data,
-          name,
-          ...place,
-          searchRadiusKm: radius,
-          availability,
-          vibes,
-        },
+    const result = await updateProfile
+      .mutateAsync({
+        pseudo: parsed.data,
+        name,
+        ...place,
+        searchRadiusKm: radius,
+        availability,
+        vibes,
       })
-      .catch(() => ({ data: undefined, response: undefined }))
+      .catch((error: unknown) => error)
     setBusy(false)
-    if (response?.status === 409) return setPseudoError('Ce pseudo est déjà pris.')
-    if (!data) return setFailed(true)
-    setStoredMe(data)
+    if (result instanceof ApiError && result.status === 409)
+      return setPseudoError('Ce pseudo est déjà pris.')
+    if (result instanceof Error) return setFailed(true)
+    const data = result as Me
     setSaved(JSON.stringify({ ...draft, pseudo: data.pseudo ?? '', city: data.city ?? '' }))
     setDone(true)
   }

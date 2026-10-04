@@ -39,16 +39,16 @@ import {
   venueRowProps,
 } from '@/lib/explore'
 import { notYet, openHome, openTab } from '@/lib/navigation'
-import { useMe } from '@/lib/useMe'
-import { useTonight } from '@/lib/useTonight'
+import { useTonightQuery } from '@/queries/useExplore'
+import { useMeQuery } from '@/queries/useMe'
 
 const WIDE = 900
 
 export default function HomeScreen() {
   const wide = useWindowDimensions().width >= WIDE
   const insets = useSafeAreaInsets()
-  const me = useMe()
-  const { place, data, failed, retry } = useTonight()
+  const me = useMeQuery()
+  const { place, data, failed, retry } = useTonightQuery()
   const [game, setGame] = useState<string | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 

@@ -7,9 +7,9 @@ import { IntroDeck } from '@/components/IntroDeck'
 import { IdentityFields } from '@/components/profile/IdentityFields'
 import { WhereFields } from '@/components/profile/WhereFields'
 import { Frame, StepButton, StepLayout, WIDE, Wide } from '@/components/StepFrame'
-import { api } from '@/lib/api'
+import { ApiError } from '@/lib/queryClient'
 import { useCityField } from '@/lib/useCityField'
-import { setStoredMe, useMe } from '@/lib/useMe'
+import { useMeMutations, useMeQuery } from '@/queries/useMe'
 
 type Step = 'intro' | 'pseudo' | 'where'
 
@@ -22,7 +22,7 @@ const finish = () => router.replace('/')
  */
 export default function OnboardingScreen() {
   const wide = useWindowDimensions().width >= WIDE
-  const me = useMe({ required: true })
+  const me = useMeQuery({ required: true })
   const [step, setStep] = useState<Step>('intro')
   const current = wide && step === 'intro' ? 'pseudo' : step
 
@@ -82,6 +82,7 @@ function PseudoStep({
   onBack?: () => void
   onDone: () => void
 }) {
+  const { updateProfile } = useMeMutations()
   const [pseudo, setPseudo] = useState(me?.pseudo ?? '')
   const [error, setError] = useState<string>()
   const [busy, setBusy] = useState(false)
@@ -90,13 +91,14 @@ function PseudoStep({
     const parsed = pseudoSchema.safeParse(pseudo)
     if (!parsed.success) return setError(parsed.error.issues[0]?.message)
     setBusy(true)
-    const { data, response } = await api
-      .PATCH('/me', { body: { pseudo: parsed.data } })
-      .catch(() => ({ data: undefined, response: undefined }))
+    const result = await updateProfile
+      .mutateAsync({ pseudo: parsed.data })
+      .catch((error: unknown) => error)
     setBusy(false)
-    if (response?.status === 409) return setError('Ce pseudo est déjà pris. Essaie une variante.')
-    if (!data) return setError('Impossible d’enregistrer ton pseudo pour l’instant. Réessaie.')
-    setStoredMe(data)
+    if (result instanceof ApiError && result.status === 409)
+      return setError('Ce pseudo est déjà pris. Essaie une variante.')
+    if (result instanceof Error)
+      return setError('Impossible d’enregistrer ton pseudo pour l’instant. Réessaie.')
     onDone()
   }
 
@@ -130,6 +132,7 @@ function PseudoStep({
 /** A5 : ville (saisie ou position, facultative) et rayon de recherche. */
 function WhereStep({ me, onBack }: { me: Me; onBack: () => void }) {
   const wide = useContext(Wide)
+  const { updateProfile } = useMeMutations()
   const cityField = useCityField(me)
   const [radius, setRadius] = useState(me.searchRadiusKm || RADIUS_KM.default)
   const [failed, setFailed] = useState(false)
@@ -140,12 +143,12 @@ function WhereStep({ me, onBack }: { me: Me; onBack: () => void }) {
     setFailed(false)
     const place = await cityField.resolve()
     if (!place) return setBusy(false)
-    const { data } = await api
-      .PATCH('/me', { body: { ...place, searchRadiusKm: radius } })
-      .catch(() => ({ data: undefined }))
+    const saved = await updateProfile
+      .mutateAsync({ ...place, searchRadiusKm: radius })
+      .then(() => true)
+      .catch(() => false)
     setBusy(false)
-    if (!data) return setFailed(true)
-    setStoredMe(data)
+    if (!saved) return setFailed(true)
     finish()
   }
 

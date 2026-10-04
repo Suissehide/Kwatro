@@ -23,9 +23,9 @@ import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { Text, type TextInput, useWindowDimensions, View } from 'react-native'
 import { Frame, StepButton, StepLayout, WIDE, Wide } from '@/components/StepFrame'
 import { TableScene } from '@/components/TableScene'
-import { api } from '@/lib/api'
 import { authClient } from '@/lib/auth'
-import { setStoredMe } from '@/lib/useMe'
+import { ApiError, queryClient } from '@/lib/queryClient'
+import { forgetMe, meQueryOptions, useMeMutations } from '@/queries/useMe'
 
 type Step = 'welcome' | 'email' | 'birth' | AgeRegime
 
@@ -43,12 +43,13 @@ export default function AuthScreen() {
   const [social, setSocial] = useState(false)
   const [providerError, setProviderError] = useState(false)
   const wide = width >= WIDE
+  const { setBirthDate } = useMeMutations()
 
   /** Après une connexion : accueil, ou date de naissance si Apple / Google vient de créer le compte. */
   const resume = useCallback(async () => {
     const { data: session } = await authClient.getSession()
     if (!session) return
-    const { data: me } = await api.GET('/me')
+    const me = await queryClient.fetchQuery(meQueryOptions).catch(() => null)
     if (!me) return
     if (me.hasBirthDate) return router.replace('/')
     setSocial(true)
@@ -58,7 +59,7 @@ export default function AuthScreen() {
   // Retour d'Apple / Google sur le web (la page est rechargée sur /auth), ou joueur déjà connecté.
   // Le profil gardé en mémoire peut être celui d'un autre compte : on l'oublie
   useEffect(() => {
-    setStoredMe(null)
+    forgetMe()
     void resume()
   }, [resume])
 
@@ -78,10 +79,14 @@ export default function AuthScreen() {
     const regime = ageRegime(date)
     const birthDate = date.toISOString().slice(0, 10)
     if (social) {
-      const { response } = await api.POST('/me/birth-date', { body: { birthDate } })
+      const error = await setBirthDate
+        .mutateAsync(birthDate)
+        .then(() => null)
+        .catch((e: unknown) => e)
       // 403 : trop jeune, l'API a supprimé le compte créé par Apple / Google
-      if (response.status === 403) await authClient.signOut().catch(() => undefined)
-      else if (!response.ok) return 'Impossible d’enregistrer ta date de naissance. Réessaie.'
+      if (error instanceof ApiError && error.status === 403)
+        await authClient.signOut().catch(() => undefined)
+      else if (error) return 'Impossible d’enregistrer ta date de naissance. Réessaie.'
     } else if (regime !== 'too-young') {
       const { error } = await authClient.signUp.email({ email, password, name: '', birthDate })
       if (error?.code?.startsWith('USER_ALREADY_EXISTS'))

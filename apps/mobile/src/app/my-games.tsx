@@ -18,16 +18,16 @@ import { PlayerScreen } from '@/components/PlayerScreen'
 import { GAMES, matchesGame } from '@/lib/explore'
 import { notYet, openHome } from '@/lib/navigation'
 import { agendaCardProps, agendaStatus, agendaTag } from '@/lib/profile'
-import { useAgenda } from '@/lib/useAgenda'
-import { useMe } from '@/lib/useMe'
+import { useAgendaQuery } from '@/queries/useAgenda'
+import { useMeQuery } from '@/queries/useMe'
 
 const WIDE = 900
 
 /** Mes parties (D1) : à venir et historique, groupées par période, filtrables par jeu. */
 export default function MyGamesScreen() {
   const wide = useWindowDimensions().width >= WIDE
-  const me = useMe({ required: true })
-  const { agenda, failed, retry } = useAgenda()
+  const me = useMeQuery({ required: true })
+  const { agenda, failed, retry } = useAgendaQuery()
   const { tab } = useLocalSearchParams<{ tab?: string }>()
   const past = tab === 'history'
   const [game, setGame] = useState<string | null>(null)

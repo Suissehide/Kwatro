@@ -67,7 +67,7 @@ Documentation interactive en dev : http://localhost:3000/docs (OpenAPI brut : `/
 1. **Schémas dans `packages/shared`** (Zod) : ce que l'API reçoit et ce qu'elle renvoie, partagés avec l'app.
 2. **Contrôleur** : `@ZodBody(schema)` valide le corps (400 détaillé sinon), `@ZodResponse(schema)` documente la réponse **et retire tout champ non déclaré** (rien ne fuit par erreur). Voir `apps/api/src/common/zod.ts`.
 3. **Permissions** : toute route exige un utilisateur connecté par défaut ; `@Public()` pour l'ouvrir, `@Roles('ADMIN')` pour la restreindre, `@CurrentUser()` pour lire l'utilisateur (`apps/api/src/auth/`). Les règles fines (mineurs, staff d'un lieu, hôte d'une room) vont dans des guards dédiés, avec des tests.
-4. `pnpm api:generate`, puis côté app : `const { data, error } = await api.GET('/games')` (typé). La CI échoue si le client n'est pas à jour.
+4. `pnpm api:generate` (la CI échoue si le client n'est pas à jour), puis côté app une requête ou une mutation TanStack Query dans `apps/mobile/src/queries/` (voir `CONTRIBUTING.md`, « App : données de l'API »).
 
 > **Connexion** : Better Auth (`apps/api/src/auth/better-auth.ts`), routes sous `/api/auth/*` (inscription et connexion e-mail + mot de passe, Apple, Google), session en cookie stockée dans Postgres ; côté app, `authClient` (`apps/mobile/src/lib/auth.ts`). Apple et Google ne s'activent que si leurs variables sont renseignées (voir `.env.example`). Après une première connexion Apple / Google, l'app demande la date de naissance (`POST /me/birth-date`).
 >

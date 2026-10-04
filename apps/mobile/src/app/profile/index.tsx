@@ -17,7 +17,7 @@ import { useWindowDimensions, View } from 'react-native'
 import { PlayerScreen } from '@/components/PlayerScreen'
 import { AccountSection } from '@/components/profile/AccountSection'
 import { placeLine, rankProps, vibeLabels, visibleAvatar } from '@/lib/profile'
-import { useMe } from '@/lib/useMe'
+import { useMeQuery } from '@/queries/useMe'
 
 const WIDE = 900
 
@@ -26,7 +26,7 @@ const openEdit = () => router.push('/profile/edit')
 /** Profil du joueur (F1) : identité, niveau, Kwote par jeu, disponibilités et compte. Les parties sont dans Mes parties. */
 export default function ProfileScreen() {
   const wide = useWindowDimensions().width >= WIDE
-  const me = useMe({ required: true })
+  const me = useMeQuery({ required: true })
 
   const header = wide ? null : (
     <View

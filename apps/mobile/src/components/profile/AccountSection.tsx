@@ -2,21 +2,16 @@ import { Banner, Button, ConfirmDialog, Panel, Section, Typography } from '@kwat
 import { router } from 'expo-router'
 import { useState } from 'react'
 import { View } from 'react-native'
-import { api } from '@/lib/api'
-import { setStoredMe } from '@/lib/useMe'
+import { useMeMutations } from '@/queries/useMe'
 
 /** Compte : suppression du compte depuis l'app (exigence Apple, KWT-18). */
 export function AccountSection({ wide }: { wide: boolean }) {
   const [confirming, setConfirming] = useState(false)
-  const [failed, setFailed] = useState(false)
+  const { deleteAccount } = useMeMutations()
 
-  async function deleteAccount() {
+  const confirmDelete = () => {
     setConfirming(false)
-    const { response } = await api.DELETE('/me').catch(() => ({ response: null }))
-    if (response?.ok) {
-      setStoredMe(null)
-      router.replace('/auth')
-    } else setFailed(true)
+    deleteAccount.mutate(undefined, { onSuccess: () => router.replace('/auth') })
   }
 
   return (
@@ -29,7 +24,7 @@ export function AccountSection({ wide }: { wide: boolean }) {
             sont annulées. C’est définitif.
           </Typography>
         </View>
-        {failed ? (
+        {deleteAccount.isError ? (
           <Banner tone="err" message="La suppression a échoué. Réessaie dans un instant." />
         ) : null}
         <View style={wide ? { alignSelf: 'flex-start' } : null}>
@@ -41,7 +36,7 @@ export function AccountSection({ wide }: { wide: boolean }) {
         title={'Supprimer ton compte ?'}
         message="Toutes tes données seront effacées. Tu ne pourras pas revenir en arrière."
         confirmLabel="Supprimer"
-        onConfirm={deleteAccount}
+        onConfirm={confirmDelete}
         onCancel={() => setConfirming(false)}
       />
     </Section>
