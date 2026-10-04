@@ -46,7 +46,7 @@ export interface paths {
         get: operations["UsersController_me"];
         put?: never;
         post?: never;
-        delete?: never;
+        delete: operations["UsersController_deleteMe"];
         options?: never;
         head?: never;
         patch?: never;
@@ -230,6 +230,23 @@ export interface operations {
                         } | null;
                     };
                 };
+            };
+        };
+    };
+    UsersController_deleteMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
