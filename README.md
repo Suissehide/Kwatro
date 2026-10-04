@@ -35,7 +35,7 @@ pnpm install                 # installe tout + les hooks Git
 cp .env.example .env         # variables locales (ne jamais committer .env)
 pnpm db:up                   # lance PostgreSQL/PostGIS et Mailpit
 pnpm db:migrate              # crée/applique les migrations
-pnpm db:seed                 # jeux, formats et un lieu de démo
+pnpm db:seed                 # jeux, lieux, événements, rooms et comptes de test
 pnpm dev                     # API + site + Expo en parallèle
 ```
 
@@ -71,7 +71,17 @@ Documentation interactive en dev : http://localhost:3000/docs (OpenAPI brut : `/
 
 > **Connexion** : Better Auth (`apps/api/src/auth/better-auth.ts`), routes sous `/api/auth/*` (inscription et connexion e-mail + mot de passe, Apple, Google), session en cookie stockée dans Postgres ; côté app, `authClient` (`apps/mobile/src/lib/auth.ts`). Apple et Google ne s'activent que si leurs variables sont renseignées (voir `.env.example`). Après une première connexion Apple / Google, l'app demande la date de naissance (`POST /me/birth-date`).
 >
-> En dev, l'en-tête `x-dev-user-id: <id d'un User>` connecte aussi un compte du seed (`DEV_AUTH_HEADER=true`, refusé en production). Bouton « Authorize » dans `/docs`. Le seed crée deux comptes fictifs prêts à l'emploi : `joueur-demo` (joueur, inscrit à la première Soirée Commander) et `admin-demo` (admin), ainsi que 2 lieux et 7 événements de démo.
+> En dev, l'en-tête `x-dev-user-id: <id d'un User>` connecte aussi un compte du seed (`DEV_AUTH_HEADER=true`, refusé en production). Bouton « Authorize » dans `/docs`. Le seed (fictif, dates recalculées à chaque `pnpm db:seed`) crée 5 lieux bordelais, une vingtaine d'événements, des rooms à venir et passées, et des comptes de test qui se connectent dans l'app par e-mail :
+>
+> | E-mail | Mot de passe | Id (`x-dev-user-id`) | Pour tester |
+> |---|---|---|---|
+> | `player@kwatro.dev` | `Player123!` | `joueur-demo` | Joueur complet : profil, Kwote, parties à venir et historique |
+> | `admin@kwatro.dev` | `Admin123!` | `admin-demo` | Admin Kwatro |
+> | `staff@kwatro.dev` | `Staff123!` | `staff-demo` | Gérant du Dé Fêlé |
+> | `mineur@kwatro.dev` | `Mineur123!` | `mineur-demo` | Joueur de 16 ans |
+> | `nouveau@kwatro.dev` | `Nouveau123!` | `nouveau-demo` | Compte neuf : l'app ouvre l'onboarding |
+>
+> Les autres joueurs (`maya@kwatro.dev`, `sam@kwatro.dev`…) n'ont pas de mot de passe.
 
 ## Base de données
 
