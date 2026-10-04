@@ -19,11 +19,13 @@ export function AccountSection({ wide }: { wide: boolean }) {
   return (
     <Section title="Compte">
       <Panel compact={!wide}>
-        <Typography variant="title">Supprimer mon compte</Typography>
-        <Typography variant="small">
-          Ton profil, tes niveaux et tes inscriptions à venir sont supprimés ; tes rooms à venir
-          sont annulées. C’est définitif.
-        </Typography>
+        <View style={{ gap: 4 }}>
+          <Typography variant="title">Supprimer mon compte</Typography>
+          <Typography variant="small">
+            Ton profil, tes niveaux et tes inscriptions à venir sont supprimés ; tes rooms à venir
+            sont annulées. C’est définitif.
+          </Typography>
+        </View>
         {failed ? (
           <Banner tone="err" message="La suppression a échoué. Réessaie dans un instant." />
         ) : null}
