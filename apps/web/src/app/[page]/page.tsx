@@ -4,11 +4,11 @@ import { TextPage } from '../text-page'
 
 // ponytail: pages provisoires du pied de page, à remplacer par leur contenu
 const PAGES: Record<string, { title: string; text: string }> = {
-  'a-propos': {
+  about: {
     title: 'À propos',
     text: 'Kwatro aide les joueurs à trouver une table près de chez eux, ce soir.',
   },
-  aide: { title: 'Aide', text: 'La foire aux questions arrive avec le lancement de l’app.' },
+  help: { title: 'Aide', text: 'La foire aux questions arrive avec le lancement de l’app.' },
   bordeaux: {
     title: 'Où jouer ce soir à Bordeaux',
     text: 'Les bars à jeux, boutiques et associations de Bordeaux arrivent bientôt sur Kwatro.',

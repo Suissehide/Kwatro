@@ -98,7 +98,10 @@ export default function PrivacyPage() {
       <h2>Destinataires et sous-traitants</h2>
       <p>Tes données ne sont ni vendues ni louées. Elles sont traitées par :</p>
       <ul>
-        <li>OVHcloud (France) : hébergement du site, de l’app et de la base de données ;</li>
+        <li>
+          OVHcloud (France) : hébergement du site, de l’app, de la base de données ainsi que des
+          photos de profil ;
+        </li>
         <li>Resend : envoi des e-mails (confirmation, mot de passe oublié, informations) ;</li>
         <li>
           Apple et Google : uniquement si tu choisis de te connecter avec eux, selon leurs propres

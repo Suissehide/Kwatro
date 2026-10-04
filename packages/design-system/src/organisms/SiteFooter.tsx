@@ -15,8 +15,8 @@ export const SITE_URL = 'https://kwatro.fr'
 /** Liens identiques sur toutes les pages. Chemins relatifs au site public (voir `siteUrl`). */
 export const FOOTER_LINKS = {
   kwatro: [
-    { label: 'À propos', href: '/a-propos' },
-    { label: 'Aide', href: '/aide' },
+    { label: 'À propos', href: '/about' },
+    { label: 'Aide', href: '/help' },
     { label: 'Contact', href: `mailto:${CONTACT_EMAIL}` },
   ],
   lieux: [
