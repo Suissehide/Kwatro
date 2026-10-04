@@ -1,17 +1,18 @@
 import type { ReactNode } from 'react'
 import { ScrollView, type StyleProp, View, type ViewStyle } from 'react-native'
+import { SITE_URL, SiteFooter } from '../organisms/SiteFooter'
 import { colors } from '../tokens'
 
 export function WebScreen({
   nav,
   children,
-  footer,
+  siteFooter = true,
   contentStyle,
 }: {
   nav: ReactNode
   children: ReactNode
-  /** Pied de page du site (SiteFooter), pleine largeur après le contenu. */
-  footer?: ReactNode
+  /** Pied de page du site, pleine largeur après le contenu ; `false` sur les parcours (auth…). */
+  siteFooter?: boolean
   contentStyle?: StyleProp<ViewStyle>
 }) {
   return (
@@ -35,7 +36,7 @@ export function WebScreen({
         >
           {children}
         </View>
-        {footer}
+        {siteFooter ? <SiteFooter siteUrl={SITE_URL} /> : null}
       </ScrollView>
     </View>
   )

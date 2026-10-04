@@ -125,6 +125,7 @@ export default function AuthScreen() {
 function WideLayout({ children }: { children: ReactNode }) {
   return (
     <WebScreen
+      siteFooter={false}
       nav={<TopNav onHome={openHome} />}
       contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 72, paddingBottom: 48 }}
     >
@@ -169,6 +170,7 @@ function Frame({
   if (!wide) {
     return (
       <MobileScreen
+        siteFooter={false}
         insets={insets}
         scroll={!!onBack}
         header={onBack ? <ScreenHeader title={title} onBack={onBack} /> : undefined}
