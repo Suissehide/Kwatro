@@ -9,8 +9,11 @@ export type FooterLink = { label: string; href: string; short?: string }
 // ponytail: adresse, comptes Instagram et Discord à confirmer avant la mise en ligne
 export const CONTACT_EMAIL = 'contact@kwatro.fr'
 
-/** Site public : préfixe des liens du pied de page dans l'app (pages légales, aide, villes). */
-export const SITE_URL = 'https://kwatro.fr'
+// Variable inlinée par Expo au bundle de l'app ; le design system n'a pas les types Node
+declare const process: { env: { EXPO_PUBLIC_SITE_URL?: string } }
+
+/** Site public : préfixe des liens du pied de page dans l'app (pages légales, aide, villes). Site local en dev. */
+export const SITE_URL = process.env.EXPO_PUBLIC_SITE_URL ?? 'https://kwatro.fr'
 
 /** Liens identiques sur toutes les pages. Chemins relatifs au site public (voir `siteUrl`). */
 export const FOOTER_LINKS = {
