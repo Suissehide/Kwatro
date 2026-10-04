@@ -1,4 +1,5 @@
-import { Linking, Platform, Pressable, Text, useWindowDimensions, View } from 'react-native'
+import { Pressable, Text, useWindowDimensions, View } from 'react-native'
+import { linkProps } from '../atoms/InlineLink'
 import { useHover } from '../atoms/useHover'
 import { Brand } from '../molecules/Brand'
 import { border, colors, font, radius, sizes, transition, type } from '../tokens'
@@ -26,9 +27,9 @@ export const FOOTER_LINKS = {
     },
   ],
   legal: [
-    { label: "Conditions d'utilisation", href: '/cgu' },
-    { label: 'Politique de confidentialité', short: 'Confidentialité', href: '/confidentialite' },
-    { label: 'Mentions légales', href: '/mentions-legales' },
+    { label: "Conditions d'utilisation", href: '/terms' },
+    { label: 'Politique de confidentialité', short: 'Confidentialité', href: '/privacy' },
+    { label: 'Mentions légales', href: '/legal-notice' },
   ],
 } satisfies Record<string, FooterLink[]>
 
@@ -178,17 +179,6 @@ export function SiteFooter({
       </View>
     </View>
   )
-}
-
-/** Vraie ancre `<a href>` sur le web (référencement, clic molette), `Linking` sur mobile. */
-function linkProps(href: string): { onPress?: () => void } {
-  if (Platform.OS !== 'web') return { onPress: () => void Linking.openURL(href) }
-  const external = href.startsWith('http')
-  // `href` et `hrefAttrs` : props de react-native-web absentes des types React Native
-  return {
-    href,
-    hrefAttrs: external ? { target: '_blank', rel: 'noopener noreferrer' } : undefined,
-  } as { onPress?: () => void }
 }
 
 function FooterTextLink({

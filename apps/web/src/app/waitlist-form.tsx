@@ -83,7 +83,10 @@ export function WaitlistForm() {
       <button className="kw-btn kw-btn--room" type="submit" disabled={sending}>
         {sending ? 'Envoi…' : 'Rejoindre la liste'}
       </button>
-      <p className="kw-small">Ton e-mail sert uniquement à te prévenir du lancement de Kwatro.</p>
+      <p className="kw-small">
+        Ton e-mail sert uniquement à te prévenir du lancement de Kwatro (
+        <a href="/privacy">confidentialité</a>).
+      </p>
     </form>
   )
 }
