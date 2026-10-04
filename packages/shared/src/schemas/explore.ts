@@ -1,6 +1,9 @@
 import { z } from 'zod'
 import {
+  ACCESSIBILITY_STATUSES,
+  CLOSURE_KINDS,
   EVENT_TYPES,
+  GAME_KINDS,
   REGISTRATION_MODES,
   REGISTRATION_STATUSES,
   ROOM_MODES,
@@ -105,15 +108,31 @@ export const eventDetailSchema = z.object({
   myRegistration: z.enum(REGISTRATION_STATUSES).nullable(),
 })
 
-/** Fiche lieu (B3) : infos pratiques, horaires, jeux sur place et agenda à venir. */
+/** Date locale « 2026-11-01 » (fermetures). */
+const localDate = z.iso.date()
+
+export const accessibilityItemSchema = z.object({
+  label: z.string(),
+  status: z.enum(ACCESSIBILITY_STATUSES),
+  note: z.string().nullish(),
+})
+
+/** Fiche lieu (B3, KWT-73) : photos, infos pratiques, horaires et fermetures, agenda, rooms, jeux, accès. */
 export const venueDetailSchema = venueListItemSchema
   .omit({ distanceMeters: true, upcomingEventCount: true })
   .extend({
     city: z.string(),
+    quarter: z.string().nullable(),
     description: z.string().nullable(),
     playFeeCents: z.number().int().nullable(),
     minSpendCents: z.number().int().nullable(),
     acceptsUnaccompaniedMinors: z.boolean(),
+    phone: z.string().nullable(),
+    website: z.string().nullable(),
+    transitInfo: z.string().nullable(),
+    /** Fermé : prochaine ouverture (date locale, minutes depuis minuit). */
+    nextOpening: z.object({ date: localDate, minute: z.number().int() }).nullable(),
+    photos: z.array(z.object({ url: z.string(), caption: z.string().nullable() })),
     /** 1 = lundi … 7 = dimanche ; fermeture < ouverture = après minuit. */
     openingHours: z.array(
       z.object({
@@ -122,8 +141,33 @@ export const venueDetailSchema = venueListItemSchema
         closesAtMinute: z.number().int(),
       }),
     ),
-    games: z.array(gameRefSchema),
-    events: z.array(eventListItemSchema.omit({ venue: true })),
+    /** Fermetures et horaires modifiés depuis le début du mois en cours. */
+    closures: z.array(
+      z.object({
+        startsOn: localDate,
+        endsOn: localDate,
+        kind: z.enum(CLOSURE_KINDS),
+        label: z.string(),
+        note: z.string().nullable(),
+        opensAtMinute: z.number().int().nullable(),
+        closesAtMinute: z.number().int().nullable(),
+      }),
+    ),
+    accessibility: z.array(accessibilityItemSchema),
+    games: z.array(gameRefSchema.extend({ kind: z.enum(GAME_KINDS) })),
+    tcgNote: z.string().nullable(),
+    /** Ludothèque : titres mis en avant et total (300+). */
+    boardGames: z.array(z.string()),
+    boardGameCount: z.number().int().nullable(),
+    boardGameNote: z.string().nullable(),
+    /** Du début du mois en cours à la fin de l'horizon de l'agenda (VENUE_AGENDA_MONTHS). */
+    events: z.array(
+      eventListItemSchema.omit({ venue: true }).extend({
+        seriesId: z.string().nullable(),
+        externalUrl: z.string().nullable(),
+      }),
+    ),
+    rooms: z.array(roomListItemSchema.omit({ venue: true })),
   })
 
 export type EventDetail = z.input<typeof eventDetailSchema>

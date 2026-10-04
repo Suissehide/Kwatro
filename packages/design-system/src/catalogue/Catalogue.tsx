@@ -9,6 +9,7 @@ import {
   CountBadge,
   DateBlock,
   IconButton,
+  InfoChip,
   Logo,
   Note,
   ProgressSteps,
@@ -22,19 +23,26 @@ import {
   Typography,
 } from '../atoms'
 import {
+  AccessibilityList,
+  AgendaEventCard,
   AvatarStack,
   Banner,
   Brand,
   ChatBubble,
   ChipGroup,
+  ClosureRow,
   ContentCard,
+  DayEventRow,
   EmptyState,
   EventCard,
+  FactCard,
+  HoursCard,
   KwoteBadge,
   ListCard,
   ListRow,
   PageTitle,
   Pagination,
+  PerkBanner,
   ProfileCard,
   RoomCard,
   RoomStatusTimeline,
@@ -47,6 +55,7 @@ import {
   TextField,
   Section as TitledSection,
   Toast,
+  ToggleGroup,
   VenueRow,
   XpBar,
 } from '../molecules'
@@ -54,6 +63,7 @@ import {
   Accordion,
   BarChart,
   DataTable,
+  MonthCalendar,
   type PlayerTab,
   PlayerTabBar,
   playerItems,
@@ -311,9 +321,78 @@ export function Catalogue() {
             onPress={() => {}}
           />
         </ListCard>
+        <Row>
+          <FactCard label="Droit de jeu" value="5 €" note="par personne, toute la soirée" />
+          <FactCard label="Âge" value="16 ans +" compact />
+        </Row>
+        <PerkBanner text="Droit de jeu offert sur présentation de l'app" />
+        <ToggleGroup items={['Liste', 'Calendrier']} value={0} onChange={() => {}} />
+        <AgendaEventCard
+          wide
+          kind="room"
+          weekday="SAM"
+          day="07"
+          month="OCT"
+          label="Tournoi · Pokémon"
+          title="Tournoi Standard"
+          meta="19 h 30 · 8 €"
+          places="2 places sur 16"
+          placesAlert
+          action={<Button small label="S'inscrire" />}
+          onPress={() => {}}
+        />
+        <HoursCard
+          title="Horaires"
+          status="Ouvert"
+          rows={[
+            { day: 'Lundi', value: 'Fermé', closed: true },
+            { day: 'Samedi', value: '14 h – 2 h', today: true },
+          ]}
+        />
+        <ClosureRow date="1er nov." label="Fermé (Toussaint)" note="Réouverture le 2 novembre" />
+        <ClosureRow date="11 nov." label="Ouverture à 14 h" special />
+        <AccessibilityList
+          columns={2}
+          items={[
+            { label: 'Accès de plain-pied', status: 'yes' },
+            { label: "Salle à l'étage", note: 'Escalier uniquement', status: 'no' },
+            { label: 'Niveau sonore', note: 'Animé le samedi soir', status: 'info' },
+          ]}
+        />
+        <Row>
+          <InfoChip label="Cascadia" />
+          <InfoChip label="+ 290 autres" muted />
+        </Row>
       </Section>
 
       <Section title="Organismes">
+        <MonthCalendar
+          title="Octobre 2026"
+          days={Array.from({ length: 35 }, (_, i) => ({
+            key: String(i),
+            day: i < 3 || i > 33 ? null : i - 2,
+            today: i === 5,
+            past: i < 5,
+            closed: i % 7 === 0,
+            items: i === 9 ? [{ label: 'Tournoi Pokémon', color: colors.room }] : [],
+          }))}
+          selected="9"
+          onSelect={() => {}}
+          onNext={() => {}}
+          dayTitle="Mercredi 7 octobre"
+          legend={[
+            { label: 'Soirée', color: colors.event },
+            { label: 'Tournoi', color: colors.room },
+          ]}
+        >
+          <DayEventRow
+            color={colors.room}
+            label="19 h 30 · Tournoi · Pokémon"
+            title="Tournoi Standard"
+            meta="8 € · 2 places sur 16"
+            metaAlert
+          />
+        </MonthCalendar>
         <DataTable<Event>
           columns={[
             { key: 'name', label: 'Événement', flex: 2 },

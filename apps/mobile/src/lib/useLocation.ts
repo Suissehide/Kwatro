@@ -41,5 +41,5 @@ export function useLocation() {
     }
   }, [])
 
-  return { place, ready }
+  return { place, ready, located: place !== fallback }
 }

@@ -54,6 +54,15 @@ export type RegistrationMode = (typeof REGISTRATION_MODES)[number]
 export const REGISTRATION_STATUSES = ['REGISTERED', 'WAITLISTED'] as const
 export type RegistrationStatus = (typeof REGISTRATION_STATUSES)[number]
 
+/** Accessibilité d'un lieu : oui, non, ou simple information (niveau sonore…). */
+export const ACCESSIBILITY_STATUSES = ['YES', 'NO', 'INFO'] as const
+
+/** Fermeture du lieu, ou horaires modifiés ces jours-là (identique à l'enum Prisma ClosureKind). */
+export const CLOSURE_KINDS = ['CLOSED', 'SPECIAL_HOURS'] as const
+
+/** Agenda de la fiche lieu : mois en cours et les deux suivants. */
+export const VENUE_AGENDA_MONTHS = 3
+
 /** Fuseau de référence des lieux (Bordeaux au lancement). */
 export const VENUE_TIME_ZONE = 'Europe/Paris'
 
