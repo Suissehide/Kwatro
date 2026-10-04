@@ -211,7 +211,7 @@ export default function HomeScreen() {
         {me ? (
           <View style={{ width: 380 }}>
             <ProfileCard
-              pseudo={me.pseudo}
+              pseudo={me.pseudo ?? ''}
               format={me.mainKwote?.format}
               kwote={me.mainKwote ? formatKwote(me.mainKwote.kwote) : undefined}
               xp={xpLevel(me.xp)}

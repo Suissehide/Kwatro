@@ -39,6 +39,7 @@ describe('schémas de réponse', () => {
       id: 'u1',
       email: 'a@b.fr',
       pseudo: 'lea',
+      hasBirthDate: true,
       role: 'PLAYER',
       city: null,
       xp: 0,

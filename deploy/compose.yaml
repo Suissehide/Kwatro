@@ -62,6 +62,8 @@ services:
       API_PORT: 3000
       DATABASE_URL: postgresql://kwatro:kwatro@postgres:5432/kwatro?schema=public
       CORS_ORIGINS: http://localhost:3010,http://localhost:8081
+      # Stack locale uniquement (comme les identifiants Postgres ci-dessus) : à remplacer sur un vrai serveur
+      BETTER_AUTH_SECRET: kwatro-local-docker-only-not-a-real-secret
     ports:
       - "127.0.0.1:3000:3000"
     networks:

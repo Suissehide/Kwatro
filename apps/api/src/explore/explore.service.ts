@@ -139,7 +139,7 @@ export class ExploreService {
             ...room,
             format: format?.name ?? null,
             venue: { ...venue, distanceMeters: distances.get(venue.id) ?? 0 },
-            players: participants.map(({ user }) => ({ initial: user.pseudo.slice(0, 1) })),
+            players: participants.map(({ user }) => ({ initial: user.pseudo?.slice(0, 1) ?? '?' })),
             kwoteRange:
               room.mode === 'RANKED' && kwotes.length
                 ? { min: Math.min(...kwotes), max: Math.max(...kwotes) }

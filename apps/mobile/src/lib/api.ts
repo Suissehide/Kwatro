@@ -1,7 +1,8 @@
 import { createApiClient } from '@kwatro/api-client'
+import { Platform } from 'react-native'
+import { API_URL, authClient } from './auth'
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000'
-// ponytail: joueur de dev (en-tête `x-dev-user-id`, ex. joueur-demo) en attendant la session Better Auth (KWT-9)
+// Dev uniquement : joueur de démo du seed (en-tête `x-dev-user-id`, ex. joueur-demo) quand personne n'est connecté
 const DEV_USER_ID = process.env.EXPO_PUBLIC_DEV_USER_ID
 
 /** Client typé de l'API Kwatro : `const { data, error } = await api.GET('/games')`. */
@@ -9,3 +10,13 @@ export const api = createApiClient(
   API_URL,
   DEV_USER_ID ? { 'x-dev-user-id': DEV_USER_ID } : undefined,
 )
+
+// Session Better Auth : cookie du navigateur sur le web, cookie gardé par le client d'auth sur téléphone
+api.use({
+  async onRequest({ request }) {
+    if (Platform.OS === 'web') return new Request(request, { credentials: 'include' })
+    const cookie = await authClient.getCookie()
+    if (cookie) request.headers.set('Cookie', cookie)
+    return request
+  },
+})

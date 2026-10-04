@@ -69,7 +69,9 @@ Documentation interactive en dev : http://localhost:3000/docs (OpenAPI brut : `/
 3. **Permissions** : toute route exige un utilisateur connecté par défaut ; `@Public()` pour l'ouvrir, `@Roles('ADMIN')` pour la restreindre, `@CurrentUser()` pour lire l'utilisateur (`apps/api/src/auth/`). Les règles fines (mineurs, staff d'un lieu, hôte d'une room) vont dans des guards dédiés, avec des tests.
 4. `pnpm api:generate`, puis côté app : `const { data, error } = await api.GET('/games')` (typé). La CI échoue si le client n'est pas à jour.
 
-> En attendant Better Auth (KWT-9), la connexion en dev se simule avec l'en-tête `x-dev-user-id: <id d'un User>` (`DEV_AUTH_HEADER=true`, refusé en production). Bouton « Authorize » dans `/docs`. Le seed crée deux comptes fictifs prêts à l'emploi : `joueur-demo` (joueur, inscrit à la première Soirée Commander) et `admin-demo` (admin), ainsi que 2 lieux et 7 événements de démo.
+> **Connexion** : Better Auth (`apps/api/src/auth/better-auth.ts`), routes sous `/api/auth/*` (inscription et connexion e-mail + mot de passe, Apple, Google), session en cookie stockée dans Postgres ; côté app, `authClient` (`apps/mobile/src/lib/auth.ts`). Apple et Google ne s'activent que si leurs variables sont renseignées (voir `.env.example`). Après une première connexion Apple / Google, l'app demande la date de naissance (`POST /me/birth-date`).
+>
+> En dev, l'en-tête `x-dev-user-id: <id d'un User>` connecte aussi un compte du seed (`DEV_AUTH_HEADER=true`, refusé en production). Bouton « Authorize » dans `/docs`. Le seed crée deux comptes fictifs prêts à l'emploi : `joueur-demo` (joueur, inscrit à la première Soirée Commander) et `admin-demo` (admin), ainsi que 2 lieux et 7 événements de démo.
 
 ## Base de données
 
