@@ -108,6 +108,7 @@ export default function VenueScreen() {
         <ListCard>
           {practical.map((row, i) => (
             <ListRow
+              inset={16}
               key={row.title}
               title={row.title}
               subtitle={row.value}
@@ -122,6 +123,7 @@ export default function VenueScreen() {
           <ListCard>
             {openingLines(venue.openingHours).map((line, i) => (
               <ListRow
+                inset={16}
                 key={line.label}
                 title={line.label}
                 right={<Typography variant="small">{line.value}</Typography>}

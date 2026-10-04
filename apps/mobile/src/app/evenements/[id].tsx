@@ -122,9 +122,10 @@ export default function EventScreen() {
 
       <ListCard>
         {details.map((row) => (
-          <ListRow key={row.title} title={row.title} subtitle={row.value} />
+          <ListRow key={row.title} inset={16} title={row.title} subtitle={row.value} />
         ))}
         <ListRow
+          inset={16}
           title={event.venue.name}
           subtitle={event.venue.address}
           right={<Typography variant="small">Voir le lieu →</Typography>}
