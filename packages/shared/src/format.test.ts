@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  agendaGroup,
   formatDayMonth,
   formatDistance,
   formatHour,
@@ -46,5 +47,15 @@ describe('formats d’affichage', () => {
 
   it('kwote', () => {
     expect(formatKwote(1214).replace(/\s/g, ' ')).toBe('1 214')
+  })
+
+  it('groupe de Mes parties', () => {
+    const now = new Date('2026-10-04T10:00:00Z')
+    expect(agendaGroup('2026-10-04T17:30:00Z', { now })).toBe('Ce soir')
+    expect(agendaGroup('2026-10-09T17:30:00Z', { now })).toBe('Cette semaine')
+    expect(agendaGroup('2026-10-20T17:30:00Z', { now })).toBe('Octobre')
+    expect(agendaGroup('2027-01-08T17:30:00Z', { now })).toBe('Janvier 2027')
+    expect(agendaGroup('2026-10-01T17:30:00Z', { now, past: true })).toBe('Octobre')
+    expect(agendaGroup('2026-09-26T17:30:00Z', { now, past: true })).toBe('Septembre')
   })
 })

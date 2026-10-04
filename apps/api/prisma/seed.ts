@@ -119,7 +119,18 @@ async function main() {
       create: { ...user, birthDate: new Date('1995-06-15'), city: 'Bordeaux' },
     })
   }
-  await prisma.user.update({ where: { id: 'joueur-demo' }, data: { xp: 1840 } })
+  await prisma.user.update({
+    where: { id: 'joueur-demo' },
+    data: {
+      xp: 1840,
+      name: 'Joueur Démo',
+      latitude: 44.8378,
+      longitude: -0.5792,
+      // Mardi, jeudi, vendredi soir, samedi après-midi et soir, dimanche matin et après-midi
+      availability: [5, 11, 14, 16, 17, 18, 19],
+      vibes: ['CHILL', 'COMPETITIVE'],
+    },
+  })
   for (const pseudo of ['maya', 'sam', 'theo', 'alix', 'jade']) {
     await prisma.user.upsert({
       where: { id: `demo-${pseudo}` },
@@ -137,8 +148,14 @@ async function main() {
     prisma.gameFormat.findFirstOrThrow({ where: { slug, game: { slug: game } } })
   const commander = await format('magic', 'commander')
   const pokemon = await format('pokemon', 'standard')
+  const lorcana = await format('lorcana', 'core')
+  const onePiece = await format('one-piece', 'standard')
   for (const [userId, f, kwote, rankedGames] of [
-    ['joueur-demo', commander, 1214, 12],
+    ['joueur-demo', commander, 1214, 38],
+    ['joueur-demo', lorcana, 1310, 12],
+    ['joueur-demo', pokemon, 1092, 21],
+    // Moins de 5 parties classées : Kwote provisoire
+    ['joueur-demo', onePiece, 1000, 3],
     ['demo-maya', pokemon, 1180, 8],
     ['demo-sam', pokemon, 1260, 15],
   ] as const) {
@@ -194,6 +211,16 @@ async function main() {
       externalUrl: 'https://example.com/avant-premiere-lorcana',
       games: ['lorcana'],
     },
+    // Passé (historique de Mes parties)
+    {
+      id: 'demo-passe-tournoi-lorcana',
+      venueId: shop.id,
+      type: 'TOURNAMENT' as const,
+      title: 'Tournoi Core',
+      startsAt: daysAgo(8, 19, 0),
+      capacity: 16,
+      games: ['lorcana'],
+    },
     // Ce soir (accueil) : relancer le seed chaque jour pour les remettre à la date du jour
     {
       id: 'demo-ce-soir-commander',
@@ -240,11 +267,17 @@ async function main() {
       create: { ...event, games: { connect: slugs.map((slug) => ({ slug })) } },
     })
   }
-  await prisma.eventRegistration.upsert({
-    where: { eventId_userId: { eventId: 'demo-commander-1', userId: 'joueur-demo' } },
-    update: {},
-    create: { eventId: 'demo-commander-1', userId: 'joueur-demo' },
-  })
+  for (const [eventId, status] of [
+    ['demo-commander-1', 'REGISTERED'],
+    ['demo-tournoi-pioneer', 'WAITLISTED'],
+    ['demo-passe-tournoi-lorcana', 'REGISTERED'],
+  ] as const) {
+    await prisma.eventRegistration.upsert({
+      where: { eventId_userId: { eventId, userId: 'joueur-demo' } },
+      update: { status },
+      create: { eventId, userId: 'joueur-demo', status },
+    })
+  }
 
   const rooms = [
     {
@@ -256,7 +289,7 @@ async function main() {
       venueId: bar.id,
       startsAt: today(21, 0),
       capacity: 4,
-      players: ['demo-maya', 'demo-sam'],
+      players: ['demo-maya', 'demo-sam', 'joueur-demo'],
     },
     {
       id: 'demo-room-commander',
@@ -268,6 +301,29 @@ async function main() {
       startsAt: today(20, 30),
       capacity: 4,
       players: ['demo-theo', 'demo-alix', 'demo-jade'],
+    },
+    {
+      id: 'demo-room-passee-commander',
+      hostId: 'joueur-demo',
+      gameId: commander.gameId,
+      formatId: commander.id,
+      mode: 'RANKED' as const,
+      status: 'FINISHED' as const,
+      venueId: bar.id,
+      startsAt: daysAgo(3, 20, 0),
+      capacity: 4,
+      players: ['joueur-demo', 'demo-theo', 'demo-alix', 'demo-jade'],
+    },
+    {
+      id: 'demo-room-passee-jeux',
+      hostId: 'demo-maya',
+      gameId: (await prisma.game.findUniqueOrThrow({ where: { slug: 'jeux-de-societe' } })).id,
+      mode: 'CASUAL' as const,
+      status: 'FINISHED' as const,
+      venueId: bar.id,
+      startsAt: daysAgo(12, 19, 30),
+      capacity: 6,
+      players: ['demo-maya', 'joueur-demo', 'demo-sam'],
     },
   ]
   for (const { players, ...room } of rooms) {
@@ -308,6 +364,12 @@ function nextWeekday(weekday: number, hours: number, minutes: number, weeksLater
   const today = date.getDay() || 7
   date.setDate(date.getDate() + ((weekday - today + 7) % 7 || 7) + weeksLater * 7)
   date.setHours(hours, minutes, 0, 0)
+  return date
+}
+
+function daysAgo(days: number, hours: number, minutes: number) {
+  const date = today(hours, minutes)
+  date.setDate(date.getDate() - days)
   return date
 }
 

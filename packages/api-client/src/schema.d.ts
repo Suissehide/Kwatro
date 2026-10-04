@@ -49,6 +49,22 @@ export interface paths {
         delete: operations["UsersController_deleteMe"];
         options?: never;
         head?: never;
+        patch: operations["UsersController_update"];
+        trace?: never;
+    };
+    "/me/agenda": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["UsersController_agenda"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
         patch?: never;
         trace?: never;
     };
@@ -218,16 +234,35 @@ export interface operations {
                         id: string;
                         email: string;
                         pseudo: string | null;
+                        name: string;
                         hasBirthDate: boolean;
                         /** @enum {string} */
                         role: "PLAYER" | "VENUE_STAFF" | "ADMIN";
+                        avatarUrl: string | null;
+                        /** @enum {string|null} */
+                        avatarStatus: "PENDING" | "APPROVED" | "REJECTED" | null;
                         city: string | null;
+                        latitude: number | null;
+                        longitude: number | null;
+                        searchRadiusKm: number;
+                        availability: number[];
+                        vibes: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
                         xp: number;
                         mainKwote: {
                             game: string;
                             format: string;
                             kwote: number;
                         } | null;
+                        rankings: {
+                            game: {
+                                slug: string;
+                                name: string;
+                            };
+                            format: string;
+                            kwote: number | null;
+                            rankedGames: number;
+                            reliabilityPct: number;
+                        }[];
                     };
                 };
             };
@@ -247,6 +282,112 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    UsersController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    pseudo?: string;
+                    name?: string;
+                    city?: string | null;
+                    latitude?: number | null;
+                    longitude?: number | null;
+                    searchRadiusKm?: number;
+                    availability?: number[];
+                    vibes?: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        email: string;
+                        pseudo: string | null;
+                        name: string;
+                        hasBirthDate: boolean;
+                        /** @enum {string} */
+                        role: "PLAYER" | "VENUE_STAFF" | "ADMIN";
+                        avatarUrl: string | null;
+                        /** @enum {string|null} */
+                        avatarStatus: "PENDING" | "APPROVED" | "REJECTED" | null;
+                        city: string | null;
+                        latitude: number | null;
+                        longitude: number | null;
+                        searchRadiusKm: number;
+                        availability: number[];
+                        vibes: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
+                        xp: number;
+                        mainKwote: {
+                            game: string;
+                            format: string;
+                            kwote: number;
+                        } | null;
+                        rankings: {
+                            game: {
+                                slug: string;
+                                name: string;
+                            };
+                            format: string;
+                            kwote: number | null;
+                            rankedGames: number;
+                            reliabilityPct: number;
+                        }[];
+                    };
+                };
+            };
+        };
+    };
+    UsersController_agenda: {
+        parameters: {
+            query?: {
+                period?: "upcoming" | "past";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        /** @enum {string} */
+                        kind: "EVENT" | "ROOM";
+                        /** @enum {string|null} */
+                        eventType: "GAME_NIGHT" | "INITIATION" | "TOURNAMENT" | "PRERELEASE" | "THEMED" | null;
+                        /** @enum {string|null} */
+                        roomMode: "RANKED" | "CASUAL" | null;
+                        title: string;
+                        game: {
+                            slug: string;
+                            name: string;
+                        } | null;
+                        place: string | null;
+                        /** Format: date-time */
+                        startsAt: string;
+                        playerCount: number;
+                        capacity: number | null;
+                        /** @enum {string} */
+                        status: "REGISTERED" | "WAITLISTED" | "PENDING" | "MISSING_PLAYERS" | "FULL" | "PLAYED";
+                    }[];
+                };
             };
         };
     };

@@ -1,20 +1,12 @@
 import {
   Button,
-  border,
   colors,
   font,
   Logo,
-  MobileScreen,
   Note,
-  ProgressSteps,
-  Raised,
-  radius,
-  ScreenHeader,
   Segmented,
   TextField,
-  TopNav,
   Typography,
-  WebScreen,
 } from '@kwatro/design-system'
 import {
   type AgeRegime,
@@ -27,27 +19,14 @@ import {
 } from '@kwatro/shared'
 import * as Linking from 'expo-linking'
 import { router } from 'expo-router'
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import { Text, type TextInput, useWindowDimensions, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Frame, StepButton, StepLayout, WIDE, Wide } from '@/components/StepFrame'
 import { TableScene } from '@/components/TableScene'
 import { api } from '@/lib/api'
 import { authClient } from '@/lib/auth'
-import { openHome } from '@/lib/navigation'
 
 type Step = 'welcome' | 'email' | 'birth' | AgeRegime
-
-/** Largeur à partir de laquelle l'écran passe en deux colonnes (navigateur desktop, tablette paysage). */
-const WIDE = 900
-const Wide = createContext(false)
 
 /**
  * Accueil (A1), e-mail (A2) et date de naissance obligatoire (A3, KWT-44), branchés sur Better Auth (KWT-9).
@@ -193,110 +172,23 @@ export default function AuthScreen() {
   )
 }
 
-/** Navigateur desktop : barre du site (favicon + Kwatro), accroche et pièces 3D à gauche, étape à droite. */
+/** Navigateur desktop : accroche et pièces 3D à gauche, étape à droite. */
 function WideLayout({ children }: { children: ReactNode }) {
   return (
-    <WebScreen
-      nav={<TopNav onHome={openHome} />}
-      contentStyle={{ flexDirection: 'row', alignItems: 'center', gap: 72, paddingBottom: 48 }}
-    >
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <Typography variant="hero" style={{ maxWidth: 560 }}>
-          Trouve où jouer ce soir et avec qui.
-        </Typography>
-        <View style={{ height: 300, marginTop: 56 }}>
-          <TableScene />
-        </View>
-      </View>
-      <View style={{ width: 440 }}>{children}</View>
-    </WebScreen>
-  )
-}
-
-/**
- * Cadre d'une étape. Téléphone : écran plein (en-tête, contenu, pied fixe).
- * Desktop : carte blanche relevée, titre de l'étape, contenu puis actions.
- */
-function Frame({
-  title,
-  onBack,
-  progress,
-  phoneTitle = true,
-  footer,
-  children,
-}: {
-  title: string
-  /** Téléphone, étape sans retour : affiche le titre en tête du contenu (l'accueil a son propre bloc). */
-  phoneTitle?: boolean
-  onBack?: () => void
-  /** Étape courante sur 2 (e-mail, date de naissance). */
-  progress?: number
-  footer: ReactNode
-  children: ReactNode
-}) {
-  const wide = useContext(Wide)
-  const insets = useSafeAreaInsets()
-  const bar = progress ? <ProgressSteps current={progress} total={2} /> : null
-
-  if (!wide) {
-    return (
-      <MobileScreen
-        insets={insets}
-        scroll={!!onBack}
-        header={onBack ? <ScreenHeader title={title} onBack={onBack} /> : undefined}
-        footer={footer}
-      >
-        {!onBack && phoneTitle ? (
-          <Typography variant="h1" style={{ paddingTop: 40 }}>
-            {title}
+    <StepLayout
+      aside={
+        <>
+          <Typography variant="hero" style={{ maxWidth: 560 }}>
+            Trouve où jouer ce soir et avec qui.
           </Typography>
-        ) : null}
-        {bar}
-        {children}
-      </MobileScreen>
-    )
-  }
-
-  return (
-    <Raised offset={5} r={radius.card}>
-      <View
-        style={{
-          backgroundColor: colors.white,
-          borderWidth: border.base,
-          borderColor: colors.ink,
-          borderRadius: radius.card,
-          padding: 28,
-          gap: 16,
-        }}
-      >
-        {onBack ? (
-          // ScreenHeader a ses marges d'écran : on les annule dans la carte
-          <View style={{ marginHorizontal: -16, marginVertical: -6 }}>
-            <ScreenHeader title={title} onBack={onBack} />
+          <View style={{ height: 300, marginTop: 56 }}>
+            <TableScene />
           </View>
-        ) : (
-          <Typography variant="h1">{title}</Typography>
-        )}
-        {bar}
-        {children}
-        {footer}
-      </View>
-    </Raised>
-  )
-}
-
-/** Bouton d'étape : pleine largeur sur téléphone (pied d'écran), à sa taille sur desktop. */
-function StepButton(props: {
-  label: string
-  kind?: 'room' | 'ghost'
-  disabled?: boolean
-  onPress: () => void
-}) {
-  const wide = useContext(Wide)
-  return (
-    <View style={wide ? { alignSelf: 'flex-start' } : null}>
-      <Button {...props} />
-    </View>
+        </>
+      }
+    >
+      {children}
+    </StepLayout>
   )
 }
 
@@ -520,7 +412,7 @@ function Outcome({ regime, onRestart }: { regime: AgeRegime; onRestart: () => vo
         regime === 'too-young' ? (
           <StepButton label="Revenir à l’accueil" kind="ghost" onPress={onRestart} />
         ) : (
-          // ponytail: l'onboarding (A4-A6, KWT-45) et le consentement parent (A7, KWT-49) ne sont pas encore faits
+          // ponytail: le consentement parent (A7, KWT-49) n'est pas encore fait ; l'accueil renvoie vers l'onboarding
           <StepButton label="Continuer" onPress={() => router.replace('/')} />
         )
       }

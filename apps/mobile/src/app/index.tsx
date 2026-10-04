@@ -25,6 +25,7 @@ import {
   WebScreen,
 } from '@kwatro/design-system'
 import { formatKwote, xpLevel } from '@kwatro/shared'
+import { Redirect } from 'expo-router'
 import { useState } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -50,6 +51,9 @@ export default function HomeScreen() {
   const { place, data, failed, retry } = useTonight()
   const [game, setGame] = useState<string | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+
+  // Compte tout juste créé : pseudo et ville avant l'accueil
+  if (me && me.pseudo === null) return <Redirect href="/onboarding" />
 
   const events = data?.events.filter((e) => matchesGame(game, e.games)) ?? []
   const rooms = data?.rooms.filter((r) => matchesGame(game, [r.game])) ?? []

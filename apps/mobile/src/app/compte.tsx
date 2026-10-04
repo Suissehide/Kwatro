@@ -11,7 +11,6 @@ import { router } from 'expo-router'
 import { useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { api } from '@/lib/api'
-import { openHome } from '@/lib/navigation'
 import { useMe } from '@/lib/useMe'
 
 /** Mon compte : suppression du compte depuis l'app (exigence Apple, KWT-18). */
@@ -29,7 +28,15 @@ export default function AccountScreen() {
   }
 
   return (
-    <MobileScreen insets={insets} header={<ScreenHeader title="Mon compte" onBack={openHome} />}>
+    <MobileScreen
+      insets={insets}
+      header={
+        <ScreenHeader
+          title="Mon compte"
+          onBack={() => (router.canGoBack() ? router.back() : router.replace('/profile'))}
+        />
+      }
+    >
       {me ? (
         <Typography variant="small">
           Connecté en tant que {me.pseudo} ({me.email})

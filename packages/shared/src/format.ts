@@ -53,3 +53,27 @@ export function formatHourBand(date: Date | string, timeZone = VENUE_TIME_ZONE):
 export function formatKwote(value: number): string {
   return value.toLocaleString('fr-FR')
 }
+
+const localDay = (date: Date, timeZone: string) =>
+  new Intl.DateTimeFormat('en-CA', { timeZone }).format(date)
+
+const DAY_MS = 24 * 60 * 60 * 1000
+
+/** Groupe d'une partie dans Mes parties : « Ce soir », « Cette semaine », sinon le mois (« Octobre », « Janvier 2027 »). */
+export function agendaGroup(
+  date: Date | string,
+  { now = new Date(), past = false, timeZone = VENUE_TIME_ZONE } = {},
+): string {
+  const at = new Date(date)
+  if (!past) {
+    if (localDay(at, timeZone) === localDay(now, timeZone)) return 'Ce soir'
+    if (at.getTime() - now.getTime() < 7 * DAY_MS) return 'Cette semaine'
+  }
+  const sameYear = at.getFullYear() === now.getFullYear()
+  const month = new Intl.DateTimeFormat('fr-FR', {
+    timeZone,
+    month: 'long',
+    ...(sameYear ? {} : { year: 'numeric' }),
+  }).format(at)
+  return month.charAt(0).toUpperCase() + month.slice(1)
+}

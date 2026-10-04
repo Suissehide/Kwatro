@@ -31,3 +31,6 @@ export function nextKwote(
   const delta = k * (options.weight ?? 1) * (score - expectedScore(rating, opponent))
   return Math.max(KWOTE_FLOOR, Math.round(rating + delta))
 }
+
+/** En dessous de ce nombre de parties classées sur un format, la Kwote est affichée « provisoire ». */
+export const KWOTE_PROVISIONAL_GAMES = 5

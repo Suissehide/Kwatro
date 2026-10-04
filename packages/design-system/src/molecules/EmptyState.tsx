@@ -8,18 +8,22 @@ export function EmptyState({
   title,
   text,
   action,
+  dashed,
 }: {
   icon: ReactNode
   tint?: string
   title: string
   text: string
   action?: ReactNode
+  /** Rien à montrer dans une liste : bordure en pointillés, sans fond. */
+  dashed?: boolean
 }) {
   return (
     <View
       style={{
-        backgroundColor: colors.white,
+        backgroundColor: dashed ? 'transparent' : colors.white,
         borderWidth: border.base,
+        borderStyle: dashed ? 'dashed' : 'solid',
         borderColor: colors.ink,
         borderRadius: radius.card,
         paddingVertical: 22,

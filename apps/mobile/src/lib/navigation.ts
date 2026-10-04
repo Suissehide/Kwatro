@@ -1,11 +1,11 @@
 import type { PlayerTab } from '@kwatro/design-system'
 import { router } from 'expo-router'
 
-// ponytail: seules les pages existantes y sont ; ajouter Mes parties et Messages avec leurs écrans,
-// Profil ouvre Mon compte en attendant l'écran profil
-const TAB_ROUTES: Partial<Record<PlayerTab, '/' | '/compte'>> = {
+// ponytail: Messages n'a pas encore d'écran
+const TAB_ROUTES: Partial<Record<PlayerTab, '/' | '/my-games' | '/profile'>> = {
   explorer: '/',
-  profil: '/compte',
+  parties: '/my-games',
+  profil: '/profile',
 }
 
 export const openHome = () => router.navigate('/')

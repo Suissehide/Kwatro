@@ -145,6 +145,9 @@
                       "nullable": true,
                       "type": "string"
                     },
+                    "name": {
+                      "type": "string"
+                    },
                     "hasBirthDate": {
                       "type": "boolean"
                     },
@@ -156,9 +159,57 @@
                         "ADMIN"
                       ]
                     },
+                    "avatarUrl": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "avatarStatus": {
+                      "nullable": true,
+                      "type": "string",
+                      "enum": [
+                        "PENDING",
+                        "APPROVED",
+                        "REJECTED"
+                      ]
+                    },
                     "city": {
                       "nullable": true,
                       "type": "string"
+                    },
+                    "latitude": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "longitude": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "searchRadiusKm": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "availability": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "vibes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "CHILL",
+                          "COMPETITIVE",
+                          "TEACHER",
+                          "BEGINNER",
+                          "HOMEBREW",
+                          "SOCIAL"
+                        ]
+                      }
                     },
                     "xp": {
                       "type": "integer",
@@ -186,17 +237,334 @@
                         "format",
                         "kwote"
                       ]
+                    },
+                    "rankings": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "game": {
+                            "type": "object",
+                            "properties": {
+                              "slug": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "slug",
+                              "name"
+                            ]
+                          },
+                          "format": {
+                            "type": "string"
+                          },
+                          "kwote": {
+                            "nullable": true,
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "rankedGames": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "reliabilityPct": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "game",
+                          "format",
+                          "kwote",
+                          "rankedGames",
+                          "reliabilityPct"
+                        ]
+                      }
                     }
                   },
                   "required": [
                     "id",
                     "email",
                     "pseudo",
+                    "name",
                     "hasBirthDate",
                     "role",
+                    "avatarUrl",
+                    "avatarStatus",
                     "city",
+                    "latitude",
+                    "longitude",
+                    "searchRadiusKm",
+                    "availability",
+                    "vibes",
                     "xp",
-                    "mainKwote"
+                    "mainKwote",
+                    "rankings"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      },
+      "patch": {
+        "operationId": "UsersController_update",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pseudo": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 20,
+                    "pattern": "^[\\p{L}\\p{N}_.-]+$"
+                  },
+                  "name": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "city": {
+                    "nullable": true,
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "latitude": {
+                    "nullable": true,
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "nullable": true,
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "searchRadiusKm": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50
+                  },
+                  "availability": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 20
+                    }
+                  },
+                  "vibes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "CHILL",
+                        "COMPETITIVE",
+                        "TEACHER",
+                        "BEGINNER",
+                        "HOMEBREW",
+                        "SOCIAL"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "pseudo": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "hasBirthDate": {
+                      "type": "boolean"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "PLAYER",
+                        "VENUE_STAFF",
+                        "ADMIN"
+                      ]
+                    },
+                    "avatarUrl": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "avatarStatus": {
+                      "nullable": true,
+                      "type": "string",
+                      "enum": [
+                        "PENDING",
+                        "APPROVED",
+                        "REJECTED"
+                      ]
+                    },
+                    "city": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "latitude": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "longitude": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "searchRadiusKm": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "availability": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "vibes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "CHILL",
+                          "COMPETITIVE",
+                          "TEACHER",
+                          "BEGINNER",
+                          "HOMEBREW",
+                          "SOCIAL"
+                        ]
+                      }
+                    },
+                    "xp": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "mainKwote": {
+                      "nullable": true,
+                      "type": "object",
+                      "properties": {
+                        "game": {
+                          "type": "string"
+                        },
+                        "format": {
+                          "type": "string"
+                        },
+                        "kwote": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "game",
+                        "format",
+                        "kwote"
+                      ]
+                    },
+                    "rankings": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "game": {
+                            "type": "object",
+                            "properties": {
+                              "slug": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "slug",
+                              "name"
+                            ]
+                          },
+                          "format": {
+                            "type": "string"
+                          },
+                          "kwote": {
+                            "nullable": true,
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "rankedGames": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "reliabilityPct": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "game",
+                          "format",
+                          "kwote",
+                          "rankedGames",
+                          "reliabilityPct"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "email",
+                    "pseudo",
+                    "name",
+                    "hasBirthDate",
+                    "role",
+                    "avatarUrl",
+                    "avatarStatus",
+                    "city",
+                    "latitude",
+                    "longitude",
+                    "searchRadiusKm",
+                    "availability",
+                    "vibes",
+                    "xp",
+                    "mainKwote",
+                    "rankings"
                   ]
                 }
               }
@@ -213,6 +581,138 @@
         "responses": {
           "204": {
             "description": ""
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/me/agenda": {
+      "get": {
+        "operationId": "UsersController_agenda",
+        "parameters": [
+          {
+            "name": "period",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "upcoming",
+              "type": "string",
+              "enum": [
+                "upcoming",
+                "past"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "EVENT",
+                          "ROOM"
+                        ]
+                      },
+                      "eventType": {
+                        "nullable": true,
+                        "type": "string",
+                        "enum": [
+                          "GAME_NIGHT",
+                          "INITIATION",
+                          "TOURNAMENT",
+                          "PRERELEASE",
+                          "THEMED"
+                        ]
+                      },
+                      "roomMode": {
+                        "nullable": true,
+                        "type": "string",
+                        "enum": [
+                          "RANKED",
+                          "CASUAL"
+                        ]
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "game": {
+                        "nullable": true,
+                        "type": "object",
+                        "properties": {
+                          "slug": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "slug",
+                          "name"
+                        ]
+                      },
+                      "place": {
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "startsAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                      },
+                      "playerCount": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "capacity": {
+                        "nullable": true,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "REGISTERED",
+                          "WAITLISTED",
+                          "PENDING",
+                          "MISSING_PLAYERS",
+                          "FULL",
+                          "PLAYED"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "kind",
+                      "eventType",
+                      "roomMode",
+                      "title",
+                      "game",
+                      "place",
+                      "startsAt",
+                      "playerCount",
+                      "capacity",
+                      "status"
+                    ]
+                  }
+                }
+              }
+            }
           }
         },
         "tags": [

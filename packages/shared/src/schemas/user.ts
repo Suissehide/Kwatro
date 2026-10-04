@@ -1,5 +1,11 @@
 import { z } from 'zod'
-import { USER_ROLES } from '../constants'
+import {
+  AVAILABILITY_SLOT_COUNT,
+  AVATAR_STATUSES,
+  PLAY_VIBES,
+  RADIUS_KM,
+  USER_ROLES,
+} from '../constants'
 
 /** E-mail saisi par un joueur (connexion, liste d'attente) : nettoyé et mis en minuscules. */
 export const emailSchema = z
@@ -24,19 +30,82 @@ export const birthDateSchema = z.iso
 export const setBirthDateSchema = z.object({ birthDate: birthDateSchema })
 export type SetBirthDateInput = z.infer<typeof setBirthDateSchema>
 
+export const PSEUDO_MIN = 3
+export const PSEUDO_MAX = 20
+/** Pseudo public, unique (sans tenir compte des majuscules). */
+export const pseudoSchema = z
+  .string()
+  .trim()
+  .min(PSEUDO_MIN, { message: `Au moins ${PSEUDO_MIN} caractères` })
+  .max(PSEUDO_MAX, { message: `${PSEUDO_MAX} caractères maximum` })
+  .regex(/^[\p{L}\p{N}_.-]+$/u, {
+    message: 'Lettres, chiffres, « _ », « - » et « . » seulement, sans espace',
+  })
+
+const unique = <T>(values: T[]) => [...new Set(values)]
+
+/** PATCH /me : chaque champ est facultatif, seuls ceux envoyés changent. */
+export const updateProfileSchema = z
+  .object({
+    pseudo: pseudoSchema,
+    /** Prénom et nom : privés, jamais montrés aux autres joueurs. */
+    name: z.string().trim().max(80, { message: '80 caractères maximum' }),
+    city: z.string().trim().min(1).max(80).nullable(),
+    latitude: z.number().min(-90).max(90).nullable(),
+    longitude: z.number().min(-180).max(180).nullable(),
+    searchRadiusKm: z.number().int().min(RADIUS_KM.min).max(RADIUS_KM.max),
+    availability: z
+      .array(
+        z
+          .number()
+          .int()
+          .min(0)
+          .max(AVAILABILITY_SLOT_COUNT - 1),
+      )
+      .transform((slots) => unique(slots).sort((a, b) => a - b)),
+    vibes: z.array(z.enum(PLAY_VIBES)).transform(unique),
+  })
+  .partial()
+  .refine((body) => (body.latitude === undefined) === (body.longitude === undefined), {
+    message: 'Latitude et longitude vont ensemble',
+    path: ['latitude'],
+  })
+
+export type UpdateProfileInput = z.input<typeof updateProfileSchema>
+
+/** Kwote du joueur sur un format TCG ; `kwote` null tant qu'elle est provisoire (KWOTE_PROVISIONAL_GAMES). */
+export const rankingSchema = z.object({
+  game: z.object({ slug: z.string(), name: z.string() }),
+  format: z.string(),
+  kwote: z.number().int().nullable(),
+  rankedGames: z.number().int(),
+  reliabilityPct: z.number().int(),
+})
+
+export type Ranking = z.infer<typeof rankingSchema>
+
 /** Profil du joueur connecté (GET /me). Ne jamais y ajouter de donnée d'un autre joueur. */
 export const meSchema = z.object({
   id: z.string(),
   email: z.string(),
   /** null tant que l'onboarding (KWT-45) n'est pas fait. */
   pseudo: z.string().nullable(),
+  name: z.string(),
   /** false après une première connexion Apple / Google : l'app demande la date avant tout. */
   hasBirthDate: z.boolean(),
   role: z.enum(USER_ROLES),
+  avatarUrl: z.string().nullable(),
+  avatarStatus: z.enum(AVATAR_STATUSES).nullable(),
   city: z.string().nullable(),
+  latitude: z.number().nullable(),
+  longitude: z.number().nullable(),
+  searchRadiusKm: z.number().int(),
+  availability: z.array(z.number().int()),
+  vibes: z.array(z.enum(PLAY_VIBES)),
   xp: z.number().int(),
   /** Kwote du format le plus joué en classé (null sans profil TCG). */
   mainKwote: z.object({ game: z.string(), format: z.string(), kwote: z.number().int() }).nullable(),
+  rankings: z.array(rankingSchema),
 })
 
 export type Me = z.infer<typeof meSchema>
