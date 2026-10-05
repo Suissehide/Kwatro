@@ -105,6 +105,7 @@ deploy/
 ├── compose.yaml                  → stack locale (profils db, backend, frontend)
 ├── api/Dockerfile                → image de production de l'API (+ Dockerfile.dockerignore)
 ├── web/Dockerfile                → image de production du site (+ Dockerfile.dockerignore)
+├── app/Dockerfile                → version web de l'app Expo, servie par nginx (+ nginx.conf)
 ├── dokploy/
 │   └── docker-compose.dokploy.yml → déploiement Dokploy
 ├── .env.example                  → variables du déploiement Dokploy
@@ -119,9 +120,11 @@ deploy/
 **Déploiement avec Dokploy**
 1. Dokploy › Create Service › **Compose** › dépôt `Suissehide/Kwatro`, branche `main`, *Compose Path* `./deploy/dokploy/docker-compose.dokploy.yml`.
 2. Onglet **Environment** : recopier `deploy/.env.example` avec les vraies valeurs.
-3. Onglet **Domains** : un domaine pour `api` (port 3000) et un pour `web` (port 3000), HTTPS activé.
+3. Onglet **Domains** : un domaine pour `api` (port 3000), un pour `web` (port 3000) et un pour `app` (port 80), HTTPS activé. Le domaine de l'app doit figurer dans `CORS_ORIGINS`.
 4. **Deploy**. Les migrations Prisma en attente s'appliquent au démarrage de l'API.
-5. Sauvegardes : le service `postgres-backup` fait un `pg_dump` quotidien (7 jours, 4 semaines, 6 mois) dans le volume `postgres-backups`. Copie hors serveur à ajouter.
+5. Les variables `NEXT_PUBLIC_*` et `EXPO_PUBLIC_*` sont figées au build : relancer un Deploy après les avoir changées.
+6. Sauvegardes : le service `postgres-backup` fait un `pg_dump` quotidien (7 jours, 4 semaines, 6 mois) dans le volume `postgres-backups`. Copie hors serveur à ajouter.
+7. App iOS / Android : hors Dokploy, via EAS (`eas build --profile production` puis `eas submit`).
 
 ## Contribuer
 
