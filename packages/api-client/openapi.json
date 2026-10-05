@@ -2328,6 +2328,268 @@
           "waitlist"
         ]
       }
+    },
+    "/me/blocks": {
+      "get": {
+        "operationId": "ModerationController_blocks",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "pseudo": {
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "blockedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "pseudo",
+                      "blockedAt"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "moderation"
+        ]
+      }
+    },
+    "/users/{id}/block": {
+      "put": {
+        "operationId": "ModerationController_block",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "moderation"
+        ]
+      },
+      "delete": {
+        "operationId": "ModerationController_unblock",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "moderation"
+        ]
+      }
+    },
+    "/users/{id}/report": {
+      "post": {
+        "operationId": "ModerationController_report",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "enum": [
+                      "HARASSMENT",
+                      "INAPPROPRIATE_CONTENT",
+                      "CHEATING",
+                      "NO_SHOW",
+                      "MINOR_SAFETY",
+                      "OTHER"
+                    ]
+                  },
+                  "details": {
+                    "default": "",
+                    "type": "string",
+                    "maxLength": 1000
+                  }
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "moderation"
+        ]
+      }
+    },
+    "/admin/reports": {
+      "get": {
+        "operationId": "ModerationController_queue",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "reason": {
+                        "type": "string",
+                        "enum": [
+                          "HARASSMENT",
+                          "INAPPROPRIATE_CONTENT",
+                          "CHEATING",
+                          "NO_SHOW",
+                          "MINOR_SAFETY",
+                          "OTHER"
+                        ]
+                      },
+                      "details": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                      },
+                      "reporter": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "pseudo": {
+                            "nullable": true,
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "pseudo"
+                        ]
+                      },
+                      "target": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "pseudo": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "minor": {
+                            "type": "boolean"
+                          },
+                          "openReports": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "pseudo",
+                          "minor",
+                          "openReports"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "reason",
+                      "details",
+                      "createdAt",
+                      "reporter",
+                      "target"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "moderation"
+        ]
+      }
+    },
+    "/admin/reports/{id}/resolve": {
+      "post": {
+        "operationId": "ModerationController_resolve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "moderation"
+        ]
+      }
     }
   },
   "info": {

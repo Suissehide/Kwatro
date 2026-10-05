@@ -105,3 +105,23 @@ export const AVAILABILITY_SLOT_COUNT = 21
 /** Modération de la photo de profil (identique à l'enum Prisma AvatarStatus). */
 export const AVATAR_STATUSES = ['PENDING', 'APPROVED', 'REJECTED'] as const
 export type AvatarStatus = (typeof AVATAR_STATUSES)[number]
+
+/** Motif d'un signalement de joueur (identique à l'enum Prisma ReportReason). */
+export const REPORT_REASONS = [
+  'HARASSMENT',
+  'INAPPROPRIATE_CONTENT',
+  'CHEATING',
+  'NO_SHOW',
+  'MINOR_SAFETY',
+  'OTHER',
+] as const
+export type ReportReason = (typeof REPORT_REASONS)[number]
+
+export const REPORT_REASON_LABELS: Record<ReportReason, string> = {
+  HARASSMENT: 'Harcèlement ou insultes',
+  INAPPROPRIATE_CONTENT: 'Pseudo ou photo inappropriés',
+  CHEATING: 'Triche ou résultat faussé',
+  NO_SHOW: 'Absences répétées',
+  MINOR_SAFETY: 'Comportement suspect envers un mineur',
+  OTHER: 'Autre',
+}

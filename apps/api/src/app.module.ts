@@ -4,6 +4,7 @@ import { EventsModule } from './events/events.module'
 import { ExploreModule } from './explore/explore.module'
 import { GamesModule } from './games/games.module'
 import { HealthModule } from './health/health.module'
+import { ModerationModule } from './moderation/moderation.module'
 import { PrismaModule } from './prisma/prisma.module'
 import { UsersModule } from './users/users.module'
 import { WaitlistModule } from './waitlist/waitlist.module'
@@ -18,6 +19,7 @@ import { WaitlistModule } from './waitlist/waitlist.module'
     ExploreModule,
     EventsModule,
     WaitlistModule,
+    ModerationModule,
   ],
 })
 export class AppModule {}

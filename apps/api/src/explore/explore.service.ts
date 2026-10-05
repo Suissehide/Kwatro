@@ -39,6 +39,17 @@ const roomInclude = {
   },
 } satisfies Prisma.RoomInclude
 
+/** Rooms d'un hôte qui n'a pas bloqué le joueur connecté et que celui-ci n'a pas bloqué (KWT-19). */
+const notBlockedWith = (viewerId?: string): Prisma.RoomWhereInput =>
+  viewerId
+    ? {
+        host: {
+          blocksGiven: { none: { blockedId: viewerId } },
+          blocksReceived: { none: { blockerId: viewerId } },
+        },
+      }
+    : {}
+
 /** Room publique : initiales des joueurs et fourchette de Kwote des parties classées. */
 function roomItem({
   format,
@@ -107,7 +118,7 @@ export class ExploreService {
    * Fiche lieu : infos pratiques, photos, horaires et fermetures, jeux sur place, rooms ouvertes
    * et agenda du mois en cours aux VENUE_AGENDA_MONTHS suivants (vue liste et calendrier).
    */
-  async venue(slug: string): Promise<z.output<typeof venueDetailSchema>> {
+  async venue(slug: string, viewerId?: string): Promise<z.output<typeof venueDetailSchema>> {
     const now = new Date()
     const [year = 0, month = 1] = localDateTime(now).date.split('-').map(Number)
     const monthStart = new Date(Date.UTC(year, month - 1, 1))
@@ -130,7 +141,7 @@ export class ExploreService {
           },
         },
         rooms: {
-          where: { status: 'OPEN', startsAt: { gte: now } },
+          where: { status: 'OPEN', startsAt: { gte: now }, ...notBlockedWith(viewerId) },
           orderBy: { startsAt: 'asc' },
           include: roomInclude,
         },
@@ -179,7 +190,10 @@ export class ExploreService {
       )
   }
 
-  async rooms(query: EventsQuery): Promise<z.output<typeof roomListItemSchema>[]> {
+  async rooms(
+    query: EventsQuery,
+    viewerId?: string,
+  ): Promise<z.output<typeof roomListItemSchema>[]> {
     const distances = await this.distances(query)
     const now = new Date()
     // ponytail: rooms à domicile exclues (zone floue à afficher, KWT des rooms à domicile)
@@ -188,6 +202,7 @@ export class ExploreService {
         status: 'OPEN',
         venueId: { in: [...distances.keys()] },
         startsAt: { gte: now, lt: new Date(now.getTime() + query.days * DAY_MS) },
+        ...notBlockedWith(viewerId),
       },
       include: { ...roomInclude, venue: { select: { id: true, name: true, isPartner: true } } },
     })

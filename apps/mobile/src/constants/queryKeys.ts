@@ -7,6 +7,11 @@ export const ME = {
   DELETE: 'delete_me',
 } as const
 
+export const BLOCKS = {
+  GET: 'blocks',
+  UNBLOCK: 'unblock_player',
+} as const
+
 export const AGENDA = {
   GET: 'agenda',
 } as const

@@ -24,6 +24,10 @@ describe('pseudoSchema', () => {
     expect(pseudoSchema.safeParse('a'.repeat(21)).success).toBe(false)
     expect(pseudoSchema.safeParse('Léa B').success).toBe(false)
   })
+
+  it('refuse les mots interdits', () => {
+    expect(pseudoSchema.safeParse('xXconnardXx').success).toBe(false)
+  })
 })
 
 describe('updateProfileSchema', () => {

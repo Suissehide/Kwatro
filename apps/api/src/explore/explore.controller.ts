@@ -11,8 +11,9 @@ import {
 import { Controller, Get, Param } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
-import { Public } from '../auth/auth.decorators'
+import { CurrentUser, Public } from '../auth/auth.decorators'
 import { ZodQuery, ZodResponse } from '../common/zod'
+import type { User } from '../generated/prisma/client'
 import { ExploreService } from './explore.service'
 
 /** « Où jouer ce soir » (B1 carte, B2 liste). Public : aussi utilisé par le site web. */
@@ -32,8 +33,8 @@ export class ExploreController {
   /** Fiche lieu (B3). */
   @Get('venues/:slug')
   @ZodResponse(venueDetailSchema)
-  venue(@Param('slug') slug: string) {
-    return this.explore.venue(slug)
+  venue(@Param('slug') slug: string, @CurrentUser() user?: User) {
+    return this.explore.venue(slug, user?.id)
   }
 
   /** Événements des prochains jours autour d'un point, par date puis distance. */
@@ -43,9 +44,10 @@ export class ExploreController {
     return this.explore.events(query)
   }
 
+  /** Rooms ouvertes ; celles des joueurs bloqués (dans un sens ou l'autre) sont masquées. */
   @Get('rooms')
   @ZodResponse(z.array(roomListItemSchema))
-  rooms(@ZodQuery(eventsQuerySchema) query: EventsQuery) {
-    return this.explore.rooms(query)
+  rooms(@ZodQuery(eventsQuerySchema) query: EventsQuery, @CurrentUser() user?: User) {
+    return this.explore.rooms(query, user?.id)
   }
 }
