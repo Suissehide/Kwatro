@@ -60,6 +60,10 @@ model User {
   eventRegistrations EventRegistration[]
   sessions           Session[]
   accounts           Account[]
+  blocksGiven        Block[]             @relation("BlocksGiven")
+  blocksReceived     Block[]             @relation("BlocksReceived")
+  reportsMade        Report[]            @relation("ReportsMade")
+  reportsReceived    Report[]            @relation("ReportsReceived")
 }
 
 enum AvatarStatus {
@@ -464,6 +468,47 @@ model Visit {
   createdAt     DateTime    @default(now())
 
   @@unique([userId, venueId, businessDate])
+}
+
+// ---------- Modération (KWT-19) ----------
+
+/// Blocage d'un joueur par un autre. Effet dans les deux sens : aucun des deux ne voit plus l'autre.
+model Block {
+  blockerId String
+  blocker   User     @relation("BlocksGiven", fields: [blockerId], references: [id])
+  blockedId String
+  blocked   User     @relation("BlocksReceived", fields: [blockedId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@id([blockerId, blockedId])
+  @@index([blockedId])
+}
+
+/// Motif de signalement (identique à REPORT_REASONS dans @kwatro/shared)
+enum ReportReason {
+  HARASSMENT
+  INAPPROPRIATE_CONTENT
+  CHEATING
+  NO_SHOW
+  MINOR_SAFETY
+  OTHER
+}
+
+/// Signalement d'un joueur, traité par un admin. Gardé après la suppression des comptes (preuve).
+model Report {
+  id         String       @id @default(cuid())
+  reporterId String
+  reporter   User         @relation("ReportsMade", fields: [reporterId], references: [id])
+  targetId   String
+  target     User         @relation("ReportsReceived", fields: [targetId], references: [id])
+  reason     ReportReason
+  details    String       @default("")
+  createdAt  DateTime     @default(now())
+  /// null tant que le signalement est dans la file des admins
+  resolvedAt DateTime?
+
+  @@index([resolvedAt, createdAt])
+  @@index([targetId])
 }
 
 // ---------- Liste d'attente (landing) ----------

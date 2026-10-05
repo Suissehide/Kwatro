@@ -6,6 +6,7 @@ import {
   RADIUS_KM,
   USER_ROLES,
 } from '../constants'
+import { hasBannedWord } from '../moderation'
 
 /** E-mail saisi par un joueur (connexion, liste d'attente) : nettoyé et mis en minuscules. */
 export const emailSchema = z
@@ -41,6 +42,7 @@ export const pseudoSchema = z
   .regex(/^[\p{L}\p{N}_.-]+$/u, {
     message: 'Lettres, chiffres, « _ », « - » et « . » seulement, sans espace',
   })
+  .refine((pseudo) => !hasBannedWord(pseudo), { message: 'Ce pseudo n’est pas autorisé' })
 
 const unique = <T>(values: T[]) => [...new Set(values)]
 
