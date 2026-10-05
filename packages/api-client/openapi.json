@@ -93,12 +93,34 @@
                             },
                             "name": {
                               "type": "string"
+                            },
+                            "minPlayers": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "maxPlayers": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "durationMinutes": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "hasBrackets": {
+                              "type": "boolean"
                             }
                           },
                           "required": [
                             "id",
                             "slug",
-                            "name"
+                            "name",
+                            "minPlayers",
+                            "maxPlayers",
+                            "durationMinutes",
+                            "hasBrackets"
                           ]
                         }
                       }
@@ -1481,6 +1503,12 @@
                             "nullable": true,
                             "type": "string"
                           },
+                          "bracket": {
+                            "nullable": true,
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
                           "players": {
                             "type": "array",
                             "items": {
@@ -1523,6 +1551,7 @@
                           "capacity",
                           "game",
                           "format",
+                          "bracket",
                           "players",
                           "kwoteRange"
                         ]
@@ -1845,6 +1874,12 @@
                         "nullable": true,
                         "type": "string"
                       },
+                      "bracket": {
+                        "nullable": true,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
                       "venue": {
                         "type": "object",
                         "properties": {
@@ -1912,6 +1947,7 @@
                       "capacity",
                       "game",
                       "format",
+                      "bracket",
                       "venue",
                       "players",
                       "kwoteRange"
@@ -1965,6 +2001,12 @@
                     "type": "integer",
                     "minimum": 2,
                     "maximum": 16
+                  },
+                  "bracket": {
+                    "nullable": true,
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
                   },
                   "minorsAllowed": {
                     "default": false,
@@ -2924,6 +2966,12 @@
                       "nullable": true,
                       "type": "string"
                     },
+                    "bracket": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
                     "venue": {
                       "nullable": true,
                       "type": "object",
@@ -3075,6 +3123,7 @@
                     "autoAccept",
                     "game",
                     "format",
+                    "bracket",
                     "venue",
                     "host",
                     "players",
@@ -3174,6 +3223,12 @@
                       "nullable": true,
                       "type": "string"
                     },
+                    "bracket": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
                     "venue": {
                       "nullable": true,
                       "type": "object",
@@ -3325,6 +3380,7 @@
                     "autoAccept",
                     "game",
                     "format",
+                    "bracket",
                     "venue",
                     "host",
                     "players",
@@ -3422,6 +3478,12 @@
                       "nullable": true,
                       "type": "string"
                     },
+                    "bracket": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
                     "venue": {
                       "nullable": true,
                       "type": "object",
@@ -3573,6 +3635,7 @@
                     "autoAccept",
                     "game",
                     "format",
+                    "bracket",
                     "venue",
                     "host",
                     "players",
@@ -3680,6 +3743,12 @@
                       "nullable": true,
                       "type": "string"
                     },
+                    "bracket": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
                     "venue": {
                       "nullable": true,
                       "type": "object",
@@ -3831,6 +3900,7 @@
                     "autoAccept",
                     "game",
                     "format",
+                    "bracket",
                     "venue",
                     "host",
                     "players",
@@ -3938,6 +4008,12 @@
                       "nullable": true,
                       "type": "string"
                     },
+                    "bracket": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
                     "venue": {
                       "nullable": true,
                       "type": "object",
@@ -4089,6 +4165,7 @@
                     "autoAccept",
                     "game",
                     "format",
+                    "bracket",
                     "venue",
                     "host",
                     "players",
@@ -4279,6 +4356,12 @@
                       "nullable": true,
                       "type": "string"
                     },
+                    "bracket": {
+                      "nullable": true,
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
                     "venue": {
                       "nullable": true,
                       "type": "object",
@@ -4430,6 +4513,7 @@
                     "autoAccept",
                     "game",
                     "format",
+                    "bracket",
                     "venue",
                     "host",
                     "players",

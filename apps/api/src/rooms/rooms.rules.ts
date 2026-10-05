@@ -14,8 +14,14 @@ export const MAX_OPEN_ROOMS_PER_HOST = 5
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
+type PlayerRange = { minPlayers: number; maxPlayers: number }
+
 export type RoomContext = {
-  game: { kind: GameKind; formatIds: string[] }
+  /** Jeu et ses formats ; les bornes de joueurs du jeu servent sans format (jeux de société). */
+  game: PlayerRange & {
+    kind: GameKind
+    formats: (PlayerRange & { id: string; hasBrackets: boolean })[]
+  }
   /** Lieu ouvert à l'heure de la room ; null si ses horaires ne sont pas renseignés. */
   venueOpen: boolean | null
   hostIsMinor: boolean
@@ -32,11 +38,15 @@ export function createRoomRefusal(
   { game, venueOpen, hostIsMinor, hostOpenRooms }: RoomContext,
   now = new Date(),
 ): string | null {
-  if (room.formatId && !game.formatIds.includes(room.formatId))
-    return 'Ce format n’existe pas pour ce jeu'
+  const format = game.formats.find((f) => f.id === room.formatId)
+  if (room.formatId && !format) return 'Ce format n’existe pas pour ce jeu'
   if (game.kind === 'TCG' && !room.formatId) return 'Choisis un format'
   if (room.mode === 'RANKED' && game.kind !== 'TCG')
     return 'Les jeux de société se jouent en room normale'
+  // Une room peut réunir plus de joueurs qu'une partie (4 joueurs qui enchaînent des duels) : seul le minimum compte
+  const { minPlayers } = format ?? game
+  if (room.capacity < minPlayers) return `Il faut au moins ${minPlayers} places pour ce format`
+  if (room.bracket && !format?.hasBrackets) return 'Le bracket ne concerne que Commander'
   if (room.startsAt <= now) return 'Choisis une date et une heure à venir'
   if (room.startsAt.getTime() > now.getTime() + ROOM_MAX_DAYS_AHEAD * DAY_MS)
     return `Une room se crée au plus ${ROOM_MAX_DAYS_AHEAD} jours à l’avance`

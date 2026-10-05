@@ -24,12 +24,23 @@ const room = {
   autoAccept: false,
 }
 const ctx: RoomContext = {
-  game: { kind: 'TCG', formatIds: ['commander', 'modern'] },
+  game: {
+    kind: 'TCG',
+    minPlayers: 2,
+    maxPlayers: 4,
+    formats: [
+      { id: 'commander', minPlayers: 2, maxPlayers: 5, hasBrackets: true },
+      { id: 'modern', minPlayers: 2, maxPlayers: 2, hasBrackets: false },
+    ],
+  },
   venueOpen: true,
   hostIsMinor: false,
   hostOpenRooms: 0,
 }
-const boardGame: RoomContext = { ...ctx, game: { kind: 'BOARD_GAME', formatIds: [] } }
+const boardGame: RoomContext = {
+  ...ctx,
+  game: { kind: 'BOARD_GAME', minPlayers: 2, maxPlayers: 8, formats: [] },
+}
 
 describe('createRoomRefusal', () => {
   it('accepte une room valide, y compris dans un lieu sans horaires', () => {
@@ -45,6 +56,28 @@ describe('createRoomRefusal', () => {
     expect(createRoomRefusal({ ...room, formatId: null, mode: 'RANKED' }, boardGame, now)).toMatch(
       /room normale/,
     )
+  })
+
+  it('au moins le minimum de joueurs du format, bracket pour Commander seulement', () => {
+    const draft: RoomContext = {
+      ...ctx,
+      game: {
+        ...ctx.game,
+        formats: [{ id: 'draft', minPlayers: 6, maxPlayers: 8, hasBrackets: false }],
+      },
+    }
+    expect(createRoomRefusal({ ...room, formatId: 'draft', capacity: 4 }, draft, now)).toBe(
+      'Il faut au moins 6 places pour ce format',
+    )
+    expect(createRoomRefusal({ ...room, formatId: 'draft', capacity: 8 }, draft, now)).toBeNull()
+    // 4 joueurs qui enchaînent des duels, 8 joueurs pour 2 tables de Commander
+    expect(createRoomRefusal({ ...room, formatId: 'modern', capacity: 4 }, ctx, now)).toBeNull()
+    expect(createRoomRefusal({ ...room, capacity: 8 }, ctx, now)).toBeNull()
+    expect(createRoomRefusal({ ...room, formatId: null, capacity: 8 }, boardGame, now)).toBeNull()
+    expect(createRoomRefusal({ ...room, bracket: 3 }, ctx, now)).toBeNull()
+    expect(
+      createRoomRefusal({ ...room, formatId: 'modern', capacity: 2, bracket: 3 }, ctx, now),
+    ).toMatch(/Commander/)
   })
 
   it('date à venir, au plus 60 jours, lieu ouvert', () => {

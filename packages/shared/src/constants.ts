@@ -14,6 +14,16 @@ export type GameKind = (typeof GAME_KINDS)[number]
 export const ROOM_MODES = ['RANKED', 'CASUAL'] as const
 export type RoomMode = (typeof ROOM_MODES)[number]
 
+/** Brackets officiels Commander (Wizards) : puissance du deck, à côté du niveau du joueur (archi §13). */
+export const COMMANDER_BRACKETS = {
+  1: 'Exhibition',
+  2: 'Core',
+  3: 'Upgraded',
+  4: 'Optimized',
+  5: 'cEDH',
+} as const
+export type CommanderBracket = keyof typeof COMMANDER_BRACKETS
+
 /** Statut d'une room (identique à l'enum Prisma RoomStatus). */
 export const ROOM_STATUSES = [
   'OPEN',

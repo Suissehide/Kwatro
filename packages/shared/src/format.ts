@@ -92,3 +92,11 @@ export function agendaGroup(
   }).format(at)
   return month.charAt(0).toUpperCase() + month.slice(1)
 }
+
+/** Durée d'une partie : « 50 min », « 1 h 30 », « 3 h ». */
+export function formatDuration(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return m ? `${h} h ${String(m).padStart(2, '0')}` : `${h} h`
+}

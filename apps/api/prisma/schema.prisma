@@ -160,6 +160,13 @@ model GameFormat {
   name     String
   gameId   String
   game     Game                @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  /// Joueurs par partie (KWT-52) : 2 en duel, 2 à 5 en Commander, 6 à 8 en draft
+  minPlayers      Int     @default(2)
+  maxPlayers      Int     @default(2)
+  /// Durée moyenne d'une partie, en minutes
+  durationMinutes Int     @default(60)
+  /// Commander : brackets officiels Wizards 1 à 5 (puissance du deck)
+  hasBrackets     Boolean @default(false)
   profiles PlayerGameProfile[]
   rooms    Room[]
 
@@ -351,6 +358,8 @@ model Room {
   minorsAllowed Boolean    @default(false)
   autoAccept    Boolean    @default(false)
   description   String?
+  /// Bracket Commander visé (1 à 5), seulement pour un format qui en a (KWT-52)
+  bracket       Int?
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 

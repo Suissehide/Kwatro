@@ -20,6 +20,13 @@ export const createRoomSchema = z.object({
     .int()
     .min(ROOM_CAPACITY.min, { message: `Au moins ${ROOM_CAPACITY.min} places` })
     .max(ROOM_CAPACITY.max, { message: `${ROOM_CAPACITY.max} places maximum` }),
+  /** Bracket Commander visé (1 à 5) ; seulement pour un format à brackets. */
+  bracket: z
+    .number()
+    .int()
+    .min(1, { message: 'Bracket de 1 à 5' })
+    .max(5, { message: 'Bracket de 1 à 5' })
+    .nullish(),
   minorsAllowed: z.boolean().default(false),
   /** Inscription automatique ; sinon l'hôte accepte chaque candidature (par défaut). */
   autoAccept: z.boolean().default(false),
@@ -62,6 +69,7 @@ export const roomDetailSchema = z.object({
   autoAccept: z.boolean(),
   game: z.object({ slug: z.string(), name: z.string() }),
   format: z.string().nullable(),
+  bracket: z.number().int().nullable(),
   venue: z
     .object({
       id: z.string(),

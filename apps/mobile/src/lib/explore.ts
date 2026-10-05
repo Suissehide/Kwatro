@@ -114,7 +114,7 @@ export function roomCardProps(
 ) {
   const missing = Math.max(0, room.capacity - room.players.length)
   return {
-    label: `${room.mode === 'RANKED' ? 'Partie classée' : 'Partie libre'} · ${gameLabel(room.game)}`,
+    label: `${room.mode === 'RANKED' ? 'Partie classée' : 'Partie libre'} · ${gameLabel(room.game)}${room.bracket ? ` · Bracket ${room.bracket}` : ''}`,
     title: missing ? `Il manque ${missing} joueur${missing > 1 ? 's' : ''}` : 'Room complète',
     meta: `${room.venue ? room.venue.name : dayLabel(room.startsAt)} · ${formatHour(room.startsAt)}`,
     players: room.players.map((p) => p.initial),

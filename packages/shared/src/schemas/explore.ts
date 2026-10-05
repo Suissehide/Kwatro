@@ -62,6 +62,8 @@ export const roomListItemSchema = z.object({
   capacity: z.number().int(),
   game: z.object({ slug: z.string(), name: z.string() }),
   format: z.string().nullable(),
+  /** Bracket Commander visé (1 à 5). */
+  bracket: z.number().int().nullable(),
   venue: z.object({
     id: z.string(),
     name: z.string(),

@@ -434,6 +434,10 @@ export interface operations {
                             id: string;
                             slug: string;
                             name: string;
+                            minPlayers: number;
+                            maxPlayers: number;
+                            durationMinutes: number;
+                            hasBrackets: boolean;
                         }[];
                     }[];
                 };
@@ -851,6 +855,7 @@ export interface operations {
                                 name: string;
                             };
                             format: string | null;
+                            bracket: number | null;
                             players: {
                                 initial: string;
                             }[];
@@ -942,6 +947,7 @@ export interface operations {
                             name: string;
                         };
                         format: string | null;
+                        bracket: number | null;
                         venue: {
                             id: string;
                             name: string;
@@ -978,6 +984,7 @@ export interface operations {
                     /** Format: date-time */
                     startsAt: string;
                     capacity: number;
+                    bracket?: number | null;
                     /** @default false */
                     minorsAllowed?: boolean;
                     /** @default false */
@@ -1362,6 +1369,7 @@ export interface operations {
                             name: string;
                         };
                         format: string | null;
+                        bracket: number | null;
                         venue: {
                             id: string;
                             slug: string;
@@ -1431,6 +1439,7 @@ export interface operations {
                             name: string;
                         };
                         format: string | null;
+                        bracket: number | null;
                         venue: {
                             id: string;
                             slug: string;
@@ -1500,6 +1509,7 @@ export interface operations {
                             name: string;
                         };
                         format: string | null;
+                        bracket: number | null;
                         venue: {
                             id: string;
                             slug: string;
@@ -1570,6 +1580,7 @@ export interface operations {
                             name: string;
                         };
                         format: string | null;
+                        bracket: number | null;
                         venue: {
                             id: string;
                             slug: string;
@@ -1640,6 +1651,7 @@ export interface operations {
                             name: string;
                         };
                         format: string | null;
+                        bracket: number | null;
                         venue: {
                             id: string;
                             slug: string;
@@ -1730,6 +1742,7 @@ export interface operations {
                             name: string;
                         };
                         format: string | null;
+                        bracket: number | null;
                         venue: {
                             id: string;
                             slug: string;
