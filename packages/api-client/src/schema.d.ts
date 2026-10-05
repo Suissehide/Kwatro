@@ -340,6 +340,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/rooms/{id}/host-action": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["RoomsController_hostAction"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1280,6 +1296,7 @@ export interface operations {
                         players: {
                             initial: string;
                             pseudo: string | null;
+                            userId: string | null;
                         }[];
                         waitlistCount: number;
                         /** @enum {string|null} */
@@ -1348,6 +1365,7 @@ export interface operations {
                         players: {
                             initial: string;
                             pseudo: string | null;
+                            userId: string | null;
                         }[];
                         waitlistCount: number;
                         /** @enum {string|null} */
@@ -1416,6 +1434,7 @@ export interface operations {
                         players: {
                             initial: string;
                             pseudo: string | null;
+                            userId: string | null;
                         }[];
                         waitlistCount: number;
                         /** @enum {string|null} */
@@ -1485,6 +1504,7 @@ export interface operations {
                         players: {
                             initial: string;
                             pseudo: string | null;
+                            userId: string | null;
                         }[];
                         waitlistCount: number;
                         /** @enum {string|null} */
@@ -1554,6 +1574,97 @@ export interface operations {
                         players: {
                             initial: string;
                             pseudo: string | null;
+                            userId: string | null;
+                        }[];
+                        waitlistCount: number;
+                        /** @enum {string|null} */
+                        myStatus: "PENDING" | "ACCEPTED" | "WAITLISTED" | "DECLINED" | "LEFT" | null;
+                        isHost: boolean;
+                        candidates: {
+                            userId: string;
+                            pseudo: string | null;
+                            /** @enum {string} */
+                            status: "PENDING" | "WAITLISTED";
+                            minor: boolean;
+                            xp: number;
+                            kwote: number | null;
+                            rankedGames: number;
+                            /** Format: date-time */
+                            appliedAt: string;
+                        }[];
+                    };
+                };
+            };
+        };
+    };
+    RoomsController_hostAction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    type: "remove";
+                    userId: string;
+                } | {
+                    /** @enum {string} */
+                    type: "transfer";
+                    userId: string;
+                } | {
+                    /** @enum {string} */
+                    type: "close";
+                } | {
+                    /** @enum {string} */
+                    type: "reopen";
+                } | {
+                    /** @enum {string} */
+                    type: "cancel";
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        /** @enum {string} */
+                        mode: "RANKED" | "CASUAL";
+                        /** @enum {string} */
+                        status: "OPEN" | "FULL" | "CONFIRMED" | "IN_PROGRESS" | "FINISHED" | "CANCELLED";
+                        /** Format: date-time */
+                        startsAt: string;
+                        capacity: number;
+                        description: string | null;
+                        minorsAllowed: boolean;
+                        autoAccept: boolean;
+                        game: {
+                            slug: string;
+                            name: string;
+                        };
+                        format: string | null;
+                        venue: {
+                            id: string;
+                            slug: string;
+                            name: string;
+                            address: string;
+                            isPartner: boolean;
+                        } | null;
+                        host: {
+                            pseudo: string | null;
+                        };
+                        players: {
+                            initial: string;
+                            pseudo: string | null;
+                            userId: string | null;
                         }[];
                         waitlistCount: number;
                         /** @enum {string|null} */

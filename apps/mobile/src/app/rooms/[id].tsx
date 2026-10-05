@@ -11,7 +11,7 @@ import {
   Tag,
   Typography,
 } from '@kwatro/design-system'
-import { formatKwote, type RoomCandidate, type RoomDetail } from '@kwatro/shared'
+import { formatKwote, type HostAction, type RoomCandidate, type RoomDetail } from '@kwatro/shared'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useState } from 'react'
 import { View } from 'react-native'
@@ -30,6 +30,16 @@ const MY_STATUS: Partial<
   DECLINED: { label: 'Demande refusée', tone: 'err' },
 }
 
+const ROOM_STATUS: Partial<
+  Record<RoomDetail['status'], { label: string; tone?: 'ok' | 'warn' | 'err' }>
+> = {
+  FULL: { label: 'Complète' },
+  CONFIRMED: { label: 'Inscriptions fermées', tone: 'ok' },
+  IN_PROGRESS: { label: 'En cours', tone: 'ok' },
+  FINISHED: { label: 'Terminée' },
+  CANCELLED: { label: 'Annulée', tone: 'err' },
+}
+
 /**
  * Fiche room (B6, KWT-56) : demander à rejoindre, liste d'attente quand c'est complet, quitter.
  * L'hôte y gère les demandes (C5) avec le profil de jeu de chaque candidat (C6).
@@ -38,14 +48,16 @@ export default function RoomScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const me = useMeQuery()
   const { data: room, isError: failed, refetch } = useRoomQuery(id)
-  const { join, leave, decide } = useParticipationMutations(id)
+  const { join, leave, decide, hostAction } = useParticipationMutations(id)
   const [confirmLeave, setConfirmLeave] = useState(false)
-  const pending = join.isPending || leave.isPending || decide.isPending
-  const error = join.error ?? leave.error ?? decide.error
+  const [confirmAction, setConfirmAction] = useState<HostConfirm | null>(null)
+  const pending = join.isPending || leave.isPending || decide.isPending || hostAction.isPending
+  const error = join.error ?? leave.error ?? decide.error ?? hostAction.error
   const clearError = () => {
     join.reset()
     leave.reset()
     decide.reset()
+    hostAction.reset()
   }
 
   if (!room) {
@@ -68,7 +80,13 @@ export default function RoomScreen() {
   const title = `${room.format ?? room.game.name} à ${room.capacity}`
   const full = room.players.length >= room.capacity
   const closed = room.status !== 'OPEN' && room.status !== 'FULL'
+  // Après le début de la partie ou une annulation, plus rien ne bouge
+  const over =
+    room.status === 'IN_PROGRESS' || room.status === 'FINISHED' || room.status === 'CANCELLED'
+  const active =
+    room.myStatus === 'ACCEPTED' || room.myStatus === 'PENDING' || room.myStatus === 'WAITLISTED'
   const status = MY_STATUS[room.myStatus ?? 'LEFT']
+  const roomPill = ROOM_STATUS[room.status]
   const details = [
     { title: 'Quand', value: eventWhen(room.startsAt, null) },
     {
@@ -83,19 +101,13 @@ export default function RoomScreen() {
   ]
 
   let footer = null
-  if (room.isHost) {
+  if (room.isHost || over) {
     footer = null
-  } else if (closed) {
-    footer = <Button disabled label="Room fermée" />
   } else if (!me) {
     footer = (
       <Button kind="room" label="Se connecter pour jouer" onPress={() => router.push('/auth')} />
     )
-  } else if (
-    room.myStatus === 'ACCEPTED' ||
-    room.myStatus === 'PENDING' ||
-    room.myStatus === 'WAITLISTED'
-  ) {
+  } else if (active) {
     footer = (
       <Button
         kind="ghost"
@@ -104,6 +116,8 @@ export default function RoomScreen() {
         onPress={() => setConfirmLeave(true)}
       />
     )
+  } else if (closed) {
+    footer = <Button disabled label="Inscriptions fermées" />
   } else if (room.myStatus !== 'DECLINED') {
     footer = (
       <Button
@@ -130,8 +144,7 @@ export default function RoomScreen() {
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
         {room.isHost ? <StatusPill tone="ok" label="Tu organises" /> : null}
         {!room.isHost && status ? <StatusPill {...status} /> : null}
-        {room.status === 'FULL' ? <StatusPill label="Complète" /> : null}
-        {room.status === 'CANCELLED' ? <StatusPill tone="err" label="Annulée" /> : null}
+        {roomPill ? <StatusPill {...roomPill} /> : null}
         {room.venue?.isPartner ? <Tag variant="partner" label="Lieu partenaire" /> : null}
       </View>
       {error ? <Banner tone="err" message={error.message} onClose={clearError} /> : null}
@@ -155,23 +168,98 @@ export default function RoomScreen() {
       {room.description ? <Typography>{room.description}</Typography> : null}
 
       <Typography variant="h2">Joueurs</Typography>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-        <AvatarStack names={room.players.map((p) => p.initial)} />
-        <Typography variant="small">
-          {room.players.some((p) => p.pseudo)
-            ? room.players.map((p) => p.pseudo ?? p.initial).join(', ')
-            : `Organisée par ${room.host.pseudo ?? 'un joueur'}`}
-        </Typography>
-      </View>
-
       {room.isHost ? (
-        <Candidates
-          candidates={room.candidates}
-          full={full}
-          disabled={pending}
-          onDecide={(userId, accept) => decide.mutate({ userId, accept })}
+        <HostPlayers
+          room={room}
+          hostId={me?.id}
+          disabled={pending || over}
+          onAsk={(player, type) =>
+            setConfirmAction(
+              type === 'remove'
+                ? {
+                    action: { type, userId: player.userId },
+                    title: `Retirer ${player.pseudo} ?`,
+                    message:
+                      "Ce joueur ne pourra plus revenir dans cette room ; sa place revient à la liste d'attente.",
+                    label: 'Retirer',
+                  }
+                : {
+                    action: { type, userId: player.userId },
+                    title: `Nommer ${player.pseudo} hôte ?`,
+                    message: 'Tu restes joueur de la room, mais tu ne pourras plus la gérer.',
+                    label: 'Nommer hôte',
+                  },
+            )
+          }
         />
+      ) : (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <AvatarStack names={room.players.map((p) => p.initial)} />
+          <Typography variant="small">
+            {room.players.some((p) => p.pseudo)
+              ? room.players.map((p) => p.pseudo ?? p.initial).join(', ')
+              : `Organisée par ${room.host.pseudo ?? 'un joueur'}`}
+          </Typography>
+        </View>
+      )}
+
+      {room.isHost && !over ? (
+        <>
+          <Candidates
+            candidates={room.candidates}
+            full={full}
+            disabled={pending}
+            onDecide={(userId, accept) => decide.mutate({ userId, accept })}
+          />
+          <Typography variant="h2">Gérer la room</Typography>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <Button
+              small
+              kind="ghost"
+              label={
+                room.status === 'CONFIRMED' ? 'Rouvrir les inscriptions' : 'Fermer les inscriptions'
+              }
+              disabled={pending}
+              onPress={() =>
+                hostAction.mutate({ type: room.status === 'CONFIRMED' ? 'reopen' : 'close' })
+              }
+            />
+            <Button
+              small
+              kind="danger"
+              label="Annuler la room"
+              disabled={pending}
+              onPress={() =>
+                setConfirmAction({
+                  action: { type: 'cancel' },
+                  title: 'Annuler la room ?',
+                  message:
+                    'Elle disparaît de l’agenda des joueurs. Tu ne pourras pas revenir en arrière.',
+                  label: 'Annuler la room',
+                })
+              }
+            />
+          </View>
+          <Typography variant="small">
+            Fermer les inscriptions confirme la table : plus de nouvelles demandes, la liste
+            d'attente patiente jusqu'à la réouverture.
+          </Typography>
+        </>
       ) : null}
+
+      <ConfirmDialog
+        visible={!!confirmAction}
+        title={confirmAction?.title ?? ''}
+        message={confirmAction?.message ?? ''}
+        confirmLabel={confirmAction?.label ?? 'Confirmer'}
+        cancelLabel="Retour"
+        destructive
+        onConfirm={() => {
+          if (confirmAction) hostAction.mutate(confirmAction.action)
+          setConfirmAction(null)
+        }}
+        onCancel={() => setConfirmAction(null)}
+      />
 
       <ConfirmDialog
         visible={confirmLeave}
@@ -190,6 +278,57 @@ export default function RoomScreen() {
         onCancel={() => setConfirmLeave(false)}
       />
     </DetailScreen>
+  )
+}
+
+type HostConfirm = { action: HostAction; title: string; message: string; label: string }
+type ManagedPlayer = { userId: string; pseudo: string }
+
+/** Joueurs acceptés vus par l'hôte (KWT-57) : retirer un joueur ou lui transférer la room. */
+function HostPlayers({
+  room,
+  hostId,
+  disabled,
+  onAsk,
+}: {
+  room: RoomDetail
+  hostId?: string
+  disabled: boolean
+  onAsk: (player: ManagedPlayer, type: 'remove' | 'transfer') => void
+}) {
+  const others = room.players.flatMap((p) =>
+    p.userId && p.userId !== hostId ? [{ userId: p.userId, pseudo: p.pseudo ?? p.initial }] : [],
+  )
+  return (
+    <View style={{ gap: 8 }}>
+      <Typography variant="small">
+        Toi
+        {others.length
+          ? `, ${others.map((p) => p.pseudo).join(', ')}`
+          : ' : personne d’autre pour l’instant'}
+      </Typography>
+      {others.map((player) => (
+        <ListCard key={player.userId}>
+          <ListRow inset={16} last title={player.pseudo} />
+          <View style={{ flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingBottom: 14 }}>
+            <Button
+              small
+              kind="ghost"
+              label="Retirer"
+              disabled={disabled}
+              onPress={() => onAsk(player, 'remove')}
+            />
+            <Button
+              small
+              kind="ghost"
+              label="Nommer hôte"
+              disabled={disabled}
+              onPress={() => onAsk(player, 'transfer')}
+            />
+          </View>
+        </ListCard>
+      ))}
+    </View>
   )
 }
 

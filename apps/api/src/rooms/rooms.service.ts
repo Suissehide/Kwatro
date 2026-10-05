@@ -1,7 +1,9 @@
 import {
   type createRoomSchema,
+  type HostAction,
   KWOTE_PROVISIONAL_GAMES,
   openingStatus,
+  type RoomStatus,
   type roomDetailSchema,
 } from '@kwatro/shared'
 import {
@@ -20,7 +22,9 @@ import {
   acceptRefusal,
   createRoomRefusal,
   fillStatus,
+  hostActionRefusal,
   joinOutcome,
+  lifecycleStatus,
   promotedStatus,
 } from './rooms.rules'
 
@@ -120,10 +124,12 @@ export class RoomsService {
     )
     return {
       ...room,
+      status: lifecycleStatus(room, now),
       format: room.format?.name ?? null,
-      players: accepted.map(({ user }) => ({
+      players: accepted.map(({ userId, user }) => ({
         initial: user.pseudo?.slice(0, 1) ?? '?',
         pseudo: member ? user.pseudo : null,
+        userId: isHost ? userId : null,
       })),
       waitlistCount: room.participants.filter((p) => p.status === 'WAITLISTED').length,
       myStatus: isHost ? 'ACCEPTED' : (mine?.status ?? null),
@@ -208,6 +214,47 @@ export class RoomsService {
     return this.detail(id, host)
   }
 
+  /**
+   * Action de l'hôte (KWT-57) : retirer un joueur (il ne peut plus revenir, sa place revient à la liste
+   * d'attente), transférer le rôle d'hôte à un joueur accepté, fermer / rouvrir les inscriptions, annuler.
+   */
+  // ponytail: annulation sans délai ni effet sur la fiabilité, et joueurs pas prévenus (KWT-108)
+  async hostAction(id: string, host: User, action: HostAction) {
+    await this.prisma.$transaction(async (tx) => {
+      const room = await this.lock(tx, id, host)
+      if (room.hostId !== host.id) throw new ForbiddenException('Réservé à l’hôte de la room')
+      const target = 'userId' in action ? action.userId : null
+      const participant = room.participants.find((p) => p.userId === target)?.status ?? null
+      const refusal = hostActionRefusal(room, action, participant)
+      if (refusal) throw new ConflictException(refusal)
+      switch (action.type) {
+        case 'remove':
+          await tx.roomParticipant.update({
+            where: { roomId_userId: { roomId: id, userId: action.userId } },
+            data: { status: 'DECLINED' },
+          })
+          await this.promote(tx, room)
+          break
+        case 'transfer':
+          await tx.room.update({ where: { id }, data: { hostId: action.userId } })
+          break
+        case 'close':
+          await tx.room.update({ where: { id }, data: { status: 'CONFIRMED' } })
+          break
+        case 'reopen':
+          // refreshStatus la repasse ensuite en ouverte ou complète ; places libérées pendant la fermeture
+          await tx.room.update({ where: { id }, data: { status: 'OPEN' } })
+          await this.promote(tx, { ...room, status: 'OPEN' }, room.capacity - accepted(room))
+          break
+        case 'cancel':
+          await tx.room.update({ where: { id }, data: { status: 'CANCELLED' } })
+          break
+      }
+      await this.refreshStatus(tx, id)
+    })
+    return this.detail(id, host)
+  }
+
   /** Verrou sur la room (deux demandes simultanées ne prennent pas la même dernière place), visibilité comprise. */
   private async lock(tx: Tx, id: string, user: User) {
     await tx.$queryRaw`SELECT 1 FROM "Room" WHERE "id" = ${id} FOR UPDATE`
@@ -219,17 +266,25 @@ export class RoomsService {
     return room
   }
 
-  private async promote(tx: Tx, room: { id: string; autoAccept: boolean }) {
-    const next = await tx.roomParticipant.findFirst({
+  /**
+   * Places libérées (`count`) : les premiers de la liste d'attente passent devant. Rien si les inscriptions
+   * sont fermées (room confirmée) : ce sera fait à la réouverture.
+   */
+  private async promote(
+    tx: Tx,
+    room: { id: string; autoAccept: boolean; status: RoomStatus },
+    count = 1,
+  ) {
+    if (count <= 0 || (room.status !== 'OPEN' && room.status !== 'FULL')) return
+    const next = await tx.roomParticipant.findMany({
       where: { roomId: room.id, status: 'WAITLISTED' },
       orderBy: { createdAt: 'asc' },
+      take: count,
     })
-    if (next) {
-      await tx.roomParticipant.update({
-        where: { roomId_userId: { roomId: room.id, userId: next.userId } },
-        data: { status: promotedStatus(room.autoAccept) },
-      })
-    }
+    await tx.roomParticipant.updateMany({
+      where: { roomId: room.id, userId: { in: next.map((p) => p.userId) } },
+      data: { status: promotedStatus(room.autoAccept) },
+    })
   }
 
   /** Ouverte / complète selon les acceptés (une room confirmée, annulée… ne bouge pas). */
