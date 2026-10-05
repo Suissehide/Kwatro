@@ -11,7 +11,14 @@ import {
   Tag,
   Typography,
 } from '@kwatro/design-system'
-import { formatKwote, type HostAction, type RoomCandidate, type RoomDetail } from '@kwatro/shared'
+import {
+  COMMANDER_BRACKETS,
+  type CommanderBracket,
+  formatKwote,
+  type HostAction,
+  type RoomCandidate,
+  type RoomDetail,
+} from '@kwatro/shared'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useState } from 'react'
 import { View } from 'react-native'
@@ -98,6 +105,14 @@ export default function RoomScreen() {
       value: room.autoAccept ? 'Automatique' : "Sur acceptation de l'hôte",
     },
     { title: 'Âge', value: room.minorsAllowed ? 'Ouverte aux mineurs' : '18 ans et plus' },
+    ...(room.bracket
+      ? [
+          {
+            title: 'Bracket des decks',
+            value: `${room.bracket} · ${COMMANDER_BRACKETS[room.bracket as CommanderBracket]}`,
+          },
+        ]
+      : []),
   ]
 
   let footer = null

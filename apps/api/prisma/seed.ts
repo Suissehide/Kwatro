@@ -15,16 +15,36 @@ const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
 })
 
-const games = [
+type SeedFormat = {
+  slug: string
+  name: string
+  /** Joueurs par partie ; un duel par défaut. */
+  players?: [number, number]
+  /** Durée moyenne d'une partie, en minutes. */
+  minutes: number
+  brackets?: true
+}
+
+/** Catalogue (KWT-52) : jeux, formats, joueurs par partie et durée moyenne. Jeux de société : 2 à 8. */
+const games: {
+  slug: string
+  name: string
+  kind: 'TCG' | 'BOARD_GAME'
+  players?: [number, number]
+  formats: SeedFormat[]
+}[] = [
   {
     slug: 'magic',
     name: 'Magic: The Gathering',
     kind: 'TCG',
     formats: [
-      ['commander', 'Commander'],
-      ['modern', 'Modern'],
-      ['pioneer', 'Pioneer'],
-      ['draft', 'Draft'],
+      { slug: 'commander', name: 'Commander', players: [2, 5], minutes: 90, brackets: true },
+      { slug: 'modern', name: 'Modern', minutes: 50 },
+      { slug: 'pioneer', name: 'Pioneer', minutes: 50 },
+      { slug: 'standard', name: 'Standard', minutes: 50 },
+      { slug: 'pauper', name: 'Pauper', minutes: 45 },
+      { slug: 'legacy', name: 'Legacy', minutes: 50 },
+      { slug: 'draft', name: 'Draft', players: [6, 8], minutes: 180 },
     ],
   },
   {
@@ -32,21 +52,72 @@ const games = [
     name: 'Pokémon JCC',
     kind: 'TCG',
     formats: [
-      ['standard', 'Standard'],
-      ['expanded', 'Étendu'],
+      { slug: 'standard', name: 'Standard', minutes: 40 },
+      { slug: 'expanded', name: 'Étendu', minutes: 40 },
     ],
   },
   {
     slug: 'one-piece',
     name: 'One Piece Card Game',
     kind: 'TCG',
-    formats: [['standard', 'Standard']],
+    formats: [{ slug: 'standard', name: 'Standard', minutes: 40 }],
   },
-  { slug: 'lorcana', name: 'Disney Lorcana', kind: 'TCG', formats: [['core', 'Core']] },
-  { slug: 'yugioh', name: 'Yu-Gi-Oh!', kind: 'TCG', formats: [['advanced', 'Advanced']] },
-  { slug: 'riftbound', name: 'Riftbound', kind: 'TCG', formats: [['standard', 'Standard']] },
-  { slug: 'jeux-de-societe', name: 'Jeux de société', kind: 'BOARD_GAME', formats: [] },
-] as const
+  {
+    slug: 'lorcana',
+    name: 'Disney Lorcana',
+    kind: 'TCG',
+    formats: [
+      { slug: 'core', name: 'Core', minutes: 40 },
+      { slug: 'infinity', name: 'Infinity', minutes: 40 },
+    ],
+  },
+  {
+    slug: 'yugioh',
+    name: 'Yu-Gi-Oh!',
+    kind: 'TCG',
+    formats: [{ slug: 'advanced', name: 'Advanced', minutes: 45 }],
+  },
+  {
+    slug: 'riftbound',
+    name: 'Riftbound',
+    kind: 'TCG',
+    formats: [{ slug: 'standard', name: 'Standard', minutes: 45 }],
+  },
+  {
+    slug: 'flesh-and-blood',
+    name: 'Flesh and Blood',
+    kind: 'TCG',
+    formats: [
+      { slug: 'classic-constructed', name: 'Classic Constructed', minutes: 50 },
+      { slug: 'blitz', name: 'Blitz', minutes: 30 },
+    ],
+  },
+  {
+    slug: 'star-wars-unlimited',
+    name: 'Star Wars: Unlimited',
+    kind: 'TCG',
+    formats: [{ slug: 'premier', name: 'Premier', minutes: 40 }],
+  },
+  {
+    slug: 'altered',
+    name: 'Altered',
+    kind: 'TCG',
+    formats: [{ slug: 'standard', name: 'Standard', minutes: 45 }],
+  },
+  {
+    slug: 'digimon',
+    name: 'Digimon Card Game',
+    kind: 'TCG',
+    formats: [{ slug: 'standard', name: 'Standard', minutes: 40 }],
+  },
+  {
+    slug: 'jeux-de-societe',
+    name: 'Jeux de société',
+    kind: 'BOARD_GAME',
+    players: [2, 8],
+    formats: [],
+  },
+]
 
 const BORDEAUX = { city: 'Bordeaux', latitude: 44.8378, longitude: -0.5792 }
 
@@ -136,17 +207,25 @@ const accounts: Account[] = [
 ]
 
 async function main() {
-  for (const { formats, ...game } of games) {
+  for (const { formats, players, ...game } of games) {
+    const data = { ...game, ...(players && { minPlayers: players[0], maxPlayers: players[1] }) }
     const saved = await prisma.game.upsert({
       where: { slug: game.slug },
-      update: { name: game.name, kind: game.kind },
-      create: game,
+      update: data,
+      create: data,
     })
-    for (const [slug, name] of formats) {
+    for (const { slug, name, players: [min, max] = [2, 2], minutes, brackets } of formats) {
+      const format = {
+        name,
+        minPlayers: min,
+        maxPlayers: max,
+        durationMinutes: minutes,
+        hasBrackets: !!brackets,
+      }
       await prisma.gameFormat.upsert({
         where: { gameId_slug: { gameId: saved.id, slug } },
-        update: { name },
-        create: { slug, name, gameId: saved.id },
+        update: format,
+        create: { slug, gameId: saved.id, ...format },
       })
     }
   }
@@ -602,6 +681,7 @@ async function main() {
       venueId: shop.id,
       startsAt: today(20, 30),
       capacity: 4,
+      bracket: 3,
       players: ['demo-theo', 'demo-alix', 'demo-jade'],
     },
     {

@@ -7,9 +7,11 @@ import {
   Typography,
 } from '@kwatro/design-system'
 import {
+  COMMANDER_BRACKETS,
   createRoomSchema,
   DEFAULT_CITY,
   formatDistance,
+  formatDuration,
   type Game,
   RADIUS_KM,
   ROOM_CAPACITY,
@@ -31,6 +33,15 @@ import { useMeQuery } from '@/queries/useMe'
 import { useRoomMutations } from '@/queries/useRoom'
 
 const WIDE = 900
+
+const BRACKET_OPTIONS = [
+  { key: '', label: 'Pas précisé' },
+  ...Object.entries(COMMANDER_BRACKETS).map(([n, name]) => ({ key: n, label: `${n} · ${name}` })),
+]
+
+/** « Partie à 2 · environ 50 min », « 2 à 5 joueurs par partie · environ 1 h 30 ». */
+const formatInfo = (f: Game['formats'][number]) =>
+  `${f.minPlayers === f.maxPlayers ? `Partie à ${f.minPlayers}` : `${f.minPlayers} à ${f.maxPlayers} joueurs par partie`} · environ ${formatDuration(f.durationMinutes)}`
 
 const MODE_OPTIONS = [
   { key: 'CASUAL' as const, label: 'Normale' },
@@ -130,6 +141,13 @@ function RoomForm({
   const gameId = useStore(form.store, (state) => state.values.gameId)
   const game = games.find((g) => g.id === gameId)
   const tcg = game?.kind === 'TCG'
+  const formatId = useStore(form.store, (state) => state.values.formatId)
+  const format = game?.formats.find((f) => f.id === formatId)
+  /** Nouveau format : bracket remis à zéro, places relevées au minimum du format (6 en draft). */
+  const fitFormat = (minPlayers: number = ROOM_CAPACITY.min) => {
+    form.setFieldValue('bracket', '')
+    if (form.getFieldValue('capacity') < minPlayers) form.setFieldValue('capacity', minPlayers)
+  }
 
   const gameFields = (
     <>
@@ -142,6 +160,7 @@ function RoomForm({
             const next = games.find((g) => g.id === value)
             form.setFieldValue('formatId', next?.formats[0]?.id ?? '')
             if (next?.kind !== 'TCG') form.setFieldValue('mode', 'CASUAL')
+            fitFormat(next?.formats[0]?.minPlayers ?? next?.minPlayers)
           },
         }}
       >
@@ -149,7 +168,13 @@ function RoomForm({
       </form.AppField>
       {tcg && game ? (
         <>
-          <form.AppField name="formatId">
+          <form.AppField
+            name="formatId"
+            listeners={{
+              onChange: ({ value }) =>
+                fitFormat(game.formats.find((f) => f.id === value)?.minPlayers),
+            }}
+          >
             {(field) => (
               <field.Choice
                 label="Format"
@@ -157,6 +182,12 @@ function RoomForm({
               />
             )}
           </form.AppField>
+          {format ? <Typography variant="small">{formatInfo(format)}</Typography> : null}
+          {format?.hasBrackets ? (
+            <form.AppField name="bracket">
+              {(field) => <field.Choice label="Bracket des decks" options={BRACKET_OPTIONS} />}
+            </form.AppField>
+          ) : null}
           <form.AppField name="mode">
             {(field) => <field.Choice label="Mode" options={MODE_OPTIONS} />}
           </form.AppField>
@@ -204,7 +235,7 @@ function RoomForm({
         {(field) => (
           <field.Slider
             label="Places (toi compris)"
-            min={ROOM_CAPACITY.min}
+            min={format?.minPlayers ?? ROOM_CAPACITY.min}
             max={ROOM_CAPACITY.max}
             unit="joueurs"
           />

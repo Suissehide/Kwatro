@@ -3,6 +3,7 @@ import {
   agendaGroup,
   formatDayMonth,
   formatDistance,
+  formatDuration,
   formatHour,
   formatHourBand,
   formatKwote,
@@ -66,5 +67,13 @@ describe('formats d’affichage', () => {
     expect(agendaGroup('2027-01-08T17:30:00Z', { now })).toBe('Janvier 2027')
     expect(agendaGroup('2026-10-01T17:30:00Z', { now, past: true })).toBe('Octobre')
     expect(agendaGroup('2026-09-26T17:30:00Z', { now, past: true })).toBe('Septembre')
+  })
+})
+
+describe('formatDuration', () => {
+  it('minutes, puis heures et minutes', () => {
+    expect(formatDuration(45)).toBe('45 min')
+    expect(formatDuration(90)).toBe('1 h 30')
+    expect(formatDuration(180)).toBe('3 h')
   })
 })

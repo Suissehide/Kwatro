@@ -8,6 +8,13 @@ export const gameFormatSchema = z.object({
   id: z.string(),
   slug: z.string(),
   name: z.string(),
+  /** Joueurs par partie (KWT-52). */
+  minPlayers: z.number().int(),
+  maxPlayers: z.number().int(),
+  /** Durée moyenne d'une partie, en minutes. */
+  durationMinutes: z.number().int(),
+  /** Commander : brackets 1 à 5. */
+  hasBrackets: z.boolean(),
 })
 
 /** Jeu du catalogue, tel que renvoyé par l'API. */

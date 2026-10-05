@@ -62,7 +62,7 @@ export class RoomsService {
     const [game, venue, hostOpenRooms] = await Promise.all([
       this.prisma.game.findUnique({
         where: { id: input.gameId },
-        include: { formats: { select: { id: true } } },
+        include: { formats: true },
       }),
       this.prisma.venue.findUnique({
         where: { id: input.venueId },
@@ -78,7 +78,7 @@ export class RoomsService {
     const refusal = createRoomRefusal(
       input,
       {
-        game: { kind: game.kind, formatIds: game.formats.map((f) => f.id) },
+        game,
         venueOpen: openingStatus(
           venue.openingHours,
           venue.closures.map(closureRange),
@@ -95,6 +95,7 @@ export class RoomsService {
       data: {
         ...input,
         formatId: input.formatId ?? null,
+        bracket: input.bracket ?? null,
         description: input.description || null,
         hostId: host.id,
         participants: { create: { userId: host.id, status: 'ACCEPTED' } },

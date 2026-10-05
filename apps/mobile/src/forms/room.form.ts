@@ -5,6 +5,8 @@ import { formOptions } from '@tanstack/react-form'
 export type RoomFormValues = {
   gameId: string
   formatId: string
+  /** Bracket Commander : '' (pas précisé) ou '1' à '5'. */
+  bracket: string
   mode: RoomMode
   venueId: string
   /** Jour local « 2026-10-06 ». */
@@ -41,6 +43,7 @@ export const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/
 export const roomDefaults = (venueId = ''): RoomFormValues => ({
   gameId: '',
   formatId: '',
+  bracket: '',
   mode: 'CASUAL',
   venueId,
   day: localDate(new Date()),
@@ -54,10 +57,11 @@ export const roomDefaults = (venueId = ''): RoomFormValues => ({
 export const roomFormOpts = formOptions({ defaultValues: roomDefaults() })
 
 /** Corps du POST /rooms : jour + heure à l'heure du téléphone, champs vides retirés. */
-export const roomBody = ({ day, time, formatId, description, ...rest }: RoomFormValues) =>
+export const roomBody = ({ day, time, formatId, bracket, description, ...rest }: RoomFormValues) =>
   ({
     ...rest,
     formatId: formatId || null,
+    bracket: bracket ? Number(bracket) : null,
     startsAt: new Date(`${day}T${time}:00`).toISOString(),
     description: description.trim() || undefined,
   }) satisfies CreateRoomInput
