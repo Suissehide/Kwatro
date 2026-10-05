@@ -36,3 +36,10 @@ export function useTonightQuery(radiusKm = 10) {
   })
   return { place, data: data ?? null, failed: isError, retry: () => void refetch() }
 }
+
+/** Lieux autour d'un point (choix du lieu d'une room), du plus proche au plus loin. */
+export const venuesQueryOptions = (lat: number, lng: number, radiusKm: number) =>
+  queryOptions({
+    queryKey: [EXPLORE.VENUES, lat, lng, radiusKm],
+    queryFn: () => unwrap(api.GET('/venues', { params: { query: { lat, lng, radiusKm } } })),
+  })

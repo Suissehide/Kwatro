@@ -37,7 +37,7 @@ import {
   todayLine,
   venueRowProps,
 } from '@/lib/explore'
-import { notYet, openEvent, openHome, openTab, openVenue } from '@/lib/navigation'
+import { notYet, openCreateRoom, openEvent, openHome, openTab, openVenue } from '@/lib/navigation'
 import { useTonightQuery } from '@/queries/useExplore'
 import { useMeQuery } from '@/queries/useMe'
 
@@ -177,7 +177,7 @@ export default function HomeScreen() {
           <PlayerTabBar
             active="explorer"
             onSelect={openTab}
-            onCreate={notYet}
+            onCreate={() => openCreateRoom()}
             bottomInset={Math.max(22, insets.bottom)}
           />
         }

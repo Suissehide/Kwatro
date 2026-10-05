@@ -11,6 +11,7 @@ import {
   Spinner,
   TextField,
   TextLink,
+  Toggle,
   Typography,
 } from '@kwatro/design-system'
 import { createFormHook } from '@tanstack/react-form'
@@ -190,6 +191,48 @@ const MultiChoiceField = <K extends string>({
   )
 }
 
+/** Choix unique en pastilles de 44 px (jeu, format, jour…). */
+const ChoiceField = <K extends string>({
+  label,
+  options,
+}: {
+  label?: string
+  options: { key: K; label: string }[]
+}) => {
+  const { field, error, onChange } = useKwField<K>()
+  return (
+    <View style={{ gap: 8 }}>
+      {label ? <Typography variant="label">{label}</Typography> : null}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        {options.map((o) => (
+          <Chip
+            key={o.key}
+            tall
+            label={o.label}
+            active={field.state.value === o.key}
+            onPress={() => onChange(o.key)}
+          />
+        ))}
+      </View>
+      {error ? <Note tone="room">{error}</Note> : null}
+    </View>
+  )
+}
+
+/** Oui / non avec son explication (mineurs acceptés, inscription automatique). */
+const SwitchField = ({ label, description }: { label: string; description?: string }) => {
+  const { field, onChange } = useKwField<boolean>()
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+      <View style={{ flex: 1, gap: 2 }}>
+        <Typography variant="label">{label}</Typography>
+        {description ? <Typography variant="small">{description}</Typography> : null}
+      </View>
+      <Toggle label={label} value={field.state.value} onChange={onChange} />
+    </View>
+  )
+}
+
 // Position arrondie à ~1 km : assez pour chercher autour, sans garder l'adresse exacte du joueur
 const round = (value: number) => Math.round(value * 100) / 100
 
@@ -288,6 +331,8 @@ export const { useAppForm, withForm } = createFormHook({
     Slider: SliderField,
     Availability: AvailabilityField,
     MultiChoice: MultiChoiceField,
+    Choice: ChoiceField,
+    Switch: SwitchField,
     City: CityField,
   },
   formComponents: {

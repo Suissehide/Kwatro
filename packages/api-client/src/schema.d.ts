@@ -141,7 +141,7 @@ export interface paths {
         };
         get: operations["ExploreController_rooms"];
         put?: never;
-        post?: never;
+        post: operations["RoomsController_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -797,6 +797,45 @@ export interface operations {
                             max: number;
                         } | null;
                     }[];
+                };
+            };
+        };
+    };
+    RoomsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    gameId: string;
+                    formatId?: string | null;
+                    /** @enum {string} */
+                    mode: "RANKED" | "CASUAL";
+                    venueId: string;
+                    /** Format: date-time */
+                    startsAt: string;
+                    capacity: number;
+                    /** @default false */
+                    minorsAllowed?: boolean;
+                    /** @default false */
+                    autoAccept?: boolean;
+                    description?: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                    };
                 };
             };
         };

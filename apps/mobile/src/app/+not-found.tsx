@@ -10,7 +10,7 @@ import { usePathname } from 'expo-router'
 import { Linking, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { PlayerNav } from '@/components/PlayerNav'
-import { notYet, openHome, openTab } from '@/lib/navigation'
+import { openCreateRoom, openHome, openTab } from '@/lib/navigation'
 
 const WIDE = 900
 
@@ -44,7 +44,7 @@ export default function NotFoundScreen() {
         tabBar={
           <PlayerTabBar
             onSelect={openTab}
-            onCreate={notYet}
+            onCreate={() => openCreateRoom()}
             bottomInset={Math.max(22, insets.bottom)}
           />
         }

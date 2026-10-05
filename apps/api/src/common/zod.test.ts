@@ -14,8 +14,8 @@ describe('ZodValidationPipe', () => {
       venueId: 'v1',
       startsAt: '2026-10-10T20:00:00Z',
       capacity: 4,
-    }) as z.infer<typeof createRoomSchema>
-    expect(room.atHome).toBe(false)
+    }) as z.output<typeof createRoomSchema>
+    expect(room.autoAccept).toBe(false)
     expect(room.startsAt).toBeInstanceOf(Date)
   })
 

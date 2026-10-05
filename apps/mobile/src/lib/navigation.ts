@@ -21,6 +21,10 @@ export const openEvent = (id: string) => router.push({ pathname: '/events/[id]',
 
 export const openSettings = () => router.push('/settings')
 
+/** Créer une room ; `venueSlug` présélectionne le lieu. */
+export const openCreateRoom = (venueSlug?: string) =>
+  router.push({ pathname: '/rooms/new', params: venueSlug ? { venue: venueSlug } : {} })
+
 /** Page du site public : aide, pages légales. */
 export const openSite = (path: string) => void Linking.openURL(SITE_URL + path)
 
@@ -29,5 +33,5 @@ export function openTab(tab: string) {
   if (route) router.navigate(route)
 }
 
-// ponytail: fiche room et création de room pas encore faites
+// ponytail: fiche room pas encore faite
 export const notYet = () => {}
