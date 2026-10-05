@@ -1,4 +1,4 @@
-import { Button, Typography } from '@kwatro/design-system'
+import { Button, SkeletonCard, Typography } from '@kwatro/design-system'
 import type { Me } from '@kwatro/shared'
 import { router } from 'expo-router'
 import { type ReactNode, useContext, useState } from 'react'
@@ -7,19 +7,22 @@ import { IntroDeck } from '@/components/IntroDeck'
 import { IdentityFields } from '@/components/profile/IdentityFields'
 import { WhereFields } from '@/components/profile/WhereFields'
 import { Frame, StepAction, StepButton, StepLayout, WIDE, Wide } from '@/components/StepFrame'
+import { gamesBody, gamesFormOpts, validateGames } from '@/forms/games.form'
 import { profileBody, profileDefaults, profileFormOpts } from '@/forms/profile.form'
 import { useAppForm } from '@/hooks/formConfig'
 import { ApiError } from '@/lib/queryClient'
+import { useGamesQuery } from '@/queries/useGames'
 import { useMeMutations, useMeQuery } from '@/queries/useMe'
+import { useMyGamesMutations } from '@/queries/useMyGames'
 
-type Step = 'intro' | 'pseudo' | 'where'
+type Step = 'intro' | 'pseudo' | 'where' | 'games'
 
-// ponytail: A6 « Tes jeux » (niveau déclaré par format TCG) arrive avec KWT-46, l'onboarding s'arrête à A5
 const finish = () => router.replace('/')
+const STEPS = 3
 
 /**
  * Onboarding après la création du compte : cartes de présentation (téléphone), pseudo et avatar (A4),
- * ville et rayon (A5). Sur desktop, les cartes restent à gauche de chaque étape.
+ * ville et rayon (A5), jeux et niveau TCG (A6). Sur desktop, les cartes restent à gauche de chaque étape.
  */
 export default function OnboardingScreen() {
   const wide = useWindowDimensions().width >= WIDE
@@ -49,8 +52,12 @@ export default function OnboardingScreen() {
         onDone={() => setStep('where')}
       />
     )
+  } else if (current === 'where') {
+    content = me ? (
+      <WhereStep me={me} onBack={() => setStep('pseudo')} onDone={() => setStep('games')} />
+    ) : null
   } else {
-    content = me ? <WhereStep me={me} onBack={() => setStep('pseudo')} /> : null
+    content = <GamesStep onBack={() => setStep('where')} />
   }
 
   return (
@@ -110,6 +117,7 @@ function PseudoStep({
       title="Ton profil"
       onBack={onBack}
       progress={1}
+      total={STEPS}
       footer={
         <form.AppForm>
           <StepAction>
@@ -131,7 +139,7 @@ function PseudoStep({
 }
 
 /** A5 : ville (saisie ou position, facultative) et rayon de recherche. */
-function WhereStep({ me, onBack }: { me: Me; onBack: () => void }) {
+function WhereStep({ me, onBack, onDone }: { me: Me; onBack: () => void; onDone: () => void }) {
   const wide = useContext(Wide)
   const { updateProfile } = useMeMutations()
   const form = useAppForm({
@@ -141,7 +149,7 @@ function WhereStep({ me, onBack }: { me: Me; onBack: () => void }) {
       try {
         const { city, latitude, longitude, searchRadiusKm } = await profileBody(value)
         await updateProfile.mutateAsync({ city, latitude, longitude, searchRadiusKm })
-        finish()
+        onDone()
       } catch {
         formApi.setErrorMap({
           onSubmit: { form: 'Impossible d’enregistrer pour l’instant. Réessaie.', fields: {} },
@@ -155,6 +163,61 @@ function WhereStep({ me, onBack }: { me: Me; onBack: () => void }) {
       title="Où tu joues"
       onBack={onBack}
       progress={2}
+      total={STEPS}
+      footer={
+        <View style={wide ? { flexDirection: 'row', alignItems: 'center', gap: 16 } : { gap: 10 }}>
+          <form.AppForm>
+            <StepAction>
+              <form.SubmitButton label="Continuer" />
+            </StepAction>
+          </form.AppForm>
+          <Button small kind="ghost" label="Plus tard" onPress={onDone} />
+        </View>
+      }
+    >
+      <Typography>
+        On te montre les soirées, les rooms et les lieux autour de ta ville. Ta position n’est
+        jamais affichée.
+      </Typography>
+      <WhereFields form={form} />
+      <form.AppForm>
+        <form.FormError />
+      </form.AppForm>
+    </Frame>
+  )
+}
+
+/** A6 : jeux joués et, par format TCG, 3 questions → niveau déclaré (Kwote de départ). Facultatif. */
+function GamesStep({ onBack }: { onBack: () => void }) {
+  const wide = useContext(Wide)
+  const games = useGamesQuery()
+  const { setMyGames } = useMyGamesMutations()
+  const form = useAppForm({
+    ...gamesFormOpts,
+    onSubmit: async ({ value, formApi }) => {
+      try {
+        await setMyGames.mutateAsync(gamesBody(value))
+        finish()
+      } catch (error) {
+        formApi.setErrorMap({
+          onSubmit: {
+            form:
+              error instanceof ApiError && error.status === 400
+                ? error.message
+                : 'Impossible d’enregistrer tes jeux pour l’instant. Réessaie.',
+            fields: {},
+          },
+        })
+      }
+    },
+  })
+
+  return (
+    <Frame
+      title="Tes jeux"
+      onBack={onBack}
+      progress={3}
+      total={STEPS}
       footer={
         <View style={wide ? { flexDirection: 'row', alignItems: 'center', gap: 16 } : { gap: 10 }}>
           <form.AppForm>
@@ -167,10 +230,16 @@ function WhereStep({ me, onBack }: { me: Me; onBack: () => void }) {
       }
     >
       <Typography>
-        On te montre les soirées, les rooms et les lieux autour de ta ville. Ta position n’est
-        jamais affichée.
+        À quoi tu joues ? Pour chaque format TCG, 3 questions situent ton niveau : c’est le point de
+        départ de ta Kwote, ajustée ensuite par tes parties classées.
       </Typography>
-      <WhereFields form={form} />
+      {games.data ? (
+        <form.AppField name="games" validators={{ onSubmit: validateGames }}>
+          {(field) => <field.Games catalog={games.data} />}
+        </form.AppField>
+      ) : (
+        <SkeletonCard />
+      )}
       <form.AppForm>
         <form.FormError />
       </form.AppForm>

@@ -2,11 +2,13 @@ import {
   AvailabilityGrid,
   Button,
   type ButtonKind,
+  border,
   Chip,
   colors,
   font,
   Note,
   OptionCard,
+  radius,
   Slider,
   Spinner,
   TextField,
@@ -14,10 +16,18 @@ import {
   Toggle,
   Typography,
 } from '@kwatro/design-system'
+import {
+  DECLARED_LEVEL_LABELS,
+  DECLARED_LEVELS,
+  type Game,
+  LEVEL_QUESTIONS,
+  levelFromAnswers,
+} from '@kwatro/shared'
 import { createFormHook } from '@tanstack/react-form'
 import * as Location from 'expo-location'
 import { type ComponentProps, type RefObject, useState } from 'react'
 import { Text, type TextInput, View } from 'react-native'
+import { type FormatChoice, type GamesValue, NO_ANSWERS } from '@/forms/games.form'
 import type { CityValue } from '@/lib/city'
 import { findCityAt } from '@/queries/useGeocode'
 import { fieldContext, formContext, useFieldContext, useFormContext } from './formContext'
@@ -286,6 +296,128 @@ const CityField = ({ compact }: { compact?: boolean }) => {
   )
 }
 
+/**
+ * Mes jeux (A6, F3) : jeux joués ; pour un TCG, ses formats, et pour chaque format les 3 questions
+ * qui donnent le niveau déclaré (Kwote de départ). Jeux de société : pas de niveau.
+ */
+const GamesField = ({ catalog }: { catalog: Game[] }) => {
+  const { field, error, onChange } = useKwField<GamesValue>()
+  const { gameIds, formats } = field.state.value
+  const toggleGame = (game: Game) => {
+    const on = gameIds.includes(game.id)
+    const formatIds = game.formats.map((f) => f.id)
+    onChange({
+      gameIds: on ? gameIds.filter((id) => id !== game.id) : [...gameIds, game.id],
+      // Décocher un jeu retire ses formats
+      formats: on ? formats.filter((f) => !formatIds.includes(f.formatId)) : formats,
+    })
+  }
+  const toggleFormat = (formatId: string) =>
+    onChange({
+      gameIds,
+      formats: formats.some((f) => f.formatId === formatId)
+        ? formats.filter((f) => f.formatId !== formatId)
+        : [...formats, { formatId, level: null, answers: NO_ANSWERS }],
+    })
+  const answer = (formatId: string, question: number, value: number) =>
+    onChange({
+      gameIds,
+      formats: formats.map((f) => {
+        if (f.formatId !== formatId) return f
+        const answers = f.answers.map((a, i) => (i === question ? value : a))
+        const complete = answers.every((a): a is number => a !== null)
+        return { ...f, answers, level: complete ? levelFromAnswers(answers) : f.level }
+      }),
+    })
+
+  return (
+    <View style={{ gap: 16 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        {catalog.map((g) => (
+          <Chip
+            key={g.id}
+            tall
+            label={g.name}
+            active={gameIds.includes(g.id)}
+            onPress={() => toggleGame(g)}
+          />
+        ))}
+      </View>
+      {catalog
+        .filter((g) => g.kind === 'TCG' && gameIds.includes(g.id))
+        .map((game) => (
+          <View key={game.id} style={{ gap: 10 }}>
+            <Typography variant="label">{game.name} : tes formats</Typography>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {game.formats.map((f) => (
+                <Chip
+                  key={f.id}
+                  tall
+                  label={f.name}
+                  active={formats.some((c) => c.formatId === f.id)}
+                  onPress={() => toggleFormat(f.id)}
+                />
+              ))}
+            </View>
+            {game.formats.flatMap((f) => {
+              const choice = formats.find((c) => c.formatId === f.id)
+              return choice
+                ? [<LevelQuestions key={f.id} name={f.name} choice={choice} onAnswer={answer} />]
+                : []
+            })}
+          </View>
+        ))}
+      {error ? <Note tone="room">{error}</Note> : null}
+    </View>
+  )
+}
+
+/** Les 3 questions d'un format et le niveau qui en découle. */
+function LevelQuestions({
+  name,
+  choice,
+  onAnswer,
+}: {
+  name: string
+  choice: FormatChoice
+  onAnswer: (formatId: string, question: number, value: number) => void
+}) {
+  return (
+    <View
+      style={{
+        gap: 10,
+        padding: 14,
+        borderWidth: border.thin,
+        borderColor: colors.ink,
+        borderRadius: radius.card,
+        backgroundColor: colors.white,
+      }}
+    >
+      <Typography variant="title">
+        {name}
+        {choice.level
+          ? ` · ${DECLARED_LEVEL_LABELS[choice.level]} (Kwote de départ ${DECLARED_LEVELS[choice.level]})`
+          : ''}
+      </Typography>
+      {LEVEL_QUESTIONS.map((q, i) => (
+        <View key={q.key} style={{ gap: 6 }}>
+          <Typography variant="small">{q.label}</Typography>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+            {q.answers.map((label, value) => (
+              <Chip
+                key={label}
+                label={label}
+                active={choice.answers[i] === value}
+                onPress={() => onAnswer(choice.formatId, i, value)}
+              />
+            ))}
+          </View>
+        </View>
+      ))}
+    </View>
+  )
+}
+
 // * FORMULAIRE
 
 /** Bouton d'envoi : grisé pendant l'envoi (validation asynchrone comprise). */
@@ -333,6 +465,7 @@ export const { useAppForm, withForm } = createFormHook({
     MultiChoice: MultiChoiceField,
     Choice: ChoiceField,
     Switch: SwitchField,
+    Games: GamesField,
     City: CityField,
   },
   formComponents: {

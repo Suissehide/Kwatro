@@ -47,3 +47,8 @@ export const ROOM = {
   LEAVE: 'leave_room',
   DECIDE: 'decide_room_candidate',
 } as const
+
+export const MY_GAMES = {
+  GET: 'my_games',
+  SET: 'set_my_games',
+} as const

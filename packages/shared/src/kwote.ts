@@ -34,3 +34,46 @@ export function nextKwote(
 
 /** En dessous de ce nombre de parties classées sur un format, la Kwote est affichée « provisoire ». */
 export const KWOTE_PROVISIONAL_GAMES = 5
+
+export const DECLARED_LEVEL_LABELS: Record<DeclaredLevel, string> = {
+  BEGINNER: 'Débutant',
+  INTERMEDIATE: 'Intermédiaire',
+  CONFIRMED: 'Confirmé',
+  EXPERT: 'Expert',
+}
+
+/**
+ * Questionnaire d'auto-évaluation par format TCG (A6, KWT-46) : 3 questions, 4 réponses notées 0 à 3.
+ */
+// ponytail: mêmes questions pour tous les TCG ; des variantes par jeu (bracket Commander…) avec KWT-52
+export const LEVEL_QUESTIONS = [
+  {
+    key: 'experience',
+    label: 'Depuis combien de temps tu joues à ce format ?',
+    answers: ['Moins de 6 mois', '6 mois à 2 ans', '2 à 5 ans', 'Plus de 5 ans'],
+  },
+  {
+    key: 'tournaments',
+    label: 'Tu as déjà joué en tournoi ?',
+    answers: [
+      'Jamais',
+      'Quelques soirées en boutique',
+      'Souvent en boutique',
+      'Régional ou national',
+    ],
+  },
+  {
+    key: 'peers',
+    label: 'Face aux joueurs de ta boutique, tu te situes…',
+    answers: ['Je débute', 'Dans la moyenne', 'Plutôt au-dessus', 'Parmi les meilleurs'],
+  },
+] as const
+
+/** Niveau déclaré d'après les 3 réponses (0 à 3 chacune) : total 0-2, 3-4, 5-6, 7-9. */
+export function levelFromAnswers(answers: readonly number[]): DeclaredLevel {
+  const total = answers.reduce((sum, a) => sum + a, 0)
+  if (total <= 2) return 'BEGINNER'
+  if (total <= 4) return 'INTERMEDIATE'
+  if (total <= 6) return 'CONFIRMED'
+  return 'EXPERT'
+}

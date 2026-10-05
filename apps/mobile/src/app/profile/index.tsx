@@ -11,6 +11,7 @@ import {
   RankRow,
   Section,
   SkeletonCard,
+  TextLink,
   Typography,
 } from '@kwatro/design-system'
 import { xpLevel } from '@kwatro/shared'
@@ -24,6 +25,7 @@ import { useMeQuery } from '@/queries/useMe'
 const WIDE = 900
 
 const openEdit = () => router.push('/profile/edit')
+const openGames = () => router.push('/profile/games')
 
 /** Profil du joueur (F1) : identité, niveau, Kwote par jeu, disponibilités. Les parties sont dans Mes parties. */
 export default function ProfileScreen() {
@@ -111,7 +113,9 @@ export default function ProfileScreen() {
     return (
       <PlayerScreen tab="profil" wide={false} header={header}>
         {identity}
-        <Section title="Classements">{rankings}</Section>
+        <Section title="Classements" link="Mes jeux" onLink={openGames}>
+          {rankings}
+        </Section>
       </PlayerScreen>
     )
   }
@@ -128,6 +132,7 @@ export default function ProfileScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 16 }}>
           <Typography variant="h2">Classements par jeu</Typography>
           <Typography variant="small">Kwote calculée sur les parties classées</Typography>
+          <TextLink label="Mes jeux" onPress={openGames} />
         </View>
         {rankings}
       </View>

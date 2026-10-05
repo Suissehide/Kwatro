@@ -3,13 +3,15 @@ import {
   type agendaItemSchema,
   KWOTE_PROVISIONAL_GAMES,
   type meSchema,
+  type myGamesSchema,
   type updateProfileSchema,
 } from '@kwatro/shared'
-import { ConflictException, Injectable } from '@nestjs/common'
+import { BadRequestException, ConflictException, Injectable } from '@nestjs/common'
 import type { z } from 'zod'
 import { Prisma, type User } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 import { eventStatus, roomStatus, STILL_UPCOMING_MS } from './agenda.rules'
+import { myGamesRefusal, profileData } from './my-games.rules'
 
 type AgendaItem = z.output<typeof agendaItemSchema>
 
@@ -146,5 +148,54 @@ export class UsersService {
     ]
     const sorted = items.sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())
     return past ? sorted.reverse().slice(0, PAST_LIMIT) : sorted
+  }
+
+  /** Mes jeux (A6, F3) : jeux joués et niveau déclaré par format TCG. */
+  async myGames(userId: string): Promise<z.output<typeof myGamesSchema>> {
+    const user = await this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: {
+        playedGames: { select: { id: true } },
+        gameProfiles: { select: { formatId: true, declaredLevel: true } },
+      },
+    })
+    return { gameIds: user.playedGames.map((g) => g.id), formats: user.gameProfiles }
+  }
+
+  /**
+   * Remplace mes jeux. Un nouveau format part de la Kwote de son niveau déclaré ; un format retiré
+   * n'est effacé que s'il n'a pas de partie classée (sa Kwote est gardée sinon).
+   */
+  async setMyGames(userId: string, input: z.output<typeof myGamesSchema>) {
+    const catalog = await this.prisma.game.findMany({
+      include: { formats: { select: { id: true } } },
+    })
+    const refusal = myGamesRefusal(
+      input,
+      catalog.map((g) => ({ ...g, formatIds: g.formats.map((f) => f.id) })),
+    )
+    if (refusal) throw new BadRequestException(refusal)
+
+    const formatIds = input.formats.map((f) => f.formatId)
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: userId },
+        data: { playedGames: { set: [...new Set(input.gameIds)].map((id) => ({ id })) } },
+      })
+      await tx.playerGameProfile.deleteMany({
+        where: { userId, formatId: { notIn: formatIds }, rankedGames: 0 },
+      })
+      const existing = await tx.playerGameProfile.findMany({ where: { userId } })
+      for (const { formatId, declaredLevel } of input.formats) {
+        const current = existing.find((p) => p.formatId === formatId) ?? null
+        const data = profileData(current, declaredLevel)
+        await tx.playerGameProfile.upsert({
+          where: { userId_formatId: { userId, formatId } },
+          update: data,
+          create: { userId, formatId, ...data },
+        })
+      }
+    })
+    return this.myGames(userId)
   }
 }
