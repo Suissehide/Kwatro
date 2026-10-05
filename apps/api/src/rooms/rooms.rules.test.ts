@@ -3,8 +3,10 @@ import {
   acceptRefusal,
   createRoomRefusal,
   fillStatus,
+  hostActionRefusal,
   type JoinableRoom,
   joinOutcome,
+  lifecycleStatus,
   MAX_OPEN_ROOMS_PER_HOST,
   promotedStatus,
   type RoomContext,
@@ -109,5 +111,56 @@ describe('acceptRefusal, promotedStatus, fillStatus', () => {
     expect(promotedStatus(false)).toBe('PENDING')
     expect(fillStatus(4, 4)).toBe('FULL')
     expect(fillStatus(3, 4)).toBe('OPEN')
+  })
+})
+
+describe('lifecycleStatus', () => {
+  const startsAt = new Date('2026-10-05T18:00:00Z')
+  it('en cours dès le début, terminée 3 h après ; annulée reste annulée', () => {
+    expect(lifecycleStatus({ status: 'OPEN', startsAt }, now)).toBe('OPEN')
+    expect(lifecycleStatus({ status: 'FULL', startsAt }, new Date('2026-10-05T19:00:00Z'))).toBe(
+      'IN_PROGRESS',
+    )
+    expect(
+      lifecycleStatus({ status: 'CONFIRMED', startsAt }, new Date('2026-10-05T21:00:00Z')),
+    ).toBe('FINISHED')
+    expect(
+      lifecycleStatus({ status: 'CANCELLED', startsAt }, new Date('2026-10-05T21:00:00Z')),
+    ).toBe('CANCELLED')
+  })
+})
+
+describe('hostActionRefusal', () => {
+  const room = {
+    hostId: 'host',
+    status: 'OPEN' as const,
+    startsAt: new Date('2026-10-06T18:00:00Z'),
+  }
+
+  it('retirer ou transférer : seulement un joueur accepté, pas l’hôte lui-même', () => {
+    expect(hostActionRefusal(room, { type: 'remove', userId: 'lea' }, 'ACCEPTED', now)).toBeNull()
+    expect(hostActionRefusal(room, { type: 'transfer', userId: 'lea' }, 'ACCEPTED', now)).toBeNull()
+    expect(hostActionRefusal(room, { type: 'remove', userId: 'lea' }, 'PENDING', now)).toMatch(
+      /ne fait pas partie/,
+    )
+    expect(hostActionRefusal(room, { type: 'transfer', userId: 'host' }, 'ACCEPTED', now)).toMatch(
+      /déjà l’hôte/,
+    )
+  })
+
+  it('fermer une room ouverte ou complète, rouvrir une room confirmée', () => {
+    const confirmed = { ...room, status: 'CONFIRMED' as const }
+    expect(hostActionRefusal(room, { type: 'close' }, null, now)).toBeNull()
+    expect(hostActionRefusal(confirmed, { type: 'close' }, null, now)).toMatch(/déjà fermées/)
+    expect(hostActionRefusal(confirmed, { type: 'reopen' }, null, now)).toBeNull()
+    expect(hostActionRefusal(room, { type: 'reopen' }, null, now)).toMatch(/déjà ouvertes/)
+  })
+
+  it('rien après le début de la partie ni sur une room annulée', () => {
+    const started = { ...room, startsAt: new Date('2026-10-05T11:00:00Z') }
+    expect(hostActionRefusal(started, { type: 'cancel' }, null, now)).toMatch(/commencé/)
+    const cancelled = { ...room, status: 'CANCELLED' as const }
+    expect(hostActionRefusal(cancelled, { type: 'cancel' }, null, now)).toMatch(/annulée/)
+    expect(hostActionRefusal(room, { type: 'cancel' }, null, now)).toBeNull()
   })
 })
