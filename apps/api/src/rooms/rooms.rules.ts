@@ -1,4 +1,10 @@
-import type { createRoomSchema, GameKind, ParticipantStatus, RoomStatus } from '@kwatro/shared'
+import type {
+  createRoomSchema,
+  GameKind,
+  HostAction,
+  ParticipantStatus,
+  RoomStatus,
+} from '@kwatro/shared'
 import type { z } from 'zod'
 
 /** Délai de réservation maximal d'une room. */
@@ -92,3 +98,45 @@ export const promotedStatus = (autoAccept: boolean): ParticipantStatus =>
 /** Statut ouverte / complète d'après les joueurs acceptés. */
 export const fillStatus = (accepted: number, capacity: number): RoomStatus =>
   accepted >= capacity ? 'FULL' : 'OPEN'
+
+/** Durée supposée d'une partie : passé ce délai après le début, la room est terminée. */
+// ponytail: pas encore de durée saisie ni de clôture planifiée (KWT-97), statut déduit de l'heure
+export const ROOM_PLAY_MS = 3 * 60 * 60 * 1000
+
+/** Statut affiché : en cours puis terminée d'après l'heure, sauf room annulée. */
+export function lifecycleStatus(
+  room: { status: RoomStatus; startsAt: Date },
+  now = new Date(),
+): RoomStatus {
+  if (room.status === 'CANCELLED' || room.status === 'FINISHED') return room.status
+  if (now.getTime() >= room.startsAt.getTime() + ROOM_PLAY_MS) return 'FINISHED'
+  if (now >= room.startsAt) return 'IN_PROGRESS'
+  return room.status
+}
+
+/**
+ * Action de l'hôte (KWT-57) : motif de refus, ou null. Possible jusqu'au début de la partie.
+ * `participant` : place du joueur visé (retirer, transférer).
+ */
+export function hostActionRefusal(
+  room: { hostId: string; status: RoomStatus; startsAt: Date },
+  action: HostAction,
+  participant: ParticipantStatus | null,
+  now = new Date(),
+): string | null {
+  const status = lifecycleStatus(room, now)
+  if (status === 'CANCELLED') return 'Cette room est annulée'
+  if (status === 'IN_PROGRESS' || status === 'FINISHED') return 'La partie a déjà commencé'
+  switch (action.type) {
+    case 'remove':
+    case 'transfer':
+      if (action.userId === room.hostId) return 'Tu es déjà l’hôte de cette room'
+      return participant === 'ACCEPTED' ? null : 'Ce joueur ne fait pas partie de la room'
+    case 'close':
+      return status === 'OPEN' || status === 'FULL' ? null : 'Les inscriptions sont déjà fermées'
+    case 'reopen':
+      return status === 'CONFIRMED' ? null : 'Les inscriptions sont déjà ouvertes'
+    case 'cancel':
+      return null
+  }
+}

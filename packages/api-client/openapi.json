@@ -2811,11 +2811,16 @@
                           "pseudo": {
                             "nullable": true,
                             "type": "string"
+                          },
+                          "userId": {
+                            "nullable": true,
+                            "type": "string"
                           }
                         },
                         "required": [
                           "initial",
-                          "pseudo"
+                          "pseudo",
+                          "userId"
                         ]
                       }
                     },
@@ -3056,11 +3061,16 @@
                           "pseudo": {
                             "nullable": true,
                             "type": "string"
+                          },
+                          "userId": {
+                            "nullable": true,
+                            "type": "string"
                           }
                         },
                         "required": [
                           "initial",
-                          "pseudo"
+                          "pseudo",
+                          "userId"
                         ]
                       }
                     },
@@ -3299,11 +3309,16 @@
                           "pseudo": {
                             "nullable": true,
                             "type": "string"
+                          },
+                          "userId": {
+                            "nullable": true,
+                            "type": "string"
                           }
                         },
                         "required": [
                           "initial",
-                          "pseudo"
+                          "pseudo",
+                          "userId"
                         ]
                       }
                     },
@@ -3552,11 +3567,16 @@
                           "pseudo": {
                             "nullable": true,
                             "type": "string"
+                          },
+                          "userId": {
+                            "nullable": true,
+                            "type": "string"
                           }
                         },
                         "required": [
                           "initial",
-                          "pseudo"
+                          "pseudo",
+                          "userId"
                         ]
                       }
                     },
@@ -3805,11 +3825,357 @@
                           "pseudo": {
                             "nullable": true,
                             "type": "string"
+                          },
+                          "userId": {
+                            "nullable": true,
+                            "type": "string"
                           }
                         },
                         "required": [
                           "initial",
-                          "pseudo"
+                          "pseudo",
+                          "userId"
+                        ]
+                      }
+                    },
+                    "waitlistCount": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "myStatus": {
+                      "nullable": true,
+                      "type": "string",
+                      "enum": [
+                        "PENDING",
+                        "ACCEPTED",
+                        "WAITLISTED",
+                        "DECLINED",
+                        "LEFT"
+                      ]
+                    },
+                    "isHost": {
+                      "type": "boolean"
+                    },
+                    "candidates": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "userId": {
+                            "type": "string"
+                          },
+                          "pseudo": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "PENDING",
+                              "WAITLISTED"
+                            ]
+                          },
+                          "minor": {
+                            "type": "boolean"
+                          },
+                          "xp": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "kwote": {
+                            "nullable": true,
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "rankedGames": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "appliedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          }
+                        },
+                        "required": [
+                          "userId",
+                          "pseudo",
+                          "status",
+                          "minor",
+                          "xp",
+                          "kwote",
+                          "rankedGames",
+                          "appliedAt"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "mode",
+                    "status",
+                    "startsAt",
+                    "capacity",
+                    "description",
+                    "minorsAllowed",
+                    "autoAccept",
+                    "game",
+                    "format",
+                    "venue",
+                    "host",
+                    "players",
+                    "waitlistCount",
+                    "myStatus",
+                    "isHost",
+                    "candidates"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "rooms"
+        ]
+      }
+    },
+    "/rooms/{id}/host-action": {
+      "post": {
+        "operationId": "RoomsController_hostAction",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "remove"
+                        ]
+                      },
+                      "userId": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "userId"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "transfer"
+                        ]
+                      },
+                      "userId": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "userId"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "close"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "reopen"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "cancel"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "mode": {
+                      "type": "string",
+                      "enum": [
+                        "RANKED",
+                        "CASUAL"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "OPEN",
+                        "FULL",
+                        "CONFIRMED",
+                        "IN_PROGRESS",
+                        "FINISHED",
+                        "CANCELLED"
+                      ]
+                    },
+                    "startsAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "capacity": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "description": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "minorsAllowed": {
+                      "type": "boolean"
+                    },
+                    "autoAccept": {
+                      "type": "boolean"
+                    },
+                    "game": {
+                      "type": "object",
+                      "properties": {
+                        "slug": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "slug",
+                        "name"
+                      ]
+                    },
+                    "format": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "venue": {
+                      "nullable": true,
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "slug": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "address": {
+                          "type": "string"
+                        },
+                        "isPartner": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "slug",
+                        "name",
+                        "address",
+                        "isPartner"
+                      ]
+                    },
+                    "host": {
+                      "type": "object",
+                      "properties": {
+                        "pseudo": {
+                          "nullable": true,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "pseudo"
+                      ]
+                    },
+                    "players": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "initial": {
+                            "type": "string"
+                          },
+                          "pseudo": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "userId": {
+                            "nullable": true,
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "initial",
+                          "pseudo",
+                          "userId"
                         ]
                       }
                     },

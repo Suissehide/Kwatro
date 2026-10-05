@@ -73,7 +73,14 @@ export const roomDetailSchema = z.object({
     .nullable(),
   host: z.object({ pseudo: z.string().nullable() }),
   /** Joueurs acceptés, hôte compris : pseudos pour les membres de la room, initiales pour les autres. */
-  players: z.array(z.object({ initial: z.string(), pseudo: z.string().nullable() })),
+  players: z.array(
+    z.object({
+      initial: z.string(),
+      pseudo: z.string().nullable(),
+      /** Pour l'hôte seulement (retirer, transférer) ; null pour les autres. */
+      userId: z.string().nullable(),
+    }),
+  ),
   waitlistCount: z.number().int(),
   /** Place du joueur connecté ; null s'il n'a pas candidaté ou n'est pas connecté. */
   myStatus: z.enum(PARTICIPANT_STATUSES).nullable(),
@@ -83,3 +90,17 @@ export const roomDetailSchema = z.object({
 
 export type RoomDetail = z.input<typeof roomDetailSchema>
 export type RoomCandidate = z.input<typeof roomCandidateSchema>
+
+/**
+ * Action de l'hôte (C5, KWT-57) : retirer un joueur, transférer le rôle d'hôte, fermer les inscriptions
+ * (room confirmée), les rouvrir, annuler la room.
+ */
+export const hostActionSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('remove'), userId: z.string().min(1) }),
+  z.object({ type: z.literal('transfer'), userId: z.string().min(1) }),
+  z.object({ type: z.literal('close') }),
+  z.object({ type: z.literal('reopen') }),
+  z.object({ type: z.literal('cancel') }),
+])
+
+export type HostAction = z.infer<typeof hostActionSchema>

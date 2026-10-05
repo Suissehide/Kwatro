@@ -1,4 +1,4 @@
-import type { CreateRoomInput, RoomDetail } from '@kwatro/shared'
+import type { CreateRoomInput, HostAction, RoomDetail } from '@kwatro/shared'
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AGENDA, EXPLORE, ROOM, VENUE } from '@/constants/queryKeys'
 import { api } from '@/lib/api'
@@ -70,5 +70,13 @@ export function useParticipationMutations(id: string) {
     onSuccess,
   })
 
-  return { join, leave, decide }
+  /** Hôte : retirer, transférer, fermer / rouvrir les inscriptions, annuler (ApiError 409 avec le motif). */
+  const hostAction = useMutation({
+    mutationKey: [ROOM.HOST_ACTION, id],
+    mutationFn: (body: HostAction) =>
+      unwrap(api.POST('/rooms/{id}/host-action', { ...path, body })),
+    onSuccess,
+  })
+
+  return { join, leave, decide, hostAction }
 }

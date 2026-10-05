@@ -46,4 +46,5 @@ export const ROOM = {
   JOIN: 'join_room',
   LEAVE: 'leave_room',
   DECIDE: 'decide_room_candidate',
+  HOST_ACTION: 'room_host_action',
 } as const

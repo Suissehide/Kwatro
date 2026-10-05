@@ -1,4 +1,10 @@
-import { createdRoomSchema, createRoomSchema, roomDetailSchema } from '@kwatro/shared'
+import {
+  createdRoomSchema,
+  createRoomSchema,
+  type HostAction,
+  hostActionSchema,
+  roomDetailSchema,
+} from '@kwatro/shared'
 import { Controller, Delete, Get, Param, Post } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import type { z } from 'zod'
@@ -56,5 +62,16 @@ export class RoomsController {
   @ZodResponse(roomDetailSchema, 201)
   decline(@Param('id') id: string, @Param('userId') userId: string, @CurrentUser() user: User) {
     return this.rooms.decide(id, user, userId, false)
+  }
+
+  /** Hôte : retirer un joueur, transférer le rôle d'hôte, fermer / rouvrir les inscriptions, annuler. */
+  @Post(':id/host-action')
+  @ZodResponse(roomDetailSchema, 201)
+  hostAction(
+    @Param('id') id: string,
+    @CurrentUser() user: User,
+    @ZodBody(hostActionSchema) action: HostAction,
+  ) {
+    return this.rooms.hostAction(id, user, action)
   }
 }
