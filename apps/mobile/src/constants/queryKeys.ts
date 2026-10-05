@@ -48,3 +48,8 @@ export const ROOM = {
   DECIDE: 'decide_room_candidate',
   HOST_ACTION: 'room_host_action',
 } as const
+
+export const MY_GAMES = {
+  GET: 'my_games',
+  SET: 'set_my_games',
+} as const

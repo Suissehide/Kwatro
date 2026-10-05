@@ -5,6 +5,7 @@ import {
   ageRegime,
   MIN_AGE,
   meSchema,
+  myGamesSchema,
   type SetBirthDateInput,
   setBirthDateSchema,
   updateProfileSchema,
@@ -18,6 +19,7 @@ import {
   HttpCode,
   Patch,
   Post,
+  Put,
 } from '@nestjs/common'
 import { ApiNoContentResponse, ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
@@ -56,6 +58,23 @@ export class UsersController {
   @ZodResponse(z.array(agendaItemSchema))
   agenda(@CurrentUser() user: User, @ZodQuery(agendaQuerySchema) { period }: AgendaQuery) {
     return this.users.agenda(user.id, period)
+  }
+
+  /** Mes jeux (A6, F3) : jeux joués et niveau déclaré par format TCG. */
+  @Get('me/games')
+  @ZodResponse(myGamesSchema)
+  myGames(@CurrentUser() user: User) {
+    return this.users.myGames(user.id)
+  }
+
+  /** Remplace mes jeux ; la Kwote de départ suit le niveau déclaré (850 à 1300). 400 avec le motif. */
+  @Put('me/games')
+  @ZodResponse(myGamesSchema)
+  setMyGames(
+    @CurrentUser() user: User,
+    @ZodBody(myGamesSchema) body: z.output<typeof myGamesSchema>,
+  ) {
+    return this.users.setMyGames(user.id, body)
   }
 
   /**
@@ -121,6 +140,7 @@ export class UsersController {
           vibes: [],
           parentId: null,
           parentalConsentAt: null,
+          playedGames: { set: [] },
           deletedAt: now,
         },
       }),

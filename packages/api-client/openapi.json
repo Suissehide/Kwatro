@@ -720,6 +720,170 @@
         ]
       }
     },
+    "/me/games": {
+      "get": {
+        "operationId": "UsersController_myGames",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "gameIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "formats": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "formatId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "declaredLevel": {
+                            "type": "string",
+                            "enum": [
+                              "BEGINNER",
+                              "INTERMEDIATE",
+                              "CONFIRMED",
+                              "EXPERT"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "formatId",
+                          "declaredLevel"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "gameIds",
+                    "formats"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      },
+      "put": {
+        "operationId": "UsersController_setMyGames",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "gameIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "formats": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "formatId": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "declaredLevel": {
+                          "type": "string",
+                          "enum": [
+                            "BEGINNER",
+                            "INTERMEDIATE",
+                            "CONFIRMED",
+                            "EXPERT"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "formatId",
+                        "declaredLevel"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "gameIds",
+                  "formats"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "gameIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "formats": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "formatId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "declaredLevel": {
+                            "type": "string",
+                            "enum": [
+                              "BEGINNER",
+                              "INTERMEDIATE",
+                              "CONFIRMED",
+                              "EXPERT"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "formatId",
+                          "declaredLevel"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "gameIds",
+                    "formats"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
     "/me/birth-date": {
       "post": {
         "operationId": "UsersController_setBirthDate",

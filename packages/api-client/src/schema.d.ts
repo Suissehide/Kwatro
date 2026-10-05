@@ -68,6 +68,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/games": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["UsersController_myGames"];
+        put: operations["UsersController_setMyGames"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/me/birth-date": {
         parameters: {
             query?: never;
@@ -595,6 +611,69 @@ export interface operations {
                         /** @enum {string} */
                         status: "REGISTERED" | "WAITLISTED" | "PENDING" | "MISSING_PLAYERS" | "FULL" | "PLAYED";
                     }[];
+                };
+            };
+        };
+    };
+    UsersController_myGames: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        gameIds: string[];
+                        formats: {
+                            formatId: string;
+                            /** @enum {string} */
+                            declaredLevel: "BEGINNER" | "INTERMEDIATE" | "CONFIRMED" | "EXPERT";
+                        }[];
+                    };
+                };
+            };
+        };
+    };
+    UsersController_setMyGames: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    gameIds: string[];
+                    formats: {
+                        formatId: string;
+                        /** @enum {string} */
+                        declaredLevel: "BEGINNER" | "INTERMEDIATE" | "CONFIRMED" | "EXPERT";
+                    }[];
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        gameIds: string[];
+                        formats: {
+                            formatId: string;
+                            /** @enum {string} */
+                            declaredLevel: "BEGINNER" | "INTERMEDIATE" | "CONFIRMED" | "EXPERT";
+                        }[];
+                    };
                 };
             };
         };

@@ -60,6 +60,8 @@ model User {
   eventRegistrations EventRegistration[]
   sessions           Session[]
   accounts           Account[]
+  /// Jeux joués (KWT-46) ; le niveau par format TCG est dans PlayerGameProfile
+  playedGames        Game[]              @relation("PlayedGames")
   blocksGiven        Block[]             @relation("BlocksGiven")
   blocksReceived     Block[]             @relation("BlocksReceived")
   reportsMade        Report[]            @relation("ReportsMade")
@@ -148,6 +150,8 @@ model Game {
   events     Event[]      @relation("EventGames")
   /// Lieux où ce jeu est disponible sur place
   venues     Venue[]      @relation("VenueGames")
+  /// Joueurs qui le déclarent dans leurs jeux (KWT-46)
+  players    User[]       @relation("PlayedGames")
 }
 
 model GameFormat {
