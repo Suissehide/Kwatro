@@ -24,7 +24,8 @@ const DAY_MS = 24 * 60 * 60 * 1000
 const toLocalDate = (date: Date) => date.toISOString().slice(0, 10)
 const fromLocalDate = (date: string) => new Date(`${date}T00:00:00Z`)
 
-const closureRange = <T extends { startsOn: Date; endsOn: Date }>(closure: T) => ({
+/** Fermeture en dates locales, forme attendue par `openingStatus`. */
+export const closureRange = <T extends { startsOn: Date; endsOn: Date }>(closure: T) => ({
   ...closure,
   startsOn: toLocalDate(closure.startsOn),
   endsOn: toLocalDate(closure.endsOn),

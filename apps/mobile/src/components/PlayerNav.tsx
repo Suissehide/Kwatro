@@ -1,5 +1,5 @@
 import { Button, playerNavItems, TopNav } from '@kwatro/design-system'
-import { notYet, openHome, openSettings, openSite, openTab } from '@/lib/navigation'
+import { openCreateRoom, openHome, openSettings, openSite, openTab } from '@/lib/navigation'
 import { visibleAvatar } from '@/lib/profile'
 import { signOut, useMeQuery } from '@/queries/useMe'
 
@@ -13,7 +13,9 @@ export function PlayerNav({ active, create = true }: { active: string; create?: 
       onSelect={openTab}
       onHome={openHome}
       right={
-        create ? <Button small kind="kwote" label="+ Créer une room" onPress={notYet} /> : null
+        create ? (
+          <Button small kind="kwote" label="+ Créer une room" onPress={() => openCreateRoom()} />
+        ) : null
       }
       account={
         me

@@ -1,7 +1,7 @@
 import { MobileScreen, type PlayerTab, PlayerTabBar, WebScreen } from '@kwatro/design-system'
 import type { ReactNode } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { notYet, openTab } from '@/lib/navigation'
+import { openCreateRoom, openTab } from '@/lib/navigation'
 import { PlayerNav } from './PlayerNav'
 
 /** Écran d'un onglet joueur : barre du site sur desktop, barre d'onglets sur téléphone. */
@@ -31,7 +31,7 @@ export function PlayerScreen({
             <PlayerTabBar
               active={tab}
               onSelect={openTab}
-              onCreate={notYet}
+              onCreate={() => openCreateRoom()}
               bottomInset={Math.max(22, insets.bottom)}
             />
           )

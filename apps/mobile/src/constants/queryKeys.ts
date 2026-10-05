@@ -18,6 +18,7 @@ export const AGENDA = {
 
 export const EXPLORE = {
   TONIGHT: 'explore_tonight',
+  VENUES: 'explore_venues',
 } as const
 
 export const EVENT = {
@@ -33,4 +34,12 @@ export const VENUE = {
 export const GEOCODE = {
   SEARCH: 'geocode_search',
   REVERSE: 'geocode_reverse',
+} as const
+
+export const GAMES = {
+  LIST: 'games',
+} as const
+
+export const ROOM = {
+  CREATE: 'create_room',
 } as const

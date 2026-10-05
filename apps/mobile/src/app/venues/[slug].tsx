@@ -37,7 +37,7 @@ import { ExploreMap } from '@/components/explore/ExploreMap'
 import { PlayerNav } from '@/components/PlayerNav'
 import { VenueAgenda } from '@/components/venue/VenueAgenda'
 import { roomCardProps } from '@/lib/explore'
-import { goBack, notYet } from '@/lib/navigation'
+import { goBack, notYet, openCreateRoom } from '@/lib/navigation'
 import { useLocation } from '@/lib/useLocation'
 import {
   accessibilityItems,
@@ -116,7 +116,9 @@ export default function VenueScreen() {
     venue.isPartner && venue.kwatroPerk ? (
       <PerkBanner text={venue.kwatroPerk} compact={!wide} />
     ) : null
-  const createRoom = <Button kind="kwote" label="+ Créer une room ici" onPress={notYet} />
+  const createRoom = (
+    <Button kind="kwote" label="+ Créer une room ici" onPress={() => openCreateRoom(venue.slug)} />
+  )
   const itineraryButton = <Button kind="ghost" label="Itinéraire" onPress={itinerary} />
 
   const hours = venue.openingHours.length ? (
