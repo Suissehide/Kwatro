@@ -1,11 +1,52 @@
-import { type createRoomSchema, openingStatus } from '@kwatro/shared'
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import {
+  type createRoomSchema,
+  KWOTE_PROVISIONAL_GAMES,
+  openingStatus,
+  type roomDetailSchema,
+} from '@kwatro/shared'
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 import type { z } from 'zod'
-import { isMinor } from '../common/minors.rules'
-import { closureRange } from '../explore/explore.service'
-import type { User } from '../generated/prisma/client'
+import { isMinor, roomVisibleTo, type Viewer } from '../common/minors.rules'
+import { closureRange, notBlockedWith } from '../explore/explore.service'
+import type { Prisma, User } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
-import { createRoomRefusal } from './rooms.rules'
+import {
+  acceptRefusal,
+  createRoomRefusal,
+  fillStatus,
+  joinOutcome,
+  promotedStatus,
+} from './rooms.rules'
+
+type Tx = Prisma.TransactionClient
+
+const detailInclude = {
+  host: { select: { pseudo: true } },
+  game: { select: { slug: true, name: true } },
+  format: { select: { name: true } },
+  venue: { select: { id: true, slug: true, name: true, address: true, isPartner: true } },
+  participants: {
+    orderBy: { createdAt: 'asc' },
+    include: {
+      user: {
+        select: {
+          id: true,
+          pseudo: true,
+          birthDate: true,
+          parentId: true,
+          xp: true,
+          gameProfiles: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.RoomInclude
 
 @Injectable()
 export class RoomsService {
@@ -57,4 +98,151 @@ export class RoomsService {
       select: { id: true },
     })
   }
+
+  /**
+   * Fiche room (B6). Introuvable si le joueur ne peut pas la voir (règles mineurs, blocage).
+   * Pseudos des joueurs pour les membres, initiales pour les autres ; candidatures pour l'hôte seulement.
+   */
+  async detail(id: string, viewer: Viewer): Promise<z.output<typeof roomDetailSchema>> {
+    const now = new Date()
+    const room = await this.prisma.room.findFirst({
+      where: { id, ...notBlockedWith(viewer?.id) },
+      include: detailInclude,
+    })
+    if (!room || !roomVisibleTo(room, viewer, now)) throw new NotFoundException('Room introuvable')
+
+    const isHost = room.hostId === viewer?.id
+    const mine = room.participants.find((p) => p.userId === viewer?.id)
+    const member = isHost || mine?.status === 'ACCEPTED'
+    const accepted = room.participants.filter((p) => p.status === 'ACCEPTED')
+    const waiting = room.participants.filter(
+      (p) => p.status === 'PENDING' || p.status === 'WAITLISTED',
+    )
+    return {
+      ...room,
+      format: room.format?.name ?? null,
+      players: accepted.map(({ user }) => ({
+        initial: user.pseudo?.slice(0, 1) ?? '?',
+        pseudo: member ? user.pseudo : null,
+      })),
+      waitlistCount: room.participants.filter((p) => p.status === 'WAITLISTED').length,
+      myStatus: isHost ? 'ACCEPTED' : (mine?.status ?? null),
+      isHost,
+      candidates: isHost
+        ? waiting.map(({ userId, status, createdAt, user }) => {
+            const profile = user.gameProfiles.find((g) => g.formatId === room.formatId)
+            return {
+              userId,
+              pseudo: user.pseudo,
+              status: status as 'PENDING' | 'WAITLISTED',
+              minor: isMinor(user, now),
+              xp: user.xp,
+              kwote:
+                profile && profile.rankedGames >= KWOTE_PROVISIONAL_GAMES ? profile.kwote : null,
+              rankedGames: profile?.rankedGames ?? 0,
+              appliedAt: createdAt,
+            }
+          })
+        : [],
+    }
+  }
+
+  /** Demander à rejoindre : en attente de l'hôte, acceptée d'office ou liste d'attente (rooms.rules). */
+  async join(id: string, user: User) {
+    await this.prisma.$transaction(async (tx) => {
+      const room = await this.lock(tx, id, user)
+      const current = room.participants.find((p) => p.userId === user.id)?.status ?? null
+      const outcome = joinOutcome(room, accepted(room), user.id, current)
+      if ('refused' in outcome) throw new ConflictException(outcome.refused)
+      if (outcome.status === current) return
+      await tx.roomParticipant.upsert({
+        where: { roomId_userId: { roomId: id, userId: user.id } },
+        // Nouvelle demande après un départ : en fin de file
+        update: { status: outcome.status, createdAt: new Date() },
+        create: { roomId: id, userId: user.id, status: outcome.status },
+      })
+      await this.refreshStatus(tx, id)
+    })
+    return this.detail(id, user)
+  }
+
+  /**
+   * Quitter la room ou retirer sa demande. Une place libérée revient au premier de la liste d'attente.
+   */
+  // ponytail: personne n'est encore prévenu (promotion, acceptation), notifications avec KWT-108
+  async leave(id: string, user: User) {
+    await this.prisma.$transaction(async (tx) => {
+      const room = await this.lock(tx, id, user)
+      if (room.hostId === user.id)
+        throw new ConflictException('L’hôte ne peut pas quitter sa room : annule-la')
+      const mine = room.participants.find((p) => p.userId === user.id)
+      if (!mine || mine.status === 'LEFT' || mine.status === 'DECLINED') return
+      await tx.roomParticipant.update({
+        where: { roomId_userId: { roomId: id, userId: user.id } },
+        data: { status: 'LEFT' },
+      })
+      if (mine.status === 'ACCEPTED') await this.promote(tx, room)
+      await this.refreshStatus(tx, id)
+    })
+    return this.detail(id, user)
+  }
+
+  /** L'hôte accepte (`accept`) ou refuse une demande. */
+  async decide(id: string, host: User, userId: string, accept: boolean) {
+    await this.prisma.$transaction(async (tx) => {
+      const room = await this.lock(tx, id, host)
+      if (room.hostId !== host.id) throw new ForbiddenException('Réservé à l’hôte de la room')
+      const candidate = room.participants.find((p) => p.userId === userId)?.status ?? null
+      const refusal = accept
+        ? acceptRefusal(candidate, accepted(room), room.capacity)
+        : candidate === 'PENDING' || candidate === 'WAITLISTED'
+          ? null
+          : 'Pas de demande en attente'
+      if (refusal) throw new ConflictException(refusal)
+      await tx.roomParticipant.update({
+        where: { roomId_userId: { roomId: id, userId } },
+        data: { status: accept ? 'ACCEPTED' : 'DECLINED' },
+      })
+      await this.refreshStatus(tx, id)
+    })
+    return this.detail(id, host)
+  }
+
+  /** Verrou sur la room (deux demandes simultanées ne prennent pas la même dernière place), visibilité comprise. */
+  private async lock(tx: Tx, id: string, user: User) {
+    await tx.$queryRaw`SELECT 1 FROM "Room" WHERE "id" = ${id} FOR UPDATE`
+    const room = await tx.room.findFirst({
+      where: { id, ...notBlockedWith(user.id) },
+      include: { participants: { orderBy: { createdAt: 'asc' } } },
+    })
+    if (!room || !roomVisibleTo(room, user)) throw new NotFoundException('Room introuvable')
+    return room
+  }
+
+  private async promote(tx: Tx, room: { id: string; autoAccept: boolean }) {
+    const next = await tx.roomParticipant.findFirst({
+      where: { roomId: room.id, status: 'WAITLISTED' },
+      orderBy: { createdAt: 'asc' },
+    })
+    if (next) {
+      await tx.roomParticipant.update({
+        where: { roomId_userId: { roomId: room.id, userId: next.userId } },
+        data: { status: promotedStatus(room.autoAccept) },
+      })
+    }
+  }
+
+  /** Ouverte / complète selon les acceptés (une room confirmée, annulée… ne bouge pas). */
+  private async refreshStatus(tx: Tx, id: string) {
+    const room = await tx.room.findUniqueOrThrow({
+      where: { id },
+      include: { _count: { select: { participants: { where: { status: 'ACCEPTED' } } } } },
+    })
+    if (room.status !== 'OPEN' && room.status !== 'FULL') return
+    const status = fillStatus(room._count.participants, room.capacity)
+    if (status !== room.status) await tx.room.update({ where: { id }, data: { status } })
+  }
 }
+
+const accepted = (room: { participants: { status: string }[] }) =>
+  room.participants.filter((p) => p.status === 'ACCEPTED').length

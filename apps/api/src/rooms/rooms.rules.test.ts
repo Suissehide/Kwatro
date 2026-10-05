@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { createRoomRefusal, MAX_OPEN_ROOMS_PER_HOST, type RoomContext } from './rooms.rules'
+import {
+  acceptRefusal,
+  createRoomRefusal,
+  fillStatus,
+  type JoinableRoom,
+  joinOutcome,
+  MAX_OPEN_ROOMS_PER_HOST,
+  promotedStatus,
+  type RoomContext,
+} from './rooms.rules'
 
 const now = new Date('2026-10-05T12:00:00Z')
 const room = {
@@ -49,5 +58,56 @@ describe('createRoomRefusal', () => {
     expect(createRoomRefusal({ ...room, minorsAllowed: true }, minor, now)).toBeNull()
     const busy = { ...ctx, hostOpenRooms: MAX_OPEN_ROOMS_PER_HOST }
     expect(createRoomRefusal(room, busy, now)).toMatch(/déjà/)
+  })
+})
+
+describe('joinOutcome', () => {
+  const open: JoinableRoom = {
+    hostId: 'host',
+    status: 'OPEN',
+    startsAt: new Date('2026-10-06T18:00:00Z'),
+    capacity: 4,
+    autoAccept: false,
+  }
+
+  it('demande en attente de l’hôte, ou acceptée d’office en inscription automatique', () => {
+    expect(joinOutcome(open, 2, 'lea', null, now)).toEqual({ status: 'PENDING' })
+    expect(joinOutcome({ ...open, autoAccept: true }, 2, 'lea', null, now)).toEqual({
+      status: 'ACCEPTED',
+    })
+    expect(joinOutcome(open, 2, 'lea', 'LEFT', now)).toEqual({ status: 'PENDING' })
+  })
+
+  it('room complète : liste d’attente, même en inscription automatique', () => {
+    expect(joinOutcome({ ...open, autoAccept: true }, 4, 'lea', null, now)).toEqual({
+      status: 'WAITLISTED',
+    })
+  })
+
+  it('sans effet si déjà dedans ; refus pour l’hôte, un refusé, une room fermée ou commencée', () => {
+    expect(joinOutcome(open, 2, 'lea', 'ACCEPTED', now)).toEqual({ status: 'ACCEPTED' })
+    expect(joinOutcome(open, 2, 'host', null, now)).toHaveProperty('refused')
+    expect(joinOutcome(open, 2, 'lea', 'DECLINED', now)).toHaveProperty('refused')
+    expect(joinOutcome({ ...open, status: 'CANCELLED' }, 2, 'lea', null, now)).toHaveProperty(
+      'refused',
+    )
+    expect(joinOutcome({ ...open, startsAt: now }, 2, 'lea', null, now)).toHaveProperty('refused')
+  })
+})
+
+describe('acceptRefusal, promotedStatus, fillStatus', () => {
+  it('accepte une demande ou un joueur en liste d’attente tant qu’il reste une place', () => {
+    expect(acceptRefusal('PENDING', 3, 4)).toBeNull()
+    expect(acceptRefusal('WAITLISTED', 3, 4)).toBeNull()
+    expect(acceptRefusal('PENDING', 4, 4)).toMatch(/complète/)
+    expect(acceptRefusal('ACCEPTED', 3, 4)).toMatch(/Pas de demande/)
+    expect(acceptRefusal(null, 3, 4)).toMatch(/Pas de demande/)
+  })
+
+  it('place libérée et statut de la room', () => {
+    expect(promotedStatus(true)).toBe('ACCEPTED')
+    expect(promotedStatus(false)).toBe('PENDING')
+    expect(fillStatus(4, 4)).toBe('FULL')
+    expect(fillStatus(3, 4)).toBe('OPEN')
   })
 })

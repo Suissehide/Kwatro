@@ -14,6 +14,27 @@ export type GameKind = (typeof GAME_KINDS)[number]
 export const ROOM_MODES = ['RANKED', 'CASUAL'] as const
 export type RoomMode = (typeof ROOM_MODES)[number]
 
+/** Statut d'une room (identique à l'enum Prisma RoomStatus). */
+export const ROOM_STATUSES = [
+  'OPEN',
+  'FULL',
+  'CONFIRMED',
+  'IN_PROGRESS',
+  'FINISHED',
+  'CANCELLED',
+] as const
+export type RoomStatus = (typeof ROOM_STATUSES)[number]
+
+/** Place d'un joueur dans une room (identique à l'enum Prisma ParticipantStatus). */
+export const PARTICIPANT_STATUSES = [
+  'PENDING',
+  'ACCEPTED',
+  'WAITLISTED',
+  'DECLINED',
+  'LEFT',
+] as const
+export type ParticipantStatus = (typeof PARTICIPANT_STATUSES)[number]
+
 /** Rôle global d'un compte (identique à l'enum Prisma UserRole). Les rôles par lieu sont dans VenueStaff. */
 export const USER_ROLES = ['PLAYER', 'VENUE_STAFF', 'ADMIN'] as const
 export type UserRole = (typeof USER_ROLES)[number]

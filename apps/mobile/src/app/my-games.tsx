@@ -16,7 +16,7 @@ import { useState } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { PlayerScreen } from '@/components/PlayerScreen'
 import { GAMES, matchesGame } from '@/lib/explore'
-import { notYet, openHome } from '@/lib/navigation'
+import { openEvent, openHome, openRoom } from '@/lib/navigation'
 import { agendaCardProps, agendaStatus, agendaTag } from '@/lib/profile'
 import { useAgendaQuery } from '@/queries/useAgenda'
 import { useMeQuery } from '@/queries/useMe'
@@ -124,7 +124,7 @@ function GameCard({ item, wide }: { item: AgendaItem; wide: boolean }) {
       }
       // Historique : pas encore de variation de Kwote à montrer (résultats de partie à venir)
       side={item.status === 'PLAYED' ? null : undefined}
-      onPress={notYet}
+      onPress={() => (item.kind === 'ROOM' ? openRoom(item.id) : openEvent(item.id))}
     />
   )
 }

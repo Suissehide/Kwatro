@@ -42,4 +42,8 @@ export const GAMES = {
 
 export const ROOM = {
   CREATE: 'create_room',
+  GET: 'room',
+  JOIN: 'join_room',
+  LEAVE: 'leave_room',
+  DECIDE: 'decide_room_candidate',
 } as const

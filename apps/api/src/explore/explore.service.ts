@@ -42,7 +42,7 @@ const roomInclude = {
 } satisfies Prisma.RoomInclude
 
 /** Rooms d'un hôte qui n'a pas bloqué le joueur connecté et que celui-ci n'a pas bloqué (KWT-19). */
-const notBlockedWith = (viewerId?: string): Prisma.RoomWhereInput =>
+export const notBlockedWith = (viewerId?: string): Prisma.RoomWhereInput =>
   viewerId
     ? {
         host: {

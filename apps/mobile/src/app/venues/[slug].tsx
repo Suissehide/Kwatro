@@ -37,7 +37,7 @@ import { ExploreMap } from '@/components/explore/ExploreMap'
 import { PlayerNav } from '@/components/PlayerNav'
 import { VenueAgenda } from '@/components/venue/VenueAgenda'
 import { roomCardProps } from '@/lib/explore'
-import { goBack, notYet, openCreateRoom } from '@/lib/navigation'
+import { goBack, openCreateRoom, openRoom } from '@/lib/navigation'
 import { useLocation } from '@/lib/useLocation'
 import {
   accessibilityItems,
@@ -217,7 +217,7 @@ export default function VenueScreen() {
             <Carousel>
               {rooms.map((room) => (
                 <View key={room.id} style={{ width: 240 }}>
-                  <RoomCard {...room} onPress={notYet} />
+                  <RoomCard {...room} onPress={() => openRoom(room.id)} />
                 </View>
               ))}
             </Carousel>
@@ -307,7 +307,7 @@ export default function VenueScreen() {
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
                 {rooms.map((room) => (
                   <View key={room.id} style={{ width: '48%' }}>
-                    <RoomCard {...room} onPress={notYet} />
+                    <RoomCard {...room} onPress={() => openRoom(room.id)} />
                   </View>
                 ))}
               </View>
