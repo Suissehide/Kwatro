@@ -14,6 +14,9 @@ export const openHome = () => router.navigate('/')
 /** Retour à l'écran précédent ; à l'accueil si la fiche a été ouverte directement (lien, web). */
 export const goBack = () => (router.canGoBack() ? router.back() : openHome())
 
+/** Tous les lieux autour du joueur (B2, KWT-75). */
+export const openVenues = () => router.push('/venues')
+
 export const openVenue = (slug: string) =>
   router.push({ pathname: '/venues/[slug]', params: { slug } })
 

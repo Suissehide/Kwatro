@@ -1,4 +1,5 @@
 import { Text, View } from 'react-native'
+import { Tag } from '../atoms/Tag'
 import { border, colors, font } from '../tokens'
 import { ListRow } from './ListRow'
 
@@ -43,7 +44,11 @@ export function VenueRow({
       subtitle={subtitle}
       note={perk ?? undefined}
       right={
-        <Text style={{ ...font('mono', 700), fontSize: 13, color: colors.ink }}>{distance}</Text>
+        // Badge en toutes lettres : la couleur de la pastille seule ne suffit pas (accessibilité)
+        <View style={{ alignItems: 'flex-end', gap: 4 }}>
+          {partner ? <Tag label="Partenaire" variant="partner" /> : null}
+          <Text style={{ ...font('mono', 700), fontSize: 13, color: colors.ink }}>{distance}</Text>
+        </View>
       }
     />
   )
