@@ -13,6 +13,7 @@ import {
 } from '@kwatro/shared'
 import { Injectable, NotFoundException } from '@nestjs/common'
 import type { z } from 'zod'
+import { eventVisibleTo, roomVisibleTo, type Viewer } from '../common/minors.rules'
 import type { Prisma } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 import { compareByDistance } from './explore.rules'
@@ -84,7 +85,7 @@ export class ExploreService {
   }
 
   /** Carte et liste des lieux : tri honnête (distance, partenaires en premier à distance égale). */
-  async venues(query: GeoQuery): Promise<VenueListItem[]> {
+  async venues(query: GeoQuery, viewer: Viewer): Promise<VenueListItem[]> {
     const distances = await this.distances(query)
     const now = new Date()
     const yesterday = fromLocalDate(addDays(localDateTime(now).date, -1))
@@ -93,11 +94,11 @@ export class ExploreService {
       include: {
         openingHours: true,
         closures: { where: { endsOn: { gte: yesterday } } },
-        _count: { select: { events: { where: { startsAt: { gte: now }, cancelledAt: null } } } },
+        events: { where: { startsAt: { gte: now }, cancelledAt: null }, select: { minAge: true } },
       },
     })
     return venues
-      .map(({ openingHours, closures, _count, ...venue }) => {
+      .map(({ openingHours, closures, events, ...venue }) => {
         const { openNow, closesAtMinute } = openingStatus(
           openingHours,
           closures.map(closureRange),
@@ -108,7 +109,7 @@ export class ExploreService {
           distanceMeters: distances.get(venue.id) ?? 0,
           openNow,
           closesAtMinute,
-          upcomingEventCount: _count.events,
+          upcomingEventCount: events.filter((event) => eventVisibleTo(event, viewer, now)).length,
         }
       })
       .sort(compareByDistance)
@@ -118,7 +119,7 @@ export class ExploreService {
    * Fiche lieu : infos pratiques, photos, horaires et fermetures, jeux sur place, rooms ouvertes
    * et agenda du mois en cours aux VENUE_AGENDA_MONTHS suivants (vue liste et calendrier).
    */
-  async venue(slug: string, viewerId?: string): Promise<z.output<typeof venueDetailSchema>> {
+  async venue(slug: string, viewer: Viewer): Promise<z.output<typeof venueDetailSchema>> {
     const now = new Date()
     const [year = 0, month = 1] = localDateTime(now).date.split('-').map(Number)
     const monthStart = new Date(Date.UTC(year, month - 1, 1))
@@ -141,7 +142,7 @@ export class ExploreService {
           },
         },
         rooms: {
-          where: { status: 'OPEN', startsAt: { gte: now }, ...notBlockedWith(viewerId) },
+          where: { status: 'OPEN', startsAt: { gte: now }, ...notBlockedWith(viewer?.id) },
           orderBy: { startsAt: 'asc' },
           include: roomInclude,
         },
@@ -154,16 +155,18 @@ export class ExploreService {
       ...openingStatus(venue.openingHours, closures, now),
       closures,
       accessibility: accessibilityItemSchema.array().parse(venue.accessibility),
-      events: venue.events.map(({ _count, ...event }) => ({
-        ...event,
-        registeredCount: _count.registrations,
-      })),
-      rooms: venue.rooms.map(roomItem),
+      events: venue.events
+        .filter((event) => eventVisibleTo(event, viewer, now))
+        .map(({ _count, ...event }) => ({ ...event, registeredCount: _count.registrations })),
+      rooms: venue.rooms.filter((room) => roomVisibleTo(room, viewer, now)).map(roomItem),
     }
   }
 
   /** Agenda des prochains jours autour du point : trié par date, puis distance (même règle que les lieux). */
-  async events(query: EventsQuery): Promise<z.output<typeof eventListItemSchema>[]> {
+  async events(
+    query: EventsQuery,
+    viewer: Viewer,
+  ): Promise<z.output<typeof eventListItemSchema>[]> {
     const distances = await this.distances(query)
     const now = new Date()
     const events = await this.prisma.event.findMany({
@@ -179,6 +182,7 @@ export class ExploreService {
       },
     })
     return events
+      .filter((event) => eventVisibleTo(event, viewer, now))
       .map(({ _count, venue, ...event }) => ({
         ...event,
         registeredCount: _count.registrations,
@@ -190,10 +194,7 @@ export class ExploreService {
       )
   }
 
-  async rooms(
-    query: EventsQuery,
-    viewerId?: string,
-  ): Promise<z.output<typeof roomListItemSchema>[]> {
+  async rooms(query: EventsQuery, viewer: Viewer): Promise<z.output<typeof roomListItemSchema>[]> {
     const distances = await this.distances(query)
     const now = new Date()
     // ponytail: rooms à domicile exclues (zone floue à afficher, KWT des rooms à domicile)
@@ -202,11 +203,12 @@ export class ExploreService {
         status: 'OPEN',
         venueId: { in: [...distances.keys()] },
         startsAt: { gte: now, lt: new Date(now.getTime() + query.days * DAY_MS) },
-        ...notBlockedWith(viewerId),
+        ...notBlockedWith(viewer?.id),
       },
       include: { ...roomInclude, venue: { select: { id: true, name: true, isPartner: true } } },
     })
     return rooms
+      .filter((room) => roomVisibleTo(room, viewer, now))
       .flatMap(({ venue, ...room }) =>
         venue
           ? [
