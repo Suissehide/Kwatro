@@ -1,4 +1,4 @@
-import type { createRoomSchema, GameKind } from '@kwatro/shared'
+import type { createRoomSchema, GameKind, ParticipantStatus, RoomStatus } from '@kwatro/shared'
 import type { z } from 'zod'
 
 /** Délai de réservation maximal d'une room. */
@@ -41,3 +41,54 @@ export function createRoomRefusal(
     return `Tu as déjà ${MAX_OPEN_ROOMS_PER_HOST} rooms à venir : attends qu’une soit passée`
   return null
 }
+
+export type JoinableRoom = {
+  hostId: string
+  status: RoomStatus
+  startsAt: Date
+  capacity: number
+  autoAccept: boolean
+}
+
+const ACTIVE: ParticipantStatus[] = ['PENDING', 'ACCEPTED', 'WAITLISTED']
+
+/**
+ * Demande à rejoindre (KWT-56) : complète → liste d'attente ; sinon acceptée d'office si l'inscription
+ * est automatique, en attente de l'hôte sinon. Sans effet si le joueur a déjà une place ou une demande.
+ * `accepted` compte les joueurs acceptés, hôte compris.
+ */
+export function joinOutcome(
+  room: JoinableRoom,
+  accepted: number,
+  userId: string,
+  current: ParticipantStatus | null,
+  now = new Date(),
+): { status: ParticipantStatus } | { refused: string } {
+  if (room.hostId === userId) return { refused: 'Tu organises cette room' }
+  if (room.status !== 'OPEN' && room.status !== 'FULL')
+    return { refused: 'Cette room n’accepte plus de joueurs' }
+  if (room.startsAt <= now) return { refused: 'Cette room a déjà commencé' }
+  if (current && ACTIVE.includes(current)) return { status: current }
+  if (current === 'DECLINED') return { refused: 'L’hôte a refusé ta demande pour cette room' }
+  if (accepted >= room.capacity) return { status: 'WAITLISTED' }
+  return { status: room.autoAccept ? 'ACCEPTED' : 'PENDING' }
+}
+
+/** L'hôte accepte une demande : seulement en attente ou en liste d'attente, et s'il reste une place. */
+export function acceptRefusal(
+  candidate: ParticipantStatus | null,
+  accepted: number,
+  capacity: number,
+) {
+  if (candidate !== 'PENDING' && candidate !== 'WAITLISTED') return 'Pas de demande en attente'
+  if (accepted >= capacity) return 'La room est complète : retire d’abord un joueur'
+  return null
+}
+
+/** Place libérée : le premier de la liste d'attente est accepté (inscription automatique) ou repasse en attente de l'hôte. */
+export const promotedStatus = (autoAccept: boolean): ParticipantStatus =>
+  autoAccept ? 'ACCEPTED' : 'PENDING'
+
+/** Statut ouverte / complète d'après les joueurs acceptés. */
+export const fillStatus = (accepted: number, capacity: number): RoomStatus =>
+  accepted >= capacity ? 'FULL' : 'OPEN'

@@ -37,7 +37,15 @@ import {
   todayLine,
   venueRowProps,
 } from '@/lib/explore'
-import { notYet, openCreateRoom, openEvent, openHome, openTab, openVenue } from '@/lib/navigation'
+import {
+  notYet,
+  openCreateRoom,
+  openEvent,
+  openHome,
+  openRoom,
+  openTab,
+  openVenue,
+} from '@/lib/navigation'
 import { useTonightQuery } from '@/queries/useExplore'
 import { useMeQuery } from '@/queries/useMe'
 
@@ -106,7 +114,7 @@ export default function HomeScreen() {
 
   const roomCards = rooms.map((r) => (
     <View key={r.id} style={wide ? { width: '48%', flexGrow: 1, maxWidth: '50%' } : { width: 250 }}>
-      <RoomCard {...roomCardProps(r)} wide={wide} onPress={notYet} />
+      <RoomCard {...roomCardProps(r)} wide={wide} onPress={() => openRoom(r.id)} />
     </View>
   ))
   const roomList = !data ? (

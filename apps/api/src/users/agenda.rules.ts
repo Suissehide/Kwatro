@@ -14,6 +14,7 @@ export function roomStatus(
   accepted: number,
   capacity: number,
 ): AgendaStatus {
+  if (participant === 'WAITLISTED') return 'WAITLISTED'
   if (participant !== 'ACCEPTED') return 'PENDING'
   return accepted < capacity ? 'MISSING_PLAYERS' : 'FULL'
 }

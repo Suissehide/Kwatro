@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ROOM_MODES } from '../constants'
+import { PARTICIPANT_STATUSES, ROOM_MODES, ROOM_STATUSES } from '../constants'
 import { hasBannedWord } from '../moderation'
 import { isoDateTime } from './common'
 
@@ -36,3 +36,50 @@ export const createdRoomSchema = z.object({ id: z.string() })
 
 /** Forme JSON envoyée par l'app (date en chaîne ISO). Côté API, `z.output` donne la `Date`. */
 export type CreateRoomInput = z.input<typeof createRoomSchema>
+
+/** Candidature vue par l'hôte (C5, C6) : de quoi décider, sans âge exact (badge -18 seulement). */
+export const roomCandidateSchema = z.object({
+  userId: z.string(),
+  pseudo: z.string().nullable(),
+  status: z.enum(['PENDING', 'WAITLISTED']),
+  minor: z.boolean(),
+  xp: z.number().int(),
+  /** Kwote sur le format de la room ; null si provisoire ou sans format. */
+  kwote: z.number().int().nullable(),
+  rankedGames: z.number().int(),
+  appliedAt: isoDateTime,
+})
+
+/** Fiche room (B6) ; `candidates` n'est rempli que pour l'hôte. */
+export const roomDetailSchema = z.object({
+  id: z.string(),
+  mode: z.enum(ROOM_MODES),
+  status: z.enum(ROOM_STATUSES),
+  startsAt: isoDateTime,
+  capacity: z.number().int(),
+  description: z.string().nullable(),
+  minorsAllowed: z.boolean(),
+  autoAccept: z.boolean(),
+  game: z.object({ slug: z.string(), name: z.string() }),
+  format: z.string().nullable(),
+  venue: z
+    .object({
+      id: z.string(),
+      slug: z.string(),
+      name: z.string(),
+      address: z.string(),
+      isPartner: z.boolean(),
+    })
+    .nullable(),
+  host: z.object({ pseudo: z.string().nullable() }),
+  /** Joueurs acceptés, hôte compris : pseudos pour les membres de la room, initiales pour les autres. */
+  players: z.array(z.object({ initial: z.string(), pseudo: z.string().nullable() })),
+  waitlistCount: z.number().int(),
+  /** Place du joueur connecté ; null s'il n'a pas candidaté ou n'est pas connecté. */
+  myStatus: z.enum(PARTICIPANT_STATUSES).nullable(),
+  isHost: z.boolean(),
+  candidates: z.array(roomCandidateSchema),
+})
+
+export type RoomDetail = z.input<typeof roomDetailSchema>
+export type RoomCandidate = z.input<typeof roomCandidateSchema>

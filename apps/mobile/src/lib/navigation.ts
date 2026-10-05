@@ -19,6 +19,8 @@ export const openVenue = (slug: string) =>
 
 export const openEvent = (id: string) => router.push({ pathname: '/events/[id]', params: { id } })
 
+export const openRoom = (id: string) => router.push({ pathname: '/rooms/[id]', params: { id } })
+
 export const openSettings = () => router.push('/settings')
 
 /** Créer une room ; `venueSlug` présélectionne le lieu. */
@@ -33,5 +35,5 @@ export function openTab(tab: string) {
   if (route) router.navigate(route)
 }
 
-// ponytail: fiche room pas encore faite
+// ponytail: listes complètes (programme, rooms, carte) pas encore faites
 export const notYet = () => {}
