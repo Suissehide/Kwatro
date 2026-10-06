@@ -3,6 +3,7 @@ import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/r
 import { AGENDA, EXPLORE, ROOM, VENUE } from '@/constants/queryKeys'
 import { api } from '@/lib/api'
 import { queryClient, unwrap } from '@/lib/queryClient'
+import { useRealtime } from '@/lib/realtime'
 
 // * QUERIES
 
@@ -12,7 +13,12 @@ export const roomQueryOptions = (id: string) =>
     queryFn: () => unwrap(api.GET('/rooms/{id}', { params: { path: { id } } })),
   })
 
-export const useRoomQuery = (id: string) => useQuery(roomQueryOptions(id))
+/** Fiche room, rechargée en direct quand elle change (places restantes, candidatures, statut). */
+export function useRoomQuery(id: string) {
+  const options = roomQueryOptions(id)
+  useRealtime({ type: 'room', id }, options.queryKey)
+  return useQuery(options)
+}
 
 /** Une room change : Mes parties, l'accueil et la fiche du lieu (places restantes) aussi. */
 const refreshLists = () =>
