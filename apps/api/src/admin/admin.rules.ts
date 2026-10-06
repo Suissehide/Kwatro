@@ -23,6 +23,43 @@ export function suspensionMessage(user: Suspendable) {
   return `Ton compte est suspendu jusqu’au ${until}.`
 }
 
+// Même adresse que CONTACT_EMAIL du design system (pied de page, Réglages)
+const SUPPORT_EMAIL = 'contact@kwatro.fr'
+
+const hello = (pseudo: string | null) => (pseudo ? `Bonjour ${pseudo},` : 'Bonjour,')
+
+/** E-mail au joueur suspendu : durée, motif, contact pour contester. */
+export const suspensionMail = (user: Suspendable & { pseudo: string | null }, reason: string) => ({
+  subject: 'Ton compte Kwatro est suspendu',
+  text: [
+    hello(user.pseudo),
+    '',
+    `${suspensionMessage(user)} Tu ne peux plus te connecter, tes rooms à venir sont annulées.`,
+    '',
+    `Motif : ${reason}`,
+    '',
+    `Pour contester cette décision, écris-nous à ${SUPPORT_EMAIL}.`,
+    '',
+    'L’équipe Kwatro',
+  ].join('\n'),
+})
+
+/** E-mail d'avertissement de la modération (envoyé aussi en notification). */
+export const warningMail = (pseudo: string | null, reason: string) => ({
+  subject: 'Avertissement de la modération Kwatro',
+  text: [
+    hello(pseudo),
+    '',
+    'L’équipe de modération a reçu un signalement à ton sujet :',
+    '',
+    reason,
+    '',
+    `Si cela se reproduit, ton compte pourra être suspendu. Une question : ${SUPPORT_EMAIL}.`,
+    '',
+    'L’équipe Kwatro',
+  ].join('\n'),
+})
+
 const minuteOf = (time: string) => {
   const [hours = 0, minutes = 0] = time.split(':').map(Number)
   return hours * 60 + minutes

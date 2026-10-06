@@ -6,9 +6,16 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import type { Prisma } from '../generated/prisma/client'
+import { MailService } from '../mail/mail.service'
 import { PrismaService } from '../prisma/prisma.service'
 import { PushService } from '../push/push.service'
-import { planFormatMerge, planProfileMerge, suspensionEnd } from './admin.rules'
+import {
+  planFormatMerge,
+  planProfileMerge,
+  suspensionEnd,
+  suspensionMail,
+  warningMail,
+} from './admin.rules'
 
 type Tx = Prisma.TransactionClient
 
@@ -19,26 +26,32 @@ export class AdminService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly push: PushService,
+    private readonly mail: MailService,
   ) {}
 
   /**
-   * Suspend un joueur : sessions et appareils supprimés (déconnecté partout, plus de notification),
-   * rooms à venir qu'il organise annulées et leurs joueurs prévenus. La connexion est refusée
-   * jusqu'à la fin de la suspension (better-auth.ts).
+   * Suspend un joueur : prévenu par e-mail, sessions et appareils supprimés (déconnecté partout, plus
+   * de notification), rooms à venir qu'il organise annulées et leurs joueurs prévenus. La connexion
+   * est refusée jusqu'à la fin de la suspension (better-auth.ts).
    */
-  // ponytail: pas d'e-mail au joueur suspendu (Resend pas encore branché) ; ses places dans les rooms des autres restent
+  // ponytail: ses places dans les rooms des autres restent
   async suspend(userId: string, { reason, days }: SuspendInput, tx: Tx) {
     const user = await tx.user.findFirst({
       where: { id: userId, deletedAt: null },
-      select: { role: true },
+      select: { role: true, email: true, pseudo: true },
     })
     if (!user) throw new NotFoundException('Joueur introuvable')
     if (user.role === 'ADMIN') throw new ForbiddenException('Impossible de suspendre un admin')
     const now = new Date()
+    const suspension = { suspendedAt: now, suspendedUntil: suspensionEnd(days, now) }
     await tx.user.update({
       where: { id: userId },
-      data: { suspendedAt: now, suspendedUntil: suspensionEnd(days, now), suspendedReason: reason },
+      data: { ...suspension, suspendedReason: reason },
     })
+    await this.mail.send(
+      { to: user.email, ...suspensionMail({ ...user, ...suspension }, reason) },
+      tx,
+    )
     await tx.session.deleteMany({ where: { userId } })
     await tx.pushToken.deleteMany({ where: { userId } })
     const rooms = await tx.room.findMany({
@@ -73,9 +86,14 @@ export class AdminService {
     if (!count) throw new NotFoundException('Aucune suspension en cours pour ce joueur')
   }
 
-  /** Avertissement de la modération : notification qu'on ne peut pas couper. */
-  warn(userId: string, reason: string, tx: Tx) {
-    return this.push.notify(
+  /** Avertissement de la modération : e-mail et notification qu'on ne peut pas couper. */
+  async warn(userId: string, reason: string, tx: Tx) {
+    const user = await tx.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { email: true, pseudo: true },
+    })
+    await this.mail.send({ to: user.email, ...warningMail(user.pseudo, reason) }, tx)
+    await this.push.notify(
       [userId],
       null,
       { title: 'Avertissement de la modération', body: reason },
