@@ -46,6 +46,7 @@ import {
   openTab,
   openVenue,
 } from '@/lib/navigation'
+import { useTabBadges } from '@/queries/useChat'
 import { useTonightQuery } from '@/queries/useExplore'
 import { useMeQuery } from '@/queries/useMe'
 
@@ -54,6 +55,7 @@ const WIDE = 900
 export default function HomeScreen() {
   const wide = useWindowDimensions().width >= WIDE
   const insets = useSafeAreaInsets()
+  const badges = useTabBadges()
   const me = useMeQuery()
   const { place, data, failed, retry } = useTonightQuery()
   const [game, setGame] = useState<string | null>(null)
@@ -183,6 +185,7 @@ export default function HomeScreen() {
         }
         tabBar={
           <PlayerTabBar
+            badges={badges}
             active="explorer"
             onSelect={openTab}
             onCreate={() => openCreateRoom()}

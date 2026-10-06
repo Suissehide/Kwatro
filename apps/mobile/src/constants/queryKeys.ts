@@ -53,3 +53,13 @@ export const MY_GAMES = {
   GET: 'my_games',
   SET: 'set_my_games',
 } as const
+
+export const CHAT = {
+  LIST: 'chats',
+  MESSAGES: 'chat_messages',
+  SEND: 'send_chat_message',
+  DELETE: 'delete_chat_message',
+  REPORT: 'report_chat_message',
+  READ: 'read_chat',
+  MUTE: 'mute_chat',
+} as const

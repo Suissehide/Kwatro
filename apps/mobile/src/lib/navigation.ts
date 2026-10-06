@@ -2,10 +2,10 @@ import { type PlayerTab, SITE_URL } from '@kwatro/design-system'
 import { router } from 'expo-router'
 import { Linking } from 'react-native'
 
-// ponytail: Messages n'a pas encore d'écran
-const TAB_ROUTES: Partial<Record<PlayerTab, '/' | '/my-games' | '/profile'>> = {
+const TAB_ROUTES: Record<PlayerTab, '/' | '/my-games' | '/messages' | '/profile'> = {
   explorer: '/',
   parties: '/my-games',
+  messages: '/messages',
   profil: '/profile',
 }
 
@@ -20,6 +20,9 @@ export const openVenue = (slug: string) =>
 export const openEvent = (id: string) => router.push({ pathname: '/events/[id]', params: { id } })
 
 export const openRoom = (id: string) => router.push({ pathname: '/rooms/[id]', params: { id } })
+
+export const openChat = (type: 'room' | 'event', id: string) =>
+  router.push({ pathname: '/chat/[type]/[id]', params: { type, id } })
 
 export const openSettings = () => router.push('/settings')
 

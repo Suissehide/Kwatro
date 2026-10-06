@@ -1,6 +1,6 @@
 import { type Channel, channelName, channelSchema, REALTIME } from '@kwatro/shared'
 import { type QueryKey, useQueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Platform } from 'react-native'
 import { io, type Socket } from 'socket.io-client'
 import { API_URL, authClient } from './auth'
@@ -31,32 +31,57 @@ function getSocket() {
 export const disconnectRealtime = () => socket?.disconnect()
 
 /**
+ * Suit `channel` tant que l'écran est monté : `listeners` reçoit les événements de ce canal, `onResync` est appelé
+ * après une reconnexion pour rattraper ce qui a été manqué. `enabled` : false tant que le joueur n'y a pas droit.
+ */
+export function useChannel(
+  channel: Channel,
+  listeners: Record<string, (payload: unknown) => void>,
+  onResync: () => void,
+  enabled = true,
+) {
+  const name = channelName(channel)
+  // Dernières fonctions reçues : pas de réabonnement à chaque rendu
+  const latest = useRef({ listeners, onResync })
+  latest.current = { listeners, onResync }
+  // biome-ignore lint/correctness/useExhaustiveDependencies: le canal est identifié par son nom
+  useEffect(() => {
+    if (!enabled) return
+    const live = getSocket()
+    const watch = () => live.emit(REALTIME.WATCH, channel)
+    const resync = () => latest.current.onResync()
+    const handlers = Object.keys(latest.current.listeners).map((event) => {
+      const handler = (payload: unknown) => {
+        const target = (payload as { channel?: unknown } | null)?.channel ?? payload
+        const parsed = channelSchema.safeParse(target)
+        if (parsed.success && channelName(parsed.data) === name)
+          latest.current.listeners[event]?.(payload)
+      }
+      live.on(event, handler)
+      return [event, handler] as const
+    })
+    if (live.connected) watch()
+    // Les abonnements ne survivent pas à une reconnexion : on se réabonne et on rattrape ce qui a changé
+    live.on('connect', watch)
+    live.io.on('reconnect', resync)
+    return () => {
+      live.emit(REALTIME.UNWATCH, channel)
+      live.off('connect', watch)
+      live.io.off('reconnect', resync)
+      for (const [event, handler] of handlers) live.off(event, handler)
+    }
+  }, [name, enabled])
+}
+
+/** Envoie un événement sur la connexion temps réel (saisie en cours du chat). */
+export const emitRealtime = (event: string, payload: unknown) => getSocket().emit(event, payload)
+
+/**
  * Recharge `queryKey` dès que l'API signale un changement sur le canal (places restantes, statut…).
  * `enabled` : false tant que le joueur n'a pas droit au canal (room dont il n'est pas membre).
  */
 export function useRealtime(channel: Channel, queryKey: QueryKey, enabled = true) {
   const client = useQueryClient()
-  const name = channelName(channel)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: le canal est identifié par son nom, la clé suit le canal
-  useEffect(() => {
-    if (!enabled) return
-    const live = getSocket()
-    const watch = () => live.emit(REALTIME.WATCH, channel)
-    const refresh = () => client.invalidateQueries({ queryKey })
-    const onChanged = (payload: unknown) => {
-      const changed = channelSchema.safeParse(payload)
-      if (changed.success && channelName(changed.data) === name) void refresh()
-    }
-    if (live.connected) watch()
-    // Les abonnements ne survivent pas à une reconnexion : on se réabonne et on rattrape ce qui a changé
-    live.on('connect', watch)
-    live.io.on('reconnect', refresh)
-    live.on(REALTIME.CHANGED, onChanged)
-    return () => {
-      live.emit(REALTIME.UNWATCH, channel)
-      live.off('connect', watch)
-      live.io.off('reconnect', refresh)
-      live.off(REALTIME.CHANGED, onChanged)
-    }
-  }, [name, enabled])
+  const refresh = () => void client.invalidateQueries({ queryKey })
+  useChannel(channel, { [REALTIME.CHANGED]: refresh }, refresh, enabled)
 }
