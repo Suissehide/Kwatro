@@ -1,6 +1,9 @@
 import { prefersReducedMotion } from '@lucko/design-system'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Platform } from 'react-native'
+
+// Une section devient active quand son titre passe cette ligne, sous le haut de la zone qui défile
+const LINE = 80
 
 // Le défilement se fait dans la ScrollView de WebScreen, pas dans la fenêtre
 const scrollParent = (el: HTMLElement) => {
@@ -18,29 +21,39 @@ const scrollParent = (el: HTMLElement) => {
 // ponytail: web seulement ; sur tablette native, brancher scrollTo sur la ScrollView
 export function useSectionNav(ids: readonly string[], ready: boolean) {
   const [active, setActive] = useState(0)
+  // Entrée cliquée : reste active pendant le défilement qu'elle lance, même si la section
+  // ne peut pas monter jusqu'en haut (fin de page)
+  const picked = useRef<number | null>(null)
 
   useEffect(() => {
     if (!ready || Platform.OS !== 'web') return
-    const sections = ids.map((id) => document.getElementById(id))
-    if (!sections[0]) return
-    const visible = new Set<string>()
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) visible.add(entry.target.id)
-          else visible.delete(entry.target.id)
-        }
-        const last = ids.findLastIndex((id) => visible.has(id))
-        if (last >= 0) setActive(last)
-      },
-      // Section active : la dernière entrée dans le haut de l'écran
-      { root: scrollParent(sections[0]), rootMargin: '0px 0px -60% 0px' },
-    )
-    for (const section of sections) if (section) observer.observe(section)
-    return () => observer.disconnect()
+    const first = document.getElementById(ids[0] ?? '')
+    if (!first) return
+    const root = scrollParent(first)
+    const onScroll = () => {
+      if (picked.current !== null) return
+      const top = root.getBoundingClientRect().top + LINE
+      const atBottom = root.scrollTop + root.clientHeight >= root.scrollHeight - 2
+      const passed = ids.findLastIndex(
+        (id) => (document.getElementById(id)?.getBoundingClientRect().top ?? Infinity) <= top,
+      )
+      setActive(atBottom ? ids.length - 1 : Math.max(passed, 0))
+    }
+    // Seul un geste du joueur rend la main au suivi du défilement
+    const release = () => {
+      picked.current = null
+    }
+    const gestures = ['wheel', 'touchstart', 'keydown', 'mousedown'] as const
+    root.addEventListener('scroll', onScroll, { passive: true })
+    for (const g of gestures) root.addEventListener(g, release, { passive: true })
+    return () => {
+      root.removeEventListener('scroll', onScroll)
+      for (const g of gestures) root.removeEventListener(g, release)
+    }
   }, [ids, ready])
 
   const select = (index: number) => {
+    picked.current = index
     setActive(index)
     const el = Platform.OS === 'web' ? document.getElementById(ids[index] ?? '') : null
     if (!el) return
