@@ -1,9 +1,13 @@
-import { Avatar, Button, StatusPill, Typography } from '@lucko/design-system'
+import { Avatar, Button, colors, StatusPill, Typography } from '@lucko/design-system'
 import { type AvatarStatus, PSEUDO_MAX, pseudoSchema } from '@lucko/shared'
+import { useState } from 'react'
 import { View } from 'react-native'
 import { profileFormOpts } from '@/forms/profile.form'
 import { withForm } from '@/hooks/formConfig'
+import { pickAvatar } from '@/lib/avatar'
 import { AVATAR_STATUS } from '@/lib/profile'
+import { ApiError } from '@/lib/queryClient'
+import { useMeMutations } from '@/queries/useMe'
 
 /** Avatar et sa modération, pseudo public, en option prénom et nom privés. */
 export const IdentityFields = withForm({
@@ -16,10 +20,25 @@ export const IdentityFields = withForm({
     autoFocus?: boolean
   },
   render: function Render({ form, avatarUri, avatarStatus, withName, compact, autoFocus }) {
+    const { setAvatar } = useMeMutations()
+    const [avatarError, setAvatarError] = useState<string | null>(null)
     const moderation = avatarStatus ? AVATAR_STATUS[avatarStatus] : null
-    const help = moderation
-      ? moderation.help
-      : 'Les autres joueurs voient ton initiale. L’ajout de photo arrive bientôt.'
+    const help = avatarError ?? moderation?.help ?? 'Les autres joueurs voient ton initiale.'
+    const helpColor = avatarError ? colors.room : undefined
+
+    const changeAvatar = async () => {
+      setAvatarError(null)
+      try {
+        const file = await pickAvatar()
+        if (file) await setAvatar.mutateAsync(file)
+      } catch (error) {
+        setAvatarError(
+          error instanceof ApiError && (error.status === 400 || error.status === 422)
+            ? `${error.message}. Choisis-en une autre.`
+            : 'L’envoi a échoué. Réessaie dans un instant.',
+        )
+      }
+    }
     return (
       <View style={{ gap: compact ? 14 : 18 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: compact ? 14 : 20 }}>
@@ -28,17 +47,31 @@ export const IdentityFields = withForm({
           </form.Subscribe>
           <View style={{ flex: 1, minWidth: 0, gap: 8, alignItems: 'flex-start' }}>
             {moderation ? <StatusPill label={moderation.label} tone={moderation.tone} /> : null}
-            {compact ? null : <Typography variant="small">{help}</Typography>}
-            {/* ponytail: envoi de photo branché avec le stockage S3 des avatars ; d'ici là le bouton reste grisé */}
+            {compact ? null : (
+              <Typography variant="small" color={helpColor}>
+                {help}
+              </Typography>
+            )}
             <Button
               small
               kind="ghost"
-              label={avatarStatus ? 'Changer la photo' : 'Ajouter une photo'}
-              disabled
+              label={
+                setAvatar.isPending
+                  ? 'Envoi…'
+                  : avatarStatus
+                    ? 'Changer la photo'
+                    : 'Ajouter une photo'
+              }
+              disabled={setAvatar.isPending}
+              onPress={() => void changeAvatar()}
             />
           </View>
         </View>
-        {compact ? <Typography variant="small">{help}</Typography> : null}
+        {compact ? (
+          <Typography variant="small" color={helpColor}>
+            {help}
+          </Typography>
+        ) : null}
         <form.AppField name="pseudo" validators={{ onSubmit: pseudoSchema }}>
           {(field) => (
             <field.Text

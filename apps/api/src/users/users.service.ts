@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import {
   type AgendaPeriod,
   type agendaItemSchema,
@@ -6,11 +7,20 @@ import {
   RATING_PROVISIONAL_GAMES,
   type updateProfileSchema,
 } from '@lucko/shared'
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+  UnprocessableEntityException,
+} from '@nestjs/common'
 import type { z } from 'zod'
+import { loadEnv } from '../config/env'
 import { Prisma, type User } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
+import { StorageService } from '../storage/storage.service'
 import { eventStatus, roomStatus, STILL_UPCOMING_MS } from './agenda.rules'
+import { avatarVerdict, type ImageScores, imageType, SIGHTENGINE_MODELS } from './avatar.rules'
 import { myGamesRefusal, profileData } from './my-games.rules'
 
 type AgendaItem = z.output<typeof agendaItemSchema>
@@ -20,7 +30,13 @@ const PAST_LIMIT = 50
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(UsersService.name)
+  private readonly env = loadEnv()
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
 
   async profile(user: User): Promise<z.output<typeof meSchema>> {
     const [profiles, staffOf] = await Promise.all([
@@ -75,6 +91,55 @@ export class UsersService {
         throw new ConflictException('Ce pseudo est déjà pris')
       throw error
     }
+  }
+
+  /**
+   * Nouvelle photo de profil, analysée avant d'être enregistrée : refusée d'office (422, l'ancienne
+   * reste), validée tout de suite ou mise en attente d'un admin au moindre doute.
+   */
+  async setAvatar(user: User, file: Buffer) {
+    const type = imageType(file)
+    if (!type) throw new BadRequestException('Photo en JPEG, PNG ou WebP uniquement')
+    const status = avatarVerdict(await this.scan(file, type.mime))
+    if (status === 'REJECTED')
+      throw new UnprocessableEntityException(
+        'Cette photo ne respecte pas la charte de la communauté',
+      )
+    const avatarUrl = await this.storage.put(
+      `avatars/${user.id}/${randomUUID()}.${type.ext}`,
+      file,
+      type.mime,
+    )
+    const saved = await this.prisma.user.update({
+      where: { id: user.id },
+      data: { avatarUrl, avatarStatus: status },
+    })
+    await this.storage.remove(user.avatarUrl)
+    return saved
+  }
+
+  /** Scores Sightengine ; null sans clé ou si le service ne répond pas (la photo attend alors un admin). */
+  private async scan(file: Buffer, mime: string): Promise<ImageScores | null> {
+    const { SIGHTENGINE_API_USER: apiUser, SIGHTENGINE_API_SECRET: apiSecret } = this.env
+    if (!apiUser || !apiSecret) return null
+    const form = new FormData()
+    form.append('media', new Blob([new Uint8Array(file)], { type: mime }), 'avatar')
+    form.append('models', SIGHTENGINE_MODELS)
+    form.append('api_user', apiUser)
+    form.append('api_secret', apiSecret)
+    try {
+      const response = await fetch('https://api.sightengine.com/1.0/check.json', {
+        method: 'POST',
+        body: form,
+        signal: AbortSignal.timeout(10_000),
+      })
+      const result = (await response.json()) as ImageScores & { status: string; error?: unknown }
+      if (result.status === 'success') return result
+      this.logger.warn(`Analyse Sightengine en échec : ${JSON.stringify(result.error)}`)
+    } catch (error) {
+      this.logger.warn(`Sightengine injoignable : ${error}`)
+    }
+    return null
   }
 
   /** Mes parties : événements où le joueur est inscrit et rooms qu'il a rejointes ou demandées. */

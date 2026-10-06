@@ -18,6 +18,7 @@
     "db:reset": "prisma migrate reset --force && prisma generate && prisma db seed"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1146.0",
     "@better-auth/expo": "1.7.7",
     "@lucko/shared": "workspace:*",
     "@nestjs/common": "^12.1.2",

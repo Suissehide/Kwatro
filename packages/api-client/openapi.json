@@ -763,6 +763,259 @@
         ]
       }
     },
+    "/me/avatar": {
+      "post": {
+        "operationId": "UsersController_setAvatar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "pseudo": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "hasBirthDate": {
+                      "type": "boolean"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "PLAYER",
+                        "VENUE_STAFF",
+                        "ADMIN"
+                      ]
+                    },
+                    "avatarUrl": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "avatarStatus": {
+                      "nullable": true,
+                      "type": "string",
+                      "enum": [
+                        "PENDING",
+                        "APPROVED",
+                        "REJECTED"
+                      ]
+                    },
+                    "city": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "latitude": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "longitude": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "searchRadiusKm": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "availability": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "vibes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "CHILL",
+                          "COMPETITIVE",
+                          "TEACHER",
+                          "BEGINNER",
+                          "HOMEBREW",
+                          "SOCIAL"
+                        ]
+                      }
+                    },
+                    "notificationsOff": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "ROOMS",
+                          "MESSAGES",
+                          "VENUES"
+                        ]
+                      }
+                    },
+                    "xp": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "mainRating": {
+                      "nullable": true,
+                      "type": "object",
+                      "properties": {
+                        "game": {
+                          "type": "string"
+                        },
+                        "format": {
+                          "type": "string"
+                        },
+                        "rating": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "game",
+                        "format",
+                        "rating"
+                      ]
+                    },
+                    "rankings": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "game": {
+                            "type": "object",
+                            "properties": {
+                              "slug": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "slug",
+                              "name"
+                            ]
+                          },
+                          "format": {
+                            "type": "string"
+                          },
+                          "rating": {
+                            "nullable": true,
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "rankedGames": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "reliabilityPct": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "game",
+                          "format",
+                          "rating",
+                          "rankedGames",
+                          "reliabilityPct"
+                        ]
+                      }
+                    },
+                    "venues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "slug": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "role": {
+                            "type": "string",
+                            "enum": [
+                              "MANAGER",
+                              "STAFF"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "slug",
+                          "name",
+                          "role"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "email",
+                    "pseudo",
+                    "name",
+                    "hasBirthDate",
+                    "role",
+                    "avatarUrl",
+                    "avatarStatus",
+                    "city",
+                    "latitude",
+                    "longitude",
+                    "searchRadiusKm",
+                    "availability",
+                    "vibes",
+                    "notificationsOff",
+                    "xp",
+                    "mainRating",
+                    "rankings",
+                    "venues"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
     "/me/agenda": {
       "get": {
         "operationId": "UsersController_agenda",
