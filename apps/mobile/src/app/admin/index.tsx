@@ -1,42 +1,110 @@
 import {
   Banner,
+  Button,
+  Chip,
+  type Column,
   colors,
+  DataTable,
   EmptyState,
-  ListCard,
-  ListRow,
+  PriorityBanner,
+  QueueCard,
   Section,
-  SettingsGroup,
   SkeletonCard,
-  StatCard,
+  Swatch,
+  TextLink,
+  Typography,
 } from '@lucko/design-system'
-import { ADMIN_ACTION_LABELS } from '@lucko/shared'
+import { ADMIN_ACTION_LABELS, type AdminActionItem } from '@lucko/shared'
 import { History } from 'lucide-react-native'
+import { useState } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { AdminScreen } from '@/components/admin/AdminScreen'
-import { ADMIN_TITLES, adminSidebarItems, dateTime, openAdmin } from '@/lib/admin'
+import {
+  ACTION_COLOR,
+  inJournal,
+  JOURNAL_FILTERS,
+  type JournalFilter,
+  logWhen,
+  longToday,
+  minorAlert,
+  openAdmin,
+  openTarget,
+  queueCards,
+} from '@/lib/admin'
 import { useAdminActionsQuery, useAdminDashboardQuery } from '@/queries/useAdminModeration'
+import { useMeQuery } from '@/queries/useMe'
 
-const WIDE = 900
+const NARROW = 768
+const PAGE = 15
 
-/** Tableau de bord du back-office (LKO-20) : ce qui attend l'équipe et les dernières actions. */
+const columns: Column<AdminActionItem>[] = [
+  {
+    key: 'when',
+    label: 'Quand',
+    width: 110,
+    render: (a) => (
+      <Typography variant="number" weight={400} style={{ color: colors.muted, fontSize: 12 }}>
+        {logWhen(a.createdAt)}
+      </Typography>
+    ),
+  },
+  {
+    key: 'action',
+    label: 'Action',
+    width: 220,
+    render: (a) => <Swatch color={ACTION_COLOR[a.action]} label={ADMIN_ACTION_LABELS[a.action]} />,
+  },
+  {
+    key: 'target',
+    label: 'Cible',
+    width: 150,
+    render: (a) => {
+      const { target } = a
+      return target ? (
+        <TextLink label={target.label} onPress={() => openTarget(target)} />
+      ) : (
+        <Typography variant="small">—</Typography>
+      )
+    },
+  },
+  {
+    key: 'reason',
+    label: 'Motif',
+    render: (a) => (
+      <Typography variant="small" numberOfLines={1} style={{ color: colors.ink }}>
+        {a.reason || '—'}
+      </Typography>
+    ),
+  },
+  {
+    key: 'by',
+    label: 'Par',
+    width: 80,
+    render: (a) => (
+      <Typography variant="small" numberOfLines={1} weight={700} style={{ color: colors.ink }}>
+        {a.admin.pseudo ?? 'Admin'}
+      </Typography>
+    ),
+  },
+]
+
+/** Tableau de bord du back-office (LKO-20) : alerte prioritaire, files à traiter, journal. */
 export default function AdminDashboardScreen() {
-  const wide = useWindowDimensions().width >= WIDE
+  const narrow = useWindowDimensions().width < NARROW
+  const me = useMeQuery()
   const dashboard = useAdminDashboardQuery()
   const actions = useAdminActionsQuery()
+  const [filter, setFilter] = useState<JournalFilter>('all')
+  const [shown, setShown] = useState(PAGE)
   const d = dashboard.data
-
-  const stats = d
-    ? [
-        { value: d.openReports, label: 'Signalements ouverts', bg: colors.room, to: 'reports' },
-        { value: d.minorReports, label: 'Dont sur un mineur', bg: colors.rating, to: 'reports' },
-        { value: d.pendingAvatars, label: 'Photos à valider', bg: colors.event, to: 'avatars' },
-        { value: d.pendingVenues, label: 'Lieux à valider', bg: colors.venue, to: 'venues' },
-        { value: d.suspendedPlayers, label: 'Joueurs suspendus', bg: colors.white, to: 'users' },
-      ]
-    : []
+  const journal = (actions.data ?? []).filter(inJournal(filter))
 
   return (
-    <AdminScreen section="dashboard">
+    <AdminScreen
+      section="dashboard"
+      kicker={longToday()}
+      title={`Bonjour ${me?.pseudo ?? ''}`.trim()}
+    >
       {dashboard.isError ? (
         <Banner
           tone="err"
@@ -47,58 +115,65 @@ export default function AdminDashboardScreen() {
       ) : !d ? (
         <SkeletonCard />
       ) : (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14 }}>
-          {stats.map((s) => (
-            <View key={s.label} style={{ flexGrow: 1, flexBasis: wide ? 160 : 140 }}>
-              <StatCard
-                value={String(s.value)}
-                label={s.label}
-                bg={s.bg}
-                onPress={() => openAdmin(s.to)}
-              />
+        <>
+          {d.minorReports > 0 ? (
+            <PriorityBanner
+              tag="Prioritaire"
+              message={minorAlert(d.minorReports)}
+              action="Traiter maintenant"
+              onAction={() => openAdmin('reports')}
+            />
+          ) : null}
+          <Section title="À traiter">
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14 }}>
+              {queueCards(d).map(({ key, ...card }) => (
+                <QueueCard key={key} {...card} onPress={() => openAdmin(key)} />
+              ))}
             </View>
-          ))}
-        </View>
+          </Section>
+        </>
       )}
 
-      {/* Desktop : la barre latérale mène aux files */}
-      {wide ? null : (
-        <SettingsGroup
-          title="Files"
-          rows={adminSidebarItems(d)
-            .filter((item) => item.key !== 'dashboard')
-            .map((item) => ({
-              label: ADMIN_TITLES[item.key as keyof typeof ADMIN_TITLES],
-              value: item.badge,
-              onPress: () => openAdmin(item.key),
-            }))}
-        />
-      )}
-
-      <Section title="Dernières actions">
-        {!actions.data ? (
-          <SkeletonCard />
-        ) : actions.data.length === 0 ? (
-          <EmptyState
-            dashed
-            icon={<History size={28} color={colors.ink} strokeWidth={2.5} />}
-            title="Aucune action pour l’instant"
-            text="Chaque décision prise ici est tracée : qui, quoi, quand, sur qui et pourquoi."
-          />
-        ) : (
-          <ListCard>
-            {actions.data.map((a, i, all) => (
-              <ListRow
-                key={a.id}
-                inset={14}
-                title={ADMIN_ACTION_LABELS[a.action]}
-                subtitle={`${a.admin.pseudo ?? 'Admin'} · ${dateTime(a.createdAt)}`}
-                note={a.reason || undefined}
-                last={i === all.length - 1}
+      <Section
+        title="Journal de modération"
+        aside={
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+            {JOURNAL_FILTERS.map((f) => (
+              <Chip
+                key={f.key}
+                label={f.label}
+                active={filter === f.key}
+                onPress={() => {
+                  setFilter(f.key)
+                  setShown(PAGE)
+                }}
               />
             ))}
-          </ListCard>
-        )}
+          </View>
+        }
+      >
+        <DataTable
+          dense
+          columns={columns}
+          rows={journal.slice(0, shown)}
+          loading={!actions.data}
+          mobileCards={narrow}
+          primary="action"
+          cardKeys={['when', 'target']}
+          empty={
+            <EmptyState
+              dashed
+              icon={<History size={28} color={colors.ink} strokeWidth={2.5} />}
+              title="Aucune action"
+              text="Chaque décision prise ici est tracée : qui, quoi, quand, sur qui et pourquoi."
+            />
+          }
+        />
+        {journal.length > shown ? (
+          <View style={{ alignSelf: 'center' }}>
+            <Button small kind="ghost" label="Voir plus" onPress={() => setShown(shown + PAGE)} />
+          </View>
+        ) : null}
       </Section>
     </AdminScreen>
   )

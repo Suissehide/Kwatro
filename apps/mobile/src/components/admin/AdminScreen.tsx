@@ -1,5 +1,4 @@
 import {
-  colors,
   MobileScreen,
   PageTitle,
   ScreenHeader,
@@ -11,27 +10,33 @@ import { ArrowLeft } from 'lucide-react-native'
 import type { ReactNode } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { ADMIN_TITLES, type AdminSection, adminSidebarItems, openAdmin } from '@/lib/admin'
-import { goBack, openHome } from '@/lib/navigation'
+import {
+  ADMIN_KICKERS,
+  ADMIN_TITLES,
+  type AdminSection,
+  adminSidebarItems,
+  openAdmin,
+} from '@/lib/admin'
+import { openHome } from '@/lib/navigation'
 import { useAdminDashboardQuery } from '@/queries/useAdminModeration'
 
 const WIDE = 900
 
 /**
- * Écran du back-office : barre latérale des files sur desktop ; sur téléphone, en-tête avec retour
- * (vers le tableau de bord, ou l'app depuis le tableau de bord).
+ * Écran du back-office : barre latérale sombre et en-tête de section sur desktop ; sur téléphone,
+ * en-tête avec retour (vers le tableau de bord, ou l'app depuis le tableau de bord).
  */
 export function AdminScreen({
   section,
   title = ADMIN_TITLES[section],
-  back,
+  kicker = ADMIN_KICKERS[section],
+  note,
   children,
 }: {
   section: AdminSection
-  /** Titre d'une fiche (joueur, lieu) ; par défaut celui de la section. */
   title?: string
-  /** Fiche ouverte depuis une liste : retour à l'écran précédent. */
-  back?: boolean
+  kicker?: string
+  note?: string
   children: ReactNode
 }) {
   const wide = useWindowDimensions().width >= WIDE
@@ -39,12 +44,12 @@ export function AdminScreen({
   const dashboard = useAdminDashboardQuery().data
 
   if (!wide) {
-    const onBack = back ? goBack : section === 'dashboard' ? openHome : () => openAdmin('dashboard')
+    const onBack = section === 'dashboard' ? openHome : () => openAdmin('dashboard')
     return (
       <MobileScreen
         insets={insets}
         siteFooter={false}
-        header={<ScreenHeader title={title} onBack={onBack} />}
+        header={<ScreenHeader title={ADMIN_TITLES[section]} onBack={onBack} />}
       >
         {children}
       </MobileScreen>
@@ -55,22 +60,17 @@ export function AdminScreen({
     <WebSidebarLayout
       sidebar={
         <Sidebar
+          dark
           title="Back-office"
           items={adminSidebarItems(dashboard)}
           active={section}
           onSelect={openAdmin}
-          color={colors.ink}
-          footer={<TextLink icon={ArrowLeft} label="Retour à l’app" onPress={openHome} />}
+          footer={<TextLink onDark icon={ArrowLeft} label="Retour à l’app" onPress={openHome} />}
         />
       }
     >
-      <View style={{ width: '100%', maxWidth: 960, gap: 20 }}>
-        {back ? (
-          <View style={{ alignSelf: 'flex-start' }}>
-            <TextLink icon={ArrowLeft} label="Retour" onPress={goBack} />
-          </View>
-        ) : null}
-        <PageTitle title={title} />
+      <View style={{ width: '100%', maxWidth: 1112, gap: 28, paddingBottom: 16 }}>
+        <PageTitle eyebrow={kicker || undefined} title={title} big note={note} />
         {children}
       </View>
     </WebSidebarLayout>

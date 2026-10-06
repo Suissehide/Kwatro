@@ -76,7 +76,7 @@ export const adminDashboardSchema = z.object({
   /** Les 3 premiers lieux en attente. */
   pendingVenueNames: z.array(z.string()),
 })
-export type AdminDashboard = z.infer<typeof adminDashboardSchema>
+export type AdminDashboard = z.input<typeof adminDashboardSchema>
 
 export const adminSearchSchema = z.object({ q: z.string().trim().max(100).default('') })
 

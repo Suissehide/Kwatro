@@ -5,18 +5,46 @@ import { border, colors, font, radius, shadow } from '../tokens'
 
 export type HoursRow = { day: string; value: string; closed?: boolean; today?: boolean }
 
-/** Horaires de la semaine ; aujourd'hui surligné, « Fermé » en rouge. Avec `title`, en-tête dans la carte. */
+/**
+ * Horaires de la semaine ; aujourd'hui surligné, « Fermé » en rouge. Avec `title`, en-tête dans la carte ;
+ * `plain` : simple liste, sans cadre ni surlignage (dans une fiche).
+ */
 export function HoursCard({
   rows,
   title,
   status,
   statusColor = colors.muted,
+  plain,
 }: {
   rows: HoursRow[]
   title?: string
   status?: string
   statusColor?: string
+  plain?: boolean
 }) {
+  if (plain)
+    return (
+      <View style={{ gap: 6 }}>
+        {rows.map((row) => (
+          <View
+            key={row.day}
+            style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}
+          >
+            <Text style={{ ...font('body', 800), fontSize: 13, color: colors.ink }}>{row.day}</Text>
+            <Text
+              style={{
+                ...font('mono', 400),
+                fontSize: 13,
+                textAlign: 'right',
+                color: row.closed ? colors.room : colors.ink,
+              }}
+            >
+              {row.value}
+            </Text>
+          </View>
+        ))}
+      </View>
+    )
   const card = (
     <View
       style={{

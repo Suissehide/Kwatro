@@ -46,6 +46,7 @@ export function DataTable<T extends { id: string }>({
   selected = [],
   onSelect,
   onRowPress,
+  expanded,
   rowActions,
   toolbar,
   bulkActions,
@@ -66,6 +67,8 @@ export function DataTable<T extends { id: string }>({
   selected?: string[]
   onSelect?: (ids: string[]) => void
   onRowPress?: (r: T) => void
+  /** Contenu déplié sous une ligne (null : repliée). */
+  expanded?: (r: T) => ReactNode
   rowActions?: (r: T) => ReactNode
   toolbar?: ReactNode
   bulkActions?: ReactNode
@@ -259,49 +262,64 @@ export function DataTable<T extends { id: string }>({
       ) : (
         rows.map((r) => {
           const on = selected.includes(r.id)
+          const detail = expanded?.(r)
           return (
-            <Pressable
-              key={r.id}
-              role="row"
-              aria-selected={on}
-              onPress={() => onRowPress?.(r)}
-              style={({ hovered }: PressState) => ({
-                flexDirection: 'row',
-                gap: 12,
-                alignItems: 'center',
-                paddingVertical: pad.v,
-                paddingHorizontal: pad.h,
-                borderBottomWidth: border.thin,
-                borderColor: table.rowBorder,
-                backgroundColor: on ? table.rowSelected : hovered ? table.rowHover : colors.white,
-              })}
-            >
-              {selectable ? (
-                <View style={{ width: 28 }}>
-                  <Checkbox
-                    label="Sélectionner"
-                    hideLabel
-                    value={on}
-                    onChange={() => toggle(r.id)}
-                  />
-                </View>
-              ) : null}
-              {columns.map((c) => (
+            <View key={r.id}>
+              <Pressable
+                role="row"
+                aria-selected={on}
+                onPress={() => onRowPress?.(r)}
+                style={({ hovered }: PressState) => ({
+                  flexDirection: 'row',
+                  gap: 12,
+                  alignItems: 'center',
+                  paddingVertical: pad.v,
+                  paddingHorizontal: pad.h,
+                  borderBottomWidth: border.thin,
+                  borderColor: table.rowBorder,
+                  backgroundColor: on ? table.rowSelected : hovered ? table.rowHover : colors.white,
+                })}
+              >
+                {selectable ? (
+                  <View style={{ width: 28 }}>
+                    <Checkbox
+                      label="Sélectionner"
+                      hideLabel
+                      value={on}
+                      onChange={() => toggle(r.id)}
+                    />
+                  </View>
+                ) : null}
+                {columns.map((c) => (
+                  <View
+                    key={c.key}
+                    role="cell"
+                    style={[
+                      colStyle(c),
+                      { alignItems: c.align === 'right' ? 'flex-end' : 'flex-start' },
+                    ]}
+                  >
+                    {cell(c, r)}
+                  </View>
+                ))}
+                {rowActions ? (
+                  <View style={{ width: 32, alignItems: 'flex-end' }}>{rowActions(r)}</View>
+                ) : null}
+              </Pressable>
+              {detail ? (
                 <View
-                  key={c.key}
-                  role="cell"
-                  style={[
-                    colStyle(c),
-                    { alignItems: c.align === 'right' ? 'flex-end' : 'flex-start' },
-                  ]}
+                  style={{
+                    paddingHorizontal: pad.h,
+                    paddingBottom: pad.v,
+                    backgroundColor: colors.white,
+                    borderBottomWidth: border.thin,
+                    borderColor: table.rowBorder,
+                  }}
                 >
-                  {cell(c, r)}
+                  {detail}
                 </View>
-              ))}
-              {rowActions ? (
-                <View style={{ width: 32, alignItems: 'flex-end' }}>{rowActions(r)}</View>
               ) : null}
-            </Pressable>
+            </View>
           )
         })
       )}

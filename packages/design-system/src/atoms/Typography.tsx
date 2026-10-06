@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { type StyleProp, Text, type TextProps, type TextStyle } from 'react-native'
-import { colors, type } from '../tokens'
+import { colors, font, type } from '../tokens'
 
 export type TypographyVariant = keyof typeof type
 
@@ -8,12 +8,15 @@ export type TypographyVariant = keyof typeof type
 export function Typography({
   variant = 'body',
   color,
+  weight,
   style,
   children,
   ...rest
 }: {
   variant?: TypographyVariant
   color?: string
+  /** Graisse à la place de celle de la variante (police Archivo, ou Space Mono pour label et number). */
+  weight?: 400 | 500 | 600 | 700 | 800
   style?: StyleProp<TextStyle>
   children: ReactNode
 } & Omit<TextProps, 'style'>) {
@@ -21,7 +24,17 @@ export function Typography({
   return (
     <Text
       role={isHeading ? 'heading' : undefined}
-      style={[{ color: colors.ink }, type[variant], color ? { color } : null, style]}
+      style={[
+        { color: colors.ink },
+        type[variant],
+        color ? { color } : null,
+        weight
+          ? variant === 'label' || variant === 'number'
+            ? font('mono', weight >= 700 ? 700 : 400)
+            : font('body', weight)
+          : null,
+        style,
+      ]}
       {...rest}
     >
       {children}

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   agendaGroup,
+  formatAgo,
   formatDayMonth,
   formatDistance,
   formatDuration,
@@ -75,5 +76,17 @@ describe('formatDuration', () => {
     expect(formatDuration(45)).toBe('45 min')
     expect(formatDuration(90)).toBe('1 h 30')
     expect(formatDuration(180)).toBe('3 h')
+  })
+})
+
+describe('formatAgo', () => {
+  const now = new Date('2026-10-06T16:00:00Z')
+  const ago = (iso: string) => formatAgo(iso, { now })
+
+  it('minutes et heures le jour même, hier, puis en jours', () => {
+    expect(ago('2026-10-06T15:58:30Z')).toBe('il y a 1 min')
+    expect(ago('2026-10-06T13:00:00Z')).toBe('il y a 3 h')
+    expect(ago('2026-10-05T20:00:00Z')).toBe('hier')
+    expect(ago('2026-10-02T16:00:00Z')).toBe('il y a 4 j')
   })
 })

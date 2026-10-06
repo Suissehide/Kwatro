@@ -8,6 +8,7 @@ export function Chip({
   active,
   color = colors.rating,
   tall,
+  count,
   onPress,
 }: {
   label: string
@@ -15,6 +16,7 @@ export function Chip({
   color?: string
   /** Cible tactile de 44 px (choix sur téléphone). */
   tall?: boolean
+  count?: number
   onPress?: () => void
 }) {
   const { hovered, hoverProps } = useHover()
@@ -38,6 +40,9 @@ export function Chip({
       }}
     >
       {label}
+      {count === undefined ? null : (
+        <Text style={{ ...font('mono', 400), fontSize: 11 }}>{`  ${count}`}</Text>
+      )}
     </Text>
   )
   if (!onPress) return <View style={[style, { alignSelf: 'flex-start' }]}>{text}</View>
