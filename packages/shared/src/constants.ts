@@ -49,6 +49,10 @@ export type ParticipantStatus = (typeof PARTICIPANT_STATUSES)[number]
 export const USER_ROLES = ['PLAYER', 'VENUE_STAFF', 'ADMIN'] as const
 export type UserRole = (typeof USER_ROLES)[number]
 
+/** Rôle dans un lieu (enum Prisma VenueStaffRole) : le gérant voit la facture, le staff scanne et pointe. */
+export const VENUE_STAFF_ROLES = ['MANAGER', 'STAFF'] as const
+export type VenueStaffRole = (typeof VENUE_STAFF_ROLES)[number]
+
 export const VENUE_TYPES = ['GAME_BAR', 'TCG_SHOP', 'LUDOTHEQUE', 'ASSOCIATION', 'OTHER'] as const
 export type VenueType = (typeof VENUE_TYPES)[number]
 

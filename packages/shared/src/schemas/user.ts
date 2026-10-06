@@ -5,6 +5,7 @@ import {
   PLAY_VIBES,
   RADIUS_KM,
   USER_ROLES,
+  VENUE_STAFF_ROLES,
 } from '../constants'
 import { hasBannedWord } from '../moderation'
 
@@ -108,6 +109,15 @@ export const meSchema = z.object({
   /** Kwote du format le plus joué en classé (null sans profil TCG). */
   mainKwote: z.object({ game: z.string(), format: z.string(), kwote: z.number().int() }).nullable(),
   rankings: z.array(rankingSchema),
+  /** Lieux où le joueur est gérant ou staff : l'app affiche l'espace lieu s'il y en a un. */
+  venues: z.array(
+    z.object({
+      id: z.string(),
+      slug: z.string(),
+      name: z.string(),
+      role: z.enum(VENUE_STAFF_ROLES),
+    }),
+  ),
 })
 
 export type Me = z.infer<typeof meSchema>

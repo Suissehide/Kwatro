@@ -23,11 +23,18 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async profile(user: User): Promise<z.output<typeof meSchema>> {
-    const profiles = await this.prisma.playerGameProfile.findMany({
-      where: { userId: user.id },
-      orderBy: [{ rankedGames: 'desc' }, { kwote: 'desc' }],
-      include: { format: { include: { game: true } } },
-    })
+    const [profiles, staffOf] = await Promise.all([
+      this.prisma.playerGameProfile.findMany({
+        where: { userId: user.id },
+        orderBy: [{ rankedGames: 'desc' }, { kwote: 'desc' }],
+        include: { format: { include: { game: true } } },
+      }),
+      this.prisma.venueStaff.findMany({
+        where: { userId: user.id },
+        orderBy: { venue: { name: 'asc' } },
+        select: { role: true, venue: { select: { id: true, slug: true, name: true } } },
+      }),
+    ])
     const main = profiles[0]
     return {
       ...user,
@@ -42,6 +49,7 @@ export class UsersService {
         rankedGames: p.rankedGames,
         reliabilityPct: p.reliabilityPct,
       })),
+      venues: staffOf.map(({ role, venue }) => ({ ...venue, role })),
     }
   }
 
