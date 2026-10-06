@@ -64,6 +64,8 @@ services:
       CORS_ORIGINS: http://localhost:3010,http://localhost:8081
       # Stack locale uniquement (comme les identifiants Postgres ci-dessus) : à remplacer sur un vrai serveur
       BETTER_AUTH_SECRET: kwatro-local-docker-only-not-a-real-secret
+      # E-mails dans Mailpit (http://localhost:8025), joint par son nom sur le réseau Docker
+      SMTP_URL: smtp://mailpit:1025
     ports:
       - "127.0.0.1:3000:3000"
     networks:
@@ -71,6 +73,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      mailpit:
+        condition: service_started
 
   web:
     container_name: kwatro-web
