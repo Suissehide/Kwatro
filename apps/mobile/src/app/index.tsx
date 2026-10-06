@@ -2,10 +2,8 @@ import {
   Banner,
   BrandHeader,
   Button,
-  border,
   Carousel,
   ChipGroup,
-  colors,
   EmptyState,
   EventCard,
   ListCard,
@@ -15,7 +13,6 @@ import {
   ProfileCard,
   RatingBadge,
   RoomCard,
-  radius,
   Section,
   SkeletonCard,
   Typography,
@@ -28,7 +25,7 @@ import { MoonStar } from 'lucide-react-native'
 import { useState } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { ExploreMap } from '@/components/explore/ExploreMap'
+import { MapFrame } from '@/components/explore/MapFrame'
 import { PlayerNav } from '@/components/PlayerNav'
 import {
   eventCardProps,
@@ -46,6 +43,7 @@ import {
   openRoom,
   openTab,
   openVenue,
+  openVenues,
 } from '@/lib/navigation'
 import { agendaAction } from '@/lib/venue'
 import { useTabBadges } from '@/queries/useChat'
@@ -131,23 +129,13 @@ export default function HomeScreen() {
   )
 
   const map = (height: number) => (
-    <View
-      style={{
-        height,
-        borderWidth: border.base,
-        borderColor: colors.ink,
-        borderRadius: radius.card,
-        overflow: 'hidden',
-        backgroundColor: colors.creamDark,
-      }}
-    >
-      <ExploreMap
-        center={place}
-        venues={data?.venues ?? []}
-        selectedId={selectedId}
-        onSelect={setSelectedId}
-      />
-    </View>
+    <MapFrame
+      height={height}
+      center={place}
+      venues={data?.venues ?? []}
+      selectedId={selectedId}
+      onSelect={setSelectedId}
+    />
   )
 
   const venueList = !data ? (
@@ -201,7 +189,7 @@ export default function HomeScreen() {
         {error}
         <Section title="Soirées ce soir">{eventList}</Section>
         <Section title="Il manque des joueurs">{roomList}</Section>
-        <Section title="Lieux ouverts">
+        <Section title="Lieux ouverts" link="Tous les lieux" onLink={openVenues}>
           {map(200)}
           {venueList}
         </Section>
@@ -236,7 +224,7 @@ export default function HomeScreen() {
           </Section>
         </View>
         <View style={{ flex: 5, minWidth: 0 }}>
-          <Section title="Lieux ouverts" link="Carte" onLink={notYet}>
+          <Section title="Lieux ouverts" link="Tous les lieux" onLink={openVenues}>
             {map(280)}
             {venueList}
           </Section>
