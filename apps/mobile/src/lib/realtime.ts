@@ -1,4 +1,4 @@
-import { type Channel, channelName, REALTIME } from '@kwatro/shared'
+import { type Channel, channelName, channelSchema, REALTIME } from '@kwatro/shared'
 import { type QueryKey, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Platform } from 'react-native'
@@ -7,9 +7,10 @@ import { API_URL, authClient } from './auth'
 
 let socket: Socket | undefined
 
-/** Connexion temps réel ouverte au premier écran qui en a besoin, puis partagée. */
+/** Connexion temps réel partagée par l'app. Réservée aux joueurs connectés : l'API refuse les autres. */
 function getSocket() {
   socket ??= io(API_URL, {
+    autoConnect: false,
     transports: ['websocket'],
     withCredentials: true,
     // Relu à chaque (re)connexion : sur téléphone, le cookie de session n'est pas envoyé automatiquement
@@ -21,20 +22,30 @@ function getSocket() {
         }))()
     },
   })
+  // Refusée (pas encore connecté) : le prochain écran qui en a besoin réessaie
+  if (!socket.active) socket.connect()
   return socket
 }
 
-/** Recharge `queryKey` dès que l'API signale un changement sur le canal (places restantes, statut…). */
-export function useRealtime(channel: Channel, queryKey: QueryKey) {
+/** Déconnexion du joueur : la session suivante rouvre la connexion avec son propre cookie. */
+export const disconnectRealtime = () => socket?.disconnect()
+
+/**
+ * Recharge `queryKey` dès que l'API signale un changement sur le canal (places restantes, statut…).
+ * `enabled` : false tant que le joueur n'a pas droit au canal (room dont il n'est pas membre).
+ */
+export function useRealtime(channel: Channel, queryKey: QueryKey, enabled = true) {
   const client = useQueryClient()
   const name = channelName(channel)
   // biome-ignore lint/correctness/useExhaustiveDependencies: le canal est identifié par son nom, la clé suit le canal
   useEffect(() => {
+    if (!enabled) return
     const live = getSocket()
     const watch = () => live.emit(REALTIME.WATCH, channel)
     const refresh = () => client.invalidateQueries({ queryKey })
-    const onChanged = (changed: Channel) => {
-      if (channelName(changed) === name) void refresh()
+    const onChanged = (payload: unknown) => {
+      const changed = channelSchema.safeParse(payload)
+      if (changed.success && channelName(changed.data) === name) void refresh()
     }
     if (live.connected) watch()
     // Les abonnements ne survivent pas à une reconnexion : on se réabonne et on rattrape ce qui a changé
@@ -47,5 +58,5 @@ export function useRealtime(channel: Channel, queryKey: QueryKey) {
       live.io.off('reconnect', refresh)
       live.off(REALTIME.CHANGED, onChanged)
     }
-  }, [name])
+  }, [name, enabled])
 }

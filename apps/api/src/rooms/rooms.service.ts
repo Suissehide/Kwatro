@@ -198,6 +198,7 @@ export class RoomsService {
       if (mine.status === 'ACCEPTED') await this.promote(tx, room)
       await this.refreshStatus(tx, id)
     })
+    await this.realtime.revoke({ type: 'room', id }, [user.id])
     this.realtime.changed({ type: 'room', id })
     return this.detail(id, user)
   }
@@ -231,6 +232,7 @@ export class RoomsService {
           tx,
         )
     })
+    if (!accept) await this.realtime.revoke({ type: 'room', id }, [userId])
     this.realtime.changed({ type: 'room', id })
     return this.detail(id, host)
   }
@@ -286,6 +288,7 @@ export class RoomsService {
       }
       await this.refreshStatus(tx, id)
     })
+    if (action.type === 'remove') await this.realtime.revoke({ type: 'room', id }, [action.userId])
     this.realtime.changed({ type: 'room', id })
     return this.detail(id, host)
   }
