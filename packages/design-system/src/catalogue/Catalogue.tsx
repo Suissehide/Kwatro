@@ -1,6 +1,6 @@
 'use client'
 
-import { CircleHelp, ExternalLink, Plus, SlidersHorizontal } from 'lucide-react-native'
+import { CircleHelp, ExternalLink, Plus, SlidersHorizontal, Trash2 } from 'lucide-react-native'
 import { type ReactNode, useState } from 'react'
 import { ScrollView, View } from 'react-native'
 import {
@@ -88,7 +88,9 @@ import {
 import {
   Accordion,
   BarChart,
+  ContextMenu,
   DataTable,
+  type MenuAnchor,
   MonthCalendar,
   type PlayerTab,
   PlayerTabBar,
@@ -137,6 +139,7 @@ export function Catalogue() {
   const [players, setPlayers] = useState(4)
   const [name, setName] = useState('')
   const [page, setPage] = useState(7)
+  const [menu, setMenu] = useState<MenuAnchor | null>(null)
   const [sort, setSort] = useState<Sort>({ key: 'date', dir: 'desc' })
   const [selected, setSelected] = useState<string[]>([])
   const [tab, setTab] = useState<PlayerTab>('explorer')
@@ -444,7 +447,15 @@ export function Catalogue() {
           />
           <ChatBubble indent text="Et des sleeves en rab." />
           <ChatDivider label="Nouveaux messages" />
-          <ChatBubble mine time="19:41" text="Parfait, on se retrouve à 20 h." onPress={() => {}} />
+          <ChatBubble mine time="19:41" text="Parfait, on se retrouve à 20 h." onMenu={setMenu} />
+          <ContextMenu
+            anchor={menu}
+            align="right"
+            items={[
+              { label: 'Supprimer', icon: Trash2, danger: true, onPress: () => setMenu(null) },
+            ]}
+            onClose={() => setMenu(null)}
+          />
           <ChatBubble mine pending text="J'arrive" />
           <ChatComposer value="" onChange={() => {}} onSend={() => {}} status="Léa écrit…" />
           <ChatComposer compact value="" onChange={() => {}} onSend={() => {}} />

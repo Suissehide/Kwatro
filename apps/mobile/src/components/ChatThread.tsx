@@ -1,14 +1,14 @@
 import {
   Banner,
-  BottomSheet,
-  Button,
   border,
   ChatBubble,
   ChatComposer,
   ChatDivider,
   ChatHeader,
+  ContextMenu,
   colors,
   font,
+  type MenuAnchor,
   PinnedBanner,
   Raised,
   radius,
@@ -26,6 +26,7 @@ import {
   REPORT_REASON_LABELS,
   REPORT_REASONS,
 } from '@lucko/shared'
+import { Flag, Trash2 } from 'lucide-react-native'
 import { useEffect, useRef, useState } from 'react'
 import { FlatList, KeyboardAvoidingView, Platform, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -54,7 +55,7 @@ export function ChatThread({ chat: ref, compact }: { chat: ChatRef; compact?: bo
   })
   const [text, setText] = useState('')
   const [announcement, setAnnouncement] = useState(false)
-  const [selected, setSelected] = useState<ChatMessage | null>(null)
+  const [menu, setMenu] = useState<{ message: ChatMessage; anchor: MenuAnchor } | null>(null)
   const [reporting, setReporting] = useState(false)
   const [reported, setReported] = useState(false)
   const lastTyping = useRef(0)
@@ -99,8 +100,8 @@ export function ChatThread({ chat: ref, compact }: { chat: ChatRef; compact?: bo
     )
   }
 
-  const closeSheet = () => {
-    setSelected(null)
+  const closeMenu = () => {
+    setMenu(null)
     setReporting(false)
   }
 
@@ -204,7 +205,7 @@ export function ChatThread({ chat: ref, compact }: { chat: ChatRef; compact?: bo
               indent={!starts && !mine}
               avatarSize={avatarSize}
               maxWidth={compact ? '78%' : '62%'}
-              onPress={pending ? undefined : () => setSelected(item)}
+              onMenu={pending ? undefined : (anchor) => setMenu({ message: item, anchor })}
             />
           </View>
         )
@@ -268,52 +269,43 @@ export function ChatThread({ chat: ref, compact }: { chat: ChatRef; compact?: bo
     </View>
   ) : null
 
-  const canDelete = selected && (selected.author.id === me?.id || first?.moderator)
-  const sheet = (
-    <BottomSheet
-      visible={!!selected}
-      title={reporting ? 'Pourquoi signaler ce message ?' : 'Message'}
-      onClose={closeSheet}
-    >
-      {selected && !reporting ? (
-        <View style={{ gap: 10 }}>
-          <Typography variant="small" numberOfLines={3}>
-            {selected.body}
-          </Typography>
-          {selected.author.id !== me?.id ? (
-            <Button kind="ghost" label="Signaler" onPress={() => setReporting(true)} />
-          ) : null}
-          {canDelete ? (
-            <Button
-              kind="danger"
-              label="Supprimer le message"
-              onPress={() => {
-                remove.mutate(selected.id)
-                closeSheet()
-              }}
-            />
-          ) : null}
-        </View>
-      ) : null}
-      {selected && reporting ? (
-        <View style={{ gap: 8 }}>
-          {REPORT_REASONS.map((reason) => (
-            <Button
-              key={reason}
-              kind="ghost"
-              label={REPORT_REASON_LABELS[reason]}
-              onPress={() => {
-                report.mutate(
-                  { messageId: selected.id, reason },
-                  { onSuccess: () => setReported(true) },
-                )
-                closeSheet()
-              }}
-            />
-          ))}
-        </View>
-      ) : null}
-    </BottomSheet>
+  const selected = menu?.message
+  const actions = selected
+    ? [
+        ...(selected.author.id !== me?.id
+          ? [{ label: 'Signaler', icon: Flag, onPress: () => setReporting(true) }]
+          : []),
+        ...(selected.author.id === me?.id || first?.moderator
+          ? [
+              {
+                label: 'Supprimer',
+                icon: Trash2,
+                danger: true,
+                onPress: () => {
+                  remove.mutate(selected.id)
+                  closeMenu()
+                },
+              },
+            ]
+          : []),
+      ]
+    : []
+  const reasons = REPORT_REASONS.map((reason) => ({
+    label: REPORT_REASON_LABELS[reason],
+    onPress: () => {
+      if (selected)
+        report.mutate({ messageId: selected.id, reason }, { onSuccess: () => setReported(true) })
+      closeMenu()
+    },
+  }))
+  const contextMenu = (
+    <ContextMenu
+      anchor={menu?.anchor ?? null}
+      align={selected?.author.id === me?.id ? 'right' : 'left'}
+      title={reporting ? 'Pourquoi signaler ?' : undefined}
+      items={reporting ? reasons : actions}
+      onClose={closeMenu}
+    />
   )
 
   if (compact) {
@@ -335,7 +327,7 @@ export function ChatThread({ chat: ref, compact }: { chat: ChatRef; compact?: bo
         </View>
         {thread}
         {composer}
-        {sheet}
+        {contextMenu}
       </KeyboardAvoidingView>
     )
   }
@@ -358,7 +350,7 @@ export function ChatThread({ chat: ref, compact }: { chat: ChatRef; compact?: bo
         {thread}
         {composer}
       </View>
-      {sheet}
+      {contextMenu}
     </Raised>
   )
 }

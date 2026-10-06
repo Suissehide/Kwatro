@@ -1,12 +1,15 @@
-import { Pressable, Text, View } from 'react-native'
+import { useRef } from 'react'
+import { Platform, Pressable, Text, View } from 'react-native'
 import { Avatar } from '../atoms/Avatar'
 import { Typography } from '../atoms/Typography'
 import { useHover } from '../atoms/useHover'
+import type { MenuAnchor } from '../organisms/ContextMenu'
 import { border, colors, font, transition } from '../tokens'
 
 /**
  * Message du chat. `announcement` : annonce de l'hôte ou de l'organisateur, mise en avant.
- * `pending` : envoi en cours. `onPress` ouvre les actions du message (signaler, supprimer).
+ * `pending` : envoi en cours. `onMenu` ouvre les actions du message (signaler, supprimer) à côté de la bulle,
+ * ou au point du clic droit sur le web.
  * Dans un groupe de messages du même auteur, seul le premier a `author` / `time` et `avatar` ;
  * les suivants passent `indent` pour rester alignés sous la bulle.
  */
@@ -21,7 +24,7 @@ export function ChatBubble({
   indent,
   avatarSize = 30,
   maxWidth = '78%',
-  onPress,
+  onMenu,
 }: {
   text: string
   mine?: boolean
@@ -34,9 +37,22 @@ export function ChatBubble({
   indent?: boolean
   avatarSize?: number
   maxWidth?: `${number}%`
-  onPress?: () => void
+  onMenu?: (anchor: MenuAnchor) => void
 }) {
   const { hovered, hoverProps } = useHover()
+  const bubble = useRef<View>(null)
+  const openMenu = () =>
+    bubble.current?.measureInWindow((x, y, width, height) => onMenu?.({ x, y, width, height }))
+  // Clic droit (web) : le menu s'ouvre sous le curseur, à la place de celui du navigateur
+  const contextMenu =
+    Platform.OS === 'web' && onMenu
+      ? {
+          onContextMenu: (e: { preventDefault: () => void; clientX: number; clientY: number }) => {
+            e.preventDefault()
+            onMenu({ x: e.clientX, y: e.clientY, width: 0, height: 0 })
+          },
+        }
+      : {}
   const bg = announcement ? colors.ratingSoft : mine ? colors.room : colors.white
   const fg = mine && !announcement ? colors.white : colors.ink
   const meta = [announcement ? 'Annonce' : null, author, time].filter(Boolean).join(' · ')
@@ -61,11 +77,14 @@ export function ChatBubble({
           </Typography>
         ) : null}
         <Pressable
-          onPress={onPress}
-          disabled={!onPress}
-          role={onPress ? 'button' : undefined}
-          aria-label={onPress ? `Actions du message : ${text}` : undefined}
+          ref={bubble}
+          onPress={openMenu}
+          disabled={!onMenu}
+          role={onMenu ? 'button' : undefined}
+          aria-label={onMenu ? `Actions du message : ${text}` : undefined}
+          aria-haspopup={onMenu ? 'menu' : undefined}
           {...hoverProps}
+          {...contextMenu}
           style={{
             backgroundColor: bg,
             borderWidth: announcement ? border.base : border.thin,
@@ -75,7 +94,7 @@ export function ChatBubble({
             borderBottomLeftRadius: mine ? 14 : 4,
             paddingVertical: 8,
             paddingHorizontal: 12,
-            opacity: pending ? 0.6 : hovered && onPress ? 0.85 : 1,
+            opacity: pending ? 0.6 : hovered && onMenu ? 0.85 : 1,
             ...transition(['opacity']),
           }}
         >
