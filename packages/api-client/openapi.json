@@ -1,6 +1,62 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/me/push-tokens": {
+      "put": {
+        "operationId": "PushController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "pattern": "^Expo(nent)?PushToken\\[[^\\]]+\\]$"
+                  }
+                },
+                "required": [
+                  "token"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "push"
+        ]
+      }
+    },
+    "/me/push-tokens/{token}": {
+      "delete": {
+        "operationId": "PushController_forget",
+        "parameters": [
+          {
+            "name": "token",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "push"
+        ]
+      }
+    },
     "/health": {
       "get": {
         "operationId": "HealthController_check",
@@ -233,6 +289,17 @@
                         ]
                       }
                     },
+                    "notificationsOff": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "ROOMS",
+                          "MESSAGES",
+                          "VENUES"
+                        ]
+                      }
+                    },
                     "xp": {
                       "type": "integer",
                       "minimum": -9007199254740991,
@@ -308,6 +375,36 @@
                           "reliabilityPct"
                         ]
                       }
+                    },
+                    "venues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "slug": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "role": {
+                            "type": "string",
+                            "enum": [
+                              "MANAGER",
+                              "STAFF"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "slug",
+                          "name",
+                          "role"
+                        ]
+                      }
                     }
                   },
                   "required": [
@@ -325,9 +422,11 @@
                     "searchRadiusKm",
                     "availability",
                     "vibes",
+                    "notificationsOff",
                     "xp",
                     "mainKwote",
-                    "rankings"
+                    "rankings",
+                    "venues"
                   ]
                 }
               }
@@ -400,6 +499,17 @@
                         "BEGINNER",
                         "HOMEBREW",
                         "SOCIAL"
+                      ]
+                    }
+                  },
+                  "notificationsOff": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "ROOMS",
+                        "MESSAGES",
+                        "VENUES"
                       ]
                     }
                   }
@@ -492,6 +602,17 @@
                         ]
                       }
                     },
+                    "notificationsOff": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "ROOMS",
+                          "MESSAGES",
+                          "VENUES"
+                        ]
+                      }
+                    },
                     "xp": {
                       "type": "integer",
                       "minimum": -9007199254740991,
@@ -567,6 +688,36 @@
                           "reliabilityPct"
                         ]
                       }
+                    },
+                    "venues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "slug": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "role": {
+                            "type": "string",
+                            "enum": [
+                              "MANAGER",
+                              "STAFF"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "slug",
+                          "name",
+                          "role"
+                        ]
+                      }
                     }
                   },
                   "required": [
@@ -584,9 +735,11 @@
                     "searchRadiusKm",
                     "availability",
                     "vibes",
+                    "notificationsOff",
                     "xp",
                     "mainKwote",
-                    "rankings"
+                    "rankings",
+                    "venues"
                   ]
                 }
               }

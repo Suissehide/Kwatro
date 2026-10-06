@@ -49,6 +49,20 @@ export type ParticipantStatus = (typeof PARTICIPANT_STATUSES)[number]
 export const USER_ROLES = ['PLAYER', 'VENUE_STAFF', 'ADMIN'] as const
 export type UserRole = (typeof USER_ROLES)[number]
 
+/** Rôle dans un lieu (enum Prisma VenueStaffRole) : le gérant voit la facture, le staff scanne et pointe. */
+export const VENUE_STAFF_ROLES = ['MANAGER', 'STAFF'] as const
+export type VenueStaffRole = (typeof VENUE_STAFF_ROLES)[number]
+
+/** Sujets de notifications push (enum Prisma NotificationTopic), que le joueur peut couper un par un. */
+export const NOTIFICATION_TOPICS = ['ROOMS', 'MESSAGES', 'VENUES'] as const
+export type NotificationTopic = (typeof NOTIFICATION_TOPICS)[number]
+
+export const NOTIFICATION_TOPIC_LABELS: Record<NotificationTopic, string> = {
+  ROOMS: 'Mes rooms (candidatures, rappels, annulations)',
+  MESSAGES: 'Messages',
+  VENUES: 'Lieux suivis',
+}
+
 export const VENUE_TYPES = ['GAME_BAR', 'TCG_SHOP', 'LUDOTHEQUE', 'ASSOCIATION', 'OTHER'] as const
 export type VenueType = (typeof VENUE_TYPES)[number]
 

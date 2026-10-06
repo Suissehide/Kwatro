@@ -110,6 +110,8 @@ export class UsersController {
     await this.prisma.$transaction([
       this.prisma.playerGameProfile.deleteMany({ where: { userId: user.id } }),
       this.prisma.venueStaff.deleteMany({ where: { userId: user.id } }),
+      // Appareils oubliés : plus aucune notification
+      this.prisma.pushToken.deleteMany({ where: { userId: user.id } }),
       // Blocages levés ; les signalements restent pour la modération
       this.prisma.block.deleteMany({
         where: { OR: [{ blockerId: user.id }, { blockedId: user.id }] },

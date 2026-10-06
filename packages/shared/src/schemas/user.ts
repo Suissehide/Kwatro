@@ -2,9 +2,11 @@ import { z } from 'zod'
 import {
   AVAILABILITY_SLOT_COUNT,
   AVATAR_STATUSES,
+  NOTIFICATION_TOPICS,
   PLAY_VIBES,
   RADIUS_KM,
   USER_ROLES,
+  VENUE_STAFF_ROLES,
 } from '../constants'
 import { hasBannedWord } from '../moderation'
 
@@ -66,6 +68,7 @@ export const updateProfileSchema = z
       )
       .transform((slots) => unique(slots).sort((a, b) => a - b)),
     vibes: z.array(z.enum(PLAY_VIBES)).transform(unique),
+    notificationsOff: z.array(z.enum(NOTIFICATION_TOPICS)).transform(unique),
   })
   .partial()
   .refine((body) => (body.latitude === undefined) === (body.longitude === undefined), {
@@ -104,10 +107,27 @@ export const meSchema = z.object({
   searchRadiusKm: z.number().int(),
   availability: z.array(z.number().int()),
   vibes: z.array(z.enum(PLAY_VIBES)),
+  /** Sujets de notifications push coupés (vide = tout activé). */
+  notificationsOff: z.array(z.enum(NOTIFICATION_TOPICS)),
   xp: z.number().int(),
   /** Kwote du format le plus joué en classé (null sans profil TCG). */
   mainKwote: z.object({ game: z.string(), format: z.string(), kwote: z.number().int() }).nullable(),
   rankings: z.array(rankingSchema),
+  /** Lieux où le joueur est gérant ou staff : l'app affiche l'espace lieu s'il y en a un. */
+  venues: z.array(
+    z.object({
+      id: z.string(),
+      slug: z.string(),
+      name: z.string(),
+      role: z.enum(VENUE_STAFF_ROLES),
+    }),
+  ),
 })
 
 export type Me = z.infer<typeof meSchema>
+
+/** Jeton Expo Push d'un appareil (`ExponentPushToken[…]`), envoyé par l'app après la permission. */
+export const pushTokenSchema = z.object({
+  token: z.string().regex(/^Expo(nent)?PushToken\[[^\]]+\]$/, { message: 'Jeton push invalide' }),
+})
+export type PushTokenInput = z.infer<typeof pushTokenSchema>

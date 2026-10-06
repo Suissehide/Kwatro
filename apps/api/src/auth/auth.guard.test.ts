@@ -2,12 +2,17 @@ import { type ExecutionContext, ForbiddenException, UnauthorizedException } from
 import { Reflector } from '@nestjs/core'
 import { describe, expect, it } from 'vitest'
 import type { User } from '../generated/prisma/client'
-import { Public, Roles } from './auth.decorators'
+import { Public, Roles, VenueRoles } from './auth.decorators'
 import { AuthGuard } from './auth.guard'
 import type { AuthRequest, AuthService } from './auth.service'
 
 const player = { id: 'u1', role: 'PLAYER' } as User
 const admin = { id: 'u2', role: 'ADMIN' } as User
+const manager = { id: 'u3', role: 'PLAYER' } as User
+const staff = { id: 'u4', role: 'PLAYER' } as User
+
+/** VenueStaff de test : u3 gérant et u4 staff du lieu v1, personne dans v2. */
+const venueStaff: Record<string, string> = { 'u3/v1': 'MANAGER', 'u4/v1': 'STAFF' }
 
 class Routes {
   @Public()
@@ -15,11 +20,18 @@ class Routes {
   any() {}
   @Roles('ADMIN')
   adminOnly() {}
+  @VenueRoles('MANAGER')
+  billing() {}
+  @VenueRoles('MANAGER', 'STAFF')
+  scan() {}
 }
 
-function setup(user: User | null, handler: keyof Routes) {
-  const request = {} as AuthRequest
-  const auth = { resolveUser: async () => user } as unknown as AuthService
+function setup(user: User | null, handler: keyof Routes, venueId = 'v1') {
+  const request = { params: { venueId } } as unknown as AuthRequest
+  const auth = {
+    resolveUser: async () => user,
+    venueRole: async (userId: string, venue: string) => venueStaff[`${userId}/${venue}`] ?? null,
+  } as unknown as AuthService
   const context = {
     getHandler: () => Routes.prototype[handler],
     getClass: () => Routes,
@@ -58,5 +70,25 @@ describe('AuthGuard', () => {
     )
     const asAdmin = setup(admin, 'adminOnly')
     await expect(asAdmin.guard.canActivate(asAdmin.context)).resolves.toBe(true)
+  })
+
+  it('applique @VenueRoles selon le rôle dans le lieu de la route', async () => {
+    const allowed = async (user: User, handler: keyof Routes, venueId?: string) => {
+      const { guard, context } = setup(user, handler, venueId)
+      return guard.canActivate(context).then(
+        () => true,
+        (error) => {
+          expect(error).toBeInstanceOf(ForbiddenException)
+          return false
+        },
+      )
+    }
+    expect(await allowed(manager, 'billing')).toBe(true)
+    expect(await allowed(staff, 'billing')).toBe(false)
+    expect(await allowed(staff, 'scan')).toBe(true)
+    expect(await allowed(player, 'scan')).toBe(false)
+    // Rôle dans un lieu, pas dans un autre
+    expect(await allowed(manager, 'scan', 'v2')).toBe(false)
+    expect(await allowed(admin, 'billing', 'v2')).toBe(true)
   })
 })

@@ -48,6 +48,8 @@ model User {
   children           User[]    @relation("ParentChild")
   parentalConsentAt  DateTime?
   xp                 Int       @default(0)
+  /// Sujets de notifications push coupés par le joueur (tout est activé par défaut)
+  notificationsOff   NotificationTopic[] @default([])
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
   deletedAt          DateTime?
@@ -66,6 +68,24 @@ model User {
   blocksReceived     Block[]             @relation("BlocksReceived")
   reportsMade        Report[]            @relation("ReportsMade")
   reportsReceived    Report[]            @relation("ReportsReceived")
+  pushTokens         PushToken[]
+}
+
+enum NotificationTopic {
+  ROOMS
+  MESSAGES
+  VENUES
+}
+
+/// Appareil d'un joueur : jeton Expo Push (KWT-108). Un appareil change de joueur s'il s'y reconnecte.
+model PushToken {
+  token     String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 enum AvatarStatus {
