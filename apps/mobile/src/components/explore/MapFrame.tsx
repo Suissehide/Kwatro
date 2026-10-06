@@ -1,5 +1,5 @@
-import { border, colors, radius } from '@kwatro/design-system'
-import type { VenueListItem } from '@kwatro/shared'
+import { border, colors, radius } from '@lucko/design-system'
+import type { VenueListItem } from '@lucko/shared'
 import { View } from 'react-native'
 import type { Place } from '@/lib/useLocation'
 import { ExploreMap } from './ExploreMap'

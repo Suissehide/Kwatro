@@ -17,19 +17,41 @@ export function expectedScore(ratingA: number, ratingB: number): number {
   return 1 / (1 + 10 ** ((ratingB - ratingA) / 400))
 }
 
+/** Joueur d'une partie classée : LK et parties classées avant la partie, place finale (1 = vainqueur). */
+export type RatingPlayer = { rating: number; rankedGames: number; place: number }
+
 /**
- * Nouveaux LK après un duel.
- * @param score 1 = victoire, 0.5 = nul, 0 = défaite
+ * Nouveaux LK après une partie classée, duel ou pod (archi §13, méthode par paires de
+ * Board Game Arena) : chaque joueur « gagne » contre ceux classés derrière lui, « perd » contre
+ * ceux devant, fait nul à place égale. L'écart est moyenné sur les adversaires, pour qu'une
+ * victoire en pod de 4 pèse autant qu'un duel. Toutes les paires partent des LK d'avant.
+ * @param weight RATING_TOURNAMENT_WEIGHT pour un tournoi classé, 1 pour une room
  */
-export function nextRating(
-  rating: number,
-  opponent: number,
-  score: 0 | 0.5 | 1,
-  options: { gamesPlayed: number; weight?: number } = { gamesPlayed: RATING_CALIBRATION_GAMES },
-): number {
-  const k = options.gamesPlayed < RATING_CALIBRATION_GAMES ? 60 : 32
-  const delta = k * (options.weight ?? 1) * (score - expectedScore(rating, opponent))
-  return Math.max(RATING_FLOOR, Math.round(rating + delta))
+export function nextRatings(players: readonly RatingPlayer[], weight = 1): number[] {
+  return players.map((me, i) => {
+    const k = me.rankedGames < RATING_CALIBRATION_GAMES ? 60 : 32
+    let gap = 0
+    players.forEach((other, j) => {
+      if (i === j) return
+      const score = me.place < other.place ? 1 : me.place === other.place ? 0.5 : 0
+      gap += score - expectedScore(me.rating, other.rating)
+    })
+    const delta = (k * weight * gap) / Math.max(1, players.length - 1)
+    return Math.max(RATING_FLOOR, Math.round(me.rating + delta))
+  })
+}
+
+/** Adversaires différents à affronter pour la part « variété » de la fiabilité. */
+export const RATING_RELIABLE_OPPONENTS = 10
+
+/**
+ * Indice de fiabilité en % (archi §13, comme Pista) : 70 % viennent du nombre de parties
+ * classées (plein après le calibrage), 30 % de la variété des adversaires.
+ */
+export function ratingReliability(rankedGames: number, distinctOpponents: number): number {
+  const games = Math.min(1, rankedGames / RATING_CALIBRATION_GAMES)
+  const variety = Math.min(1, distinctOpponents / RATING_RELIABLE_OPPONENTS)
+  return Math.round(70 * games + 30 * variety)
 }
 
 /** En dessous de ce nombre de parties classées sur un format, les LK sont affichés « provisoires ». */
