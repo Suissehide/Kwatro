@@ -2,6 +2,7 @@ import {
   Avatar,
   Banner,
   Button,
+  colors,
   EmptyState,
   ListCard,
   ListRow,
@@ -14,6 +15,7 @@ import {
 } from '@kwatro/design-system'
 import { ADMIN_ACTION_LABELS, REPORT_REASON_LABELS, REPORT_RESOLUTION_LABELS } from '@kwatro/shared'
 import { useLocalSearchParams } from 'expo-router'
+import { Flag } from 'lucide-react-native'
 import { useState } from 'react'
 import { View } from 'react-native'
 import { ActionDialog } from '@/components/admin/ActionDialog'
@@ -73,7 +75,7 @@ export default function AdminUserScreen() {
             {u.reports.length === 0 ? (
               <EmptyState
                 dashed
-                icon={<Typography variant="h2">◎</Typography>}
+                icon={<Flag size={28} color={colors.ink} strokeWidth={2.5} />}
                 title="Aucun signalement"
                 text="Personne n’a signalé ce joueur."
               />

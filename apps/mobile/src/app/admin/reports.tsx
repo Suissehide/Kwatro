@@ -1,14 +1,15 @@
 import {
   Banner,
   Button,
+  colors,
   EmptyState,
   ReviewCard,
   SkeletonCard,
   StatusPill,
   Tag,
-  Typography,
 } from '@kwatro/design-system'
 import { type AdminReport, REPORT_REASON_LABELS, type ReportResolution } from '@kwatro/shared'
+import { ShieldCheck } from 'lucide-react-native'
 import { useState } from 'react'
 import { View } from 'react-native'
 import { ActionDialog } from '@/components/admin/ActionDialog'
@@ -63,7 +64,7 @@ export default function AdminReportsScreen() {
       ) : reports.data.length === 0 ? (
         <EmptyState
           dashed
-          icon={<Typography variant="h2">✓</Typography>}
+          icon={<ShieldCheck size={28} color={colors.ink} strokeWidth={2.5} />}
           title="File vide"
           text="Aucun signalement en attente."
         />

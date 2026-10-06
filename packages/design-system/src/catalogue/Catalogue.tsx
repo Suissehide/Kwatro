@@ -1,6 +1,8 @@
 'use client'
+
+import { CircleHelp, Plus, SlidersHorizontal } from 'lucide-react-native'
 import { type ReactNode, useState } from 'react'
-import { ScrollView, Text, View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 import {
   Avatar,
   Button,
@@ -86,7 +88,7 @@ import {
   TopNav,
   VenueTabBar,
 } from '../organisms'
-import { colors, font, space } from '../tokens'
+import { colors, space } from '../tokens'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -179,11 +181,14 @@ export function Catalogue() {
         <Row>
           <Avatar name="Léa" />
           <Avatar name="Max" color={colors.kwote} size={56} badge={<CountBadge count={2} />} />
-          <IconButton label="Filtrer" icon={<Text style={font('body', 800)}>≡</Text>} />
+          <IconButton
+            label="Filtrer"
+            icon={<SlidersHorizontal size={18} color={colors.ink} strokeWidth={2.5} />}
+          />
           <IconButton
             label="Ajouter"
             bg={colors.kwote}
-            icon={<Text style={font('body', 800)}>+</Text>}
+            icon={<Plus size={20} color={colors.ink} strokeWidth={2.5} />}
           />
           <DateBlock day="18" month="OCT" />
           <DateBlock day="23" month="OCT" color={colors.room} />
@@ -307,7 +312,7 @@ export function Catalogue() {
           </Row>
         </ContentCard>
         <View>
-          <ListRow left={<Avatar name="Léa" />} title="Léa" subtitle="Pioneer · ◆ 1 240" />
+          <ListRow left={<Avatar name="Léa" />} title="Léa" subtitle="Pioneer · Kwote 1 240" />
           <ListRow
             left={<Avatar name="Max" color={colors.venue} />}
             title="Max"
@@ -354,7 +359,7 @@ export function Catalogue() {
           <ChatComposer value="" onChange={() => {}} onSend={() => {}} status="Léa écrit…" />
         </View>
         <EmptyState
-          icon={<Text style={{ ...font('display'), fontSize: 24 }}>?</Text>}
+          icon={<CircleHelp size={28} color={colors.ink} strokeWidth={2.5} />}
           title="Aucune room ce soir"
           text="Crée la tienne : les joueurs du coin seront prévenus."
           action={<Button label="Créer une room" small />}

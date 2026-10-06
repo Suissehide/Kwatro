@@ -1,5 +1,6 @@
 import {
   type Column,
+  colors,
   DataTable,
   EmptyState,
   StatusPill,
@@ -7,6 +8,7 @@ import {
   Typography,
 } from '@kwatro/design-system'
 import type { AdminUser } from '@kwatro/shared'
+import { SearchX } from 'lucide-react-native'
 import { useState } from 'react'
 import { useWindowDimensions } from 'react-native'
 import { AdminScreen } from '@/components/admin/AdminScreen'
@@ -78,7 +80,7 @@ export default function AdminUsersScreen() {
         empty={
           <EmptyState
             dashed
-            icon={<Typography variant="h2">?</Typography>}
+            icon={<SearchX size={28} color={colors.ink} strokeWidth={2.5} />}
             title="Aucun joueur"
             text="Personne ne correspond à cette recherche."
           />

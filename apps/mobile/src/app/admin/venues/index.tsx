@@ -1,6 +1,7 @@
 import {
   Banner,
   Button,
+  colors,
   EmptyState,
   ReviewCard,
   Segmented,
@@ -8,7 +9,6 @@ import {
   StatusPill,
   Tag,
   TextField,
-  Typography,
 } from '@kwatro/design-system'
 import {
   type AdminVenue,
@@ -16,6 +16,7 @@ import {
   VENUE_TYPE_LABELS,
   type VenueStatus,
 } from '@kwatro/shared'
+import { MapPinCheck } from 'lucide-react-native'
 import { useState } from 'react'
 import { View } from 'react-native'
 import { ActionDialog } from '@/components/admin/ActionDialog'
@@ -70,7 +71,7 @@ export default function AdminVenuesScreen() {
       ) : venues.data.length === 0 ? (
         <EmptyState
           dashed
-          icon={<Typography variant="h2">✓</Typography>}
+          icon={<MapPinCheck size={28} color={colors.ink} strokeWidth={2.5} />}
           title="Aucun lieu"
           text={filter === 0 ? 'Aucun lieu en attente de validation.' : 'Aucun lieu trouvé.'}
         />

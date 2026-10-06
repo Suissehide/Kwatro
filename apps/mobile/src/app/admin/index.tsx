@@ -8,9 +8,9 @@ import {
   SettingsGroup,
   SkeletonCard,
   StatCard,
-  Typography,
 } from '@kwatro/design-system'
 import { ADMIN_ACTION_LABELS } from '@kwatro/shared'
+import { History } from 'lucide-react-native'
 import { useWindowDimensions, View } from 'react-native'
 import { AdminScreen } from '@/components/admin/AdminScreen'
 import { ADMIN_TITLES, adminSidebarItems, dateTime, openAdmin } from '@/lib/admin'
@@ -81,7 +81,7 @@ export default function AdminDashboardScreen() {
         ) : actions.data.length === 0 ? (
           <EmptyState
             dashed
-            icon={<Typography variant="h2">◎</Typography>}
+            icon={<History size={28} color={colors.ink} strokeWidth={2.5} />}
             title="Aucune action pour l’instant"
             text="Chaque décision prise ici est tracée : qui, quoi, quand, sur qui et pourquoi."
           />

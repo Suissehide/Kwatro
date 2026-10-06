@@ -852,7 +852,7 @@ async function main() {
     })
   }
 
-  console.log('Seed terminé ✔')
+  console.log('Seed terminé')
   console.log('Comptes de test (e-mail / mot de passe) :')
   for (const { email, password, role } of accounts.filter((a) => a.password)) {
     console.log(`  ${email.padEnd(22)} ${password?.padEnd(13)} ${role ?? 'PLAYER'}`)

@@ -11,6 +11,7 @@ import {
   Typography,
 } from '@kwatro/design-system'
 import { addMonths, localDateTime, VENUE_AGENDA_MONTHS, type VenueDetail } from '@kwatro/shared'
+import { ExternalLink } from 'lucide-react-native'
 import { useState } from 'react'
 import { Linking, View } from 'react-native'
 import { localDay } from '@/lib/explore'
@@ -50,7 +51,13 @@ export function VenueAgenda({ venue, wide }: { venue: VenueDetail; wide: boolean
   const run = (id: string, action: AgendaAction) =>
     action.url ? Linking.openURL(action.url) : openEvent(id)
   const button = (id: string, action: AgendaAction) => (
-    <Button small kind={action.kind} label={action.label} onPress={() => run(id, action)} />
+    <Button
+      small
+      kind={action.kind}
+      label={action.label}
+      icon={action.url ? ExternalLink : undefined}
+      onPress={() => run(id, action)}
+    />
   )
 
   const toggle = <ToggleGroup items={['Liste', 'Calendrier']} value={view} onChange={setView} />

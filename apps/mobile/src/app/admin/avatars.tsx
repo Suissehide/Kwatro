@@ -2,12 +2,13 @@ import {
   Avatar,
   Banner,
   Button,
+  colors,
   EmptyState,
   ReviewCard,
   SkeletonCard,
-  Typography,
 } from '@kwatro/design-system'
 import type { PendingAvatar } from '@kwatro/shared'
+import { CircleCheck } from 'lucide-react-native'
 import { useState } from 'react'
 import { View } from 'react-native'
 import { ActionDialog } from '@/components/admin/ActionDialog'
@@ -36,7 +37,7 @@ export default function AdminAvatarsScreen() {
       ) : avatars.data.length === 0 ? (
         <EmptyState
           dashed
-          icon={<Typography variant="h2">✓</Typography>}
+          icon={<CircleCheck size={28} color={colors.ink} strokeWidth={2.5} />}
           title="Rien à valider"
           text="Toutes les photos de profil ont été traitées."
         />

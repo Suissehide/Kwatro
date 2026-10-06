@@ -1,3 +1,4 @@
+import { TrendingDown, TrendingUp } from 'lucide-react-native'
 import { Pressable, Text, View } from 'react-native'
 import { Raised } from '../atoms/Raised'
 import { useHover } from '../atoms/useHover'
@@ -19,6 +20,7 @@ export function StatCard({
 }) {
   const fg = textOn(bg)
   const { hovered, hoverProps } = useHover()
+  const Trend = delta?.up ? TrendingUp : TrendingDown
   const card = (
     <Raised offset={shadow.md}>
       <View
@@ -37,15 +39,18 @@ export function StatCard({
         <Text style={{ ...font('display'), fontSize: 34, color: fg }}>{value}</Text>
         <Text style={{ ...font('body', 700), fontSize: 13, color: fg }}>{label}</Text>
         {delta ? (
-          <Text
-            style={{
-              ...font('mono', 700),
-              fontSize: 13,
-              color: delta.up ? colors.venue : colors.room,
-            }}
-          >
-            {delta.up ? '▲' : '▼'} {delta.text}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Trend size={15} color={delta.up ? colors.venue : colors.room} strokeWidth={2.5} />
+            <Text
+              style={{
+                ...font('mono', 700),
+                fontSize: 13,
+                color: delta.up ? colors.venue : colors.room,
+              }}
+            >
+              {delta.text}
+            </Text>
+          </View>
         ) : null}
       </View>
     </Raised>

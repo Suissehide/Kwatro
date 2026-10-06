@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react-native'
 import { Pressable, Text, View } from 'react-native'
 import { useHover } from '../atoms/useHover'
 import { border, colors, font, radius, sizes, transition } from '../tokens'
@@ -97,9 +98,7 @@ function Cell({ label, on, onPress }: { label: string; on: boolean; onPress?: ()
       {...hoverProps}
       style={style}
     >
-      {on ? (
-        <Text style={{ ...font('body', 800), fontSize: 15, color: colors.white }}>✓</Text>
-      ) : null}
+      {on ? <Check size={18} color={colors.white} strokeWidth={3} /> : null}
     </Pressable>
   )
 }

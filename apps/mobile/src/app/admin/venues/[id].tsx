@@ -1,16 +1,17 @@
 import {
   Banner,
   Button,
+  colors,
   EmptyState,
   Panel,
   ReviewCard,
   SkeletonCard,
   StatusPill,
   Tag,
-  Typography,
 } from '@kwatro/design-system'
 import { type AdminEvent, EVENT_TYPE_LABELS } from '@kwatro/shared'
 import { useLocalSearchParams } from 'expo-router'
+import { CalendarX } from 'lucide-react-native'
 import { useState } from 'react'
 import { View } from 'react-native'
 import { ActionDialog } from '@/components/admin/ActionDialog'
@@ -60,7 +61,7 @@ export default function AdminVenueEventsScreen() {
       ) : events.data.length === 0 ? (
         <EmptyState
           dashed
-          icon={<Typography variant="h2">◎</Typography>}
+          icon={<CalendarX size={28} color={colors.ink} strokeWidth={2.5} />}
           title="Agenda vide"
           text="Aucun événement à venir pour ce lieu."
         />

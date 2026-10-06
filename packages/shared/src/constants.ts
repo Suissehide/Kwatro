@@ -205,7 +205,7 @@ export type AdminActionKind = (typeof ADMIN_ACTION_KINDS)[number]
 export const ADMIN_ACTION_LABELS: Record<AdminActionKind, string> = {
   REPORT_DISMISS: 'Signalement classé',
   REPORT_WARN: 'Joueur averti',
-  REPORT_SUSPEND: 'Signalement → suspension',
+  REPORT_SUSPEND: 'Suspendu après un signalement',
   USER_SUSPEND: 'Joueur suspendu',
   USER_UNSUSPEND: 'Suspension levée',
   AVATAR_APPROVE: 'Photo approuvée',

@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight, X } from 'lucide-react-native'
 import { type ReactNode, useRef, useState } from 'react'
 import { Image, Modal, ScrollView, Text, View } from 'react-native'
 import { Button } from '../atoms/Button'
@@ -119,7 +120,7 @@ export function PhotoCarousel({
             {index > 0 ? (
               <IconButton
                 label="Photo précédente"
-                icon={<Arrow>←</Arrow>}
+                icon={<ChevronLeft size={22} color={colors.ink} strokeWidth={2.5} />}
                 onPress={() => go(index - 1)}
               />
             ) : null}
@@ -128,7 +129,7 @@ export function PhotoCarousel({
             {index < photos.length - 1 ? (
               <IconButton
                 label="Photo suivante"
-                icon={<Arrow>→</Arrow>}
+                icon={<ChevronRight size={22} color={colors.ink} strokeWidth={2.5} />}
                 onPress={() => go(index + 1)}
               />
             ) : null}
@@ -160,10 +161,6 @@ export function PhotoCarousel({
   )
 }
 
-const Arrow = ({ children }: { children: string }) => (
-  <Text style={{ ...font('body', 800), fontSize: 18, color: colors.ink }}>{children}</Text>
-)
-
 /** Visionneuse plein écran des photos. */
 export function PhotoViewer({
   visible,
@@ -182,7 +179,11 @@ export function PhotoViewer({
         style={{ flex: 1, backgroundColor: colors.ink, padding: space.xxl, gap: space.lg }}
       >
         <View style={{ alignSelf: 'flex-end' }}>
-          <IconButton label="Fermer" icon={<Arrow>✕</Arrow>} onPress={onClose} />
+          <IconButton
+            label="Fermer"
+            icon={<X size={20} color={colors.ink} strokeWidth={2.5} />}
+            onPress={onClose}
+          />
         </View>
         <View style={{ flex: 1 }}>
           <PhotoCarousel photos={photos} height="100%" arrows rounded />

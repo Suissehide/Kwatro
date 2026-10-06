@@ -1,3 +1,4 @@
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react-native'
 import type { ReactNode } from 'react'
 import {
   Pressable,
@@ -199,6 +200,7 @@ export function DataTable<T extends { id: string }>({
         ) : null}
         {columns.map((c) => {
           const active = sort?.key === c.key
+          const SortIcon = !active ? ArrowUpDown : sort?.dir === 'desc' ? ArrowDown : ArrowUp
           return (
             <Pressable
               key={c.key}
@@ -220,6 +222,7 @@ export function DataTable<T extends { id: string }>({
                 colStyle(c),
                 {
                   flexDirection: 'row',
+                  alignItems: 'center',
                   gap: 4,
                   justifyContent: c.align === 'right' ? 'flex-end' : 'flex-start',
                 },
@@ -227,9 +230,7 @@ export function DataTable<T extends { id: string }>({
             >
               <Typography variant="label">{c.label}</Typography>
               {c.sortable ? (
-                <Typography variant="label" color={active ? colors.ink : '#B9AB92'}>
-                  {active ? (sort?.dir === 'desc' ? '▼' : '▲') : '↕'}
-                </Typography>
+                <SortIcon size={13} color={active ? colors.ink : '#B9AB92'} strokeWidth={2.5} />
               ) : null}
             </Pressable>
           )

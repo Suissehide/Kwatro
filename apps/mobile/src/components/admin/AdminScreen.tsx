@@ -7,6 +7,7 @@ import {
   TextLink,
   WebSidebarLayout,
 } from '@kwatro/design-system'
+import { ArrowLeft } from 'lucide-react-native'
 import type { ReactNode } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -59,14 +60,14 @@ export function AdminScreen({
           active={section}
           onSelect={openAdmin}
           color={colors.ink}
-          footer={<TextLink label="← Retour à l’app" onPress={openHome} />}
+          footer={<TextLink icon={ArrowLeft} label="Retour à l’app" onPress={openHome} />}
         />
       }
     >
       <View style={{ width: '100%', maxWidth: 960, gap: 20 }}>
         {back ? (
           <View style={{ alignSelf: 'flex-start' }}>
-            <TextLink label="← Retour" onPress={goBack} />
+            <TextLink icon={ArrowLeft} label="Retour" onPress={goBack} />
           </View>
         ) : null}
         <PageTitle title={title} />

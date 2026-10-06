@@ -1,3 +1,4 @@
+import { ArrowLeft } from 'lucide-react-native'
 import type { ReactNode } from 'react'
 import { Text, View } from 'react-native'
 import { IconButton } from '../atoms/IconButton'
@@ -29,7 +30,7 @@ export function ScreenHeader({
           size={36}
           label="Retour"
           onPress={onBack}
-          icon={<Text style={{ ...font('body', 800), fontSize: 18, color: colors.ink }}>←</Text>}
+          icon={<ArrowLeft size={20} color={colors.ink} strokeWidth={2.5} />}
         />
       ) : null}
       <Text
