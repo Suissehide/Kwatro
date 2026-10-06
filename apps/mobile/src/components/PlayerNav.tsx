@@ -26,7 +26,7 @@ export function PlayerNav({ active, create = true }: { active: string; create?: 
               items: [
                 { label: 'Mon profil', onPress: () => openTab('profil') },
                 { label: 'Réglages du compte', onPress: openSettings },
-                { label: 'Aide', onPress: () => openSite('/aide') },
+                { label: 'Aide', onPress: () => openSite('/help') },
               ],
               onSignOut: () => void signOut(),
             }
