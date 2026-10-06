@@ -2,11 +2,11 @@ import { Pressable, Text, View } from 'react-native'
 import { border, colors, font, radius, sizes, textOn, transition } from '../tokens'
 import { useHover } from './useHover'
 
-/** Pastille de filtre ; active = fond kwote (ou `color`). Sans `onPress` : simple étiquette, sans survol. */
+/** Pastille de filtre ; active = fond rating (ou `color`). Sans `onPress` : simple étiquette, sans survol. */
 export function Chip({
   label,
   active,
-  color = colors.kwote,
+  color = colors.rating,
   tall,
   onPress,
 }: {

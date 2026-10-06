@@ -25,7 +25,7 @@ type SeedFormat = {
   brackets?: true
 }
 
-/** Catalogue (KWT-52) : jeux, formats, joueurs par partie et durée moyenne. Jeux de société : 2 à 8. */
+/** Catalogue (LKO-52) : jeux, formats, joueurs par partie et durée moyenne. Jeux de société : 2 à 8. */
 const games: {
   slug: string
   name: string
@@ -140,7 +140,7 @@ type Account = {
 const accounts: Account[] = [
   {
     id: 'joueur-demo',
-    email: 'player@kwatro.dev',
+    email: 'player@lucko.dev',
     password: 'Player123!',
     pseudo: 'Lea',
     name: 'Léa Martin',
@@ -151,15 +151,15 @@ const accounts: Account[] = [
   },
   {
     id: 'admin-demo',
-    email: 'admin@kwatro.dev',
+    email: 'admin@lucko.dev',
     password: 'Admin123!',
     pseudo: 'admin',
-    name: 'Équipe Kwatro',
+    name: 'Équipe Lucko',
     role: 'ADMIN',
   },
   {
     id: 'staff-demo',
-    email: 'staff@kwatro.dev',
+    email: 'staff@lucko.dev',
     password: 'Staff123!',
     pseudo: 'gerant-de-fele',
     name: 'Karim Benali',
@@ -168,7 +168,7 @@ const accounts: Account[] = [
   },
   {
     id: 'mineur-demo',
-    email: 'mineur@kwatro.dev',
+    email: 'mineur@lucko.dev',
     password: 'Mineur123!',
     pseudo: 'Tom_16',
     name: 'Tom Leroy',
@@ -180,7 +180,7 @@ const accounts: Account[] = [
   {
     // Compte tout juste créé : l'app ouvre l'onboarding (pseudo, ville)
     id: 'nouveau-demo',
-    email: 'nouveau@kwatro.dev',
+    email: 'nouveau@lucko.dev',
     password: 'Nouveau123!',
     pseudo: null,
     city: null,
@@ -198,7 +198,7 @@ const accounts: Account[] = [
     ] as const
   ).map(([pseudo, xp, vibes, availability]) => ({
     id: `demo-${pseudo}`,
-    email: `${pseudo}@kwatro.dev`,
+    email: `${pseudo}@lucko.dev`,
     pseudo,
     xp,
     vibes: [...vibes],
@@ -248,7 +248,7 @@ async function main() {
       description: 'Bar à jeux : ludothèque de 400 jeux, tables TCG, soirées à thème.',
       playFeeCents: 300,
       minSpendCents: 500,
-      kwatroPerk: 'Droit de jeu offert sur présentation du QR Kwatro',
+      luckoPerk: 'Droit de jeu offert sur présentation du QR Lucko',
       quarter: 'Saint-Pierre',
       phone: '05 56 00 00 00',
       website: 'https://example.com',
@@ -275,7 +275,7 @@ async function main() {
     ],
     {
       photos: ['salle', 'ludotheque', 'comptoir', 'tournoi', 'terrasse'].map((name, order) => ({
-        url: `https://picsum.photos/seed/kwatro-${name}/1200/800`,
+        url: `https://picsum.photos/seed/lucko-${name}/1200/800`,
         caption: name,
         order,
       })),
@@ -351,7 +351,7 @@ async function main() {
       isPartner: true,
       description: 'Bar à jeux et arcade, tournois TCG le week-end.',
       playFeeCents: 400,
-      kwatroPerk: '-10 % sur les boosters avec le QR Kwatro',
+      luckoPerk: '-10 % sur les boosters avec le QR Lucko',
     },
     ['one-piece', 'lorcana', 'riftbound', 'jeux-de-societe'],
     tuesdayToSaturday(16 * 60, 2 * 60),
@@ -422,8 +422,8 @@ async function main() {
   const yugioh = await format('yugioh', 'advanced')
   const boardGames = await prisma.game.findUniqueOrThrow({ where: { slug: 'jeux-de-societe' } })
 
-  // Kwote par format : moins de 5 parties classées = provisoire
-  for (const [userId, f, kwote, rankedGames, reliabilityPct] of [
+  // LK par format : moins de 5 parties classées = provisoire
+  for (const [userId, f, rating, rankedGames, reliabilityPct] of [
     ['joueur-demo', commander, 1214, 38, 82],
     ['joueur-demo', lorcana, 1310, 12, 54],
     ['joueur-demo', pokemon, 1092, 21, 66],
@@ -442,8 +442,8 @@ async function main() {
   ] as const) {
     await prisma.playerGameProfile.upsert({
       where: { userId_formatId: { userId, formatId: f.id } },
-      update: { kwote, rankedGames, reliabilityPct },
-      create: { userId, formatId: f.id, kwote, rankedGames, reliabilityPct },
+      update: { rating, rankedGames, reliabilityPct },
+      create: { userId, formatId: f.id, rating, rankedGames, reliabilityPct },
     })
   }
 
@@ -785,7 +785,74 @@ async function main() {
     }
   }
 
-  console.log('Seed terminé ✔')
+  // ---------- Back-office admin (LKO-20) ----------
+
+  // Lieu proposé, en attente de validation : absent d'Explorer tant qu'un admin ne l'a pas publié
+  await upsertVenue(
+    {
+      slug: 'taverne-des-des-demo',
+      name: 'La Taverne des Dés',
+      type: 'GAME_BAR',
+      status: 'PENDING',
+      address: '21 cours de la Somme',
+      city: 'Bordeaux',
+      latitude: 44.8268,
+      longitude: -0.5701,
+      description: 'Bar à jeux proposé par un joueur, à vérifier.',
+    },
+    ['jeux-de-societe'],
+    tuesdayToSaturday(18 * 60, 1 * 60),
+  )
+  // Photo de profil à valider
+  await prisma.user.update({
+    where: { id: 'demo-jade' },
+    data: { avatarUrl: 'https://picsum.photos/seed/lucko-jade/400/400', avatarStatus: 'PENDING' },
+  })
+  // Doublon de Magic à fusionner, avec un joueur et un profil Commander
+  const duplicate = await prisma.game.upsert({
+    where: { slug: 'mtg-demo' },
+    update: {},
+    create: { slug: 'mtg-demo', name: 'MTG', kind: 'TCG' },
+  })
+  const duplicateCommander = await prisma.gameFormat.upsert({
+    where: { gameId_slug: { gameId: duplicate.id, slug: 'commander' } },
+    update: {},
+    create: { slug: 'commander', name: 'Commander', gameId: duplicate.id, maxPlayers: 5 },
+  })
+  await prisma.user.update({
+    where: { id: 'demo-hugo' },
+    data: { playedGames: { connect: { id: duplicate.id } } },
+  })
+  await prisma.playerGameProfile.upsert({
+    where: { userId_formatId: { userId: 'demo-hugo', formatId: duplicateCommander.id } },
+    update: {},
+    create: { userId: 'demo-hugo', formatId: duplicateCommander.id, rating: 1090, rankedGames: 6 },
+  })
+  // Signalements ouverts, dont un sur un mineur (en tête de file)
+  for (const report of [
+    {
+      id: 'demo-signalement-mineur',
+      reporterId: 'demo-hugo',
+      targetId: 'mineur-demo',
+      reason: 'INAPPROPRIATE_CONTENT' as const,
+      details: 'Pseudo limite dans le chat de la room.',
+    },
+    {
+      id: 'demo-signalement-noah',
+      reporterId: 'joueur-demo',
+      targetId: 'demo-noah',
+      reason: 'HARASSMENT' as const,
+      details: 'Insultes après la partie de Lorcana.',
+    },
+  ]) {
+    await prisma.report.upsert({
+      where: { id: report.id },
+      update: { resolvedAt: null, resolution: null },
+      create: report,
+    })
+  }
+
+  console.log('Seed terminé')
   console.log('Comptes de test (e-mail / mot de passe) :')
   for (const { email, password, role } of accounts.filter((a) => a.password)) {
     console.log(`  ${email.padEnd(22)} ${password?.padEnd(13)} ${role ?? 'PLAYER'}`)

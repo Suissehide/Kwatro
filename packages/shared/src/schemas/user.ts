@@ -2,6 +2,7 @@ import { z } from 'zod'
 import {
   AVAILABILITY_SLOT_COUNT,
   AVATAR_STATUSES,
+  NOTIFICATION_TOPICS,
   PLAY_VIBES,
   RADIUS_KM,
   USER_ROLES,
@@ -67,6 +68,7 @@ export const updateProfileSchema = z
       )
       .transform((slots) => unique(slots).sort((a, b) => a - b)),
     vibes: z.array(z.enum(PLAY_VIBES)).transform(unique),
+    notificationsOff: z.array(z.enum(NOTIFICATION_TOPICS)).transform(unique),
   })
   .partial()
   .refine((body) => (body.latitude === undefined) === (body.longitude === undefined), {
@@ -76,11 +78,11 @@ export const updateProfileSchema = z
 
 export type UpdateProfileInput = z.input<typeof updateProfileSchema>
 
-/** Kwote du joueur sur un format TCG ; `kwote` null tant qu'elle est provisoire (KWOTE_PROVISIONAL_GAMES). */
+/** LK du joueur sur un format TCG ; `rating` null tant qu'ils sont provisoires (RATING_PROVISIONAL_GAMES). */
 export const rankingSchema = z.object({
   game: z.object({ slug: z.string(), name: z.string() }),
   format: z.string(),
-  kwote: z.number().int().nullable(),
+  rating: z.number().int().nullable(),
   rankedGames: z.number().int(),
   reliabilityPct: z.number().int(),
 })
@@ -91,7 +93,7 @@ export type Ranking = z.infer<typeof rankingSchema>
 export const meSchema = z.object({
   id: z.string(),
   email: z.string(),
-  /** null tant que l'onboarding (KWT-45) n'est pas fait. */
+  /** null tant que l'onboarding (LKO-45) n'est pas fait. */
   pseudo: z.string().nullable(),
   name: z.string(),
   /** false après une première connexion Apple / Google : l'app demande la date avant tout. */
@@ -105,9 +107,13 @@ export const meSchema = z.object({
   searchRadiusKm: z.number().int(),
   availability: z.array(z.number().int()),
   vibes: z.array(z.enum(PLAY_VIBES)),
+  /** Sujets de notifications push coupés (vide = tout activé). */
+  notificationsOff: z.array(z.enum(NOTIFICATION_TOPICS)),
   xp: z.number().int(),
-  /** Kwote du format le plus joué en classé (null sans profil TCG). */
-  mainKwote: z.object({ game: z.string(), format: z.string(), kwote: z.number().int() }).nullable(),
+  /** LK du format le plus joué en classé (null sans profil TCG). */
+  mainRating: z
+    .object({ game: z.string(), format: z.string(), rating: z.number().int() })
+    .nullable(),
   rankings: z.array(rankingSchema),
   /** Lieux où le joueur est gérant ou staff : l'app affiche l'espace lieu s'il y en a un. */
   venues: z.array(
@@ -121,3 +127,9 @@ export const meSchema = z.object({
 })
 
 export type Me = z.infer<typeof meSchema>
+
+/** Jeton Expo Push d'un appareil (`ExponentPushToken[…]`), envoyé par l'app après la permission. */
+export const pushTokenSchema = z.object({
+  token: z.string().regex(/^Expo(nent)?PushToken\[[^\]]+\]$/, { message: 'Jeton push invalide' }),
+})
+export type PushTokenInput = z.infer<typeof pushTokenSchema>

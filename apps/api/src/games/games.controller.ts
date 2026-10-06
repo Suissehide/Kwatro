@@ -1,4 +1,4 @@
-import { gameSchema } from '@kwatro/shared'
+import { gameSchema } from '@lucko/shared'
 import { Controller, Get } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'

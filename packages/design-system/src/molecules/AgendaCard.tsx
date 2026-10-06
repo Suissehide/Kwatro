@@ -8,7 +8,7 @@ import { border, colors, font, radius, shadow, transition } from '../tokens'
 
 /**
  * Partie de Mes parties. Web : liseré à gauche, compteur et état en colonnes, relevée au survol.
- * Téléphone : bandeau en haut, état et `side` (compteur ou variation de Kwote) sous le titre.
+ * Téléphone : bandeau en haut, état et `side` (compteur ou variation de LK) sous le titre.
  */
 export function AgendaCard({
   color,

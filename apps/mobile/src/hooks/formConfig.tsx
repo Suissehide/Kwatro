@@ -15,14 +15,14 @@ import {
   TextLink,
   Toggle,
   Typography,
-} from '@kwatro/design-system'
+} from '@lucko/design-system'
 import {
   DECLARED_LEVEL_LABELS,
   DECLARED_LEVELS,
   type Game,
   LEVEL_QUESTIONS,
   levelFromAnswers,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import { createFormHook } from '@tanstack/react-form'
 import * as Location from 'expo-location'
 import { type ComponentProps, type RefObject, useState } from 'react'
@@ -298,7 +298,7 @@ const CityField = ({ compact }: { compact?: boolean }) => {
 
 /**
  * Mes jeux (A6, F3) : jeux joués ; pour un TCG, ses formats, et pour chaque format les 3 questions
- * qui donnent le niveau déclaré (Kwote de départ). Jeux de société : pas de niveau.
+ * qui donnent le niveau déclaré (LK de départ). Jeux de société : pas de niveau.
  */
 const GamesField = ({ catalog }: { catalog: Game[] }) => {
   const { field, error, onChange } = useKwField<GamesValue>()
@@ -396,7 +396,7 @@ function LevelQuestions({
       <Typography variant="title">
         {name}
         {choice.level
-          ? ` · ${DECLARED_LEVEL_LABELS[choice.level]} (Kwote de départ ${DECLARED_LEVELS[choice.level]})`
+          ? ` · ${DECLARED_LEVEL_LABELS[choice.level]} (LK de départ ${DECLARED_LEVELS[choice.level]})`
           : ''}
       </Typography>
       {LEVEL_QUESTIONS.map((q, i) => (

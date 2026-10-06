@@ -2,15 +2,16 @@ import {
   Banner,
   Button,
   ConfirmDialog,
+  colors,
   EmptyState,
   ListRow,
   PageTitle,
   ScreenHeader,
   SkeletonCard,
-  Typography,
-} from '@kwatro/design-system'
-import type { BlockedPlayer } from '@kwatro/shared'
+} from '@lucko/design-system'
+import type { BlockedPlayer } from '@lucko/shared'
 import { router } from 'expo-router'
+import { UserX } from 'lucide-react-native'
 import { useState } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { PlayerScreen } from '@/components/PlayerScreen'
@@ -21,7 +22,7 @@ const WIDE = 900
 
 const backToSettings = () => (router.canGoBack() ? router.back() : router.replace('/settings'))
 
-/** Réglages → Joueurs bloqués (KWT-19) : liste et déblocage. */
+/** Réglages → Joueurs bloqués (LKO-19) : liste et déblocage. */
 export default function BlockedScreen() {
   const wide = useWindowDimensions().width >= WIDE
   useMeQuery({ required: true })
@@ -43,7 +44,7 @@ export default function BlockedScreen() {
   ) : blocks.data.length === 0 ? (
     <EmptyState
       dashed
-      icon={<Typography variant="h2">◎</Typography>}
+      icon={<UserX size={28} color={colors.ink} strokeWidth={2.5} />}
       title="Personne de bloqué"
       text="Un joueur bloqué ne voit plus tes rooms et tu ne vois plus les siennes."
     />

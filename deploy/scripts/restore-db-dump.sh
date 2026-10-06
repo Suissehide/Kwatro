@@ -12,16 +12,16 @@
 # realite au format custom.
 #
 # Variables d'environnement :
-#   CONTAINER        conteneur Postgres cible          (defaut: kwatro-postgres)
-#   DB_NAME          base a recreer                    (defaut: kwatro)
-#   DB_USER          role Postgres                     (defaut: kwatro)  
+#   CONTAINER        conteneur Postgres cible          (defaut: lucko-postgres)
+#   DB_NAME          base a recreer                    (defaut: lucko)
+#   DB_USER          role Postgres                     (defaut: lucko)  
 #   PG_CLIENT_IMAGE  image fournissant pg_restore/psql (defaut: postgres:17-alpine)
 #
 set -euo pipefail
 
-CONTAINER="${CONTAINER:-kwatro-postgres}"
-DB_NAME="${DB_NAME:-kwatro}"
-DB_USER="${DB_USER:-kwatro}"
+CONTAINER="${CONTAINER:-lucko-postgres}"
+DB_NAME="${DB_NAME:-lucko}"
+DB_USER="${DB_USER:-lucko}"
 PG_CLIENT_IMAGE="${PG_CLIENT_IMAGE:-postgres:17-alpine}"
 
 die() { printf '\033[31merreur :\033[0m %s\n' "$*" >&2; exit 1; }

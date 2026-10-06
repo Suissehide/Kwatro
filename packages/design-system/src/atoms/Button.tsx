@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react-native'
 import { Pressable, Text, View } from 'react-native'
 import {
   border,
@@ -14,12 +15,12 @@ import { Raised } from './Raised'
 import { useHover } from './useHover'
 
 /** `danger` : contour comme `ghost`, texte rouge (déconnexion). `ghost`, `soft` et `danger` n'ont pas d'ombre. */
-export type ButtonKind = 'room' | 'event' | 'venue' | 'kwote' | 'ink' | 'ghost' | 'soft' | 'danger'
+export type ButtonKind = 'room' | 'event' | 'venue' | 'rating' | 'ink' | 'ghost' | 'soft' | 'danger'
 const bg: Record<ButtonKind, string> = {
   room: colors.room,
   event: colors.event,
   venue: colors.venue,
-  kwote: colors.kwote,
+  rating: colors.rating,
   ink: colors.ink,
   ghost: colors.white,
   danger: colors.white,
@@ -29,7 +30,7 @@ const fg: Record<ButtonKind, string> = {
   room: onColor.room,
   event: onColor.event,
   venue: onColor.venue,
-  kwote: onColor.kwote,
+  rating: onColor.rating,
   ink: onColor.ink,
   ghost: colors.ink,
   danger: colors.room,
@@ -42,10 +43,13 @@ export function Button({
   kind = 'room',
   small,
   disabled,
+  icon: Icon,
   onPress,
 }: {
   label: string
   kind?: ButtonKind
+  /** Icône Lucide après le libellé (ex. lien externe). */
+  icon?: LucideIcon
   small?: boolean
   disabled?: boolean
   onPress?: () => void
@@ -81,6 +85,8 @@ export function Button({
               paddingVertical: small ? 7 : 14,
               paddingHorizontal: small ? 12 : 16,
               minHeight: small ? 36 : 52,
+              flexDirection: 'row',
+              gap: 6,
               alignItems: 'center',
               justifyContent: 'center',
               ...transition(['transform', 'background-color'], motion.fast),
@@ -102,6 +108,13 @@ export function Button({
             >
               {label}
             </Text>
+            {Icon ? (
+              <Icon
+                size={small ? 14 : 18}
+                color={disabled ? colors.disabledText : fg[kind]}
+                strokeWidth={2.5}
+              />
+            ) : null}
           </View>
         )
         // Structure fixe pendant l'appui : la face glisse pile sur son ombre, qui disparaît dessous.

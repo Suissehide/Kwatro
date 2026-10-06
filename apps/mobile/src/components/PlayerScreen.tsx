@@ -1,7 +1,8 @@
-import { MobileScreen, type PlayerTab, PlayerTabBar, WebScreen } from '@kwatro/design-system'
+import { MobileScreen, type PlayerTab, PlayerTabBar, WebScreen } from '@lucko/design-system'
 import type { ReactNode } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { openCreateRoom, openTab } from '@/lib/navigation'
+import { useTabBadges } from '@/queries/useChat'
 import { PlayerNav } from './PlayerNav'
 
 /** Écran d'un onglet joueur : barre du site sur desktop, barre d'onglets sur téléphone. */
@@ -21,6 +22,7 @@ export function PlayerScreen({
   children: ReactNode
 }) {
   const insets = useSafeAreaInsets()
+  const badges = useTabBadges()
   if (!wide) {
     return (
       <MobileScreen
@@ -30,6 +32,7 @@ export function PlayerScreen({
           pushed ? undefined : (
             <PlayerTabBar
               active={tab}
+              badges={badges}
               onSelect={openTab}
               onCreate={() => openCreateRoom()}
               bottomInset={Math.max(22, insets.bottom)}

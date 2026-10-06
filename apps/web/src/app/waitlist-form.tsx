@@ -1,6 +1,6 @@
 'use client'
-import { createApiClient } from '@kwatro/api-client'
-import { joinWaitlistSchema } from '@kwatro/shared'
+import { createApiClient } from '@lucko/api-client'
+import { joinWaitlistSchema } from '@lucko/shared'
 import { type FormEvent, useState } from 'react'
 import s from './landing.module.css'
 
@@ -35,7 +35,7 @@ export function WaitlistForm() {
         ? { tone: 'err', message: 'Inscription impossible pour le moment, réessaie plus tard.' }
         : {
             tone: 'ok',
-            message: 'C’est noté ! On te prévient dès que Kwatro arrive près de chez toi.',
+            message: 'C’est noté ! On te prévient dès que Lucko arrive près de chez toi.',
           },
     )
   }
@@ -51,9 +51,9 @@ export function WaitlistForm() {
   return (
     <form className={s.form} onSubmit={submit} noValidate>
       <label className={s.field}>
-        <span className="kw-label">E-mail</span>
+        <span className="lk-label">E-mail</span>
         <input
-          className="kw-field"
+          className="lk-field"
           name="email"
           type="email"
           autoComplete="email"
@@ -62,9 +62,9 @@ export function WaitlistForm() {
         />
       </label>
       <label className={s.field}>
-        <span className="kw-label">Ta ville (facultatif)</span>
+        <span className="lk-label">Ta ville (facultatif)</span>
         <input
-          className="kw-field"
+          className="lk-field"
           name="city"
           autoComplete="address-level2"
           placeholder="Lyon, Lille, Toulouse…"
@@ -80,11 +80,11 @@ export function WaitlistForm() {
           {status.message}
         </p>
       ) : null}
-      <button className="kw-btn kw-btn--room" type="submit" disabled={sending}>
+      <button className="lk-btn lk-btn--room" type="submit" disabled={sending}>
         {sending ? 'Envoi…' : 'Rejoindre la liste'}
       </button>
-      <p className="kw-small">
-        Ton e-mail sert uniquement à te prévenir du lancement de Kwatro (
+      <p className="lk-small">
+        Ton e-mail sert uniquement à te prévenir du lancement de Lucko (
         <a href="/privacy">confidentialité</a>).
       </p>
     </form>

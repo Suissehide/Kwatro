@@ -1,9 +1,9 @@
-# @kwatro/design-system
+# @lucko/design-system
 
-Design system « Plateau pop » de Kwatro : tokens + composants React Native, utilisés tels quels par
+Design system « Plateau pop » de Lucko : tokens + composants React Native, utilisés tels quels par
 l'app Expo (`apps/mobile`) et par le site Next.js (`apps/web`, via react-native-web).
 
-Référence visuelle : handoff design « Kwatro MVP » (`Kwatro DS Plateau pop v2`). Catalogue vivant :
+Référence visuelle : handoff design « Lucko MVP » (`Lucko DS Plateau pop v2`). Catalogue vivant :
 http://localhost:3010/design-system (web) et `/design-system` dans l'app Expo.
 
 ## Organisation (atomic design)
@@ -13,14 +13,14 @@ src/
 ├── tokens/      couleurs, polices (font()), typo, espacements, rayons, traits, ombres, z, grille…
 ├── atoms/       Typography, Button, IconButton, Tag, Chip, StatusPill, CountBadge, Avatar, DateBlock,
 │                Toggle, Checkbox, Radio, ProgressSteps, Note, Skeleton, Spinner, Raised
-├── molecules/   ScreenHeader, Segmented, TextField, Stepper, KwoteBadge, XpBar, ContentCard, ListRow,
+├── molecules/   ScreenHeader, Segmented, TextField, Stepper, RatingBadge, XpBar, ContentCard, ListRow,
 │                RoomStatusTimeline, StatCard, ShareBar, Toast, Banner, ChatBubble, Pagination,
 │                EmptyState, SkeletonCard
 ├── organisms/   DataTable, Accordion, BarChart, ConfirmDialog, BottomSheet,
 │                PlayerTabBar / VenueTabBar, Sidebar
 ├── templates/   MobileScreen, WebSidebarLayout
-├── scene/       HeroScene : pièces 3D Three.js, web uniquement (import séparé : @kwatro/design-system/scene)
-└── catalogue/   vitrine de tous les composants (import séparé : @kwatro/design-system/catalogue)
+├── scene/       HeroScene : pièces 3D Three.js, web uniquement (import séparé : @lucko/design-system/scene)
+└── catalogue/   vitrine de tous les composants (import séparé : @lucko/design-system/catalogue)
 ```
 
 Règle de dépendance : un niveau n'importe que les niveaux en dessous (atoms → tokens, molecules →
@@ -31,7 +31,7 @@ l'API.
 ## Utilisation
 
 ```tsx
-import { Button, ContentCard, Typography, colors } from '@kwatro/design-system'
+import { Button, ContentCard, Typography, colors } from '@lucko/design-system'
 
 <ContentCard kind="room" raised>
   <Typography variant="title">Pioneer du jeudi</Typography>
@@ -42,17 +42,20 @@ import { Button, ContentCard, Typography, colors } from '@kwatro/design-system'
 - **Polices** : toujours via `font('body', 800)` / `font('mono', 700)` / `font('display')` ou
   `Typography`, jamais `fontFamily` + `fontWeight` à la main (sur iOS/Android chaque graisse est
   une police distincte). Côté Expo, `apps/mobile/src/app/_layout.tsx` les charge ; côté Next,
-  `kwatro.css` les importe de Google Fonts.
+  `lucko.css` les importe de Google Fonts.
 - **Ombres** : pleines et sans flou, toujours via `<Raised>` (Android n'a pas d'ombre dure).
-- **Couleurs** : `textOn(bg)` donne la couleur de texte lisible ; jamais de blanc sur `kwote`.
+- **Couleurs** : `textOn(bg)` donne la couleur de texte lisible ; jamais de blanc sur `rating`.
+- **Icônes** : uniquement [Lucide](https://lucide.dev/icons) (`lucide-react-native`), jamais d'émoji
+  ni de glyphe Unicode (✓, ←, ▲, ◆, +…). Couleur via `color` (tokens), trait épaissi
+  (`strokeWidth={2.5}`) pour suivre la graisse 800 du texte.
 - **Accessibilité** : `IconButton`, `Toggle`, `Checkbox` exigent un `label` (lu par les lecteurs
   d'écran) ; `Checkbox hideLabel` pour une case seule.
 
 ## Web (Next.js)
 
 `apps/web/next.config.ts` alias `react-native` → `react-native-web` et transpile ce paquet ;
-`apps/web/src/app/rnw-styles.tsx` injecte les styles au rendu serveur. `kwatro.css` (variables
-`--kw-*` et classes `.kw-*`) reste disponible pour les pages statiques en HTML/CSS pur.
+`apps/web/src/app/rnw-styles.tsx` injecte les styles au rendu serveur. `lucko.css` (variables
+`--lk-*` et classes `.kw-*`) reste disponible pour les pages statiques en HTML/CSS pur.
 
 ## Ajouter un composant
 

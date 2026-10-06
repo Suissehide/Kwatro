@@ -1,11 +1,11 @@
-import { createApiClient } from '@kwatro/api-client'
+import { createApiClient } from '@lucko/api-client'
 import { Platform } from 'react-native'
 import { API_URL, authClient } from './auth'
 
 // Dev uniquement : joueur de démo du seed (en-tête `x-dev-user-id`, ex. joueur-demo) quand personne n'est connecté
 const DEV_USER_ID = process.env.EXPO_PUBLIC_DEV_USER_ID
 
-/** Client typé de l'API Kwatro. Les écrans ne l'appellent pas directement : ils passent par src/queries/ (TanStack Query). */
+/** Client typé de l'API Lucko. Les écrans ne l'appellent pas directement : ils passent par src/queries/ (TanStack Query). */
 export const api = createApiClient(
   API_URL,
   DEV_USER_ID ? { 'x-dev-user-id': DEV_USER_ID } : undefined,

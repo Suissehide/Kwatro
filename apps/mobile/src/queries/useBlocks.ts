@@ -10,7 +10,7 @@ export const blocksQueryOptions = queryOptions({
   queryFn: () => unwrap(api.GET('/me/blocks')),
 })
 
-/** Joueurs que j'ai bloqués, du plus récent au plus ancien (KWT-19). */
+/** Joueurs que j'ai bloqués, du plus récent au plus ancien (LKO-19). */
 export const useBlocksQuery = () => useQuery(blocksQueryOptions)
 
 // * MUTATIONS

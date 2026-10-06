@@ -1,4 +1,4 @@
-import { ageOn, type RegistrationMode, type RegistrationStatus } from '@kwatro/shared'
+import { ageOn, type RegistrationMode, type RegistrationStatus } from '@lucko/shared'
 
 export type RegistrableEvent = {
   registrationMode: RegistrationMode

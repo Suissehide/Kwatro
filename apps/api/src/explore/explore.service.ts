@@ -10,7 +10,7 @@ import {
   VENUE_AGENDA_MONTHS,
   type VenueListItem,
   type venueDetailSchema,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import { Injectable, NotFoundException } from '@nestjs/common'
 import type { z } from 'zod'
 import { eventVisibleTo, roomVisibleTo, type Viewer } from '../common/minors.rules'
@@ -41,7 +41,7 @@ const roomInclude = {
   },
 } satisfies Prisma.RoomInclude
 
-/** Rooms d'un hôte qui n'a pas bloqué le joueur connecté et que celui-ci n'a pas bloqué (KWT-19). */
+/** Rooms d'un hôte qui n'a pas bloqué le joueur connecté et que celui-ci n'a pas bloqué (LKO-19). */
 export const notBlockedWith = (viewerId?: string): Prisma.RoomWhereInput =>
   viewerId
     ? {
@@ -52,22 +52,37 @@ export const notBlockedWith = (viewerId?: string): Prisma.RoomWhereInput =>
       }
     : {}
 
-/** Room publique : initiales des joueurs et fourchette de Kwote des parties classées. */
+/** Inscription du joueur connecté à un événement (annulée = pas inscrit) ; sans joueur, aucune. */
+const myRegistration = (viewer: Viewer) => ({
+  registrations: {
+    where: {
+      userId: viewer?.id ?? '',
+      status: { in: ['REGISTERED' as const, 'WAITLISTED' as const] },
+    },
+    select: { status: true },
+  },
+})
+
+/** Statut lu par `myRegistration` : les inscriptions annulées sont déjà filtrées. */
+const myStatus = (registrations: { status: string }[]) =>
+  (registrations[0]?.status as 'REGISTERED' | 'WAITLISTED' | undefined) ?? null
+
+/** Room publique : initiales des joueurs et fourchette de LK des parties classées. */
 function roomItem({
   format,
   participants,
   ...room
 }: Prisma.RoomGetPayload<{ include: typeof roomInclude }>) {
-  const kwotes = participants.flatMap(({ user }) =>
-    user.gameProfiles.filter((p) => p.formatId === room.formatId).map((p) => p.kwote),
+  const ratings = participants.flatMap(({ user }) =>
+    user.gameProfiles.filter((p) => p.formatId === room.formatId).map((p) => p.rating),
   )
   return {
     ...room,
     format: format?.name ?? null,
     players: participants.map(({ user }) => ({ initial: user.pseudo?.slice(0, 1) ?? '?' })),
-    kwoteRange:
-      room.mode === 'RANKED' && kwotes.length
-        ? { min: Math.min(...kwotes), max: Math.max(...kwotes) }
+    ratingRange:
+      room.mode === 'RANKED' && ratings.length
+        ? { min: Math.min(...ratings), max: Math.max(...ratings) }
         : null,
   }
 }
@@ -76,12 +91,12 @@ function roomItem({
 export class ExploreService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /** Lieux à moins de `radiusKm` du point, avec leur distance en mètres (PostGIS, index GiST). */
+  /** Lieux publiés à moins de `radiusKm` du point, avec leur distance en mètres (PostGIS, index GiST). */
   private async distances({ lat, lng, radiusKm }: GeoQuery) {
     const rows = await this.prisma.$queryRaw<{ id: string; distance: number }[]>`
       SELECT "id", ST_Distance("location", ST_MakePoint(${lng}::float8, ${lat}::float8)::geography) AS distance
       FROM "Venue"
-      WHERE ST_DWithin("location", ST_MakePoint(${lng}::float8, ${lat}::float8)::geography, ${radiusKm * 1000}::float8)`
+      WHERE "status" = 'PUBLISHED' AND ST_DWithin("location", ST_MakePoint(${lng}::float8, ${lat}::float8)::geography, ${radiusKm * 1000}::float8)`
     return new Map(rows.map((row) => [row.id, Math.round(Number(row.distance))]))
   }
 
@@ -127,8 +142,8 @@ export class ExploreService {
     // Un jour de marge de chaque côté : l'app regroupe les événements par jour à l'heure de Paris
     const agendaFrom = new Date(monthStart.getTime() - DAY_MS)
     const agendaTo = new Date(Date.UTC(year, month - 1 + VENUE_AGENDA_MONTHS, 1) + DAY_MS)
-    const venue = await this.prisma.venue.findUnique({
-      where: { slug },
+    const venue = await this.prisma.venue.findFirst({
+      where: { slug, status: 'PUBLISHED' },
       include: {
         openingHours: { orderBy: [{ weekday: 'asc' }, { opensAtMinute: 'asc' }] },
         closures: { where: { endsOn: { gte: monthStart } }, orderBy: { startsOn: 'asc' } },
@@ -140,6 +155,7 @@ export class ExploreService {
           include: {
             games: { select: { slug: true, name: true }, orderBy: { name: 'asc' } },
             _count: { select: { registrations: { where: { status: 'REGISTERED' } } } },
+            ...myRegistration(viewer),
           },
         },
         rooms: {
@@ -158,7 +174,11 @@ export class ExploreService {
       accessibility: accessibilityItemSchema.array().parse(venue.accessibility),
       events: venue.events
         .filter((event) => eventVisibleTo(event, viewer, now))
-        .map(({ _count, ...event }) => ({ ...event, registeredCount: _count.registrations })),
+        .map(({ _count, registrations, ...event }) => ({
+          ...event,
+          registeredCount: _count.registrations,
+          myRegistration: myStatus(registrations),
+        })),
       rooms: venue.rooms.filter((room) => roomVisibleTo(room, viewer, now)).map(roomItem),
     }
   }
@@ -180,13 +200,15 @@ export class ExploreService {
         games: { select: { slug: true, name: true }, orderBy: { name: 'asc' } },
         venue: { select: { id: true, slug: true, name: true, isPartner: true } },
         _count: { select: { registrations: { where: { status: 'REGISTERED' } } } },
+        ...myRegistration(viewer),
       },
     })
     return events
       .filter((event) => eventVisibleTo(event, viewer, now))
-      .map(({ _count, venue, ...event }) => ({
+      .map(({ _count, venue, registrations, ...event }) => ({
         ...event,
         registeredCount: _count.registrations,
+        myRegistration: myStatus(registrations),
         venue: { ...venue, distanceMeters: distances.get(venue.id) ?? 0 },
       }))
       .sort(
@@ -198,7 +220,7 @@ export class ExploreService {
   async rooms(query: EventsQuery, viewer: Viewer): Promise<z.output<typeof roomListItemSchema>[]> {
     const distances = await this.distances(query)
     const now = new Date()
-    // ponytail: rooms à domicile exclues (zone floue à afficher, KWT des rooms à domicile)
+    // ponytail: rooms à domicile exclues (zone floue à afficher, ticket des rooms à domicile)
     const rooms = await this.prisma.room.findMany({
       where: {
         status: 'OPEN',

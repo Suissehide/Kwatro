@@ -1,8 +1,8 @@
-/* Landing joueurs (KWT-3) — tokens et classes kw-* de @kwatro/design-system/kwatro.css */
+/* Landing joueurs (LKO-3) — tokens et classes lk-* de @lucko/design-system/lucko.css */
 
 .page {
   overflow-x: clip;
-  background: var(--kw-cream);
+  background: var(--lk-cream);
 }
 
 .wrap {
@@ -24,7 +24,7 @@
 
 .h2 {
   margin: 0 0 clamp(32px, 5vw, 56px);
-  font: 400 clamp(2rem, 4vw, 3.5rem) / 1 var(--kw-font-display);
+  font: 400 clamp(2rem, 4vw, 3.5rem) / 1 var(--lk-font-display);
   text-transform: uppercase;
   max-width: 18ch;
 }
@@ -33,18 +33,18 @@
 .nav {
   position: sticky;
   top: 0;
-  z-index: var(--kw-z-sticky);
+  z-index: var(--lk-z-sticky);
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
   padding: 12px max(16px, calc((100% - 1200px) / 2 + 32px));
-  background: color-mix(in srgb, var(--kw-cream) 85%, transparent);
+  background: color-mix(in srgb, var(--lk-cream) 85%, transparent);
   backdrop-filter: blur(10px);
-  border-bottom: var(--kw-b);
+  border-bottom: var(--lk-b);
 }
 .logo {
-  font: 400 22px / 1 var(--kw-font-display);
+  font: 400 22px / 1 var(--lk-font-display);
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
@@ -55,7 +55,7 @@
 }
 .heroTitle {
   margin: 0;
-  font: 400 clamp(2.5rem, 5.6vw, 5.5rem) / 0.98 var(--kw-font-display);
+  font: 400 clamp(2.5rem, 5.6vw, 5.5rem) / 0.98 var(--lk-font-display);
   text-transform: uppercase;
   letter-spacing: -0.01em;
 }
@@ -73,8 +73,8 @@
 .lead {
   margin: 0;
   max-width: 34ch;
-  font: 500 clamp(17px, 1.6vw, 21px) / 1.5 var(--kw-font-body);
-  color: var(--kw-muted);
+  font: 500 clamp(17px, 1.6vw, 21px) / 1.5 var(--lk-font-body);
+  color: var(--lk-muted);
 }
 .ctas {
   display: flex;
@@ -94,8 +94,8 @@
   position: absolute;
   width: min(300px, 78%);
   transition:
-    rotate var(--kw-t-normal) var(--kw-ease),
-    translate var(--kw-t-normal) var(--kw-ease);
+    rotate var(--lk-t-normal) var(--lk-ease),
+    translate var(--lk-t-normal) var(--lk-ease);
 }
 .mock:hover {
   z-index: 1;
@@ -123,9 +123,9 @@
 /* ---- Défilé des jeux ---- */
 .marquee {
   overflow: hidden;
-  background: var(--kw-ink);
+  background: var(--lk-ink);
   color: #fff;
-  border-block: var(--kw-b);
+  border-block: var(--lk-b);
   transform: rotate(-1.5deg);
   margin-inline: -16px;
 }
@@ -142,14 +142,14 @@
 }
 .marqueeTrack li {
   padding: 18px 0;
-  font: 400 clamp(20px, 2.4vw, 30px) / 1 var(--kw-font-display);
+  font: 400 clamp(20px, 2.4vw, 30px) / 1 var(--lk-font-display);
   text-transform: uppercase;
   white-space: nowrap;
 }
 .marqueeTrack li::after {
   content: "◆";
   margin-inline: 0.9em;
-  color: var(--kw-kwote);
+  color: var(--lk-rating);
 }
 @keyframes marquee {
   to {
@@ -172,7 +172,7 @@
     grid-column: span 2;
     min-height: 260px;
   }
-  .tileKwote {
+  .tileRating {
     grid-row: span 2;
   }
 }
@@ -182,36 +182,36 @@
   justify-content: flex-end;
   gap: 10px;
   padding: clamp(22px, 2.6vw, 32px);
-  border: var(--kw-b);
-  border-radius: var(--kw-r-card);
-  box-shadow: var(--kw-sh-lg);
+  border: var(--lk-b);
+  border-radius: var(--lk-r-card);
+  box-shadow: var(--lk-sh-lg);
   background: #fff;
 }
 .tileMeta {
-  font: 700 13px var(--kw-font-mono);
+  font: 700 13px var(--lk-font-mono);
   text-transform: uppercase;
 }
 .tileTitle {
   margin: 0;
   max-width: 18ch;
-  font: 400 clamp(1.5rem, 2.6vw, 2.25rem) / 1.02 var(--kw-font-display);
+  font: 400 clamp(1.5rem, 2.6vw, 2.25rem) / 1.02 var(--lk-font-display);
   text-transform: uppercase;
 }
 .tileText {
   margin: 0;
   max-width: 38ch;
-  font: 600 17px / 1.45 var(--kw-font-body);
+  font: 600 17px / 1.45 var(--lk-font-body);
 }
 .tileEvent {
-  background: var(--kw-event);
+  background: var(--lk-event);
   color: #fff;
 }
-.tileKwote {
-  background: var(--kw-kwote);
+.tileRating {
+  background: var(--lk-rating);
   justify-content: space-between;
 }
 .tileNumber {
-  font: 700 clamp(4rem, 9vw, 7.5rem) / 0.9 var(--kw-font-mono);
+  font: 700 clamp(4rem, 9vw, 7.5rem) / 0.9 var(--lk-font-mono);
   letter-spacing: -0.04em;
 }
 .tileRoom {
@@ -219,17 +219,17 @@
   overflow: hidden;
   padding-top: calc(clamp(22px, 2.6vw, 32px) + 11px);
 }
-/* Bandeau rouge sous la bordure encre, comme .kw-card__stripe */
+/* Bandeau rouge sous la bordure encre, comme .lk-card__stripe */
 .tileRoom::before {
   content: "";
   position: absolute;
   inset: 0 0 auto;
   height: 8px;
-  background: var(--kw-room);
-  border-bottom: var(--kw-b);
+  background: var(--lk-room);
+  border-bottom: var(--lk-b);
 }
 .tileVenue {
-  background: var(--kw-venue-soft);
+  background: var(--lk-venue-soft);
 }
 
 /* ---- Comment ça marche : titre épinglé, étapes qui défilent ---- */
@@ -266,25 +266,25 @@
   width: 44px;
   height: 44px;
   margin-bottom: 18px;
-  border: var(--kw-b);
+  border: var(--lk-b);
   border-radius: 50%;
-  background: var(--kw-kwote);
-  font: 700 18px var(--kw-font-mono);
+  background: var(--lk-rating);
+  font: 700 18px var(--lk-font-mono);
 }
 .stepTitle {
   margin: 0 0 8px;
-  font: 800 clamp(20px, 2vw, 26px) / 1.2 var(--kw-font-body);
+  font: 800 clamp(20px, 2vw, 26px) / 1.2 var(--lk-font-body);
 }
 .step p {
   margin: 0;
-  font: 400 17px / 1.5 var(--kw-font-body);
-  color: var(--kw-muted);
+  font: 400 17px / 1.5 var(--lk-font-body);
+  color: var(--lk-muted);
 }
 
 /* ---- Liste d'attente ---- */
 .action {
   padding-block: clamp(96px, 14vw, 192px);
-  background: var(--kw-ink);
+  background: var(--lk-ink);
   color: #fff;
   scroll-margin-top: 64px;
 }
@@ -300,19 +300,19 @@
 }
 .actionTitle {
   margin: 0;
-  font: 400 clamp(2.75rem, 6vw, 5.5rem) / 0.95 var(--kw-font-display);
+  font: 400 clamp(2.75rem, 6vw, 5.5rem) / 0.95 var(--lk-font-display);
   text-transform: uppercase;
 }
 .actionLead {
   margin: 24px 0 0;
   max-width: 36ch;
-  font: 500 19px / 1.5 var(--kw-font-body);
+  font: 500 19px / 1.5 var(--lk-font-body);
   color: #e9dcc4;
 }
 .formCard {
   padding: clamp(20px, 3vw, 32px);
-  color: var(--kw-ink);
-  box-shadow: 8px 8px 0 var(--kw-kwote);
+  color: var(--lk-ink);
+  box-shadow: 8px 8px 0 var(--lk-rating);
 }
 
 .form {
@@ -327,17 +327,17 @@
   min-height: 50px;
   box-sizing: border-box;
   width: 100%;
-  color: var(--kw-ink);
+  color: var(--lk-ink);
 }
 .field input::placeholder {
-  color: var(--kw-placeholder);
+  color: var(--lk-placeholder);
 }
 .check {
   display: flex;
   align-items: center;
   gap: 10px;
   min-height: 44px;
-  font: 700 15px var(--kw-font-body);
+  font: 700 15px var(--lk-font-body);
   cursor: pointer;
 }
 .check input {
@@ -346,7 +346,7 @@
   width: 24px;
   height: 24px;
   margin: 0;
-  border: var(--kw-b-thin);
+  border: var(--lk-b-thin);
   border-radius: 6px;
   background: #fff;
   display: grid;
@@ -354,16 +354,16 @@
   cursor: pointer;
 }
 .check input:checked {
-  background: var(--kw-venue);
+  background: var(--lk-venue);
 }
 .check input:checked::after {
   content: "✓";
   color: #fff;
-  font: 800 14px var(--kw-font-body);
+  font: 800 14px var(--lk-font-body);
 }
 .check input:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px var(--kw-kwote);
+  box-shadow: 0 0 0 3px var(--lk-rating);
 }
 .form button:disabled {
   opacity: 0.6;
@@ -373,15 +373,15 @@
 .success {
   margin: 0;
   padding: 12px 14px;
-  border: var(--kw-b);
+  border: var(--lk-b);
   border-radius: 12px;
-  font: 700 15px / 1.4 var(--kw-font-body);
+  font: 700 15px / 1.4 var(--lk-font-body);
 }
 .error {
-  background: var(--kw-room-soft);
+  background: var(--lk-room-soft);
 }
 .success {
-  background: var(--kw-venue-soft);
+  background: var(--lk-venue-soft);
 }
 
 /* ---- Pied de page ---- */
@@ -394,7 +394,7 @@
   }
 }
 
-/* ---- Scène 3D du hero (@kwatro/design-system/scene) : déborde du paquet de cartes, laisse passer les clics ---- */
+/* ---- Scène 3D du hero (@lucko/design-system/scene) : déborde du paquet de cartes, laisse passer les clics ---- */
 .scene {
   position: absolute;
   inset: -64px -56px;
@@ -409,7 +409,7 @@
   }
 }
 /* Le canvas déborde du cadre (.scene) pour que les pièces en vol ne soient pas coupées ;
-   le cadrage de la table reste celui de .scene (setViewOffset dans @kwatro/design-system/scene) */
+   le cadrage de la table reste celui de .scene (setViewOffset dans @lucko/design-system/scene) */
 .scene canvas {
   position: absolute;
   inset: -35% -20% -12%;

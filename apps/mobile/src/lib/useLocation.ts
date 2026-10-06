@@ -1,4 +1,4 @@
-import { DEFAULT_CITY } from '@kwatro/shared'
+import { DEFAULT_CITY } from '@lucko/shared'
 import * as Location from 'expo-location'
 import { useEffect, useState } from 'react'
 

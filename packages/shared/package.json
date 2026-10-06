@@ -1,5 +1,5 @@
 {
-  "name": "@kwatro/shared",
+  "name": "@lucko/shared",
   "version": "0.0.0",
   "private": true,
   "description": "Types, schémas Zod et constantes partagés entre l'API, le site et l'app",

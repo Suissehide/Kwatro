@@ -1,0 +1,58 @@
+name: Mobile
+
+# Mise à jour OTA (JS seulement) du canal preview après chaque CI verte sur main.
+# Production : manuel (Actions › Mobile › Run workflow), mise à jour OTA ou nouveau build envoyé aux stores.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "update : OTA sur les apps installées · build : nouveau binaire envoyé aux stores"
+        type: choice
+        options: [update, build]
+        default: update
+
+jobs:
+  eas:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && 'production' || 'staging' }}
+    concurrency:
+      group: mobile-${{ github.event_name == 'workflow_dispatch' && 'production' || 'preview' }}
+    env:
+      PROFILE: ${{ github.event_name == 'workflow_dispatch' && 'production' || 'preview' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Mise à jour OTA
+        if: inputs.action != 'build'
+        working-directory: apps/mobile
+        run: |
+          pnpm run eas-build-post-install
+          eas update --channel "$PROFILE" --environment "$PROFILE" --message "$(git log -1 --pretty=%s)" --non-interactive
+
+      - name: Build iOS + Android et envoi aux stores
+        if: inputs.action == 'build'
+        working-directory: apps/mobile
+        run: eas build --platform all --profile production --auto-submit --non-interactive --no-wait

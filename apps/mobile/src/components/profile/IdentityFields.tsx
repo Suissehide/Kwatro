@@ -1,5 +1,5 @@
-import { Avatar, Button, StatusPill, Typography } from '@kwatro/design-system'
-import { type AvatarStatus, PSEUDO_MAX, pseudoSchema } from '@kwatro/shared'
+import { Avatar, Button, StatusPill, Typography } from '@lucko/design-system'
+import { type AvatarStatus, PSEUDO_MAX, pseudoSchema } from '@lucko/shared'
 import { View } from 'react-native'
 import { profileFormOpts } from '@/forms/profile.form'
 import { withForm } from '@/hooks/formConfig'

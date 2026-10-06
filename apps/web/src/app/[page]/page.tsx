@@ -6,12 +6,12 @@ import { TextPage } from '../text-page'
 const PAGES: Record<string, { title: string; text: string }> = {
   about: {
     title: 'À propos',
-    text: 'Kwatro aide les joueurs à trouver une table près de chez eux, ce soir.',
+    text: 'Lucko aide les joueurs à trouver une table près de chez eux, ce soir.',
   },
   help: { title: 'Aide', text: 'La foire aux questions arrive avec le lancement de l’app.' },
   bordeaux: {
     title: 'Où jouer ce soir à Bordeaux',
-    text: 'Les bars à jeux, boutiques et associations de Bordeaux arrivent bientôt sur Kwatro.',
+    text: 'Les bars à jeux, boutiques et associations de Bordeaux arrivent bientôt sur Lucko.',
   },
 }
 

@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react-native'
 import { Pressable, Text, View } from 'react-native'
 import { border, colors, font, sizes } from '../tokens'
 
@@ -33,9 +34,7 @@ export function Checkbox({
           justifyContent: 'center',
         }}
       >
-        {value ? (
-          <Text style={{ ...font('body', 800), color: colors.white, fontSize: 14 }}>✓</Text>
-        ) : null}
+        {value ? <Check size={16} color={colors.white} strokeWidth={3} /> : null}
       </View>
       {!hideLabel ? (
         <Text style={{ ...font('body', 600), fontSize: 14, color: colors.ink }}>{label}</Text>

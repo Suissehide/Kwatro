@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   addMonths,
   type ClosureRange,
+  fromLocalDateTime,
   localDateTime,
   monthGrid,
   openingStatus,
@@ -111,5 +112,12 @@ describe('monthGrid', () => {
     expect(october[33]).toBe('2026-10-31')
     expect(october[34]).toBeNull()
     expect(addMonths('2026-11', 2)).toBe('2027-01')
+  })
+})
+
+describe('fromLocalDateTime', () => {
+  it("garde l'heure de Paris de part et d'autre du passage à l'heure d'hiver", () => {
+    expect(fromLocalDateTime('2026-10-24', 19 * 60).toISOString()).toBe('2026-10-24T17:00:00.000Z')
+    expect(fromLocalDateTime('2026-10-31', 19 * 60).toISOString()).toBe('2026-10-31T18:00:00.000Z')
   })
 })

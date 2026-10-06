@@ -3,7 +3,7 @@ import { Typography } from '../atoms/Typography'
 import { colors, font } from '../tokens'
 import { AvatarStack } from './AvatarStack'
 import { ContentCard } from './ContentCard'
-import { KwoteBadge } from './KwoteBadge'
+import { RatingBadge } from './RatingBadge'
 
 export function RoomCard({
   label,
@@ -11,7 +11,7 @@ export function RoomCard({
   meta,
   players,
   capacity,
-  kwote,
+  rating,
   wide,
   onPress,
 }: {
@@ -20,7 +20,7 @@ export function RoomCard({
   meta: string
   players: string[]
   capacity: number
-  kwote?: string | null
+  rating?: string | null
   wide?: boolean
   onPress?: () => void
 }) {
@@ -47,7 +47,7 @@ export function RoomCard({
             <AvatarStack names={players} />
             {count}
           </View>
-          {kwote ? <KwoteBadge value={kwote} /> : null}
+          {rating ? <RatingBadge value={rating} /> : null}
         </View>
       ) : (
         count

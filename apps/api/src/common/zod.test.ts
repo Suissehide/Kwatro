@@ -1,4 +1,4 @@
-import { createRoomSchema, meSchema } from '@kwatro/shared'
+import { createRoomSchema, meSchema } from '@lucko/shared'
 import { BadRequestException } from '@nestjs/common'
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
@@ -50,8 +50,9 @@ describe('schémas de réponse', () => {
       searchRadiusKm: 10,
       availability: [],
       vibes: [],
+      notificationsOff: [],
       xp: 0,
-      mainKwote: null,
+      mainRating: null,
       rankings: [],
       venues: [],
       birthDate: new Date('2010-01-01'),

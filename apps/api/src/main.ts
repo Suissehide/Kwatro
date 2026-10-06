@@ -20,7 +20,7 @@ async function bootstrap() {
     })
   }
   await app.listen(env.API_PORT)
-  Logger.log(`API Kwatro sur http://localhost:${env.API_PORT} (docs : /docs)`, 'Bootstrap')
+  Logger.log(`API Lucko sur http://localhost:${env.API_PORT} (docs : /docs)`, 'Bootstrap')
 }
 
 void bootstrap()

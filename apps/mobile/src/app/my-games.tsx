@@ -3,15 +3,17 @@ import {
   Banner,
   Button,
   ChipGroup,
+  colors,
   EmptyState,
   Segmented,
   SkeletonCard,
   StatusPill,
   Tag,
   Typography,
-} from '@kwatro/design-system'
-import { type AgendaItem, agendaGroup } from '@kwatro/shared'
+} from '@lucko/design-system'
+import { type AgendaItem, agendaGroup } from '@lucko/shared'
 import { router, useLocalSearchParams } from 'expo-router'
+import { CalendarX } from 'lucide-react-native'
 import { useState } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { PlayerScreen } from '@/components/PlayerScreen'
@@ -122,7 +124,7 @@ function GameCard({ item, wide }: { item: AgendaItem; wide: boolean }) {
           <Tag label={tag.label} variant={tag.variant} />
         ) : null
       }
-      // Historique : pas encore de variation de Kwote à montrer (résultats de partie à venir)
+      // Historique : pas encore de variation de LK à montrer (résultats de partie à venir)
       side={item.status === 'PLAYED' ? null : undefined}
       onPress={() => (item.kind === 'ROOM' ? openRoom(item.id) : openEvent(item.id))}
     />
@@ -134,7 +136,7 @@ function Empty({ past, filtered }: { past: boolean; filtered: boolean }) {
     return (
       <EmptyState
         dashed
-        icon={<Typography variant="h2">◎</Typography>}
+        icon={<CalendarX size={28} color={colors.ink} strokeWidth={2.5} />}
         title="Rien pour ce jeu"
         text="Choisis un autre jeu, ou « Tous »."
       />
@@ -142,14 +144,14 @@ function Empty({ past, filtered }: { past: boolean; filtered: boolean }) {
   return past ? (
     <EmptyState
       dashed
-      icon={<Typography variant="h2">◎</Typography>}
+      icon={<CalendarX size={28} color={colors.ink} strokeWidth={2.5} />}
       title="Pas encore de partie"
-      text="Tes parties terminées apparaîtront ici, avec le résultat et ta Kwote."
+      text="Tes parties terminées apparaîtront ici, avec le résultat et tes LK."
     />
   ) : (
     <EmptyState
       dashed
-      icon={<Typography variant="h2">◎</Typography>}
+      icon={<CalendarX size={28} color={colors.ink} strokeWidth={2.5} />}
       title="Rien de prévu"
       text="Inscris-toi à une soirée ou rejoins une room pour la retrouver ici."
       action={<Button small label="Explorer ce soir" onPress={openHome} />}

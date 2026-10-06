@@ -3,8 +3,8 @@ import type {
   CalendarDay,
   ContentKind,
   StatusTone,
-} from '@kwatro/design-system'
-import { contentColor } from '@kwatro/design-system'
+} from '@lucko/design-system'
+import { contentColor } from '@lucko/design-system'
 import {
   EVENT_TYPE_LABELS,
   type EventType,
@@ -17,7 +17,7 @@ import {
   rangesOn,
   VENUE_TIME_ZONE,
   type VenueDetail,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import { eventPlaces, gameLabel, isFull, localDay } from './explore'
 
 type VenueEvent = VenueDetail['events'][number]
@@ -200,11 +200,23 @@ export type AgendaAction =
   | { kind: 'ghost' | 'room' | 'soft'; label: string; url?: undefined }
   | { kind: 'ghost'; label: string; url: string }
 
-/** Bouton selon le mode d'inscription ; l'inscription elle-même se fait sur la fiche événement. */
-export function agendaAction(event: VenueEvent): AgendaAction {
+/**
+ * Bouton selon l'inscription du joueur et le mode d'inscription ; l'inscription elle-même se fait sur la
+ * fiche événement. Sert aussi aux cartes d'Explorer (pas de lien externe direct).
+ */
+export function agendaAction(
+  event: Pick<
+    VenueEvent,
+    'registrationMode' | 'myRegistration' | 'capacity' | 'registeredCount'
+  > & {
+    externalUrl?: string | null
+  },
+): AgendaAction {
+  if (event.myRegistration === 'REGISTERED') return { kind: 'ghost', label: 'Inscrit ✓' }
+  if (event.myRegistration === 'WAITLISTED') return { kind: 'ghost', label: "En liste d'attente" }
   if (event.registrationMode === 'NONE') return { kind: 'ghost', label: 'Voir' }
   if (event.registrationMode === 'EXTERNAL' && event.externalUrl) {
-    return { kind: 'ghost', label: 'Inscription ↗', url: event.externalUrl }
+    return { kind: 'ghost', label: 'Inscription', url: event.externalUrl }
   }
   return isFull(event)
     ? { kind: 'soft', label: "Liste d'attente" }

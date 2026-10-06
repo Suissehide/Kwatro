@@ -7,17 +7,17 @@ import { border, colors, font, radius, sizes, transition, type } from '../tokens
 export type FooterLink = { label: string; href: string; short?: string }
 
 // ponytail: adresse, comptes Instagram et Discord à confirmer avant la mise en ligne
-export const CONTACT_EMAIL = 'contact@kwatro.fr'
+export const CONTACT_EMAIL = 'contact@lucko.fr'
 
 // Variable inlinée par Expo au bundle de l'app ; le design system n'a pas les types Node
 declare const process: { env: { EXPO_PUBLIC_SITE_URL?: string } }
 
 /** Site public : préfixe des liens du pied de page dans l'app (pages légales, aide, villes). Site local en dev. */
-export const SITE_URL = process.env.EXPO_PUBLIC_SITE_URL ?? 'https://kwatro.fr'
+export const SITE_URL = process.env.EXPO_PUBLIC_SITE_URL ?? 'https://lucko.fr'
 
 /** Liens identiques sur toutes les pages. Chemins relatifs au site public (voir `siteUrl`). */
 export const FOOTER_LINKS = {
-  kwatro: [
+  lucko: [
     { label: 'À propos', href: '/about' },
     { label: 'Aide', href: '/help' },
     { label: 'Contact', href: `mailto:${CONTACT_EMAIL}` },
@@ -37,8 +37,8 @@ export const FOOTER_LINKS = {
 } satisfies Record<string, FooterLink[]>
 
 export const SOCIAL_LINKS = [
-  { label: 'Instagram', href: 'https://www.instagram.com/kwatro.app' },
-  { label: 'Discord', href: 'https://discord.gg/kwatro' },
+  { label: 'Instagram', href: 'https://www.instagram.com/lucko.app' },
+  { label: 'Discord', href: 'https://discord.gg/lucko' },
 ] satisfies FooterLink[]
 
 const WIDE = 900
@@ -66,7 +66,7 @@ export function SiteFooter({
 
   const column = (title: string, links: FooterLink[]) => (
     <View style={{ flex: 1, minWidth: 0, gap: small ? 10 : 12 }}>
-      <Text style={{ ...type.label, color: colors.kwote }}>{title}</Text>
+      <Text style={{ ...type.label, color: colors.rating }}>{title}</Text>
       {links.map((l) => (
         <FooterTextLink
           key={l.href}
@@ -93,7 +93,7 @@ export function SiteFooter({
       ) : null}
     </>
   )
-  const copyright = <Text style={{ ...type.small, color: colors.creamMuted }}>© {year} Kwatro</Text>
+  const copyright = <Text style={{ ...type.small, color: colors.creamMuted }}>© {year} Lucko</Text>
   const noTracking = <Text style={{ ...type.small, color: colors.creamMuted }}>{NO_TRACKING}</Text>
 
   if (small) {
@@ -105,7 +105,7 @@ export function SiteFooter({
         <Brand onDark />
         <Text style={{ ...type.h1, color: colors.white }}>{PITCH}</Text>
         <View style={{ flexDirection: 'row', gap: 16 }}>
-          {column('Kwatro', [...FOOTER_LINKS.kwatro, ...FOOTER_LINKS.lieux])}
+          {column('Lucko', [...FOOTER_LINKS.lucko, ...FOOTER_LINKS.lieux])}
           {column('Légal', FOOTER_LINKS.legal)}
         </View>
         {extras}
@@ -156,7 +156,7 @@ export function SiteFooter({
             </Text>
             {extras}
           </View>
-          {column('Kwatro', FOOTER_LINKS.kwatro)}
+          {column('Lucko', FOOTER_LINKS.lucko)}
           {column('Lieux', FOOTER_LINKS.lieux)}
           {column('Légal', FOOTER_LINKS.legal)}
         </View>
@@ -173,7 +173,7 @@ export function SiteFooter({
           }}
         >
           <Text style={{ ...type.small, color: colors.creamMuted }}>
-            © {year} Kwatro · {NO_TRACKING}
+            © {year} Lucko · {NO_TRACKING}
           </Text>
           <Text style={{ ...type.label, letterSpacing: 0, color: colors.creamMuted }}>
             Bordeaux · France
@@ -206,7 +206,7 @@ function FooterTextLink({
         style={{
           ...font('body', 600),
           fontSize,
-          color: hovered ? colors.kwote : colors.white,
+          color: hovered ? colors.rating : colors.white,
           ...transition(['color']),
         }}
       >
@@ -218,7 +218,7 @@ function FooterTextLink({
 
 function SocialLink({ label, href }: { label: string; href: string }) {
   const { hovered, hoverProps } = useHover()
-  const color = hovered ? colors.kwote : colors.white
+  const color = hovered ? colors.rating : colors.white
   return (
     <Pressable
       role="link"
@@ -314,7 +314,7 @@ function StoreBadge({ label, href }: { label: string; href: string }) {
         paddingHorizontal: 14,
         justifyContent: 'center',
         borderWidth: border.thin,
-        borderColor: hovered ? colors.kwote : colors.white,
+        borderColor: hovered ? colors.rating : colors.white,
         borderRadius: radius.button,
         ...transition(['border-color']),
       }}

@@ -2,32 +2,30 @@ import {
   Banner,
   BrandHeader,
   Button,
-  border,
   Carousel,
   ChipGroup,
-  colors,
   EmptyState,
   EventCard,
-  KwoteBadge,
   ListCard,
   MobileScreen,
   PageTitle,
   PlayerTabBar,
   ProfileCard,
+  RatingBadge,
   RoomCard,
-  radius,
   Section,
   SkeletonCard,
   Typography,
   VenueRow,
   WebScreen,
-} from '@kwatro/design-system'
-import { formatKwote, xpLevel } from '@kwatro/shared'
+} from '@lucko/design-system'
+import { formatRating, xpLevel } from '@lucko/shared'
 import { Redirect } from 'expo-router'
+import { MoonStar } from 'lucide-react-native'
 import { useState } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { ExploreMap } from '@/components/explore/ExploreMap'
+import { MapFrame } from '@/components/explore/MapFrame'
 import { PlayerNav } from '@/components/PlayerNav'
 import {
   eventCardProps,
@@ -45,7 +43,10 @@ import {
   openRoom,
   openTab,
   openVenue,
+  openVenues,
 } from '@/lib/navigation'
+import { agendaAction } from '@/lib/venue'
+import { useTabBadges } from '@/queries/useChat'
 import { useTonightQuery } from '@/queries/useExplore'
 import { useMeQuery } from '@/queries/useMe'
 
@@ -54,6 +55,7 @@ const WIDE = 900
 export default function HomeScreen() {
   const wide = useWindowDimensions().width >= WIDE
   const insets = useSafeAreaInsets()
+  const badges = useTabBadges()
   const me = useMeQuery()
   const { place, data, failed, retry } = useTonightQuery()
   const [game, setGame] = useState<string | null>(null)
@@ -85,7 +87,7 @@ export default function HomeScreen() {
     <SkeletonCard />
   ) : events.length === 0 ? (
     <EmptyState
-      icon={<Typography variant="h2">◎</Typography>}
+      icon={<MoonStar size={28} color={colors.ink} strokeWidth={2.5} />}
       title="Pas de soirée ce soir"
       text={
         game
@@ -94,22 +96,21 @@ export default function HomeScreen() {
       }
     />
   ) : (
-    events.map((e, i) => (
-      <EventCard
-        key={e.id}
-        {...eventCardProps(e)}
-        wide={wide}
-        raised={i === 0}
-        onPress={() => openEvent(e.id)}
-        action={
-          e.registrationMode === 'NONE' ? (
-            <Button small kind="ghost" label="Voir" onPress={() => openEvent(e.id)} />
-          ) : (
-            <Button small label="S'inscrire" onPress={() => openEvent(e.id)} />
-          )
-        }
-      />
-    ))
+    events.map((e, i) => {
+      const action = agendaAction(e)
+      return (
+        <EventCard
+          key={e.id}
+          {...eventCardProps(e)}
+          wide={wide}
+          raised={i === 0}
+          onPress={() => openEvent(e.id)}
+          action={
+            <Button small kind={action.kind} label={action.label} onPress={() => openEvent(e.id)} />
+          }
+        />
+      )
+    })
   )
 
   const roomCards = rooms.map((r) => (
@@ -128,23 +129,13 @@ export default function HomeScreen() {
   )
 
   const map = (height: number) => (
-    <View
-      style={{
-        height,
-        borderWidth: border.base,
-        borderColor: colors.ink,
-        borderRadius: radius.card,
-        overflow: 'hidden',
-        backgroundColor: colors.creamDark,
-      }}
-    >
-      <ExploreMap
-        center={place}
-        venues={data?.venues ?? []}
-        selectedId={selectedId}
-        onSelect={setSelectedId}
-      />
-    </View>
+    <MapFrame
+      height={height}
+      center={place}
+      venues={data?.venues ?? []}
+      selectedId={selectedId}
+      onSelect={setSelectedId}
+    />
   )
 
   const venueList = !data ? (
@@ -177,12 +168,15 @@ export default function HomeScreen() {
           <BrandHeader
             onHome={openHome}
             right={
-              me?.mainKwote ? <KwoteBadge value={formatKwote(me.mainKwote.kwote)} /> : undefined
+              me?.mainRating ? (
+                <RatingBadge value={formatRating(me.mainRating.rating)} />
+              ) : undefined
             }
           />
         }
         tabBar={
           <PlayerTabBar
+            badges={badges}
             active="explorer"
             onSelect={openTab}
             onCreate={() => openCreateRoom()}
@@ -195,7 +189,7 @@ export default function HomeScreen() {
         {error}
         <Section title="Soirées ce soir">{eventList}</Section>
         <Section title="Il manque des joueurs">{roomList}</Section>
-        <Section title="Lieux ouverts">
+        <Section title="Lieux ouverts" link="Tous les lieux" onLink={openVenues}>
           {map(200)}
           {venueList}
         </Section>
@@ -211,8 +205,8 @@ export default function HomeScreen() {
           <View style={{ width: 380 }}>
             <ProfileCard
               pseudo={me.pseudo ?? ''}
-              format={me.mainKwote?.format}
-              kwote={me.mainKwote ? formatKwote(me.mainKwote.kwote) : undefined}
+              format={me.mainRating?.format}
+              rating={me.mainRating ? formatRating(me.mainRating.rating) : undefined}
               xp={xpLevel(me.xp)}
             />
           </View>
@@ -230,7 +224,7 @@ export default function HomeScreen() {
           </Section>
         </View>
         <View style={{ flex: 5, minWidth: 0 }}>
-          <Section title="Lieux ouverts" link="Carte" onLink={notYet}>
+          <Section title="Lieux ouverts" link="Tous les lieux" onLink={openVenues}>
             {map(280)}
             {venueList}
           </Section>

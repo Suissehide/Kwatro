@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react'
 
 // Three.js (~150 ko) chargé à part, seulement sur navigateur desktop
-const HeroScene = lazy(() => import('@kwatro/design-system/scene'))
+const HeroScene = lazy(() => import('@lucko/design-system/scene'))
 
 /** Pièces 3D de la landing (dé, pion, carte, jeton) lancées sur la table, à côté du formulaire. */
 export function TableScene() {

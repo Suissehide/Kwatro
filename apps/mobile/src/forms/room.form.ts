@@ -1,4 +1,4 @@
-import type { CreateRoomInput, RoomMode } from '@kwatro/shared'
+import type { CreateRoomInput, RoomMode } from '@lucko/shared'
 import { formOptions } from '@tanstack/react-form'
 
 /** Créer une room (C1-C3). Jour et heure séparés : pastilles des 14 prochains jours + heure saisie. */

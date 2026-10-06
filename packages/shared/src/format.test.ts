@@ -6,9 +6,9 @@ import {
   formatDuration,
   formatHour,
   formatHourBand,
-  formatKwote,
   formatMinuteOfDay,
   formatPrice,
+  formatRating,
   formatTime,
   metersBetween,
 } from './format'
@@ -55,8 +55,8 @@ describe('formats d’affichage', () => {
     expect(formatHourBand('2026-10-03T17:30:00Z')).toBe('19H30')
   })
 
-  it('kwote', () => {
-    expect(formatKwote(1214).replace(/\s/g, ' ')).toBe('1 214')
+  it('rating', () => {
+    expect(formatRating(1214).replace(/\s/g, ' ')).toBe('1 214')
   })
 
   it('groupe de Mes parties', () => {

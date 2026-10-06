@@ -9,7 +9,7 @@ import {
   type SetBirthDateInput,
   setBirthDateSchema,
   updateProfileSchema,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import {
   ConflictException,
   Controller,
@@ -67,7 +67,7 @@ export class UsersController {
     return this.users.myGames(user.id)
   }
 
-  /** Remplace mes jeux ; la Kwote de départ suit le niveau déclaré (850 à 1300). 400 avec le motif. */
+  /** Remplace mes jeux ; les LK de départ suivent le niveau déclaré (850 à 1300). 400 avec le motif. */
   @Put('me/games')
   @ZodResponse(myGamesSchema)
   setMyGames(
@@ -110,6 +110,8 @@ export class UsersController {
     await this.prisma.$transaction([
       this.prisma.playerGameProfile.deleteMany({ where: { userId: user.id } }),
       this.prisma.venueStaff.deleteMany({ where: { userId: user.id } }),
+      // Appareils oubliés : plus aucune notification
+      this.prisma.pushToken.deleteMany({ where: { userId: user.id } }),
       // Blocages levés ; les signalements restent pour la modération
       this.prisma.block.deleteMany({
         where: { OR: [{ blockerId: user.id }, { blockedId: user.id }] },

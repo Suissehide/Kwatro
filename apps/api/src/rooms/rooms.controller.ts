@@ -4,7 +4,7 @@ import {
   type HostAction,
   hostActionSchema,
   roomDetailSchema,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import { Controller, Delete, Get, Param, Post } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import type { z } from 'zod'

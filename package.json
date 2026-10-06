@@ -1,5 +1,5 @@
 {
-  "name": "kwatro",
+  "name": "lucko",
   "private": true,
   "packageManager": "pnpm@12.8.1",
   "engines": {
@@ -7,9 +7,9 @@
   },
   "scripts": {
     "dev": "turbo run dev",
-    "dev:api": "turbo run dev --filter=@kwatro/api",
-    "dev:web": "turbo run dev --filter=@kwatro/web",
-    "dev:mobile": "turbo run dev --filter=@kwatro/mobile",
+    "dev:api": "turbo run dev --filter=@lucko/api",
+    "dev:web": "turbo run dev --filter=@lucko/web",
+    "dev:mobile": "turbo run dev --filter=@lucko/mobile",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
@@ -18,15 +18,15 @@
     "lint:ci": "biome ci .",
     "db:up": "docker compose -f deploy/compose.yaml --profile db up -d",
     "db:down": "docker compose -f deploy/compose.yaml --profile db down",
-    "api:generate": "pnpm --filter @kwatro/api openapi && pnpm --filter @kwatro/api-client generate",
-    "db:generate": "pnpm --filter @kwatro/api db:generate",
-    "db:migrate": "pnpm --filter @kwatro/api db:migrate",
-    "db:seed": "pnpm --filter @kwatro/api db:seed",
-    "db:studio": "pnpm --filter @kwatro/api db:studio",
+    "api:generate": "pnpm --filter @lucko/api openapi && pnpm --filter @lucko/api-client generate",
+    "db:generate": "pnpm --filter @lucko/api db:generate",
+    "db:migrate": "pnpm --filter @lucko/api db:migrate",
+    "db:seed": "pnpm --filter @lucko/api db:seed",
+    "db:studio": "pnpm --filter @lucko/api db:studio",
     "prepare": "lefthook install || exit 0",
     "docker:up": "docker compose -f deploy/compose.yaml --profile db --profile backend --profile frontend up -d --build",
     "docker:down": "docker compose -f deploy/compose.yaml --profile db --profile backend --profile frontend down",
-    "db:reset": "pnpm --filter @kwatro/api db:reset",
+    "db:reset": "pnpm --filter @lucko/api db:reset",
     "db:restore": "deploy/scripts/restore-db-dump.sh"
   },
   "devDependencies": {

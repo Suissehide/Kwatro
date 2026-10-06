@@ -5,7 +5,7 @@ import {
   ScreenHeader,
   SkeletonCard,
   Typography,
-} from '@kwatro/design-system'
+} from '@lucko/design-system'
 import {
   COMMANDER_BRACKETS,
   createRoomSchema,
@@ -17,7 +17,7 @@ import {
   ROOM_CAPACITY,
   ROOM_DESCRIPTION_MAX,
   type VenueListItem,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import { useStore } from '@tanstack/react-form'
 import { useQuery } from '@tanstack/react-query'
 import { router, useLocalSearchParams } from 'expo-router'
@@ -52,7 +52,7 @@ const MODE_OPTIONS = [
  * Créer une room (C1 jeu, C2 où et quand, C3 qui) sur un seul écran. `?venue=<slug>` présélectionne
  * le lieu (bouton « Créer une room ici » de la fiche lieu).
  */
-// ponytail: récap et lien de partage (C4) avec KWT-98, critères d'acceptation avec KWT-56
+// ponytail: récap et lien de partage (C4) avec LKO-98, critères d'acceptation avec LKO-56
 export default function CreateRoomScreen() {
   const wide = useWindowDimensions().width >= WIDE
   const { venue: venueSlug } = useLocalSearchParams<{ venue?: string }>()
@@ -192,7 +192,7 @@ function RoomForm({
             {(field) => <field.Choice label="Mode" options={MODE_OPTIONS} />}
           </form.AppField>
           <Typography variant="small">
-            Classée : le résultat compte pour la Kwote. Normale : on joue pour le plaisir, XP
+            Classée : le résultat compte pour les LK. Normale : on joue pour le plaisir, XP
             seulement.
           </Typography>
         </>
@@ -287,7 +287,7 @@ function RoomForm({
       <form.AppForm>
         <form.FormError />
         <View style={wide ? { alignSelf: 'flex-start' } : null}>
-          <form.SubmitButton kind="kwote" label="Publier la room" />
+          <form.SubmitButton kind="rating" label="Publier la room" />
         </View>
       </form.AppForm>
     </View>

@@ -27,9 +27,10 @@ import {
   TextLink,
   Typography,
   WebScreen,
-} from '@kwatro/design-system'
-import { formatDistance, metersBetween, VENUE_TYPE_LABELS } from '@kwatro/shared'
+} from '@lucko/design-system'
+import { formatDistance, metersBetween, VENUE_TYPE_LABELS } from '@lucko/shared'
 import { useLocalSearchParams } from 'expo-router'
+import { ArrowLeft } from 'lucide-react-native'
 import { type ReactNode, useState } from 'react'
 import { Linking, Text, useWindowDimensions, View, type ViewStyle } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -59,7 +60,7 @@ const statusColor = { ok: colors.venue, warn: colors.muted, err: colors.room } a
 // Colonne latérale collée en haut au défilement (web uniquement, absent des types React Native)
 const sticky = { position: 'sticky', top: 24 } as unknown as ViewStyle
 
-/** Fiche lieu (B3, KWT-73) : photos, infos pratiques, horaires et fermetures, agenda, rooms, jeux, accès. */
+/** Fiche lieu (B3, LKO-73) : photos, infos pratiques, horaires et fermetures, agenda, rooms, jeux, accès. */
 export default function VenueScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>()
   const wide = useWindowDimensions().width >= WIDE
@@ -113,11 +114,11 @@ export default function VenueScreen() {
 
   const partner = venue.isPartner ? <Tag variant="partner" label="Partenaire" /> : null
   const perk =
-    venue.isPartner && venue.kwatroPerk ? (
-      <PerkBanner text={venue.kwatroPerk} compact={!wide} />
+    venue.isPartner && venue.luckoPerk ? (
+      <PerkBanner text={venue.luckoPerk} compact={!wide} />
     ) : null
   const createRoom = (
-    <Button kind="kwote" label="+ Créer une room ici" onPress={() => openCreateRoom(venue.slug)} />
+    <Button kind="rating" label="+ Créer une room ici" onPress={() => openCreateRoom(venue.slug)} />
   )
   const itineraryButton = <Button kind="ghost" label="Itinéraire" onPress={itinerary} />
 
@@ -153,7 +154,14 @@ export default function VenueScreen() {
   ) : null
 
   if (!wide) {
-    const back = <IconButton label="Retour" size={44} icon={<Glyph>←</Glyph>} onPress={goBack} />
+    const back = (
+      <IconButton
+        label="Retour"
+        size={44}
+        icon={<ArrowLeft size={22} color={colors.ink} strokeWidth={2.5} />}
+        onPress={goBack}
+      />
+    )
     return (
       <MobileScreen
         insets={insets}
@@ -237,7 +245,7 @@ export default function VenueScreen() {
   return (
     <WebScreen nav={nav} contentStyle={{ paddingTop: 32 }}>
       <View style={{ alignSelf: 'flex-start' }}>
-        <TextLink label="← Lieux près de toi" onPress={goBack} />
+        <TextLink icon={ArrowLeft} label="Lieux près de toi" onPress={goBack} />
       </View>
 
       <PhotoGallery photos={venue.photos} onOpen={() => setViewer(true)} />
@@ -356,10 +364,6 @@ export default function VenueScreen() {
 
 function Mono({ children, color = colors.muted }: { children: string; color?: string }) {
   return <Text style={{ ...font('mono', 700), fontSize: 12, color }}>{children}</Text>
-}
-
-function Glyph({ children }: { children: string }) {
-  return <Text style={{ ...font('body', 800), fontSize: 18, color: colors.ink }}>{children}</Text>
 }
 
 function AddressBlock({

@@ -1,8 +1,9 @@
-import type { CreateRoomInput, HostAction, RoomDetail } from '@kwatro/shared'
+import type { CreateRoomInput, HostAction, RoomDetail } from '@lucko/shared'
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AGENDA, EXPLORE, ROOM, VENUE } from '@/constants/queryKeys'
 import { api } from '@/lib/api'
 import { queryClient, unwrap } from '@/lib/queryClient'
+import { useRealtime } from '@/lib/realtime'
 
 // * QUERIES
 
@@ -12,7 +13,22 @@ export const roomQueryOptions = (id: string) =>
     queryFn: () => unwrap(api.GET('/rooms/{id}', { params: { path: { id } } })),
   })
 
-export const useRoomQuery = (id: string) => useQuery(roomQueryOptions(id))
+/**
+ * Fiche room. Pour l'hôte et les joueurs inscrits (acceptés, en attente, liste d'attente), rechargée en direct
+ * quand elle change (places restantes, candidatures, statut).
+ */
+export function useRoomQuery(id: string) {
+  const options = roomQueryOptions(id)
+  const query = useQuery(options)
+  const room = query.data
+  const member =
+    room?.isHost === true ||
+    room?.myStatus === 'ACCEPTED' ||
+    room?.myStatus === 'PENDING' ||
+    room?.myStatus === 'WAITLISTED'
+  useRealtime({ type: 'room', id }, options.queryKey, member)
+  return query
+}
 
 /** Une room change : Mes parties, l'accueil et la fiche du lieu (places restantes) aussi. */
 const refreshLists = () =>

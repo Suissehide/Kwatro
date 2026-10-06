@@ -1,6 +1,7 @@
-import { Text, View } from 'react-native'
+import { Check } from 'lucide-react-native'
+import { View } from 'react-native'
 import { Typography } from '../atoms/Typography'
-import { border, colors, font } from '../tokens'
+import { border, colors } from '../tokens'
 
 export const ROOM_STEPS = ['Ouverte', 'Complète', 'Confirmée', 'En cours', 'Terminée'] as const
 
@@ -24,9 +25,7 @@ export function RoomStatusTimeline({ current }: { current: number }) {
                 justifyContent: 'center',
               }}
             >
-              {i < current ? (
-                <Text style={{ ...font('body', 800), color: colors.white, fontSize: 12 }}>✓</Text>
-              ) : null}
+              {i < current ? <Check size={14} color={colors.white} strokeWidth={3} /> : null}
             </View>
             {i < ROOM_STEPS.length - 1 ? (
               <View

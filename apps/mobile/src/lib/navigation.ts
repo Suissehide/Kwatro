@@ -1,11 +1,11 @@
-import { type PlayerTab, SITE_URL } from '@kwatro/design-system'
+import { type PlayerTab, SITE_URL } from '@lucko/design-system'
 import { router } from 'expo-router'
 import { Linking } from 'react-native'
 
-// ponytail: Messages n'a pas encore d'écran
-const TAB_ROUTES: Partial<Record<PlayerTab, '/' | '/my-games' | '/profile'>> = {
+const TAB_ROUTES: Record<PlayerTab, '/' | '/my-games' | '/messages' | '/profile'> = {
   explorer: '/',
   parties: '/my-games',
+  messages: '/messages',
   profil: '/profile',
 }
 
@@ -14,12 +14,18 @@ export const openHome = () => router.navigate('/')
 /** Retour à l'écran précédent ; à l'accueil si la fiche a été ouverte directement (lien, web). */
 export const goBack = () => (router.canGoBack() ? router.back() : openHome())
 
+/** Tous les lieux autour du joueur (B2, KWT-75). */
+export const openVenues = () => router.push('/venues')
+
 export const openVenue = (slug: string) =>
   router.push({ pathname: '/venues/[slug]', params: { slug } })
 
 export const openEvent = (id: string) => router.push({ pathname: '/events/[id]', params: { id } })
 
 export const openRoom = (id: string) => router.push({ pathname: '/rooms/[id]', params: { id } })
+
+export const openChat = (type: 'room' | 'event', id: string) =>
+  router.push({ pathname: '/chat/[type]/[id]', params: { type, id } })
 
 export const openSettings = () => router.push('/settings')
 

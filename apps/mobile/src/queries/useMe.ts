@@ -1,11 +1,13 @@
-import type { UpdateProfileInput } from '@kwatro/shared'
+import type { UpdateProfileInput } from '@lucko/shared'
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { router } from 'expo-router'
 import { useEffect } from 'react'
 import { ME } from '@/constants/queryKeys'
 import { api } from '@/lib/api'
 import { authClient } from '@/lib/auth'
+import { forgetPush } from '@/lib/push'
 import { ApiError, queryClient, unwrap } from '@/lib/queryClient'
+import { disconnectRealtime } from '@/lib/realtime'
 
 // * QUERIES
 
@@ -32,9 +34,11 @@ export function useMeQuery({ required = false } = {}) {
 /** Oublie le joueur connecté (déconnexion, changement de compte). */
 export const forgetMe = () => queryClient.removeQueries({ queryKey: [ME.GET] })
 
-/** Déconnexion : session Better Auth fermée, cache vidé, retour à la connexion. */
+/** Déconnexion : téléphone oublié pour les push, session Better Auth fermée, cache vidé, retour à la connexion. */
 export async function signOut() {
+  await forgetPush().catch(() => undefined)
   await authClient.signOut().catch(() => undefined)
+  disconnectRealtime()
   queryClient.clear()
   router.replace({ pathname: '/auth', params: { signedOut: '1' } })
 }

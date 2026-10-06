@@ -35,12 +35,19 @@ function setup(user: User | null, handler: keyof Routes, venueId = 'v1') {
   const context = {
     getHandler: () => Routes.prototype[handler],
     getClass: () => Routes,
+    getType: () => 'http',
     switchToHttp: () => ({ getRequest: () => request }),
   } as unknown as ExecutionContext
   return { guard: new AuthGuard(new Reflector(), auth), context, request }
 }
 
 describe('AuthGuard', () => {
+  it('laisse les messages WebSocket à la passerelle temps réel', async () => {
+    const { guard, context } = setup(null, 'any')
+    const ws = { ...context, getType: () => 'ws' } as ExecutionContext
+    await expect(guard.canActivate(ws)).resolves.toBe(true)
+  })
+
   it('laisse passer une route @Public sans utilisateur', async () => {
     const { guard, context } = setup(null, 'open')
     await expect(guard.canActivate(context)).resolves.toBe(true)

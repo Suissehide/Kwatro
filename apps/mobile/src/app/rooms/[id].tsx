@@ -3,6 +3,7 @@ import {
   Banner,
   Button,
   ConfirmDialog,
+  colors,
   ListCard,
   ListRow,
   PageTitle,
@@ -10,21 +11,23 @@ import {
   StatusPill,
   Tag,
   Typography,
-} from '@kwatro/design-system'
+} from '@lucko/design-system'
 import {
   COMMANDER_BRACKETS,
   type CommanderBracket,
-  formatKwote,
+  formatRating,
   type HostAction,
   type RoomCandidate,
   type RoomDetail,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import { router, useLocalSearchParams } from 'expo-router'
+import { ChevronRight } from 'lucide-react-native'
 import { useState } from 'react'
 import { View } from 'react-native'
 import { DetailScreen } from '@/components/DetailScreen'
 import { eventWhen, gameLabel } from '@/lib/explore'
-import { openVenue } from '@/lib/navigation'
+import { openChat, openVenue } from '@/lib/navigation'
+import { useChatUnread } from '@/queries/useChat'
 import { useMeQuery } from '@/queries/useMe'
 import { useParticipationMutations, useRoomQuery } from '@/queries/useRoom'
 
@@ -48,7 +51,7 @@ const ROOM_STATUS: Partial<
 }
 
 /**
- * Fiche room (B6, KWT-56) : demander à rejoindre, liste d'attente quand c'est complet, quitter.
+ * Fiche room (B6, LKO-56) : demander à rejoindre, liste d'attente quand c'est complet, quitter.
  * L'hôte y gère les demandes (C5) avec le profil de jeu de chaque candidat (C6).
  */
 export default function RoomScreen() {
@@ -56,6 +59,8 @@ export default function RoomScreen() {
   const me = useMeQuery()
   const { data: room, isError: failed, refetch } = useRoomQuery(id)
   const { join, leave, decide, hostAction } = useParticipationMutations(id)
+  const member = room?.isHost === true || room?.myStatus === 'ACCEPTED'
+  const unread = useChatUnread({ type: 'room', id }, member)
   const [confirmLeave, setConfirmLeave] = useState(false)
   const [confirmAction, setConfirmAction] = useState<HostConfirm | null>(null)
   const pending = join.isPending || leave.isPending || decide.isPending || hostAction.isPending
@@ -163,6 +168,16 @@ export default function RoomScreen() {
         {room.venue?.isPartner ? <Tag variant="partner" label="Lieu partenaire" /> : null}
       </View>
       {error ? <Banner tone="err" message={error.message} onClose={clearError} /> : null}
+      {member ? (
+        <View style={{ alignSelf: 'flex-start' }}>
+          <Button
+            small
+            kind="soft"
+            label={`Chat de la room${unread ? ` · ${unread} non lu${unread > 1 ? 's' : ''}` : ''}`}
+            onPress={() => openChat('room', id)}
+          />
+        </View>
+      ) : null}
 
       <ListCard>
         {details.map((row) => (
@@ -173,7 +188,12 @@ export default function RoomScreen() {
             inset={16}
             title={room.venue.name}
             subtitle={room.venue.address}
-            right={<Typography variant="small">Voir le lieu →</Typography>}
+            right={
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                <Typography variant="small">Voir le lieu</Typography>
+                <ChevronRight size={16} color={colors.muted} strokeWidth={2.5} />
+              </View>
+            }
             last
             onPress={() => room.venue && openVenue(room.venue.slug)}
           />
@@ -299,7 +319,7 @@ export default function RoomScreen() {
 type HostConfirm = { action: HostAction; title: string; message: string; label: string }
 type ManagedPlayer = { userId: string; pseudo: string }
 
-/** Joueurs acceptés vus par l'hôte (KWT-57) : retirer un joueur ou lui transférer la room. */
+/** Joueurs acceptés vus par l'hôte (LKO-57) : retirer un joueur ou lui transférer la room. */
 function HostPlayers({
   room,
   hostId,
@@ -347,7 +367,7 @@ function HostPlayers({
   )
 }
 
-/** Demandes et liste d'attente (C5) : niveau, Kwote sur le format, badge -18 ; accepter ou refuser. */
+/** Demandes et liste d'attente (C5) : niveau, LK sur le format, badge -18 ; accepter ou refuser. */
 function Candidates({
   candidates,
   full,
@@ -376,8 +396,8 @@ function Candidates({
                 subtitle={[
                   c.status === 'WAITLISTED' ? "Liste d'attente" : null,
                   `${c.xp} XP`,
-                  c.kwote !== null
-                    ? `Kwote ${formatKwote(c.kwote)}`
+                  c.rating !== null
+                    ? `LK ${formatRating(c.rating)}`
                     : c.rankedGames
                       ? `${c.rankedGames} parties classées`
                       : null,

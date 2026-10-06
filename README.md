@@ -1,17 +1,17 @@
-# Kwatro
+# Lucko
 
 Trouver des joueurs et des lieux pour jouer aux TCG et aux jeux de société, près de chez soi.
 
 Monorepo TypeScript : app mobile (Expo), site public (Next.js), API (NestJS + PostgreSQL/PostGIS via Prisma), code partagé.
 
 ```
-kwatro/
+lucko/
 ├── apps/
 │   ├── api/        → API NestJS, Prisma (schéma, migrations, seed)        http://localhost:3000
 │   ├── web/        → site public Next.js (SEO : ville, lieux, événements)   http://localhost:3010
 │   └── mobile/     → app Expo iOS / Android (+ back-office lieu)            Expo : http://localhost:8081
 ├── packages/
-│   ├── shared/         → types, schémas Zod, constantes, règles (Kwote…)
+│   ├── shared/         → types, schémas Zod, constantes, règles (LK…)
 │   └── design-system/  → design system « Plateau pop » (tokens + composants RN, mobile et web)   catalogue : /design-system
 ├── deploy/             → tout Docker : stack locale, Dockerfiles, déploiement Dokploy, scripts
 ├── biome.json          → lint + format (remplace ESLint et Prettier)
@@ -75,13 +75,36 @@ Documentation interactive en dev : http://localhost:3000/docs (OpenAPI brut : `/
 >
 > | E-mail | Mot de passe | Id (`x-dev-user-id`) | Pour tester |
 > |---|---|---|---|
-> | `player@kwatro.dev` | `Player123!` | `joueur-demo` | Joueur complet : profil, Kwote, parties à venir et historique |
-> | `admin@kwatro.dev` | `Admin123!` | `admin-demo` | Admin Kwatro |
-> | `staff@kwatro.dev` | `Staff123!` | `staff-demo` | Gérant du Dé Fêlé |
-> | `mineur@kwatro.dev` | `Mineur123!` | `mineur-demo` | Joueur de 16 ans |
-> | `nouveau@kwatro.dev` | `Nouveau123!` | `nouveau-demo` | Compte neuf : l'app ouvre l'onboarding |
+> | `player@lucko.dev` | `Player123!` | `joueur-demo` | Joueur complet : profil, LK, parties à venir et historique |
+> | `admin@lucko.dev` | `Admin123!` | `admin-demo` | Admin Lucko |
+> | `staff@lucko.dev` | `Staff123!` | `staff-demo` | Gérant du Dé Fêlé |
+> | `mineur@lucko.dev` | `Mineur123!` | `mineur-demo` | Joueur de 16 ans |
+> | `nouveau@lucko.dev` | `Nouveau123!` | `nouveau-demo` | Compte neuf : l'app ouvre l'onboarding |
 >
-> Les autres joueurs (`maya@kwatro.dev`, `sam@kwatro.dev`…) n'ont pas de mot de passe.
+> Les autres joueurs (`maya@lucko.dev`, `sam@lucko.dev`…) n'ont pas de mot de passe.
+
+## API : temps réel
+
+Socket.IO sur le même port que l'API (`apps/api/src/realtime/realtime.gateway.ts`). Contrat Zod dans `packages/shared/src/schemas/realtime.ts`.
+
+- **Connexion** : réservée aux joueurs connectés, refusée sinon (`connect_error` « Connexion requise »). Sur le web, le cookie de session part tout seul ; sur téléphone, l'app l'envoie dans `auth.cookie` (et `auth.devUserId` en dev, comme `x-dev-user-id`).
+- **Canaux** : `{ type, id }`, avec `type` dans `room`, `event`, `room-chat` ou `event-chat` (chat, LKO-80).
+
+| Message | Sens | Charge utile | Effet |
+|---|---|---|---|
+| `watch` | app → API | `{ type, id }` | Suivre un canal. Accusé `true`, ou `false` si le joueur n'y a pas droit |
+| `unwatch` | app → API | `{ type, id }` | Ne plus suivre |
+| `changed` | API → app | `{ type, id }` | La fiche a changé : l'app la recharge par HTTP |
+| `chat:message` | API → app | `{ channel, message }` | Nouveau message (pas envoyé aux joueurs bloqués par l'auteur ou qui l'ont bloqué) |
+| `chat:deleted` | API → app | `{ channel, messageId }` | Message supprimé |
+| `chat:typing` | app → API → app | `{ channel }` puis `{ channel, pseudo }` | Saisie en cours, relayée aux autres lecteurs |
+
+- **Droits** : une room seulement pour son hôte et ses joueurs (acceptés, en attente, liste d'attente), règles mineurs comprises. Un joueur qui part, est retiré ou refusé quitte le canal. Un événement pour tout joueur connecté qui peut le voir (âge minimum).
+- `changed` ne porte aucune donnée : la fiche dépend de qui la lit (pseudos, candidatures). Les services l'émettent après le commit : `this.realtime.changed({ type: 'room', id })`.
+- **Chat** : membres seulement (hôte et joueurs acceptés d'une room, inscrits et staff du lieu d'un événement), même règle que l'API HTTP (`apps/api/src/chat/chat.access.ts`). Quitter la room retire aussi du chat. L'envoi passe par HTTP (`POST /chats/:type/:id/messages`), le socket ne fait que diffuser.
+- **Côté app** : `useRealtime(channel, queryKey, enabled)` (`apps/mobile/src/lib/realtime.ts`), déjà branché dans `useRoomQuery` et `useEventQuery` ; `useChannel` pour écouter d'autres événements (chat).
+- **Nouveau canal** (chat, tournois) : ajouter le type à `channelSchema`, sa règle d'accès dans `canWatch`, puis émettre depuis le service.
+- Une seule instance d'API : pour en lancer plusieurs, ajouter l'adaptateur Redis (`@socket.io/redis-adapter`), sinon un message émis par une instance n'atteint pas les clients des autres.
 
 ## Base de données
 
@@ -92,8 +115,8 @@ Documentation interactive en dev : http://localhost:3000/docs (OpenAPI brut : `/
 ## Ajouter une dépendance
 
 ```bash
-pnpm --filter @kwatro/api add nom-du-paquet
-pnpm --filter @kwatro/mobile exec expo install nom-du-paquet   # côté Expo : toujours via expo install
+pnpm --filter @lucko/api add nom-du-paquet
+pnpm --filter @lucko/mobile exec expo install nom-du-paquet   # côté Expo : toujours via expo install
 ```
 
 ## Docker
@@ -105,6 +128,7 @@ deploy/
 ├── compose.yaml                  → stack locale (profils db, backend, frontend)
 ├── api/Dockerfile                → image de production de l'API (+ Dockerfile.dockerignore)
 ├── web/Dockerfile                → image de production du site (+ Dockerfile.dockerignore)
+├── app/Dockerfile                → version web de l'app Expo, servie par nginx (+ nginx.conf)
 ├── dokploy/
 │   └── docker-compose.dokploy.yml → déploiement Dokploy
 ├── .env.example                  → variables du déploiement Dokploy
@@ -116,13 +140,27 @@ deploy/
 - `pnpm docker:up` : profils `db` + `backend` + `frontend`, l'API (port 3000) et le site (port 3010) avec les images de production, pour vérifier un build avant de pousser.
 - `pnpm db:restore <fichier>` : remplace la base locale par une sauvegarde (par ex. téléchargée depuis Dokploy).
 
-**Déploiement avec Dokploy**
-1. Dokploy › Create Service › **Compose** › dépôt `Suissehide/Kwatro`, branche `main`, *Compose Path* `./deploy/dokploy/docker-compose.dokploy.yml`.
-2. Onglet **Environment** : recopier `deploy/.env.example` avec les vraies valeurs.
-3. Onglet **Domains** : un domaine pour `api` (port 3000) et un pour `web` (port 3000), HTTPS activé.
-4. **Deploy**. Les migrations Prisma en attente s'appliquent au démarrage de l'API.
-5. Sauvegardes : le service `postgres-backup` fait un `pg_dump` quotidien (7 jours, 4 semaines, 6 mois) dans le volume `postgres-backups`. Copie hors serveur à ajouter.
+**Déploiement avec Dokploy** : deux services Compose sur le même fichier, `lucko-staging` et `lucko-production`.
+1. Dokploy › Create Service › **Compose** › dépôt `Suissehide/Lucko`, branche `main`, *Compose Path* `./deploy/dokploy/docker-compose.dokploy.yml`. Désactiver **Autodeploy** : c'est la CI qui déclenche les déploiements.
+2. Onglet **Environment** : recopier `deploy/.env.example` avec les vraies valeurs, propres à chaque environnement (`APP_IMAGE_NAME=lucko-staging` pour le staging, secrets et domaines distincts).
+3. Onglet **Domains** : un domaine pour `api` (port 3000), un pour `web` (port 3000) et un pour `app` (port 80), HTTPS activé. Le domaine de l'app doit figurer dans `CORS_ORIGINS`.
+4. Les migrations Prisma en attente s'appliquent au démarrage de l'API.
+5. Les variables `NEXT_PUBLIC_*` et `EXPO_PUBLIC_*` sont figées au build : relancer un Deploy après les avoir changées.
+6. Sauvegardes : le service `postgres-backup` fait un `pg_dump` quotidien (7 jours, 4 semaines, 6 mois) dans le volume `postgres-backups`. Copie hors serveur à ajouter.
+
+**CI/CD** (`.github/workflows/deploy.yml`)
+- Staging : déployé automatiquement à chaque CI verte sur `main`.
+- Production : Actions › **Deploy** › *Run workflow* sur `main`.
+- Configuration GitHub (Settings › Environments) : deux environnements `staging` et `production` (ajouter des *required reviewers* sur `production` si besoin), chacun avec les variables `DOKPLOY_URL` (ex. `https://dokploy.exemple.fr`) et `DOKPLOY_COMPOSE_ID` (dans l'URL du service Dokploy) et le secret `DOKPLOY_API_KEY` (Dokploy › Settings › Profile › API/CLI).
+
+**Apps iOS / Android (EAS)** : build et envoi aux stores dans le cloud d'Expo, rien à installer sur le serveur.
+- Une seule fois, depuis `apps/mobile` : `npx eas-cli login`, `npx eas-cli init` (lie le projet, indispensable aux push), puis `npx eas-cli update:configure` (URL des mises à jour OTA).
+- URL de l'API par environnement EAS (`preview` → API de staging, `production` → API de prod) : `npx eas-cli env:create --environment production --name EXPO_PUBLIC_API_URL --value https://api.exemple.fr --visibility plaintext` (idem pour `EXPO_PUBLIC_SITE_URL`).
+- Identifiants des stores pour `--auto-submit` : `npx eas-cli credentials` (clé API App Store Connect, compte de service Google Play).
+- GitHub : secret `EXPO_TOKEN` (expo.dev › Access tokens) au niveau du dépôt.
+- `.github/workflows/mobile.yml` : mise à jour OTA du canal `preview` après chaque CI verte sur `main` ; Actions › **Mobile** › *Run workflow* pour la production, `update` (OTA, quelques minutes, JS seulement) ou `build` (nouveau binaire envoyé à TestFlight et au test interne Play Store).
+- Un nouveau `build` est nécessaire dès que le code natif change (module natif, permission, plugin) : la *runtime version* (empreinte du natif) empêche une OTA d'atteindre un binaire incompatible.
 
 ## Contribuer
 
-Voir [CONTRIBUTING.md](CONTRIBUTING.md). Tickets : espace Notion Kwatro. Documentation : vault Obsidian Qwetle, `05-Technique/TCG/`.
+Voir [CONTRIBUTING.md](CONTRIBUTING.md). Tickets : espace Notion Lucko. Documentation : vault Obsidian Qwetle, `05-Technique/TCG/`.

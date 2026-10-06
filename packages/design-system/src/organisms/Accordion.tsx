@@ -1,3 +1,4 @@
+import { Minus, Plus } from 'lucide-react-native'
 import { useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import { border, colors, font, radius } from '../tokens'
@@ -25,7 +26,7 @@ export function Accordion({ items }: { items: { q: string; a: string }[] }) {
             style={{
               padding: 14,
               gap: 8,
-              backgroundColor: expanded ? colors.kwoteSoft : colors.white,
+              backgroundColor: expanded ? colors.ratingSoft : colors.white,
               borderTopWidth: i ? border.thin : 0,
               borderColor: colors.line,
             }}
@@ -34,9 +35,11 @@ export function Accordion({ items }: { items: { q: string; a: string }[] }) {
               <Text style={{ flex: 1, ...font('body', 800), fontSize: 14, color: colors.ink }}>
                 {it.q}
               </Text>
-              <Text style={{ ...font('body', 800), color: colors.ink }}>
-                {expanded ? '−' : '+'}
-              </Text>
+              {expanded ? (
+                <Minus size={18} color={colors.ink} strokeWidth={2.5} />
+              ) : (
+                <Plus size={18} color={colors.ink} strokeWidth={2.5} />
+              )}
             </View>
             {expanded ? (
               <Text

@@ -8,7 +8,7 @@ import {
   Segmented,
   SITE_URL,
   Typography,
-} from '@kwatro/design-system'
+} from '@lucko/design-system'
 import {
   type AgeRegime,
   ageRegime,
@@ -17,7 +17,7 @@ import {
   PASSWORD_MIN,
   parseBirthDate,
   passwordSchema,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import * as Linking from 'expo-linking'
 import { router, useLocalSearchParams } from 'expo-router'
 import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
@@ -32,7 +32,7 @@ import { forgetMe, meQueryOptions, useMeMutations } from '@/queries/useMe'
 type Step = 'welcome' | 'email' | 'birth' | AgeRegime
 
 /**
- * Accueil (A1), e-mail (A2) et date de naissance obligatoire (A3, KWT-44), branchés sur Better Auth (KWT-9).
+ * Accueil (A1), e-mail (A2) et date de naissance obligatoire (A3, LKO-44), branchés sur Better Auth (LKO-9).
  * Téléphone et navigateur desktop.
  */
 export default function AuthScreen() {
@@ -137,12 +137,12 @@ export default function AuthScreen() {
         {wide ? (
           <>
             {signedOut ? <Banner tone="ok" message="Tu es déconnecté·e." /> : null}
-            <Typography>Connecte-toi ou crée ton compte Kwatro.</Typography>
+            <Typography>Connecte-toi ou crée ton compte Lucko.</Typography>
           </>
         ) : (
           <View style={{ flex: 1, justifyContent: 'center', gap: 12 }}>
             <Logo size={44} />
-            <Typography variant="display">Kwatro</Typography>
+            <Typography variant="display">Lucko</Typography>
             <Typography style={{ ...font('body', 600), fontSize: 17, lineHeight: 24 }}>
               Trouve où jouer ce soir et avec qui.
             </Typography>
@@ -353,7 +353,7 @@ function BirthStep({
       }
     >
       <Typography>
-        Kwatro est ouvert dès {MIN_AGE} ans. Ta date de naissance règle ce que ton compte permet,
+        Lucko est ouvert dès {MIN_AGE} ans. Ta date de naissance règle ce que ton compte permet,
         elle n’est jamais affichée.
       </Typography>
       <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -398,7 +398,7 @@ function BirthStep({
 
 const OUTCOMES: Record<
   AgeRegime,
-  { title: string; text: string; tone: 'kwote' | 'room' | 'venue' }
+  { title: string; text: string; tone: 'rating' | 'room' | 'venue' }
 > = {
   adult: {
     title: 'C’est parti',
@@ -413,11 +413,11 @@ const OUTCOMES: Record<
   'parental-consent': {
     title: 'Un parent doit valider',
     text: 'Avant 15 ans, la loi demande l’accord d’un parent pour créer ton compte. À l’étape suivante, indique son e-mail : il recevra un lien pour valider.',
-    tone: 'kwote',
+    tone: 'rating',
   },
   'too-young': {
     title: `Reviens à ${MIN_AGE} ans`,
-    text: `Kwatro est réservé aux joueurs de ${MIN_AGE} ans et plus. Aucun compte n’a été créé et ta date de naissance n’est pas conservée.`,
+    text: `Lucko est réservé aux joueurs de ${MIN_AGE} ans et plus. Aucun compte n’a été créé et ta date de naissance n’est pas conservée.`,
     tone: 'room',
   },
 }
@@ -431,7 +431,7 @@ function Outcome({ regime, onRestart }: { regime: AgeRegime; onRestart: () => vo
         regime === 'too-young' ? (
           <StepButton label="Revenir à l’accueil" kind="ghost" onPress={onRestart} />
         ) : (
-          // ponytail: le consentement parent (A7, KWT-49) n'est pas encore fait ; l'accueil renvoie vers l'onboarding
+          // ponytail: le consentement parent (A7, LKO-49) n'est pas encore fait ; l'accueil renvoie vers l'onboarding
           <StepButton label="Continuer" onPress={() => router.replace('/')} />
         )
       }

@@ -1,16 +1,20 @@
+import { Check, Info, type LucideIcon, X } from 'lucide-react-native'
 import { Text, View } from 'react-native'
 import { Typography } from '../atoms/Typography'
 import { border, colors, font, semantic } from '../tokens'
 import { ListCard } from './ListCard'
 
 export type AccessibilityStatus = 'yes' | 'no' | 'info'
-const marks: Record<AccessibilityStatus, { mark: string; bg: string; fg: string; name: string }> = {
-  yes: { mark: '✓', bg: colors.venue, fg: colors.white, name: 'Oui' },
-  no: { mark: '✕', bg: semantic.dangerSoft, fg: colors.ink, name: 'Non' },
-  info: { mark: 'i', bg: semantic.warningSoft, fg: colors.ink, name: 'Info' },
+const marks: Record<
+  AccessibilityStatus,
+  { Mark: LucideIcon; bg: string; fg: string; name: string }
+> = {
+  yes: { Mark: Check, bg: colors.venue, fg: colors.white, name: 'Oui' },
+  no: { Mark: X, bg: semantic.dangerSoft, fg: colors.ink, name: 'Non' },
+  info: { Mark: Info, bg: semantic.warningSoft, fg: colors.ink, name: 'Info' },
 }
 
-/** Accès et accessibilité d'un lieu : case ✓ / ✕ / i, libellé et note. Deux colonnes avec `columns={2}`. */
+/** Accès et accessibilité d'un lieu : case oui / non / info, libellé et note. Deux colonnes avec `columns={2}`. */
 export function AccessibilityList({
   items,
   columns = 1,
@@ -51,7 +55,7 @@ export function AccessibilityList({
                   backgroundColor: m.bg,
                 }}
               >
-                <Text style={{ ...font('body', 800), fontSize: 13, color: m.fg }}>{m.mark}</Text>
+                <m.Mark size={14} color={m.fg} strokeWidth={3} />
               </View>
               <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
                 <Text style={{ ...font('body', 800), fontSize: 15, color: colors.ink }}>

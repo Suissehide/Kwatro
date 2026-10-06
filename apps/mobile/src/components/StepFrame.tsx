@@ -10,7 +10,7 @@ import {
   TopNav,
   Typography,
   WebScreen,
-} from '@kwatro/design-system'
+} from '@lucko/design-system'
 import { createContext, type ReactNode, useContext } from 'react'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'

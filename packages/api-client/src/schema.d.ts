@@ -4,6 +4,38 @@
  */
 
 export interface paths {
+    "/me/push-tokens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["PushController_register"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/push-tokens/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["PushController_forget"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -260,38 +292,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/reports": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["ModerationController_queue"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/admin/reports/{id}/resolve": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["ModerationController_resolve"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/rooms/{id}": {
         parameters: {
             query?: never;
@@ -372,6 +372,390 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminModerationController_dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminModerationController_reports"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/reports/{id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AdminModerationController_resolve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminModerationController_users"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminModerationController_user"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/users/{id}/suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AdminModerationController_suspend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/users/{id}/unsuspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AdminModerationController_unsuspend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/avatars": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminModerationController_avatars"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/avatars/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AdminModerationController_approveAvatar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/avatars/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AdminModerationController_rejectAvatar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminModerationController_actions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/venues": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminCatalogController_venues"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/venues/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["AdminCatalogController_updateVenue"];
+        trace?: never;
+    };
+    "/admin/venues/{id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminCatalogController_events"];
+        put?: never;
+        post: operations["AdminCatalogController_createEvent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/events/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["AdminCatalogController_updateEvent"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/events/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AdminCatalogController_cancelEvent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/games": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AdminCatalogController_games"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/games/{id}/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["AdminCatalogController_merge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/chats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ChatController_chats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chats/{type}/{id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ChatController_page"];
+        put?: never;
+        post: operations["ChatController_send"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chats/{type}/{id}/messages/{messageId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["ChatController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chats/{type}/{id}/messages/{messageId}/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ChatController_report"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chats/{type}/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["ChatController_read"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chats/{type}/{id}/mute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["ChatController_mute"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -384,6 +768,48 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    PushController_register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    token: string;
+                };
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PushController_forget: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     HealthController_check: {
         parameters: {
             query?: never;
@@ -475,11 +901,12 @@ export interface operations {
                         searchRadiusKm: number;
                         availability: number[];
                         vibes: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
+                        notificationsOff: ("ROOMS" | "MESSAGES" | "VENUES")[];
                         xp: number;
-                        mainKwote: {
+                        mainRating: {
                             game: string;
                             format: string;
-                            kwote: number;
+                            rating: number;
                         } | null;
                         rankings: {
                             game: {
@@ -487,7 +914,7 @@ export interface operations {
                                 name: string;
                             };
                             format: string;
-                            kwote: number | null;
+                            rating: number | null;
                             rankedGames: number;
                             reliabilityPct: number;
                         }[];
@@ -538,6 +965,7 @@ export interface operations {
                     searchRadiusKm?: number;
                     availability?: number[];
                     vibes?: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
+                    notificationsOff?: ("ROOMS" | "MESSAGES" | "VENUES")[];
                 };
             };
         };
@@ -564,11 +992,12 @@ export interface operations {
                         searchRadiusKm: number;
                         availability: number[];
                         vibes: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
+                        notificationsOff: ("ROOMS" | "MESSAGES" | "VENUES")[];
                         xp: number;
-                        mainKwote: {
+                        mainRating: {
                             game: string;
                             format: string;
-                            kwote: number;
+                            rating: number;
                         } | null;
                         rankings: {
                             game: {
@@ -576,7 +1005,7 @@ export interface operations {
                                 name: string;
                             };
                             format: string;
-                            kwote: number | null;
+                            rating: number | null;
                             rankedGames: number;
                             reliabilityPct: number;
                         }[];
@@ -748,7 +1177,7 @@ export interface operations {
                         latitude: number;
                         longitude: number;
                         isPartner: boolean;
-                        kwatroPerk: string | null;
+                        luckoPerk: string | null;
                         distanceMeters: number;
                         openNow: boolean | null;
                         closesAtMinute: number | null;
@@ -784,7 +1213,7 @@ export interface operations {
                         latitude: number;
                         longitude: number;
                         isPartner: boolean;
-                        kwatroPerk: string | null;
+                        luckoPerk: string | null;
                         openNow: boolean | null;
                         closesAtMinute: number | null;
                         city: string;
@@ -850,6 +1279,8 @@ export interface operations {
                             registeredCount: number;
                             /** @enum {string} */
                             registrationMode: "NONE" | "IN_APP" | "EXTERNAL";
+                            /** @enum {string|null} */
+                            myRegistration: "REGISTERED" | "WAITLISTED" | null;
                             games: {
                                 slug: string;
                                 name: string;
@@ -873,7 +1304,7 @@ export interface operations {
                             players: {
                                 initial: string;
                             }[];
-                            kwoteRange: {
+                            ratingRange: {
                                 min: number;
                                 max: number;
                             } | null;
@@ -914,6 +1345,8 @@ export interface operations {
                         registeredCount: number;
                         /** @enum {string} */
                         registrationMode: "NONE" | "IN_APP" | "EXTERNAL";
+                        /** @enum {string|null} */
+                        myRegistration: "REGISTERED" | "WAITLISTED" | null;
                         games: {
                             slug: string;
                             name: string;
@@ -971,7 +1404,7 @@ export interface operations {
                         players: {
                             initial: string;
                         }[];
-                        kwoteRange: {
+                        ratingRange: {
                             min: number;
                             max: number;
                         } | null;
@@ -1295,61 +1728,6 @@ export interface operations {
             };
         };
     };
-    ModerationController_queue: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        id: string;
-                        /** @enum {string} */
-                        reason: "HARASSMENT" | "INAPPROPRIATE_CONTENT" | "CHEATING" | "NO_SHOW" | "MINOR_SAFETY" | "OTHER";
-                        details: string;
-                        /** Format: date-time */
-                        createdAt: string;
-                        reporter: {
-                            id: string;
-                            pseudo: string | null;
-                        };
-                        target: {
-                            id: string;
-                            pseudo: string | null;
-                            minor: boolean;
-                            openReports: number;
-                        };
-                    }[];
-                };
-            };
-        };
-    };
-    ModerationController_resolve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     RoomsController_detail: {
         parameters: {
             query?: never;
@@ -1410,7 +1788,7 @@ export interface operations {
                             status: "PENDING" | "WAITLISTED";
                             minor: boolean;
                             xp: number;
-                            kwote: number | null;
+                            rating: number | null;
                             rankedGames: number;
                             /** Format: date-time */
                             appliedAt: string;
@@ -1480,7 +1858,7 @@ export interface operations {
                             status: "PENDING" | "WAITLISTED";
                             minor: boolean;
                             xp: number;
-                            kwote: number | null;
+                            rating: number | null;
                             rankedGames: number;
                             /** Format: date-time */
                             appliedAt: string;
@@ -1550,7 +1928,7 @@ export interface operations {
                             status: "PENDING" | "WAITLISTED";
                             minor: boolean;
                             xp: number;
-                            kwote: number | null;
+                            rating: number | null;
                             rankedGames: number;
                             /** Format: date-time */
                             appliedAt: string;
@@ -1621,7 +1999,7 @@ export interface operations {
                             status: "PENDING" | "WAITLISTED";
                             minor: boolean;
                             xp: number;
-                            kwote: number | null;
+                            rating: number | null;
                             rankedGames: number;
                             /** Format: date-time */
                             appliedAt: string;
@@ -1692,7 +2070,7 @@ export interface operations {
                             status: "PENDING" | "WAITLISTED";
                             minor: boolean;
                             xp: number;
-                            kwote: number | null;
+                            rating: number | null;
                             rankedGames: number;
                             /** Format: date-time */
                             appliedAt: string;
@@ -1783,13 +2161,972 @@ export interface operations {
                             status: "PENDING" | "WAITLISTED";
                             minor: boolean;
                             xp: number;
-                            kwote: number | null;
+                            rating: number | null;
                             rankedGames: number;
                             /** Format: date-time */
                             appliedAt: string;
                         }[];
                     };
                 };
+            };
+        };
+    };
+    AdminModerationController_dashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        openReports: number;
+                        minorReports: number;
+                        pendingAvatars: number;
+                        pendingVenues: number;
+                        suspendedPlayers: number;
+                    };
+                };
+            };
+        };
+    };
+    AdminModerationController_reports: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        /** @enum {string} */
+                        reason: "HARASSMENT" | "INAPPROPRIATE_CONTENT" | "CHEATING" | "NO_SHOW" | "MINOR_SAFETY" | "OTHER";
+                        details: string;
+                        /** Format: date-time */
+                        createdAt: string;
+                        reporter: {
+                            id: string;
+                            pseudo: string | null;
+                        };
+                        target: {
+                            id: string;
+                            pseudo: string | null;
+                            minor: boolean;
+                            openReports: number;
+                        };
+                    }[];
+                };
+            };
+        };
+    };
+    AdminModerationController_resolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    resolution: "DISMISSED";
+                    /** @default  */
+                    reason?: string;
+                } | {
+                    /** @enum {string} */
+                    resolution: "WARNED";
+                    reason: string;
+                } | {
+                    reason: string;
+                    days: number | null;
+                    /** @enum {string} */
+                    resolution: "SUSPENDED";
+                };
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminModerationController_users: {
+        parameters: {
+            query?: {
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        pseudo: string | null;
+                        email: string;
+                        /** @enum {string} */
+                        role: "PLAYER" | "VENUE_STAFF" | "ADMIN";
+                        minor: boolean;
+                        /** Format: date-time */
+                        createdAt: string;
+                        suspension: {
+                            /** Format: date-time */
+                            at: string;
+                            /** Format: date-time */
+                            until: string | null;
+                            reason: string;
+                        } | null;
+                        openReports: number;
+                    }[];
+                };
+            };
+        };
+    };
+    AdminModerationController_user: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        pseudo: string | null;
+                        email: string;
+                        /** @enum {string} */
+                        role: "PLAYER" | "VENUE_STAFF" | "ADMIN";
+                        minor: boolean;
+                        /** Format: date-time */
+                        createdAt: string;
+                        suspension: {
+                            /** Format: date-time */
+                            at: string;
+                            /** Format: date-time */
+                            until: string | null;
+                            reason: string;
+                        } | null;
+                        openReports: number;
+                        avatarUrl: string | null;
+                        /** @enum {string|null} */
+                        avatarStatus: "PENDING" | "APPROVED" | "REJECTED" | null;
+                        deleted: boolean;
+                        reports: {
+                            id: string;
+                            /** @enum {string} */
+                            reason: "HARASSMENT" | "INAPPROPRIATE_CONTENT" | "CHEATING" | "NO_SHOW" | "MINOR_SAFETY" | "OTHER";
+                            details: string;
+                            /** Format: date-time */
+                            createdAt: string;
+                            /** Format: date-time */
+                            resolvedAt: string | null;
+                            /** @enum {string|null} */
+                            resolution: "DISMISSED" | "WARNED" | "SUSPENDED" | null;
+                            reporter: {
+                                id: string;
+                                pseudo: string | null;
+                            };
+                        }[];
+                        actions: {
+                            id: string;
+                            /** @enum {string} */
+                            action: "REPORT_DISMISS" | "REPORT_WARN" | "REPORT_SUSPEND" | "USER_SUSPEND" | "USER_UNSUSPEND" | "AVATAR_APPROVE" | "AVATAR_REJECT" | "VENUE_UPDATE" | "EVENT_CREATE" | "EVENT_UPDATE" | "EVENT_CANCEL" | "GAME_MERGE";
+                            targetId: string;
+                            reason: string;
+                            /** Format: date-time */
+                            createdAt: string;
+                            admin: {
+                                id: string;
+                                pseudo: string | null;
+                            };
+                        }[];
+                    };
+                };
+            };
+        };
+    };
+    AdminModerationController_suspend: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    reason: string;
+                    days: number | null;
+                };
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminModerationController_unsuspend: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    reason: string;
+                };
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminModerationController_avatars: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        pseudo: string | null;
+                        avatarUrl: string;
+                    }[];
+                };
+            };
+        };
+    };
+    AdminModerationController_approveAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminModerationController_rejectAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    reason: string;
+                };
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminModerationController_actions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        /** @enum {string} */
+                        action: "REPORT_DISMISS" | "REPORT_WARN" | "REPORT_SUSPEND" | "USER_SUSPEND" | "USER_UNSUSPEND" | "AVATAR_APPROVE" | "AVATAR_REJECT" | "VENUE_UPDATE" | "EVENT_CREATE" | "EVENT_UPDATE" | "EVENT_CANCEL" | "GAME_MERGE";
+                        targetId: string;
+                        reason: string;
+                        /** Format: date-time */
+                        createdAt: string;
+                        admin: {
+                            id: string;
+                            pseudo: string | null;
+                        };
+                    }[];
+                };
+            };
+        };
+    };
+    AdminCatalogController_venues: {
+        parameters: {
+            query?: {
+                q?: string;
+                status?: "PENDING" | "PUBLISHED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        slug: string;
+                        name: string;
+                        /** @enum {string} */
+                        type: "GAME_BAR" | "TCG_SHOP" | "LUDOTHEQUE" | "ASSOCIATION" | "OTHER";
+                        /** @enum {string} */
+                        status: "PENDING" | "PUBLISHED";
+                        address: string;
+                        city: string;
+                        phone: string | null;
+                        website: string | null;
+                        isPartner: boolean;
+                        luckoPerk: string | null;
+                        acceptsUnaccompaniedMinors: boolean;
+                        openingHours: {
+                            weekday: number;
+                            opensAtMinute: number;
+                            closesAtMinute: number;
+                        }[];
+                        /** Format: date-time */
+                        createdAt: string;
+                    }[];
+                };
+            };
+        };
+    };
+    AdminCatalogController_updateVenue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    status?: "PENDING" | "PUBLISHED";
+                    isPartner?: boolean;
+                    luckoPerk?: string | null;
+                    acceptsUnaccompaniedMinors?: boolean;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        slug: string;
+                        name: string;
+                        /** @enum {string} */
+                        type: "GAME_BAR" | "TCG_SHOP" | "LUDOTHEQUE" | "ASSOCIATION" | "OTHER";
+                        /** @enum {string} */
+                        status: "PENDING" | "PUBLISHED";
+                        address: string;
+                        city: string;
+                        phone: string | null;
+                        website: string | null;
+                        isPartner: boolean;
+                        luckoPerk: string | null;
+                        acceptsUnaccompaniedMinors: boolean;
+                        openingHours: {
+                            weekday: number;
+                            opensAtMinute: number;
+                            closesAtMinute: number;
+                        }[];
+                        /** Format: date-time */
+                        createdAt: string;
+                    };
+                };
+            };
+        };
+    };
+    AdminCatalogController_events: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        /** @enum {string} */
+                        type: "GAME_NIGHT" | "INITIATION" | "TOURNAMENT" | "PRERELEASE" | "THEMED";
+                        title: string;
+                        description: string | null;
+                        /** Format: date-time */
+                        startsAt: string;
+                        /** Format: date-time */
+                        endsAt: string | null;
+                        capacity: number | null;
+                        priceCents: number | null;
+                        minAge: number | null;
+                        /** @enum {string} */
+                        registrationMode: "NONE" | "IN_APP" | "EXTERNAL";
+                        externalUrl: string | null;
+                        seriesId: string | null;
+                        /** Format: date-time */
+                        cancelledAt: string | null;
+                        gameIds: string[];
+                        registered: number;
+                    }[];
+                };
+            };
+        };
+    };
+    AdminCatalogController_createEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    type: "GAME_NIGHT" | "INITIATION" | "TOURNAMENT" | "PRERELEASE" | "THEMED";
+                    title: string;
+                    /** @default null */
+                    description?: string | null;
+                    /** Format: date */
+                    date: string;
+                    startTime: string;
+                    /** @default null */
+                    endTime?: string | null;
+                    /** @default null */
+                    capacity?: number | null;
+                    /** @default null */
+                    priceCents?: number | null;
+                    /** @default null */
+                    minAge?: number | null;
+                    /**
+                     * @default IN_APP
+                     * @enum {string}
+                     */
+                    registrationMode?: "NONE" | "IN_APP" | "EXTERNAL";
+                    /**
+                     * Format: uri
+                     * @default null
+                     */
+                    externalUrl?: string | null;
+                    /** @default [] */
+                    gameIds?: string[];
+                    /** @default 0 */
+                    repeatWeeks?: number;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        /** @enum {string} */
+                        type: "GAME_NIGHT" | "INITIATION" | "TOURNAMENT" | "PRERELEASE" | "THEMED";
+                        title: string;
+                        description: string | null;
+                        /** Format: date-time */
+                        startsAt: string;
+                        /** Format: date-time */
+                        endsAt: string | null;
+                        capacity: number | null;
+                        priceCents: number | null;
+                        minAge: number | null;
+                        /** @enum {string} */
+                        registrationMode: "NONE" | "IN_APP" | "EXTERNAL";
+                        externalUrl: string | null;
+                        seriesId: string | null;
+                        /** Format: date-time */
+                        cancelledAt: string | null;
+                        gameIds: string[];
+                        registered: number;
+                    }[];
+                };
+            };
+        };
+    };
+    AdminCatalogController_updateEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    type: "GAME_NIGHT" | "INITIATION" | "TOURNAMENT" | "PRERELEASE" | "THEMED";
+                    title: string;
+                    /** @default null */
+                    description?: string | null;
+                    /** Format: date */
+                    date: string;
+                    startTime: string;
+                    /** @default null */
+                    endTime?: string | null;
+                    /** @default null */
+                    capacity?: number | null;
+                    /** @default null */
+                    priceCents?: number | null;
+                    /** @default null */
+                    minAge?: number | null;
+                    /**
+                     * @default IN_APP
+                     * @enum {string}
+                     */
+                    registrationMode?: "NONE" | "IN_APP" | "EXTERNAL";
+                    /**
+                     * Format: uri
+                     * @default null
+                     */
+                    externalUrl?: string | null;
+                    /** @default [] */
+                    gameIds?: string[];
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        /** @enum {string} */
+                        type: "GAME_NIGHT" | "INITIATION" | "TOURNAMENT" | "PRERELEASE" | "THEMED";
+                        title: string;
+                        description: string | null;
+                        /** Format: date-time */
+                        startsAt: string;
+                        /** Format: date-time */
+                        endsAt: string | null;
+                        capacity: number | null;
+                        priceCents: number | null;
+                        minAge: number | null;
+                        /** @enum {string} */
+                        registrationMode: "NONE" | "IN_APP" | "EXTERNAL";
+                        externalUrl: string | null;
+                        seriesId: string | null;
+                        /** Format: date-time */
+                        cancelledAt: string | null;
+                        gameIds: string[];
+                        registered: number;
+                    };
+                };
+            };
+        };
+    };
+    AdminCatalogController_cancelEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    reason: string;
+                    /** @default false */
+                    series?: boolean;
+                };
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminCatalogController_games: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        slug: string;
+                        name: string;
+                        formats: {
+                            id: string;
+                            slug: string;
+                            name: string;
+                        }[];
+                        rooms: number;
+                        events: number;
+                        players: number;
+                    }[];
+                };
+            };
+        };
+    };
+    AdminCatalogController_merge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    intoId: string;
+                };
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ChatController_chats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        unread: number;
+                        chats: {
+                            /** @enum {string} */
+                            type: "room" | "event";
+                            id: string;
+                            title: string;
+                            /** Format: date-time */
+                            startsAt: string;
+                            last: {
+                                pseudo: string | null;
+                                body: string;
+                                /** Format: date-time */
+                                createdAt: string;
+                            } | null;
+                            unread: number;
+                        }[];
+                    };
+                };
+            };
+        };
+    };
+    ChatController_page: {
+        parameters: {
+            query?: {
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                type: "room" | "event";
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        title: string;
+                        messages: {
+                            id: string;
+                            author: {
+                                id: string;
+                                pseudo: string | null;
+                            };
+                            body: string;
+                            /** @enum {string} */
+                            kind: "MESSAGE" | "ANNOUNCEMENT";
+                            /** Format: date-time */
+                            createdAt: string;
+                        }[];
+                        nextCursor: string | null;
+                        pinned: {
+                            id: string;
+                            author: {
+                                id: string;
+                                pseudo: string | null;
+                            };
+                            body: string;
+                            /** @enum {string} */
+                            kind: "MESSAGE" | "ANNOUNCEMENT";
+                            /** Format: date-time */
+                            createdAt: string;
+                        } | null;
+                        /** Format: date-time */
+                        lastReadAt: string | null;
+                        muted: boolean;
+                        moderator: boolean;
+                    };
+                };
+            };
+        };
+    };
+    ChatController_send: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type: "room" | "event";
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    body: string;
+                    /** @default false */
+                    announcement?: boolean;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        author: {
+                            id: string;
+                            pseudo: string | null;
+                        };
+                        body: string;
+                        /** @enum {string} */
+                        kind: "MESSAGE" | "ANNOUNCEMENT";
+                        /** Format: date-time */
+                        createdAt: string;
+                    };
+                };
+            };
+        };
+    };
+    ChatController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type: "room" | "event";
+                id: string;
+                messageId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ChatController_report: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type: "room" | "event";
+                id: string;
+                messageId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    reason: "HARASSMENT" | "INAPPROPRIATE_CONTENT" | "CHEATING" | "NO_SHOW" | "MINOR_SAFETY" | "OTHER";
+                    /** @default  */
+                    details?: string;
+                };
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ChatController_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type: "room" | "event";
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ChatController_mute: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type: "room" | "event";
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    muted: boolean;
+                };
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

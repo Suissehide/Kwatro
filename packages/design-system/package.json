@@ -1,5 +1,5 @@
 {
-  "name": "@kwatro/design-system",
+  "name": "@lucko/design-system",
   "version": "0.0.0",
   "private": true,
   "description": "Design system « Plateau pop » : tokens et composants React Native (mobile + web via react-native-web)",
@@ -9,7 +9,7 @@
     ".": "./src/index.ts",
     "./catalogue": "./src/catalogue/Catalogue.tsx",
     "./scene": "./src/scene/HeroScene.tsx",
-    "./kwatro.css": "./css/kwatro.css"
+    "./lucko.css": "./css/lucko.css"
   },
   "sideEffects": [
     "*.css"
@@ -20,18 +20,21 @@
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-svg": "*"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
     "@types/three": "^0.186.0",
     "react": "19.2.3",
     "react-native": "0.86.3",
+    "react-native-svg": "15.15.4",
     "typescript": "~6.0.3",
     "vitest": "^5.0.3"
   },
   "dependencies": {
     "gsap": "^3.15.0",
+    "lucide-react-native": "^1.52.0",
     "three": "^0.186.1"
   }
 }

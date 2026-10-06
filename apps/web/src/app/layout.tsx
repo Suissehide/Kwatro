@@ -1,24 +1,24 @@
 import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
-import '@kwatro/design-system/kwatro.css'
+import '@lucko/design-system/lucko.css'
 import { RnwStyles } from './rnw-styles'
 import { siteDescription, siteUrl } from './site'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'Kwatro — Soirées jeux de société et tournois TCG près de chez toi',
-    template: '%s — Kwatro',
+    default: 'Lucko — Soirées jeux de société et tournois TCG près de chez toi',
+    template: '%s — Lucko',
   },
   description: siteDescription,
-  applicationName: 'Kwatro',
+  applicationName: 'Lucko',
   alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
-    siteName: 'Kwatro',
+    siteName: 'Lucko',
     url: '/',
-    title: 'Kwatro — Où jouer ce soir ?',
+    title: 'Lucko — Où jouer ce soir ?',
     description: siteDescription,
   },
   twitter: { card: 'summary_large_image' },

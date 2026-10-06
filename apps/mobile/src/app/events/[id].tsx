@@ -2,6 +2,7 @@ import {
   Banner,
   Button,
   ConfirmDialog,
+  colors,
   ListCard,
   ListRow,
   Note,
@@ -10,23 +11,30 @@ import {
   StatusPill,
   Tag,
   Typography,
-} from '@kwatro/design-system'
-import { EVENT_TYPE_LABELS, formatPrice } from '@kwatro/shared'
+} from '@lucko/design-system'
+import { EVENT_TYPE_LABELS, formatPrice } from '@lucko/shared'
 import { router, useLocalSearchParams } from 'expo-router'
+import { ChevronRight } from 'lucide-react-native'
 import { useState } from 'react'
 import { Linking, View } from 'react-native'
 import { DetailScreen } from '@/components/DetailScreen'
 import { eventPlaces, eventWhen, gameLabel, isFull } from '@/lib/explore'
-import { openVenue } from '@/lib/navigation'
+import { openChat, openVenue } from '@/lib/navigation'
+import { useChatUnread } from '@/queries/useChat'
 import { useEventMutations, useEventQuery } from '@/queries/useEvent'
 import { useMeQuery } from '@/queries/useMe'
 
-/** Fiche événement (B4, KWT-11) et inscription dans l'app, avec liste d'attente quand c'est complet. */
+/** Fiche événement (B4, LKO-11) et inscription dans l'app, avec liste d'attente quand c'est complet. */
 export default function EventScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const me = useMeQuery()
   const { data: event, isError: failed, refetch } = useEventQuery(id)
   const { register, unregister } = useEventMutations(id)
+  // Chat du tournoi : inscrits et staff du lieu (organisateur)
+  const member =
+    event?.myRegistration === 'REGISTERED' ||
+    (!!event && !!me?.venues.some((venue) => venue.id === event.venue.id))
+  const unread = useChatUnread({ type: 'event', id }, member)
   const [confirmCancel, setConfirmCancel] = useState(false)
   const pending = register.isPending || unregister.isPending
   const error = register.error ?? unregister.error
@@ -106,6 +114,16 @@ export default function EventScreen() {
         {event.venue.isPartner ? <Tag variant="partner" label="Lieu partenaire" /> : null}
       </View>
       {error ? <Banner tone="err" message={error.message} onClose={clearError} /> : null}
+      {member ? (
+        <View style={{ alignSelf: 'flex-start' }}>
+          <Button
+            small
+            kind="soft"
+            label={`Chat de l'événement${unread ? ` · ${unread} non lu${unread > 1 ? 's' : ''}` : ''}`}
+            onPress={() => openChat('event', id)}
+          />
+        </View>
+      ) : null}
       {event.registrationMode === 'NONE' && !event.cancelledAt ? (
         <Note tone="plain">Entrée libre : pas besoin de s'inscrire, viens directement.</Note>
       ) : null}
@@ -118,7 +136,12 @@ export default function EventScreen() {
           inset={16}
           title={event.venue.name}
           subtitle={event.venue.address}
-          right={<Typography variant="small">Voir le lieu →</Typography>}
+          right={
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+              <Typography variant="small">Voir le lieu</Typography>
+              <ChevronRight size={16} color={colors.muted} strokeWidth={2.5} />
+            </View>
+          }
           last
           onPress={() => openVenue(event.venue.slug)}
         />

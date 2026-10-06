@@ -1,7 +1,9 @@
 import { expo } from '@better-auth/expo'
-import { ageRegime, birthDateSchema, MIN_AGE, PASSWORD_MIN } from '@kwatro/shared'
+import { ageRegime, birthDateSchema, MIN_AGE, PASSWORD_MIN } from '@lucko/shared'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
+import { APIError } from 'better-auth/api'
+import { isSuspended, suspensionMessage } from '../admin/admin.rules'
 import type { Env } from '../config/env'
 import type { PrismaClient } from '../generated/prisma/client'
 
@@ -11,7 +13,7 @@ function provider(clientId?: string, clientSecret?: string) {
 }
 
 /**
- * Better Auth (KWT-9) : e-mail + mot de passe, Apple, Google ; sessions en cookie, stockées dans Postgres.
+ * Better Auth (LKO-9) : e-mail + mot de passe, Apple, Google ; sessions en cookie, stockées dans Postgres.
  * Routes servies sous /api/auth/* (montées dans main.ts, avant le body parser de Nest).
  */
 export function createAuth(prisma: PrismaClient, env: Env) {
@@ -29,7 +31,7 @@ export function createAuth(prisma: PrismaClient, env: Env) {
     // et le POST de retour d'Apple
     trustedOrigins: [
       ...env.CORS_ORIGINS,
-      'kwatro://',
+      'lucko://',
       ...(env.NODE_ENV === 'production' ? [] : ['exp://']),
       'https://appleid.apple.com',
     ],
@@ -41,7 +43,7 @@ export function createAuth(prisma: PrismaClient, env: Env) {
           required: false,
           validator: {
             input: birthDateSchema.refine((date) => ageRegime(date) !== 'too-young', {
-              message: `Kwatro est ouvert dès ${MIN_AGE} ans`,
+              message: `Lucko est ouvert dès ${MIN_AGE} ans`,
             }),
           },
         },
@@ -51,6 +53,19 @@ export function createAuth(prisma: PrismaClient, env: Env) {
       user: {
         // La date de naissance règle les droits du compte : jamais modifiable via /api/auth/update-user
         update: { before: async (data) => ('birthDate' in data ? false : undefined) },
+      },
+      session: {
+        // Compte suspendu (LKO-20) : connexion refusée, quel que soit le moyen (e-mail, Apple, Google)
+        create: {
+          before: async (session) => {
+            const user = await prisma.user.findUnique({
+              where: { id: session.userId },
+              select: { suspendedAt: true, suspendedUntil: true },
+            })
+            if (user && isSuspended(user))
+              throw new APIError('FORBIDDEN', { message: suspensionMessage(user) })
+          },
+        },
       },
     },
     plugins: [expo()],

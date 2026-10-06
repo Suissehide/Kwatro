@@ -1,6 +1,8 @@
 'use client'
+
+import { CircleHelp, ExternalLink, Plus, SlidersHorizontal } from 'lucide-react-native'
 import { type ReactNode, useState } from 'react'
-import { ScrollView, Text, View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 import {
   Avatar,
   Button,
@@ -33,6 +35,8 @@ import {
   Brand,
   CardFan,
   ChatBubble,
+  ChatComposer,
+  ChatDivider,
   ChipGroup,
   ClosureRow,
   ContentCard,
@@ -41,8 +45,8 @@ import {
   EventCard,
   FactCard,
   HoursCard,
-  KwoteBadge,
   LevelCard,
+  LinkCard,
   ListCard,
   ListRow,
   OptionCard,
@@ -54,10 +58,18 @@ import {
   ProfileIdentity,
   RankCard,
   RankRow,
+  RatingBadge,
+  ReviewCard,
   RoomCard,
   RoomStatusTimeline,
   ScreenHeader,
   Segmented,
+  SettingsCard,
+  SettingsField,
+  SettingsGroup,
+  SettingsNav,
+  SettingsRow,
+  SettingsSection,
   ShareBar,
   SkeletonCard,
   StatCard,
@@ -83,7 +95,7 @@ import {
   TopNav,
   VenueTabBar,
 } from '../organisms'
-import { colors, font, space } from '../tokens'
+import { colors, space } from '../tokens'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -136,7 +148,7 @@ export function Catalogue() {
       <View style={{ gap: 8 }}>
         <Typography variant="display">Plateau pop</Typography>
         <Typography variant="small">
-          Design system Kwatro : atomes, molécules, organismes, templates.
+          Design system Lucko : atomes, molécules, organismes, templates.
         </Typography>
       </View>
 
@@ -150,7 +162,7 @@ export function Catalogue() {
           <Button label="Rejoindre" />
           <Button label="Événement" kind="event" />
           <Button label="Lieu" kind="venue" />
-          <Button label="Kwote" kind="kwote" />
+          <Button label="LK" kind="rating" />
           <Button label="Ink" kind="ink" />
           <Button label="Annuler" kind="ghost" />
           <Button label="Désactivé" disabled />
@@ -175,12 +187,15 @@ export function Catalogue() {
         </Row>
         <Row>
           <Avatar name="Léa" />
-          <Avatar name="Max" color={colors.kwote} size={56} badge={<CountBadge count={2} />} />
-          <IconButton label="Filtrer" icon={<Text style={font('body', 800)}>≡</Text>} />
+          <Avatar name="Max" color={colors.rating} size={56} badge={<CountBadge count={2} />} />
+          <IconButton
+            label="Filtrer"
+            icon={<SlidersHorizontal size={18} color={colors.ink} strokeWidth={2.5} />}
+          />
           <IconButton
             label="Ajouter"
-            bg={colors.kwote}
-            icon={<Text style={font('body', 800)}>+</Text>}
+            bg={colors.rating}
+            icon={<Plus size={20} color={colors.ink} strokeWidth={2.5} />}
           />
           <DateBlock day="18" month="OCT" />
           <DateBlock day="23" month="OCT" color={colors.room} />
@@ -214,8 +229,8 @@ export function Catalogue() {
         <TextField label="E-mail" value="lea@" error="Adresse e-mail incomplète" />
         <Row>
           <Stepper value={players} min={2} max={8} onChange={setPlayers} />
-          <KwoteBadge value="1 184" reliability={96} />
-          <KwoteBadge value="1 184" large />
+          <RatingBadge value="1 184" reliability={96} />
+          <RatingBadge value="1 184" large />
         </Row>
         <XpBar level={7} name="Habitué" current={340} max={500} />
         <Slider label="Rayon" value={radiusKm} min={1} max={50} onChange={setRadiusKm} />
@@ -233,6 +248,46 @@ export function Catalogue() {
           value={vibe}
           onChange={setVibe}
         />
+        <SettingsGroup
+          title="Notifications"
+          rows={[
+            {
+              label: 'Mes rooms',
+              description: 'Candidatures, rappels, annulations',
+              toggle: { value: toggle, onChange: setToggle },
+            },
+            { label: 'Joueurs bloqués', value: '2', onPress: () => {} },
+          ]}
+        />
+        <SettingsSection title="Session" description="Ta session sur ce navigateur.">
+          <SettingsCard>
+            <SettingsField label="E-mail de connexion" value="lea@lucko.fr" />
+            <SettingsRow
+              wide
+              danger
+              label="Supprimer mon compte"
+              description="C'est définitif."
+              aside={<Button small kind="ghost" label="Supprimer…" onPress={() => {}} />}
+            />
+          </SettingsCard>
+        </SettingsSection>
+        <Row>
+          <SettingsNav
+            back="Profil"
+            onBack={() => {}}
+            items={['Compte', 'Notifications']}
+            active={0}
+            onSelect={() => {}}
+          />
+          <View style={{ width: 300 }}>
+            <LinkCard
+              label="Aide"
+              description="Questions fréquentes"
+              icon={ExternalLink}
+              onPress={() => {}}
+            />
+          </View>
+        </Row>
         <ProfileIdentity
           pseudo="Léa"
           place="Bordeaux · 10 km"
@@ -248,7 +303,7 @@ export function Catalogue() {
               color={colors.room}
               game="Magic"
               format="Commander"
-              kwote="1 214"
+              rating="1 214"
               note="38 parties classées"
             />
           </View>
@@ -257,9 +312,9 @@ export function Catalogue() {
               color={colors.venue}
               game="One Piece"
               format="Standard"
-              kwote={null}
+              rating={null}
               progress="3 / 5"
-              note="Encore 2 parties classées avant ta première Kwote"
+              note="Encore 2 parties classées avant tes premiers LK"
             />
           </View>
         </Row>
@@ -268,7 +323,7 @@ export function Catalogue() {
             color={colors.event}
             game="Lorcana"
             format="Core"
-            kwote="1 310"
+            rating="1 310"
             note="12 parties"
             last
           />
@@ -304,7 +359,7 @@ export function Catalogue() {
           </Row>
         </ContentCard>
         <View>
-          <ListRow left={<Avatar name="Léa" />} title="Léa" subtitle="Pioneer · ◆ 1 240" />
+          <ListRow left={<Avatar name="Léa" />} title="Léa" subtitle="Pioneer · LK 1 240" />
           <ListRow
             left={<Avatar name="Max" color={colors.venue} />}
             title="Max"
@@ -313,23 +368,45 @@ export function Catalogue() {
           />
         </View>
         <RoomStatusTimeline current={2} />
+        <ReviewCard
+          title="Tom_16"
+          tags={<Tag label="-18" variant="tonight" />}
+          meta="Signalé par hugo · il y a 2 h"
+          body="Pseudo limite dans le chat de la room."
+          onPress={() => {}}
+          actions={
+            <>
+              <Button small kind="ghost" label="Classer" onPress={() => {}} />
+              <Button small kind="room" label="Suspendre" onPress={() => {}} />
+            </>
+          }
+        />
         <Row>
           <View style={{ flex: 1, minWidth: 160 }}>
             <StatCard value="42" label="Joueurs ce soir" delta={{ text: '12 %', up: true }} />
           </View>
           <View style={{ flex: 1, minWidth: 160 }}>
-            <StatCard value="7" label="Événements" bg={colors.event} />
+            <StatCard value="7" label="Événements" bg={colors.event} onPress={() => {}} />
           </View>
         </Row>
         <ShareBar label="Pioneer" percent={46} color={colors.room} />
         <Banner message="Ta room commence dans 1 h." action="Voir" onClose={() => {}} />
         <Toast message="Candidature envoyée" action="Annuler" />
         <View style={{ gap: 8 }}>
-          <ChatBubble author="Léa" text="Je ramène mon deck Mono-rouge !" />
-          <ChatBubble mine text="Parfait, on se retrouve à 20 h." />
+          <ChatBubble
+            announcement
+            author="Fêlé"
+            time="19:02"
+            text="Ronde 1 lancée, tables 1 à 6."
+          />
+          <ChatBubble author="Léa" time="19:40" text="Je ramène mon deck Mono-rouge !" />
+          <ChatDivider label="Nouveaux messages" />
+          <ChatBubble mine time="19:41" text="Parfait, on se retrouve à 20 h." onPress={() => {}} />
+          <ChatBubble mine pending text="J'arrive 🃏" />
+          <ChatComposer value="" onChange={() => {}} onSend={() => {}} status="Léa écrit…" />
         </View>
         <EmptyState
-          icon={<Text style={{ ...font('display'), fontSize: 24 }}>?</Text>}
+          icon={<CircleHelp size={28} color={colors.ink} strokeWidth={2.5} />}
           title="Aucune room ce soir"
           text="Crée la tienne : les joueurs du coin seront prévenus."
           action={<Button label="Créer une room" small />}
@@ -379,7 +456,7 @@ export function Catalogue() {
               meta="Le Dé Fêlé · 21 h"
               players={['M', 'S']}
               capacity={4}
-              kwote="1 180 – 1 260"
+              rating="1 180 – 1 260"
               onPress={() => {}}
             />
           </View>
@@ -387,7 +464,7 @@ export function Catalogue() {
             <ProfileCard
               pseudo="Léa"
               format="Commander"
-              kwote="1 214"
+              rating="1 214"
               xp={{ level: 4, name: 'Pilier de table', current: 340, max: 500 }}
             />
           </View>
@@ -400,7 +477,7 @@ export function Catalogue() {
             subtitle="Bar à jeux · jusqu'à 1 h"
             distance="1,2 km"
             partner
-            perk="Droit de jeu offert avec Kwatro"
+            perk="Droit de jeu offert avec Lucko"
             onPress={() => {}}
           />
           <VenueRow
@@ -506,7 +583,7 @@ export function Catalogue() {
           selectable
           selected={selected}
           onSelect={setSelected}
-          bulkActions={<Button label="Publier" kind="kwote" small />}
+          bulkActions={<Button label="Publier" kind="rating" small />}
           footer={<Pagination page={page} pages={20} total={58} perPage={3} onChange={setPage} />}
         />
         <BarChart
@@ -521,7 +598,7 @@ export function Catalogue() {
         />
         <Accordion
           items={[
-            { q: 'Comment marche la Kwote ?', a: 'Elle mesure ta force par format TCG.' },
+            { q: 'Comment marchent les LK ?', a: 'Ils mesurent ta force par format TCG.' },
             { q: "Et l'XP ?", a: "Elle récompense l'assiduité, pas la victoire." },
           ]}
         />
@@ -533,7 +610,7 @@ export function Catalogue() {
           items={playerNavItems}
           active={tab}
           onSelect={(key) => setTab(key as PlayerTab)}
-          right={<Button small kind="kwote" label="+ Créer une room" />}
+          right={<Button small kind="rating" label="+ Créer une room" />}
         />
         <View style={{ maxWidth: 420, width: '100%', gap: 12 }}>
           <PlayerTabBar active={tab} onSelect={setTab} onCreate={() => {}} bottomInset={10} />

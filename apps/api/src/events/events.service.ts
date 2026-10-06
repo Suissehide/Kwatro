@@ -1,15 +1,19 @@
-import type { eventDetailSchema } from '@kwatro/shared'
+import type { eventDetailSchema } from '@lucko/shared'
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common'
 import type { z } from 'zod'
 import type { User } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
+import { RealtimeGateway } from '../realtime/realtime.gateway'
 import { registrationOutcome } from './events.rules'
 
 const registered = { registrations: { where: { status: 'REGISTERED' as const } } }
 
 @Injectable()
 export class EventsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly realtime: RealtimeGateway,
+  ) {}
 
   /** Fiche événement ; `userId` ajoute l'inscription du joueur connecté. */
   async detail(id: string, userId?: string): Promise<z.output<typeof eventDetailSchema>> {
@@ -57,6 +61,7 @@ export class EventsService {
         create: { eventId: id, userId: user.id, status: outcome.status },
       })
     })
+    this.realtime.changed({ type: 'event', id })
     return this.detail(id, user.id)
   }
 
@@ -77,7 +82,7 @@ export class EventsService {
         where: { eventId: id, status: 'WAITLISTED' },
         orderBy: { createdAt: 'asc' },
       })
-      // ponytail: le joueur promu n'est pas encore prévenu, notification avec KWT-108
+      // ponytail: le joueur promu n'est pas encore prévenu, notification avec LKO-108
       if (next) {
         await tx.eventRegistration.update({
           where: { eventId_userId: { eventId: id, userId: next.userId } },
@@ -85,6 +90,8 @@ export class EventsService {
         })
       }
     })
+    await this.realtime.revoke({ type: 'event-chat', id }, [user.id])
+    this.realtime.changed({ type: 'event', id })
     return this.detail(id, user.id)
   }
 }
