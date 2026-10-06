@@ -140,14 +140,19 @@ deploy/
 - `pnpm docker:up` : profils `db` + `backend` + `frontend`, l'API (port 3000) et le site (port 3010) avec les images de production, pour vérifier un build avant de pousser.
 - `pnpm db:restore <fichier>` : remplace la base locale par une sauvegarde (par ex. téléchargée depuis Dokploy).
 
-**Déploiement avec Dokploy**
-1. Dokploy › Create Service › **Compose** › dépôt `Suissehide/Lucko`, branche `main`, *Compose Path* `./deploy/dokploy/docker-compose.dokploy.yml`.
-2. Onglet **Environment** : recopier `deploy/.env.example` avec les vraies valeurs.
+**Déploiement avec Dokploy** : deux services Compose sur le même fichier, `lucko-staging` et `lucko-production`.
+1. Dokploy › Create Service › **Compose** › dépôt `Suissehide/Lucko`, branche `main`, *Compose Path* `./deploy/dokploy/docker-compose.dokploy.yml`. Désactiver **Autodeploy** : c'est la CI qui déclenche les déploiements.
+2. Onglet **Environment** : recopier `deploy/.env.example` avec les vraies valeurs, propres à chaque environnement (`APP_IMAGE_NAME=lucko-staging` pour le staging, secrets et domaines distincts).
 3. Onglet **Domains** : un domaine pour `api` (port 3000), un pour `web` (port 3000) et un pour `app` (port 80), HTTPS activé. Le domaine de l'app doit figurer dans `CORS_ORIGINS`.
-4. **Deploy**. Les migrations Prisma en attente s'appliquent au démarrage de l'API.
+4. Les migrations Prisma en attente s'appliquent au démarrage de l'API.
 5. Les variables `NEXT_PUBLIC_*` et `EXPO_PUBLIC_*` sont figées au build : relancer un Deploy après les avoir changées.
 6. Sauvegardes : le service `postgres-backup` fait un `pg_dump` quotidien (7 jours, 4 semaines, 6 mois) dans le volume `postgres-backups`. Copie hors serveur à ajouter.
 7. App iOS / Android : hors Dokploy, via EAS (`eas build --profile production` puis `eas submit`).
+
+**CI/CD** (`.github/workflows/deploy.yml`)
+- Staging : déployé automatiquement à chaque CI verte sur `main`.
+- Production : Actions › **Deploy** › *Run workflow* sur `main`.
+- Configuration GitHub (Settings › Environments) : deux environnements `staging` et `production` (ajouter des *required reviewers* sur `production` si besoin), chacun avec les variables `DOKPLOY_URL` (ex. `https://dokploy.exemple.fr`) et `DOKPLOY_COMPOSE_ID` (dans l'URL du service Dokploy) et le secret `DOKPLOY_API_KEY` (Dokploy › Settings › Profile › API/CLI).
 
 ## Contribuer
 

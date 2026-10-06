@@ -1,6 +1,7 @@
 # ────────────────────────────────────────────────────────────────
 # Lucko — déploiement Dokploy (service de type « Compose »)
 #
+#   Un service Compose par environnement (staging, production), même fichier :
 #   Compose Path : ./deploy/dokploy/docker-compose.dokploy.yml
 #   Environment  : variables de deploy/.env.example (vraies valeurs)
 #   Domains      : à déclarer dans l'onglet « Domains » de Dokploy
@@ -23,6 +24,7 @@ services:
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
       - APPLE_CLIENT_ID=${APPLE_CLIENT_ID:-}
       - APPLE_CLIENT_SECRET=${APPLE_CLIENT_SECRET:-}
+      - EXPO_ACCESS_TOKEN=${EXPO_ACCESS_TOKEN:-}
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
       interval: 30s
