@@ -33,6 +33,8 @@ import {
   Brand,
   CardFan,
   ChatBubble,
+  ChatComposer,
+  ChatDivider,
   ChipGroup,
   ClosureRow,
   ContentCard,
@@ -339,8 +341,17 @@ export function Catalogue() {
         <Banner message="Ta room commence dans 1 h." action="Voir" onClose={() => {}} />
         <Toast message="Candidature envoyée" action="Annuler" />
         <View style={{ gap: 8 }}>
-          <ChatBubble author="Léa" text="Je ramène mon deck Mono-rouge !" />
-          <ChatBubble mine text="Parfait, on se retrouve à 20 h." />
+          <ChatBubble
+            announcement
+            author="Fêlé"
+            time="19:02"
+            text="Ronde 1 lancée, tables 1 à 6."
+          />
+          <ChatBubble author="Léa" time="19:40" text="Je ramène mon deck Mono-rouge !" />
+          <ChatDivider label="Nouveaux messages" />
+          <ChatBubble mine time="19:41" text="Parfait, on se retrouve à 20 h." onPress={() => {}} />
+          <ChatBubble mine pending text="J'arrive 🃏" />
+          <ChatComposer value="" onChange={() => {}} onSend={() => {}} status="Léa écrit…" />
         </View>
         <EmptyState
           icon={<Text style={{ ...font('display'), fontSize: 24 }}>?</Text>}

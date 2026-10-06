@@ -2,6 +2,7 @@ import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/r
 import { AGENDA, EVENT, EXPLORE } from '@/constants/queryKeys'
 import { api } from '@/lib/api'
 import { unwrap } from '@/lib/queryClient'
+import { useRealtime } from '@/lib/realtime'
 
 // * QUERIES
 
@@ -11,7 +12,12 @@ type EventDetail = Awaited<ReturnType<typeof fetchEvent>>
 export const eventQueryOptions = (id: string) =>
   queryOptions({ queryKey: [EVENT.GET, id], queryFn: () => fetchEvent(id) })
 
-export const useEventQuery = (id: string) => useQuery(eventQueryOptions(id))
+/** Fiche événement, rechargée en direct quand les places restantes changent. */
+export function useEventQuery(id: string) {
+  const options = eventQueryOptions(id)
+  useRealtime({ type: 'event', id }, options.queryKey)
+  return useQuery(options)
+}
 
 // * MUTATIONS
 

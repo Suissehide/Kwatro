@@ -28,15 +28,15 @@ const backToProfile = () => (router.canGoBack() ? router.back() : router.replace
 
 // ponytail: mot de passe, fournisseur lié et langue attendent leurs écrans
 const KWATRO_ROWS = [
-  { label: 'Aide', onPress: () => openSite('/aide') },
+  { label: 'Aide', onPress: () => openSite('/help') },
   // Contact du support exigé par Apple et Google (KWT-19)
   {
     label: 'Nous contacter',
     value: CONTACT_EMAIL,
     onPress: () => Linking.openURL(`mailto:${CONTACT_EMAIL}`),
   },
-  { label: "Conditions d'utilisation", onPress: () => openSite('/cgu') },
-  { label: 'Politique de confidentialité', onPress: () => openSite('/confidentialite') },
+  { label: "Conditions d'utilisation", onPress: () => openSite('/terms') },
+  { label: 'Politique de confidentialité', onPress: () => openSite('/privacy') },
 ]
 
 /** Réglages du compte : e-mail, joueurs bloqués, liens Kwatro et contact, déconnexion et suppression (KWT-18), notifications (KWT-108). */

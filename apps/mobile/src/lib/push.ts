@@ -4,7 +4,9 @@ import * as Notifications from 'expo-notifications'
 import { type Href, router } from 'expo-router'
 import { useEffect } from 'react'
 import { Platform } from 'react-native'
+import { CHAT } from '@/constants/queryKeys'
 import { api } from './api'
+import { queryClient } from './queryClient'
 
 /** Notifications push (KWT-108) : seulement sur un vrai téléphone, pas sur le web ni le simulateur. */
 const supported = Platform.OS !== 'web' && Device.isDevice
@@ -73,6 +75,13 @@ export function usePush(meId: string | undefined) {
     }
     void Notifications.getLastNotificationResponseAsync().then(open)
     const subscription = Notifications.addNotificationResponseReceivedListener(open)
-    return () => subscription.remove()
+    // Message reçu app ouverte : le badge de l'onglet Messages suit
+    const received = Notifications.addNotificationReceivedListener(
+      () => void queryClient.invalidateQueries({ queryKey: [CHAT.LIST] }),
+    )
+    return () => {
+      subscription.remove()
+      received.remove()
+    }
   }, [])
 }

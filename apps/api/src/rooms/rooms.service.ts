@@ -19,6 +19,7 @@ import { closureRange, notBlockedWith } from '../explore/explore.service'
 import type { Prisma, User } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 import { PushService } from '../push/push.service'
+import { RealtimeGateway } from '../realtime/realtime.gateway'
 import {
   acceptRefusal,
   createRoomRefusal,
@@ -58,6 +59,7 @@ export class RoomsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly push: PushService,
+    private readonly realtime: RealtimeGateway,
   ) {}
 
   /** Crée la room ; l'hôte en est le premier joueur accepté. */
@@ -174,13 +176,13 @@ export class RoomsService {
       })
       await this.refreshStatus(tx, id)
     })
+    this.realtime.changed({ type: 'room', id })
     return this.detail(id, user)
   }
 
   /**
    * Quitter la room ou retirer sa demande. Une place libérée revient au premier de la liste d'attente.
    */
-  // ponytail: personne n'est encore prévenu (promotion, acceptation), notifications avec KWT-108
   async leave(id: string, user: User) {
     await this.prisma.$transaction(async (tx) => {
       const room = await this.lock(tx, id, user)
@@ -195,6 +197,8 @@ export class RoomsService {
       if (mine.status === 'ACCEPTED') await this.promote(tx, room)
       await this.refreshStatus(tx, id)
     })
+    await this.realtime.revoke({ type: 'room', id }, [user.id])
+    this.realtime.changed({ type: 'room', id })
     return this.detail(id, user)
   }
 
@@ -227,6 +231,8 @@ export class RoomsService {
           tx,
         )
     })
+    if (!accept) await this.realtime.revoke({ type: 'room', id }, [userId])
+    this.realtime.changed({ type: 'room', id })
     return this.detail(id, host)
   }
 
@@ -281,6 +287,8 @@ export class RoomsService {
       }
       await this.refreshStatus(tx, id)
     })
+    if (action.type === 'remove') await this.realtime.revoke({ type: 'room', id }, [action.userId])
+    this.realtime.changed({ type: 'room', id })
     return this.detail(id, host)
   }
 

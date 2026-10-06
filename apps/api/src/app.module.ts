@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { AdminModule } from './admin/admin.module'
 import { AuthModule } from './auth/auth.module'
+import { ChatModule } from './chat/chat.module'
 import { EventsModule } from './events/events.module'
 import { ExploreModule } from './explore/explore.module'
 import { GamesModule } from './games/games.module'
@@ -10,6 +11,7 @@ import { MailModule } from './mail/mail.module'
 import { ModerationModule } from './moderation/moderation.module'
 import { PrismaModule } from './prisma/prisma.module'
 import { PushModule } from './push/push.module'
+import { RealtimeModule } from './realtime/realtime.module'
 import { RoomsModule } from './rooms/rooms.module'
 import { UsersModule } from './users/users.module'
 import { WaitlistModule } from './waitlist/waitlist.module'
@@ -20,6 +22,7 @@ import { WaitlistModule } from './waitlist/waitlist.module'
     JobsModule,
     MailModule,
     PushModule,
+    RealtimeModule,
     AuthModule,
     HealthModule,
     GamesModule,
@@ -30,6 +33,7 @@ import { WaitlistModule } from './waitlist/waitlist.module'
     ModerationModule,
     RoomsModule,
     AdminModule,
+    ChatModule,
   ],
 })
 export class AppModule {}

@@ -7,6 +7,7 @@ import { api } from '@/lib/api'
 import { authClient } from '@/lib/auth'
 import { forgetPush } from '@/lib/push'
 import { ApiError, queryClient, unwrap } from '@/lib/queryClient'
+import { disconnectRealtime } from '@/lib/realtime'
 
 // * QUERIES
 
@@ -37,6 +38,7 @@ export const forgetMe = () => queryClient.removeQueries({ queryKey: [ME.GET] })
 export async function signOut() {
   await forgetPush().catch(() => undefined)
   await authClient.signOut().catch(() => undefined)
+  disconnectRealtime()
   queryClient.clear()
   router.replace({ pathname: '/auth', params: { signedOut: '1' } })
 }

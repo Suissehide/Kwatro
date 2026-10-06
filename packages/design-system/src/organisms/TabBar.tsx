@@ -1,4 +1,5 @@
 import { Pressable, Text, View } from 'react-native'
+import { CountBadge } from '../atoms/CountBadge'
 import { Raised } from '../atoms/Raised'
 import { useHover } from '../atoms/useHover'
 import { border, colors, font, motion, shadow, transition } from '../tokens'
@@ -25,12 +26,14 @@ const venueItems: TabItem<VenueTab>[] = [
 
 function Tab<K extends string>({
   item,
+  badge,
   active,
   activeColor,
   bottomInset,
   onPress,
 }: {
   item: TabItem<K>
+  badge?: number
   active: boolean
   activeColor: string
   bottomInset: number
@@ -42,7 +45,7 @@ function Tab<K extends string>({
     <Pressable
       role="tab"
       aria-selected={active}
-      aria-label={item.label}
+      aria-label={badge ? `${item.label}, ${badge} non lus` : item.label}
       onPress={onPress}
       {...hoverProps}
       style={{ flex: 1, alignItems: 'center', gap: 4, paddingTop: 10, paddingBottom: bottomInset }}
@@ -57,7 +60,13 @@ function Tab<K extends string>({
           borderColor: strong ? colors.ink : colors.muted,
           ...transition(['border-color', 'background-color']),
         }}
-      />
+      >
+        {badge ? (
+          <View style={{ position: 'absolute', top: -9, left: 12 }}>
+            <CountBadge count={badge} />
+          </View>
+        ) : null}
+      </View>
       <Text
         style={{
           ...font('body', active ? 800 : 600),
@@ -81,11 +90,14 @@ const barStyle = {
 /** Barre d'onglets joueur : 4 onglets + bouton central « + » (créer une room). */
 export function PlayerTabBar({
   active,
+  badges,
   onSelect,
   onCreate,
   bottomInset = 22,
 }: {
   active?: PlayerTab
+  /** Pastilles de compte par onglet (messages non lus). */
+  badges?: Partial<Record<PlayerTab, number>>
   onSelect: (tab: PlayerTab) => void
   onCreate: () => void
   /** Marge basse (zone de sécurité de l'appareil). */
@@ -95,6 +107,7 @@ export function PlayerTabBar({
     <Tab
       key={item.key}
       item={item}
+      badge={badges?.[item.key]}
       active={item.key === active}
       activeColor={colors.room}
       bottomInset={bottomInset}

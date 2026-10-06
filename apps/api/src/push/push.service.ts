@@ -7,9 +7,15 @@ import { PrismaService } from '../prisma/prisma.service'
 import { quietUntil, wantsTopic } from './push.rules'
 
 const PUSH_JOB = 'push'
+const RECEIPTS_JOB = 'push-receipts'
 const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send'
+const EXPO_RECEIPTS_URL = 'https://exp.host/--/api/v2/push/getReceipts'
 /** Messages par requête acceptés par Expo Push. */
 const EXPO_BATCH = 100
+/** Reçus par requête acceptés par Expo. */
+const RECEIPTS_BATCH = 1000
+/** Expo conseille d'attendre 15 min avant de lire les reçus (gardés 24 h). */
+const RECEIPTS_DELAY_MS = 15 * 60_000
 
 type PushMessage = {
   to: string
@@ -18,9 +24,15 @@ type PushMessage = {
   sound: 'default'
   data?: { url: string }
 }
-type ExpoTicket = { status: 'ok' | 'error'; details?: { error?: string } }
+type ExpoTicket = { status: 'ok' | 'error'; id?: string; details?: { error?: string } }
+type ExpoReceipt = { status: 'ok' | 'error'; details?: { error?: string } }
+/** Reçu Expo à lire → jeton de l'appareil concerné. */
+type PendingReceipts = Record<string, string>
 
-/** Contenu d'une notification ; `url` = écran de l'app ouvert au tap (ex. `/rooms/abc`). */
+/**
+ * Contenu d'une notification ; `url` = écran de l'app ouvert au tap (ex. `/rooms/abc`).
+ * Jamais d'adresse de domicile (KWT-71) : l'écran ouvert l'affiche à qui y a droit.
+ */
 export type PushContent = { title: string; body: string; url?: string }
 
 /**
@@ -40,6 +52,9 @@ export class PushService implements OnModuleInit {
   async onModuleInit() {
     await this.jobs.handle<{ messages: PushMessage[] }>(PUSH_JOB, ({ messages }) =>
       this.deliver(messages),
+    )
+    await this.jobs.handle<{ receipts: PendingReceipts }>(RECEIPTS_JOB, ({ receipts }) =>
+      this.checkReceipts(receipts),
     )
   }
 
@@ -88,27 +103,61 @@ export class PushService implements OnModuleInit {
     }
   }
 
-  /** Envoie à Expo ; supprime les jetons des appareils désinstallés (DeviceNotRegistered). */
-  // ponytail: pas de lecture des reçus Expo (erreurs APNs / FCM différées), à ajouter si des envois se perdent
+  /**
+   * Envoie à Expo ; supprime les jetons des appareils désinstallés (DeviceNotRegistered),
+   * signalés tout de suite ou plus tard dans les reçus (erreurs APNs / FCM).
+   */
   private async deliver(messages: PushMessage[]) {
+    const receipts: PendingReceipts = {}
     for (let i = 0; i < messages.length; i += EXPO_BATCH) {
       const batch = messages.slice(i, i + EXPO_BATCH)
-      const response = await fetch(EXPO_PUSH_URL, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          ...(this.accessToken ? { Authorization: `Bearer ${this.accessToken}` } : {}),
-        },
-        body: JSON.stringify(batch),
+      const { data } = await this.expo<ExpoTicket[]>(EXPO_PUSH_URL, batch)
+      const gone: string[] = []
+      batch.forEach(({ to }, j) => {
+        const ticket = data[j]
+        if (ticket?.details?.error === 'DeviceNotRegistered') gone.push(to)
+        else if (ticket?.id) receipts[ticket.id] = to
       })
-      // Erreur levée = nouvel essai par pg-boss
-      if (!response.ok) throw new Error(`Expo Push a répondu ${response.status}`)
-      const { data } = (await response.json()) as { data: ExpoTicket[] }
-      const gone = batch
-        .filter((_, j) => data[j]?.details?.error === 'DeviceNotRegistered')
-        .map((m) => m.to)
-      if (gone.length) await this.prisma.pushToken.deleteMany({ where: { token: { in: gone } } })
+      await this.forget(gone)
     }
+    if (Object.keys(receipts).length)
+      await this.jobs.send(
+        RECEIPTS_JOB,
+        { receipts },
+        { startAfter: new Date(Date.now() + RECEIPTS_DELAY_MS) },
+      )
+  }
+
+  private async checkReceipts(receipts: PendingReceipts) {
+    const ids = Object.keys(receipts)
+    for (let i = 0; i < ids.length; i += RECEIPTS_BATCH) {
+      const { data } = await this.expo<Record<string, ExpoReceipt>>(EXPO_RECEIPTS_URL, {
+        ids: ids.slice(i, i + RECEIPTS_BATCH),
+      })
+      await this.forget(
+        Object.entries(data)
+          .filter(([, receipt]) => receipt.details?.error === 'DeviceNotRegistered')
+          .flatMap(([id]) => receipts[id] ?? []),
+      )
+    }
+  }
+
+  private async expo<T>(url: string, body: unknown): Promise<{ data: T }> {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...(this.accessToken ? { Authorization: `Bearer ${this.accessToken}` } : {}),
+      },
+      body: JSON.stringify(body),
+    })
+    // Erreur levée = nouvel essai par pg-boss
+    if (!response.ok) throw new Error(`Expo Push a répondu ${response.status}`)
+    return response.json() as Promise<{ data: T }>
+  }
+
+  private async forget(tokens: string[]) {
+    if (tokens.length) await this.prisma.pushToken.deleteMany({ where: { token: { in: tokens } } })
   }
 }

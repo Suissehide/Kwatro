@@ -23,9 +23,11 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext) {
+    // Temps réel : la session est lue à la connexion, la passerelle vérifie chaque abonnement
+    if (context.getType() !== 'http') return true
     const targets = [context.getHandler(), context.getClass()]
     const request = context.switchToHttp().getRequest<AuthRequest>()
-    const user = await this.auth.resolveUser(request)
+    const user = await this.auth.resolveUser(request.headers)
     // Route publique : l'utilisateur est quand même posé s'il est connecté (ex. « inscrit » sur une fiche)
     if (user) request.user = user
     if (this.reflector.getAllAndOverride<boolean>(IS_PUBLIC, targets)) return true

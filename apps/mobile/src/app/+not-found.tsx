@@ -11,12 +11,14 @@ import { Linking, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { PlayerNav } from '@/components/PlayerNav'
 import { openCreateRoom, openHome, openTab } from '@/lib/navigation'
+import { useTabBadges } from '@/queries/useChat'
 
 const WIDE = 900
 
 export default function NotFoundScreen() {
   const wide = useWindowDimensions().width >= WIDE
   const insets = useSafeAreaInsets()
+  const badges = useTabBadges()
   const path = usePathname()
 
   const content = (
@@ -43,6 +45,7 @@ export default function NotFoundScreen() {
         header={<BrandHeader onHome={openHome} />}
         tabBar={
           <PlayerTabBar
+            badges={badges}
             onSelect={openTab}
             onCreate={() => openCreateRoom()}
             bottomInset={Math.max(22, insets.bottom)}
