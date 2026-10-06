@@ -5,6 +5,7 @@ import { useEffect } from 'react'
 import { ME } from '@/constants/queryKeys'
 import { api } from '@/lib/api'
 import { authClient } from '@/lib/auth'
+import { forgetPush } from '@/lib/push'
 import { ApiError, queryClient, unwrap } from '@/lib/queryClient'
 
 // * QUERIES
@@ -32,8 +33,9 @@ export function useMeQuery({ required = false } = {}) {
 /** Oublie le joueur connecté (déconnexion, changement de compte). */
 export const forgetMe = () => queryClient.removeQueries({ queryKey: [ME.GET] })
 
-/** Déconnexion : session Better Auth fermée, cache vidé, retour à la connexion. */
+/** Déconnexion : téléphone oublié pour les push, session Better Auth fermée, cache vidé, retour à la connexion. */
 export async function signOut() {
+  await forgetPush().catch(() => undefined)
   await authClient.signOut().catch(() => undefined)
   queryClient.clear()
   router.replace({ pathname: '/auth', params: { signedOut: '1' } })

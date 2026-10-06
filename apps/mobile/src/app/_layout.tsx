@@ -11,7 +11,14 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { useFonts } from 'expo-font'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
+import { usePush } from '@/lib/push'
 import { persistOptions, queryClient } from '@/lib/queryClient'
+import { useMeQuery } from '@/queries/useMe'
+
+function PushSetup() {
+  usePush(useMeQuery()?.id)
+  return null
+}
 
 export default function RootLayout() {
   // Noms identiques à ceux du design system (tokens `font()`)
@@ -29,6 +36,7 @@ export default function RootLayout() {
 
   return (
     <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+      <PushSetup />
       <Stack screenOptions={{ headerShown: false }} />
       <StatusBar style="auto" />
     </PersistQueryClientProvider>
