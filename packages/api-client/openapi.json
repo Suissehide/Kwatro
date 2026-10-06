@@ -1570,6 +1570,14 @@
                               "EXTERNAL"
                             ]
                           },
+                          "myRegistration": {
+                            "nullable": true,
+                            "type": "string",
+                            "enum": [
+                              "REGISTERED",
+                              "WAITLISTED"
+                            ]
+                          },
                           "games": {
                             "type": "array",
                             "items": {
@@ -1606,6 +1614,7 @@
                           "capacity",
                           "registeredCount",
                           "registrationMode",
+                          "myRegistration",
                           "games",
                           "seriesId",
                           "externalUrl"
@@ -1859,6 +1868,14 @@
                           "EXTERNAL"
                         ]
                       },
+                      "myRegistration": {
+                        "nullable": true,
+                        "type": "string",
+                        "enum": [
+                          "REGISTERED",
+                          "WAITLISTED"
+                        ]
+                      },
                       "games": {
                         "type": "array",
                         "items": {
@@ -1916,6 +1933,7 @@
                       "capacity",
                       "registeredCount",
                       "registrationMode",
+                      "myRegistration",
                       "games",
                       "venue"
                     ]

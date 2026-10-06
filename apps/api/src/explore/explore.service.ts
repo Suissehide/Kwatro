@@ -52,6 +52,21 @@ export const notBlockedWith = (viewerId?: string): Prisma.RoomWhereInput =>
       }
     : {}
 
+/** Inscription du joueur connecté à un événement (annulée = pas inscrit) ; sans joueur, aucune. */
+const myRegistration = (viewer: Viewer) => ({
+  registrations: {
+    where: {
+      userId: viewer?.id ?? '',
+      status: { in: ['REGISTERED' as const, 'WAITLISTED' as const] },
+    },
+    select: { status: true },
+  },
+})
+
+/** Statut lu par `myRegistration` : les inscriptions annulées sont déjà filtrées. */
+const myStatus = (registrations: { status: string }[]) =>
+  (registrations[0]?.status as 'REGISTERED' | 'WAITLISTED' | undefined) ?? null
+
 /** Room publique : initiales des joueurs et fourchette de Kwote des parties classées. */
 function roomItem({
   format,
@@ -140,6 +155,7 @@ export class ExploreService {
           include: {
             games: { select: { slug: true, name: true }, orderBy: { name: 'asc' } },
             _count: { select: { registrations: { where: { status: 'REGISTERED' } } } },
+            ...myRegistration(viewer),
           },
         },
         rooms: {
@@ -158,7 +174,11 @@ export class ExploreService {
       accessibility: accessibilityItemSchema.array().parse(venue.accessibility),
       events: venue.events
         .filter((event) => eventVisibleTo(event, viewer, now))
-        .map(({ _count, ...event }) => ({ ...event, registeredCount: _count.registrations })),
+        .map(({ _count, registrations, ...event }) => ({
+          ...event,
+          registeredCount: _count.registrations,
+          myRegistration: myStatus(registrations),
+        })),
       rooms: venue.rooms.filter((room) => roomVisibleTo(room, viewer, now)).map(roomItem),
     }
   }
@@ -180,13 +200,15 @@ export class ExploreService {
         games: { select: { slug: true, name: true }, orderBy: { name: 'asc' } },
         venue: { select: { id: true, slug: true, name: true, isPartner: true } },
         _count: { select: { registrations: { where: { status: 'REGISTERED' } } } },
+        ...myRegistration(viewer),
       },
     })
     return events
       .filter((event) => eventVisibleTo(event, viewer, now))
-      .map(({ _count, venue, ...event }) => ({
+      .map(({ _count, venue, registrations, ...event }) => ({
         ...event,
         registeredCount: _count.registrations,
+        myRegistration: myStatus(registrations),
         venue: { ...venue, distanceMeters: distances.get(venue.id) ?? 0 },
       }))
       .sort(
