@@ -180,7 +180,6 @@ export class RoomsService {
   /**
    * Quitter la room ou retirer sa demande. Une place libérée revient au premier de la liste d'attente.
    */
-  // ponytail: personne n'est encore prévenu (promotion, acceptation), notifications avec KWT-108
   async leave(id: string, user: User) {
     await this.prisma.$transaction(async (tx) => {
       const room = await this.lock(tx, id, user)
