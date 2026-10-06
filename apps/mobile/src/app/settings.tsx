@@ -201,6 +201,9 @@ export default function SettingsScreen() {
               value: blocked === undefined ? undefined : blocked ? String(blocked) : 'Aucun',
               onPress: () => router.push('/blocked'),
             },
+            ...(me.role === 'ADMIN'
+              ? [{ label: 'Back-office', onPress: () => router.push('/admin') }]
+              : []),
           ]}
         />
         <SettingsGroup
@@ -292,6 +295,14 @@ export default function SettingsScreen() {
               }
               onPress={() => router.push('/blocked')}
             />
+            {me.role === 'ADMIN' ? (
+              <SettingsRow
+                wide
+                label="Back-office"
+                description="Modération, lieux, événements et journal d'audit."
+                onPress={() => router.push('/admin')}
+              />
+            ) : null}
           </SettingsCard>
         </SettingsSection>
 

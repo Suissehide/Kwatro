@@ -109,3 +109,15 @@ export function openingStatus(
   }
   return { openNow: false, closesAtMinute: null, nextOpening: null }
 }
+
+/** Instant d'une date locale (« 2026-10-24 ») à `minute` depuis minuit, heure du lieu (changements d'heure compris). */
+export function fromLocalDateTime(date: string, minute: number, timeZone = VENUE_TIME_ZONE) {
+  const wanted = Date.parse(`${date}T00:00:00Z`) + minute * 60_000
+  let instant = wanted
+  // Deux passes : l'écart avec UTC peut changer entre la première estimation et l'heure visée
+  for (let i = 0; i < 2; i++) {
+    const local = localDateTime(new Date(instant), timeZone)
+    instant += wanted - (Date.parse(`${local.date}T00:00:00Z`) + local.minute * 60_000)
+  }
+  return new Date(instant)
+}
