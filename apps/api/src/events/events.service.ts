@@ -82,7 +82,7 @@ export class EventsService {
         where: { eventId: id, status: 'WAITLISTED' },
         orderBy: { createdAt: 'asc' },
       })
-      // ponytail: le joueur promu n'est pas encore prévenu, notification avec KWT-108
+      // ponytail: le joueur promu n'est pas encore prévenu, notification avec LKO-108
       if (next) {
         await tx.eventRegistration.update({
           where: { eventId_userId: { eventId: id, userId: next.userId } },

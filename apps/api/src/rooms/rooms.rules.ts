@@ -69,7 +69,7 @@ export type JoinableRoom = {
 const ACTIVE: ParticipantStatus[] = ['PENDING', 'ACCEPTED', 'WAITLISTED']
 
 /**
- * Demande à rejoindre (KWT-56) : complète → liste d'attente ; sinon acceptée d'office si l'inscription
+ * Demande à rejoindre (LKO-56) : complète → liste d'attente ; sinon acceptée d'office si l'inscription
  * est automatique, en attente de l'hôte sinon. Sans effet si le joueur a déjà une place ou une demande.
  * `accepted` compte les joueurs acceptés, hôte compris.
  */
@@ -110,7 +110,7 @@ export const fillStatus = (accepted: number, capacity: number): RoomStatus =>
   accepted >= capacity ? 'FULL' : 'OPEN'
 
 /** Durée supposée d'une partie : passé ce délai après le début, la room est terminée. */
-// ponytail: pas encore de durée saisie ni de clôture planifiée (KWT-97), statut déduit de l'heure
+// ponytail: pas encore de durée saisie ni de clôture planifiée (LKO-97), statut déduit de l'heure
 export const ROOM_PLAY_MS = 3 * 60 * 60 * 1000
 
 /** Statut affiché : en cours puis terminée d'après l'heure, sauf room annulée. */
@@ -125,7 +125,7 @@ export function lifecycleStatus(
 }
 
 /**
- * Action de l'hôte (KWT-57) : motif de refus, ou null. Possible jusqu'au début de la partie.
+ * Action de l'hôte (LKO-57) : motif de refus, ou null. Possible jusqu'au début de la partie.
  * `participant` : place du joueur visé (retirer, transférer).
  */
 export function hostActionRefusal(

@@ -22,7 +22,7 @@ const WIDE = 900
 
 const backToSettings = () => (router.canGoBack() ? router.back() : router.replace('/settings'))
 
-/** Réglages → Joueurs bloqués (KWT-19) : liste et déblocage. */
+/** Réglages → Joueurs bloqués (LKO-19) : liste et déblocage. */
 export default function BlockedScreen() {
   const wide = useWindowDimensions().width >= WIDE
   useMeQuery({ required: true })

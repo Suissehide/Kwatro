@@ -21,7 +21,7 @@ const WIDE = 900
 
 const backToProfile = () => (router.canGoBack() ? router.back() : router.replace('/profile'))
 
-/** Mes jeux (F3, KWT-46) : jeux joués et niveau déclaré par format TCG, depuis le profil. */
+/** Mes jeux (F3, LKO-46) : jeux joués et niveau déclaré par format TCG, depuis le profil. */
 export default function MyGamesScreen() {
   const wide = useWindowDimensions().width >= WIDE
   useMeQuery({ required: true })

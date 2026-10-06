@@ -8,7 +8,7 @@ import { CHAT } from '@/constants/queryKeys'
 import { api } from './api'
 import { queryClient } from './queryClient'
 
-/** Notifications push (KWT-108) : seulement sur un vrai téléphone, pas sur le web ni le simulateur. */
+/** Notifications push (LKO-108) : seulement sur un vrai téléphone, pas sur le web ni le simulateur. */
 const supported = Platform.OS !== 'web' && Device.isDevice
 
 if (supported) {
@@ -60,7 +60,7 @@ export async function forgetPush() {
 
 /**
  * À monter une fois : enregistre le téléphone quand un joueur est connecté (`meId`), sans demander
- * la permission (écran de pré-autorisation A8, KWT-59), et ouvre l'écran d'une notification tapée.
+ * la permission (écran de pré-autorisation A8, LKO-59), et ouvre l'écran d'une notification tapée.
  */
 export function usePush(meId: string | undefined) {
   useEffect(() => {

@@ -1,6 +1,6 @@
-// Filtre de contenus (KWT-19) : refuse les insultes et propos haineux dans les textes publics (pseudo).
+// Filtre de contenus (LKO-19) : refuse les insultes et propos haineux dans les textes publics (pseudo).
 // ponytail: liste courte FR / EN, à compléter par l'équipe ; passer par un service de modération
-// quand il y aura du texte libre en volume (chat de room, KWT-80).
+// quand il y aura du texte libre en volume (chat de room, LKO-80).
 
 /** Assez longs et distinctifs pour être cherchés n'importe où dans le texte (« xXconnardXx »). */
 const BANNED_ANYWHERE = [

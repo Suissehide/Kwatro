@@ -93,7 +93,7 @@ export type Ranking = z.infer<typeof rankingSchema>
 export const meSchema = z.object({
   id: z.string(),
   email: z.string(),
-  /** null tant que l'onboarding (KWT-45) n'est pas fait. */
+  /** null tant que l'onboarding (LKO-45) n'est pas fait. */
   pseudo: z.string().nullable(),
   name: z.string(),
   /** false après une première connexion Apple / Google : l'app demande la date avant tout. */

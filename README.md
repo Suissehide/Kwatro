@@ -88,7 +88,7 @@ Documentation interactive en dev : http://localhost:3000/docs (OpenAPI brut : `/
 Socket.IO sur le même port que l'API (`apps/api/src/realtime/realtime.gateway.ts`). Contrat Zod dans `packages/shared/src/schemas/realtime.ts`.
 
 - **Connexion** : réservée aux joueurs connectés, refusée sinon (`connect_error` « Connexion requise »). Sur le web, le cookie de session part tout seul ; sur téléphone, l'app l'envoie dans `auth.cookie` (et `auth.devUserId` en dev, comme `x-dev-user-id`).
-- **Canaux** : `{ type, id }`, avec `type` dans `room`, `event`, `room-chat` ou `event-chat` (chat, KWT-80).
+- **Canaux** : `{ type, id }`, avec `type` dans `room`, `event`, `room-chat` ou `event-chat` (chat, LKO-80).
 
 | Message | Sens | Charge utile | Effet |
 |---|---|---|---|

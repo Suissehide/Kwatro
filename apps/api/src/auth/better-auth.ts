@@ -11,7 +11,7 @@ function provider(clientId?: string, clientSecret?: string) {
 }
 
 /**
- * Better Auth (KWT-9) : e-mail + mot de passe, Apple, Google ; sessions en cookie, stockées dans Postgres.
+ * Better Auth (LKO-9) : e-mail + mot de passe, Apple, Google ; sessions en cookie, stockées dans Postgres.
  * Routes servies sous /api/auth/* (montées dans main.ts, avant le body parser de Nest).
  */
 export function createAuth(prisma: PrismaClient, env: Env) {

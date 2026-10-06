@@ -52,7 +52,7 @@ const MODE_OPTIONS = [
  * Créer une room (C1 jeu, C2 où et quand, C3 qui) sur un seul écran. `?venue=<slug>` présélectionne
  * le lieu (bouton « Créer une room ici » de la fiche lieu).
  */
-// ponytail: récap et lien de partage (C4) avec KWT-98, critères d'acceptation avec KWT-56
+// ponytail: récap et lien de partage (C4) avec LKO-98, critères d'acceptation avec LKO-56
 export default function CreateRoomScreen() {
   const wide = useWindowDimensions().width >= WIDE
   const { venue: venueSlug } = useLocalSearchParams<{ venue?: string }>()

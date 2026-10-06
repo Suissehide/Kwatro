@@ -9,7 +9,7 @@ import type { z } from 'zod'
 export type CatalogGame = { id: string; name: string; kind: GameKind; formatIds: string[] }
 
 /**
- * Mes jeux (KWT-46) : motif de refus, ou null. Un format doit appartenir à un TCG coché,
+ * Mes jeux (LKO-46) : motif de refus, ou null. Un format doit appartenir à un TCG coché,
  * et chaque TCG coché a au moins un format (c'est par format que se fait le niveau).
  */
 export function myGamesRefusal(

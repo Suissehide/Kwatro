@@ -32,7 +32,7 @@ import { forgetMe, meQueryOptions, useMeMutations } from '@/queries/useMe'
 type Step = 'welcome' | 'email' | 'birth' | AgeRegime
 
 /**
- * Accueil (A1), e-mail (A2) et date de naissance obligatoire (A3, KWT-44), branchés sur Better Auth (KWT-9).
+ * Accueil (A1), e-mail (A2) et date de naissance obligatoire (A3, LKO-44), branchés sur Better Auth (LKO-9).
  * Téléphone et navigateur desktop.
  */
 export default function AuthScreen() {
@@ -431,7 +431,7 @@ function Outcome({ regime, onRestart }: { regime: AgeRegime; onRestart: () => vo
         regime === 'too-young' ? (
           <StepButton label="Revenir à l’accueil" kind="ghost" onPress={onRestart} />
         ) : (
-          // ponytail: le consentement parent (A7, KWT-49) n'est pas encore fait ; l'accueil renvoie vers l'onboarding
+          // ponytail: le consentement parent (A7, LKO-49) n'est pas encore fait ; l'accueil renvoie vers l'onboarding
           <StepButton label="Continuer" onPress={() => router.replace('/')} />
         )
       }

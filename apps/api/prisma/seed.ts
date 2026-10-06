@@ -25,7 +25,7 @@ type SeedFormat = {
   brackets?: true
 }
 
-/** Catalogue (KWT-52) : jeux, formats, joueurs par partie et durée moyenne. Jeux de société : 2 à 8. */
+/** Catalogue (LKO-52) : jeux, formats, joueurs par partie et durée moyenne. Jeux de société : 2 à 8. */
 const games: {
   slug: string
   name: string

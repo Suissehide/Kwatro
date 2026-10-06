@@ -44,7 +44,7 @@ const steps = [
   },
 ]
 
-/** Landing joueurs : promesse, fonctionnement, inscription à la liste d'attente (KWT-3). */
+/** Landing joueurs : promesse, fonctionnement, inscription à la liste d'attente (LKO-3). */
 export function Landing() {
   const root = useRef<HTMLDivElement>(null)
 

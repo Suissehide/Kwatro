@@ -41,7 +41,7 @@ const roomInclude = {
   },
 } satisfies Prisma.RoomInclude
 
-/** Rooms d'un hôte qui n'a pas bloqué le joueur connecté et que celui-ci n'a pas bloqué (KWT-19). */
+/** Rooms d'un hôte qui n'a pas bloqué le joueur connecté et que celui-ci n'a pas bloqué (LKO-19). */
 export const notBlockedWith = (viewerId?: string): Prisma.RoomWhereInput =>
   viewerId
     ? {
@@ -220,7 +220,7 @@ export class ExploreService {
   async rooms(query: EventsQuery, viewer: Viewer): Promise<z.output<typeof roomListItemSchema>[]> {
     const distances = await this.distances(query)
     const now = new Date()
-    // ponytail: rooms à domicile exclues (zone floue à afficher, KWT des rooms à domicile)
+    // ponytail: rooms à domicile exclues (zone floue à afficher, ticket des rooms à domicile)
     const rooms = await this.prisma.room.findMany({
       where: {
         status: 'OPEN',

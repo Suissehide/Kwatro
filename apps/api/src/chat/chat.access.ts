@@ -14,7 +14,7 @@ export type ChatAccess = {
 }
 
 /**
- * Seuls les membres lisent et écrivent (KWT-80) : l'hôte et les joueurs acceptés d'une room, les inscrits
+ * Seuls les membres lisent et écrivent (LKO-80) : l'hôte et les joueurs acceptés d'une room, les inscrits
  * d'un événement et le staff du lieu. null sinon. Partagé par l'API et la passerelle temps réel.
  * Pas de messages privés : un mineur ne parle qu'aux membres d'une room ou d'un événement qu'il peut voir.
  */

@@ -121,7 +121,7 @@ export const accessibilityItemSchema = z.object({
   note: z.string().nullish(),
 })
 
-/** Fiche lieu (B3, KWT-73) : photos, infos pratiques, horaires et fermetures, agenda, rooms, jeux, accès. */
+/** Fiche lieu (B3, LKO-73) : photos, infos pratiques, horaires et fermetures, agenda, rooms, jeux, accès. */
 export const venueDetailSchema = venueListItemSchema
   .omit({ distanceMeters: true, upcomingEventCount: true })
   .extend({

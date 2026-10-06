@@ -237,7 +237,7 @@ export class RoomsService {
   }
 
   /**
-   * Action de l'hôte (KWT-57) : retirer un joueur (il ne peut plus revenir, sa place revient à la liste
+   * Action de l'hôte (LKO-57) : retirer un joueur (il ne peut plus revenir, sa place revient à la liste
    * d'attente), transférer le rôle d'hôte à un joueur accepté, fermer / rouvrir les inscriptions, annuler.
    */
   // ponytail: annulation sans délai ni effet sur la fiabilité

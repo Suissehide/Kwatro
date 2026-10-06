@@ -47,7 +47,7 @@ const messageTime = (date: string) =>
     ? formatTime(date)
     : `${dayLabel(date)} · ${formatTime(date)}`
 
-/** Chat de room ou de tournoi (KWT-80) : messages en direct, annonces de l'organisateur, signalement. */
+/** Chat de room ou de tournoi (LKO-80) : messages en direct, annonces de l'organisateur, signalement. */
 export default function ChatScreen() {
   const params = useLocalSearchParams<{ type: string; id: string }>()
   const type: ChatType = (CHAT_TYPES as readonly string[]).includes(params.type)

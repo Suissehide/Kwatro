@@ -6,7 +6,7 @@ import { ZodBody } from '../common/zod'
 import type { User } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 
-/** Jetons Expo Push des appareils du joueur connecté (KWT-108). */
+/** Jetons Expo Push des appareils du joueur connecté (LKO-108). */
 @ApiTags('push')
 @Controller('me/push-tokens')
 export class PushController {

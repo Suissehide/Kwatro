@@ -6,7 +6,7 @@ import * as SecureStore from 'expo-secure-store'
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000'
 
 /**
- * Client Better Auth (KWT-9). Sur téléphone, le cookie de session est gardé dans SecureStore
+ * Client Better Auth (LKO-9). Sur téléphone, le cookie de session est gardé dans SecureStore
  * et Apple / Google s'ouvrent dans le navigateur système ; sur le web, cookie classique du navigateur.
  */
 export const authClient = createAuthClient({

@@ -3,7 +3,7 @@ import { isoDateTime } from './common'
 import type { Channel } from './realtime'
 
 /**
- * Chat de room et de tournoi (KWT-80). Une conversation par room ou par événement, adressée comme sa fiche :
+ * Chat de room et de tournoi (LKO-80). Une conversation par room ou par événement, adressée comme sa fiche :
  * `/chats/room/<id>` ou `/chats/event/<id>`. En direct, sur le canal `room-chat` / `event-chat` (voir REALTIME).
  */
 export const CHAT_TYPES = ['room', 'event'] as const

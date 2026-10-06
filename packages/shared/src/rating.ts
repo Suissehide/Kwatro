@@ -43,9 +43,9 @@ export const DECLARED_LEVEL_LABELS: Record<DeclaredLevel, string> = {
 }
 
 /**
- * Questionnaire d'auto-évaluation par format TCG (A6, KWT-46) : 3 questions, 4 réponses notées 0 à 3.
+ * Questionnaire d'auto-évaluation par format TCG (A6, LKO-46) : 3 questions, 4 réponses notées 0 à 3.
  */
-// ponytail: mêmes questions pour tous les TCG ; des variantes par jeu (bracket Commander…) avec KWT-52
+// ponytail: mêmes questions pour tous les TCG ; des variantes par jeu (bracket Commander…) avec LKO-52
 export const LEVEL_QUESTIONS = [
   {
     key: 'experience',

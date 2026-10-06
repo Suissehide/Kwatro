@@ -60,7 +60,7 @@ const statusColor = { ok: colors.venue, warn: colors.muted, err: colors.room } a
 // Colonne latérale collée en haut au défilement (web uniquement, absent des types React Native)
 const sticky = { position: 'sticky', top: 24 } as unknown as ViewStyle
 
-/** Fiche lieu (B3, KWT-73) : photos, infos pratiques, horaires et fermetures, agenda, rooms, jeux, accès. */
+/** Fiche lieu (B3, LKO-73) : photos, infos pratiques, horaires et fermetures, agenda, rooms, jeux, accès. */
 export default function VenueScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>()
   const wide = useWindowDimensions().width >= WIDE

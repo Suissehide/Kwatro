@@ -51,7 +51,7 @@ const ROOM_STATUS: Partial<
 }
 
 /**
- * Fiche room (B6, KWT-56) : demander à rejoindre, liste d'attente quand c'est complet, quitter.
+ * Fiche room (B6, LKO-56) : demander à rejoindre, liste d'attente quand c'est complet, quitter.
  * L'hôte y gère les demandes (C5) avec le profil de jeu de chaque candidat (C6).
  */
 export default function RoomScreen() {
@@ -319,7 +319,7 @@ export default function RoomScreen() {
 type HostConfirm = { action: HostAction; title: string; message: string; label: string }
 type ManagedPlayer = { userId: string; pseudo: string }
 
-/** Joueurs acceptés vus par l'hôte (KWT-57) : retirer un joueur ou lui transférer la room. */
+/** Joueurs acceptés vus par l'hôte (LKO-57) : retirer un joueur ou lui transférer la room. */
 function HostPlayers({
   room,
   hostId,

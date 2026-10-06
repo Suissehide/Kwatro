@@ -3,8 +3,8 @@
 ## Flux de travail
 
 1. Prendre un ticket dans Notion (base 🎫 Tickets), le passer en **En cours** et s'assigner.
-2. Créer une branche depuis `main` : `type/KWT-<n>-description-courte`
-   ex. `feat/KWT-56-creer-une-room`, `fix/KWT-80-chat-notifications`
+2. Créer une branche depuis `main` : `type/LKO-<n>-description-courte`
+   ex. `feat/LKO-56-creer-une-room`, `fix/LKO-80-chat-notifications`
 3. Commits au format **Conventional Commits** (vérifié par un hook) :
    `feat(api): créer une room`, `fix(mobile): …`, `chore: …`, `docs: …`, `refactor: …`, `test: …`
 4. Ouvrir une Pull Request vers `main`, lier le ticket, passer le ticket en **En revue**.

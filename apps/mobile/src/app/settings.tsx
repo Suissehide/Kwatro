@@ -29,7 +29,7 @@ const backToProfile = () => (router.canGoBack() ? router.back() : router.replace
 // ponytail: mot de passe, fournisseur lié et langue attendent leurs écrans
 const LUCKO_ROWS = [
   { label: 'Aide', onPress: () => openSite('/help') },
-  // Contact du support exigé par Apple et Google (KWT-19)
+  // Contact du support exigé par Apple et Google (LKO-19)
   {
     label: 'Nous contacter',
     value: CONTACT_EMAIL,
@@ -39,7 +39,7 @@ const LUCKO_ROWS = [
   { label: 'Politique de confidentialité', onPress: () => openSite('/privacy') },
 ]
 
-/** Réglages du compte : e-mail, joueurs bloqués, liens Lucko et contact, déconnexion et suppression (KWT-18), notifications (KWT-108). */
+/** Réglages du compte : e-mail, joueurs bloqués, liens Lucko et contact, déconnexion et suppression (LKO-18), notifications (LKO-108). */
 export default function SettingsScreen() {
   const wide = useWindowDimensions().width >= WIDE
   const me = useMeQuery({ required: true })

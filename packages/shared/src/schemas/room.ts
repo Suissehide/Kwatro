@@ -6,7 +6,7 @@ import { isoDateTime } from './common'
 export const ROOM_CAPACITY = { min: 2, max: 16 } as const
 export const ROOM_DESCRIPTION_MAX = 1000
 
-// ponytail: rooms à domicile (zone floue, adresse chiffrée, garde-fous) ajoutées avec KWT-71 / KWT-72
+// ponytail: rooms à domicile (zone floue, adresse chiffrée, garde-fous) ajoutées avec LKO-71 / LKO-72
 /** Création d'une room (C1-C3) : validée par l'app et par l'API, règles métier dans l'API (rooms.rules.ts). */
 export const createRoomSchema = z.object({
   gameId: z.string().min(1, { message: 'Choisis un jeu' }),
@@ -100,7 +100,7 @@ export type RoomDetail = z.input<typeof roomDetailSchema>
 export type RoomCandidate = z.input<typeof roomCandidateSchema>
 
 /**
- * Action de l'hôte (C5, KWT-57) : retirer un joueur, transférer le rôle d'hôte, fermer les inscriptions
+ * Action de l'hôte (C5, LKO-57) : retirer un joueur, transférer le rôle d'hôte, fermer les inscriptions
  * (room confirmée), les rouvrir, annuler la room.
  */
 export const hostActionSchema = z.discriminatedUnion('type', [
