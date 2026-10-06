@@ -124,12 +124,19 @@ deploy/
 4. Les migrations Prisma en attente s'appliquent au démarrage de l'API.
 5. Les variables `NEXT_PUBLIC_*` et `EXPO_PUBLIC_*` sont figées au build : relancer un Deploy après les avoir changées.
 6. Sauvegardes : le service `postgres-backup` fait un `pg_dump` quotidien (7 jours, 4 semaines, 6 mois) dans le volume `postgres-backups`. Copie hors serveur à ajouter.
-7. App iOS / Android : hors Dokploy, via EAS (`eas build --profile production` puis `eas submit`).
 
 **CI/CD** (`.github/workflows/deploy.yml`)
 - Staging : déployé automatiquement à chaque CI verte sur `main`.
 - Production : Actions › **Deploy** › *Run workflow* sur `main`.
 - Configuration GitHub (Settings › Environments) : deux environnements `staging` et `production` (ajouter des *required reviewers* sur `production` si besoin), chacun avec les variables `DOKPLOY_URL` (ex. `https://dokploy.exemple.fr`) et `DOKPLOY_COMPOSE_ID` (dans l'URL du service Dokploy) et le secret `DOKPLOY_API_KEY` (Dokploy › Settings › Profile › API/CLI).
+
+**Apps iOS / Android (EAS)** : build et envoi aux stores dans le cloud d'Expo, rien à installer sur le serveur.
+- Une seule fois, depuis `apps/mobile` : `npx eas-cli login`, `npx eas-cli init` (lie le projet, indispensable aux push), puis `npx eas-cli update:configure` (URL des mises à jour OTA).
+- URL de l'API par environnement EAS (`preview` → API de staging, `production` → API de prod) : `npx eas-cli env:create --environment production --name EXPO_PUBLIC_API_URL --value https://api.exemple.fr --visibility plaintext` (idem pour `EXPO_PUBLIC_SITE_URL`).
+- Identifiants des stores pour `--auto-submit` : `npx eas-cli credentials` (clé API App Store Connect, compte de service Google Play).
+- GitHub : secret `EXPO_TOKEN` (expo.dev › Access tokens) au niveau du dépôt.
+- `.github/workflows/mobile.yml` : mise à jour OTA du canal `preview` après chaque CI verte sur `main` ; Actions › **Mobile** › *Run workflow* pour la production, `update` (OTA, quelques minutes, JS seulement) ou `build` (nouveau binaire envoyé à TestFlight et au test interne Play Store).
+- Un nouveau `build` est nécessaire dès que le code natif change (module natif, permission, plugin) : la *runtime version* (empreinte du natif) empêche une OTA d'atteindre un binaire incompatible.
 
 ## Contribuer
 
