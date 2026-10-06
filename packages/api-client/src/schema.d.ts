@@ -2922,13 +2922,19 @@ export interface operations {
                             type: "room" | "event";
                             id: string;
                             title: string;
+                            /** @enum {string} */
+                            kind: "RANKED" | "CASUAL" | "GAME_NIGHT" | "INITIATION" | "TOURNAMENT" | "PRERELEASE" | "THEMED";
                             /** Format: date-time */
                             startsAt: string;
+                            venueName: string | null;
+                            past: boolean;
+                            muted: boolean;
                             last: {
                                 pseudo: string | null;
                                 body: string;
                                 /** Format: date-time */
                                 createdAt: string;
+                                mine: boolean;
                             } | null;
                             unread: number;
                         }[];
@@ -2987,6 +2993,11 @@ export interface operations {
                         lastReadAt: string | null;
                         muted: boolean;
                         moderator: boolean;
+                        /** Format: date-time */
+                        startsAt: string;
+                        venueName: string | null;
+                        players: number;
+                        capacity: number | null;
                     };
                 };
             };

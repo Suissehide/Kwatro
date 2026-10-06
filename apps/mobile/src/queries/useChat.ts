@@ -23,7 +23,7 @@ const fetchPage = (ref: ChatRef, cursor?: string) =>
     }),
   )
 
-type ChatPage = Awaited<ReturnType<typeof fetchPage>>
+export type ChatPage = Awaited<ReturnType<typeof fetchPage>>
 export type ChatMessage = ChatPage['messages'][number]
 type Pages = InfiniteData<ChatPage, string | undefined>
 
@@ -36,6 +36,8 @@ export const chatsQueryOptions = queryOptions({
 })
 
 export const useChatsQuery = (enabled = true) => useQuery({ ...chatsQueryOptions, enabled })
+
+export type ChatSummary = NonNullable<ReturnType<typeof useChatsQuery>['data']>['chats'][number]
 
 /** Pastilles des onglets : messages non lus du joueur connecté. */
 export function useTabBadges() {
@@ -193,10 +195,12 @@ export function useChatMutations(ref: ChatRef, me: { id: string; pseudo: string 
     mutationKey: [CHAT.MUTE, ref.type, ref.id],
     mutationFn: (muted: boolean) =>
       unwrap(api.PUT('/chats/{type}/{id}/mute', { ...path, body: { muted } })),
-    onSuccess: (_data, muted) =>
+    onSuccess: (_data, muted) => {
       client.setQueryData<Pages>(key, (data) =>
         data ? { ...data, pages: data.pages.map((page) => ({ ...page, muted })) } : data,
-      ),
+      )
+      void client.invalidateQueries({ queryKey: [CHAT.LIST] })
+    },
   })
 
   return { send, remove, report, markRead, mute }

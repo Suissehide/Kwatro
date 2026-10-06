@@ -25,7 +25,7 @@ import { PrismaService } from '../prisma/prisma.service'
 import { PushService } from '../push/push.service'
 import { RealtimeGateway } from '../realtime/realtime.gateway'
 import { chatAccess } from './chat.access'
-import { FLOOD, ONGOING_MS, pushRecipients, sortChats, startsBurst } from './chat.rules'
+import { FLOOD, isPast, ONGOING_MS, pushRecipients, sortChats, startsBurst } from './chat.rules'
 
 const withAuthor = {
   author: { select: { id: true, pseudo: true } },
@@ -74,7 +74,10 @@ export class ChatService {
 
   /** Une page d'historique, du plus récent au plus ancien, sans les messages des joueurs bloqués. */
   async page(ref: ChatRef, user: User, cursor?: string): Promise<z.output<typeof chatPageSchema>> {
-    const { moderator, title } = await this.access(ref, user)
+    const { moderator, title, startsAt, venueName, players, capacity } = await this.access(
+      ref,
+      user,
+    )
     const conversation = await this.prisma.conversation.findUnique({
       where: conversationKey(ref),
       select: { id: true, reads: { where: { userId: user.id } } },
@@ -85,6 +88,10 @@ export class ChatService {
       lastReadAt: read?.lastReadAt ?? null,
       muted: read?.muted ?? false,
       moderator,
+      startsAt,
+      venueName,
+      players,
+      capacity,
     }
     if (!conversation) return { ...meta, messages: [], nextCursor: null, pinned: null }
     const where = { conversationId: conversation.id, deletedAt: null, ...notBlockedWith(user.id) }
@@ -266,12 +273,14 @@ export class ChatService {
           where: visible,
           orderBy: { createdAt: 'desc' },
           take: 1,
-          include: { author: { select: { pseudo: true } } },
+          include: { author: { select: { id: true, pseudo: true } } },
         },
+        reads: { where: { userId: user.id }, select: { muted: true } },
       },
     } satisfies Prisma.ConversationDefaultArgs
     const written = { conversation: { messages: { some: visible } } }
     const registered = { some: { status: 'REGISTERED' as const } }
+    const venue = { select: { name: true } }
     const [rooms, events, unread] = await Promise.all([
       this.prisma.room.findMany({
         where: {
@@ -284,6 +293,9 @@ export class ChatService {
         select: {
           id: true,
           startsAt: true,
+          mode: true,
+          status: true,
+          venue,
           game: { select: { name: true } },
           format: { select: { name: true } },
           conversation,
@@ -297,37 +309,85 @@ export class ChatService {
           ],
           AND: { OR: [{ startsAt: { gte: since }, cancelledAt: null }, written] },
         },
-        select: { id: true, title: true, startsAt: true, conversation },
+        select: {
+          id: true,
+          title: true,
+          type: true,
+          startsAt: true,
+          endsAt: true,
+          cancelledAt: true,
+          venue,
+          conversation,
+        },
       }),
       this.unreadCounts(user.id),
     ])
+    const now = new Date()
     const item = (
-      type: ChatType,
-      id: string,
-      title: string,
-      startsAt: Date,
       chat: {
+        type: ChatType
         id: string
-        messages: { body: string; createdAt: Date; author: { pseudo: string | null } }[]
+        title: string
+        kind: z.output<typeof myChatsSchema>['chats'][number]['kind']
+        startsAt: Date
+        venueName: string | null
+        past: boolean
+      },
+      conversation: {
+        id: string
+        messages: {
+          body: string
+          createdAt: Date
+          author: { id: string; pseudo: string | null }
+        }[]
+        reads: { muted: boolean }[]
       } | null,
     ) => {
-      const last = chat?.messages[0]
+      const last = conversation?.messages[0]
       return {
-        type,
-        id,
-        title,
-        startsAt,
+        ...chat,
+        muted: conversation?.reads[0]?.muted ?? false,
         last: last
-          ? { pseudo: last.author.pseudo, body: last.body, createdAt: last.createdAt }
+          ? {
+              pseudo: last.author.pseudo,
+              body: last.body,
+              createdAt: last.createdAt,
+              mine: last.author.id === user.id,
+            }
           : null,
-        unread: chat ? (unread.get(chat.id) ?? 0) : 0,
+        unread: conversation ? (unread.get(conversation.id) ?? 0) : 0,
       }
     }
     const chats = sortChats([
       ...rooms.map((r) =>
-        item('room', r.id, r.format?.name ?? r.game.name, r.startsAt, r.conversation),
+        item(
+          {
+            type: 'room',
+            id: r.id,
+            title: r.format?.name ?? r.game.name,
+            kind: r.mode,
+            startsAt: r.startsAt,
+            venueName: r.venue?.name ?? null,
+            past:
+              r.status === 'FINISHED' || r.status === 'CANCELLED' || isPast(r.startsAt, null, now),
+          },
+          r.conversation,
+        ),
       ),
-      ...events.map((e) => item('event', e.id, e.title, e.startsAt, e.conversation)),
+      ...events.map((e) =>
+        item(
+          {
+            type: 'event',
+            id: e.id,
+            title: e.title,
+            kind: e.type,
+            startsAt: e.startsAt,
+            venueName: e.venue.name,
+            past: !!e.cancelledAt || isPast(e.startsAt, e.endsAt, now),
+          },
+          e.conversation,
+        ),
+      ),
     ])
     return { unread: chats.reduce((sum, chat) => sum + chat.unread, 0), chats }
   }
