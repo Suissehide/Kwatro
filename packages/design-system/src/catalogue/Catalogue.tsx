@@ -1,6 +1,6 @@
 'use client'
 
-import { CircleHelp, Plus, SlidersHorizontal } from 'lucide-react-native'
+import { CircleHelp, ExternalLink, Plus, SlidersHorizontal } from 'lucide-react-native'
 import { type ReactNode, useState } from 'react'
 import { ScrollView, View } from 'react-native'
 import {
@@ -46,6 +46,7 @@ import {
   FactCard,
   HoursCard,
   LevelCard,
+  LinkCard,
   ListCard,
   ListRow,
   OptionCard,
@@ -62,6 +63,12 @@ import {
   RoomStatusTimeline,
   ScreenHeader,
   Segmented,
+  SettingsCard,
+  SettingsField,
+  SettingsGroup,
+  SettingsNav,
+  SettingsRow,
+  SettingsSection,
   ShareBar,
   SkeletonCard,
   StatCard,
@@ -240,6 +247,46 @@ export function Catalogue() {
           value={vibe}
           onChange={setVibe}
         />
+        <SettingsGroup
+          title="Notifications"
+          rows={[
+            {
+              label: 'Mes rooms',
+              description: 'Candidatures, rappels, annulations',
+              toggle: { value: toggle, onChange: setToggle },
+            },
+            { label: 'Joueurs bloqués', value: '2', onPress: () => {} },
+          ]}
+        />
+        <SettingsSection title="Session" description="Ta session sur ce navigateur.">
+          <SettingsCard>
+            <SettingsField label="E-mail de connexion" value="lea@lucko.fr" />
+            <SettingsRow
+              wide
+              danger
+              label="Supprimer mon compte"
+              description="C'est définitif."
+              aside={<Button small kind="ghost" label="Supprimer…" onPress={() => {}} />}
+            />
+          </SettingsCard>
+        </SettingsSection>
+        <Row>
+          <SettingsNav
+            back="Profil"
+            onBack={() => {}}
+            items={['Compte', 'Notifications']}
+            active={0}
+            onSelect={() => {}}
+          />
+          <View style={{ width: 300 }}>
+            <LinkCard
+              label="Aide"
+              description="Questions fréquentes"
+              icon={ExternalLink}
+              onPress={() => {}}
+            />
+          </View>
+        </Row>
         <ProfileIdentity
           pseudo="Léa"
           place="Bordeaux · 10 km"
