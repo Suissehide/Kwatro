@@ -52,3 +52,9 @@
   color: var(--kw-ink);
   font-weight: 700;
 }
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}

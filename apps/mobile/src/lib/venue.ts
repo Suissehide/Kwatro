@@ -204,7 +204,7 @@ export type AgendaAction =
 export function agendaAction(event: VenueEvent): AgendaAction {
   if (event.registrationMode === 'NONE') return { kind: 'ghost', label: 'Voir' }
   if (event.registrationMode === 'EXTERNAL' && event.externalUrl) {
-    return { kind: 'ghost', label: 'Inscription ↗', url: event.externalUrl }
+    return { kind: 'ghost', label: 'Inscription', url: event.externalUrl }
   }
   return isFull(event)
     ? { kind: 'soft', label: "Liste d'attente" }

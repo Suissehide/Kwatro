@@ -1,4 +1,5 @@
 import { CONTACT_EMAIL } from '@kwatro/design-system'
+import { ArrowLeft } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Footer } from './site-footer'
 import s from './text-page.module.css'
@@ -17,8 +18,9 @@ export function TextPage({
   return (
     <div className={s.page}>
       <main className={s.main}>
-        <a className="kw-small" href="/">
-          ← Kwatro
+        <a className={`kw-small ${s.back}`} href="/">
+          <ArrowLeft size={14} strokeWidth={2.5} aria-hidden />
+          Kwatro
         </a>
         <h1 className="kw-h1">{title}</h1>
         {updated ? <p className="kw-small">Dernière mise à jour : {updated}</p> : null}

@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react-native'
 import { Pressable, Text, View } from 'react-native'
 import { Raised } from '../atoms/Raised'
 import { useHover } from '../atoms/useHover'
@@ -44,9 +45,7 @@ export function OptionCard({
           justifyContent: 'center',
         }}
       >
-        {value ? (
-          <Text style={{ ...font('body', 800), fontSize: 13, color: colors.ink }}>✓</Text>
-        ) : null}
+        {value ? <Check size={15} color={colors.ink} strokeWidth={3} /> : null}
       </View>
       <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
         <Text style={{ ...font('body', 800), fontSize: 15, color: colors.ink }}>{label}</Text>

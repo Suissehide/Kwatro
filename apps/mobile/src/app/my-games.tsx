@@ -3,6 +3,7 @@ import {
   Banner,
   Button,
   ChipGroup,
+  colors,
   EmptyState,
   Segmented,
   SkeletonCard,
@@ -12,6 +13,7 @@ import {
 } from '@kwatro/design-system'
 import { type AgendaItem, agendaGroup } from '@kwatro/shared'
 import { router, useLocalSearchParams } from 'expo-router'
+import { CalendarX } from 'lucide-react-native'
 import { useState } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { PlayerScreen } from '@/components/PlayerScreen'
@@ -134,7 +136,7 @@ function Empty({ past, filtered }: { past: boolean; filtered: boolean }) {
     return (
       <EmptyState
         dashed
-        icon={<Typography variant="h2">◎</Typography>}
+        icon={<CalendarX size={28} color={colors.ink} strokeWidth={2.5} />}
         title="Rien pour ce jeu"
         text="Choisis un autre jeu, ou « Tous »."
       />
@@ -142,14 +144,14 @@ function Empty({ past, filtered }: { past: boolean; filtered: boolean }) {
   return past ? (
     <EmptyState
       dashed
-      icon={<Typography variant="h2">◎</Typography>}
+      icon={<CalendarX size={28} color={colors.ink} strokeWidth={2.5} />}
       title="Pas encore de partie"
       text="Tes parties terminées apparaîtront ici, avec le résultat et ta Kwote."
     />
   ) : (
     <EmptyState
       dashed
-      icon={<Typography variant="h2">◎</Typography>}
+      icon={<CalendarX size={28} color={colors.ink} strokeWidth={2.5} />}
       title="Rien de prévu"
       text="Inscris-toi à une soirée ou rejoins une room pour la retrouver ici."
       action={<Button small label="Explorer ce soir" onPress={openHome} />}

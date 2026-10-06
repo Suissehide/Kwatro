@@ -1,7 +1,7 @@
 import {
   AvailabilityGrid,
   Button,
-  font,
+  colors,
   IconButton,
   LevelCard,
   ListCard,
@@ -16,6 +16,7 @@ import {
 } from '@kwatro/design-system'
 import { xpLevel } from '@kwatro/shared'
 import { router } from 'expo-router'
+import { Settings } from 'lucide-react-native'
 import { useWindowDimensions, View } from 'react-native'
 import { PlayerScreen } from '@/components/PlayerScreen'
 import { openSettings } from '@/lib/navigation'
@@ -49,7 +50,7 @@ export default function ProfileScreen() {
           size={44}
           label="Réglages"
           onPress={openSettings}
-          icon={<Typography style={{ ...font('body', 800), fontSize: 18 }}>⚙</Typography>}
+          icon={<Settings size={20} color={colors.ink} strokeWidth={2.5} />}
         />
         <Button small kind="ghost" label="Modifier" onPress={openEdit} />
       </View>

@@ -45,6 +45,9 @@ import { Button, ContentCard, Typography, colors } from '@kwatro/design-system'
   `kwatro.css` les importe de Google Fonts.
 - **Ombres** : pleines et sans flou, toujours via `<Raised>` (Android n'a pas d'ombre dure).
 - **Couleurs** : `textOn(bg)` donne la couleur de texte lisible ; jamais de blanc sur `kwote`.
+- **Icônes** : uniquement [Lucide](https://lucide.dev/icons) (`lucide-react-native`), jamais d'émoji
+  ni de glyphe Unicode (✓, ←, ▲, ◆, +…). Couleur via `color` (tokens), trait épaissi
+  (`strokeWidth={2.5}`) pour suivre la graisse 800 du texte.
 - **Accessibilité** : `IconButton`, `Toggle`, `Checkbox` exigent un `label` (lu par les lecteurs
   d'écran) ; `Checkbox hideLabel` pour une case seule.
 

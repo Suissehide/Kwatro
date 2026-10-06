@@ -26,15 +26,9 @@ import {
   REPORT_REASONS,
 } from '@kwatro/shared'
 import { useLocalSearchParams } from 'expo-router'
+import { ArrowLeft, Bell, BellOff, Pin } from 'lucide-react-native'
 import { useEffect, useRef, useState } from 'react'
-import {
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  Text,
-  useWindowDimensions,
-  View,
-} from 'react-native'
+import { FlatList, KeyboardAvoidingView, Platform, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { PlayerNav } from '@/components/PlayerNav'
 import { dayLabel, localDay } from '@/lib/explore'
@@ -128,7 +122,13 @@ export default function ChatScreen() {
       size={36}
       label={first.muted ? 'Réactiver les notifications' : 'Couper les notifications'}
       onPress={() => mute.mutate(!first.muted)}
-      icon={<Text style={{ fontSize: 16 }}>{first.muted ? '🔕' : '🔔'}</Text>}
+      icon={
+        first.muted ? (
+          <BellOff size={18} color={colors.ink} strokeWidth={2.5} />
+        ) : (
+          <Bell size={18} color={colors.ink} strokeWidth={2.5} />
+        )
+      }
     />
   ) : null
 
@@ -150,8 +150,8 @@ export default function ChatScreen() {
   ) : (
     <View style={{ flex: 1, gap: 10 }}>
       {first.pinned ? (
-        <Note tone="kwote">
-          📌 {first.pinned.author.pseudo ?? 'Organisateur'} : {first.pinned.body}
+        <Note tone="kwote" icon={Pin}>
+          {first.pinned.author.pseudo ?? 'Organisateur'} : {first.pinned.body}
         </Note>
       ) : null}
       <FlatList
@@ -318,7 +318,7 @@ export default function ChatScreen() {
         }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-          <TextLink label="← Retour" onPress={goBack} />
+          <TextLink icon={ArrowLeft} label="Retour" onPress={goBack} />
           <View style={{ flex: 1, minWidth: 0 }}>
             <Typography variant="h2" numberOfLines={1}>
               {title}

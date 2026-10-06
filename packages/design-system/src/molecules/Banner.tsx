@@ -1,3 +1,4 @@
+import { X } from 'lucide-react-native'
 import { Pressable, Text, View } from 'react-native'
 import { border, colors, font, type Tone, toneStyles } from '../tokens'
 
@@ -14,7 +15,7 @@ export function Banner({
   onAction?: () => void
   onClose?: () => void
 }) {
-  const t = toneStyles[tone]
+  const { soft, icon: Icon } = toneStyles[tone]
   return (
     <View
       role="alert"
@@ -22,7 +23,7 @@ export function Banner({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
-        backgroundColor: t.soft,
+        backgroundColor: soft,
         borderWidth: border.base,
         borderColor: colors.ink,
         borderRadius: 12,
@@ -30,7 +31,7 @@ export function Banner({
         paddingHorizontal: 14,
       }}
     >
-      <Text style={{ ...font('body', 800), fontSize: 16, color: colors.ink }}>{t.icon}</Text>
+      <Icon size={18} color={colors.ink} strokeWidth={2.5} />
       <Text style={{ flex: 1, ...font('body', 600), fontSize: 14, color: colors.ink }}>
         {message}
       </Text>
@@ -41,7 +42,7 @@ export function Banner({
       ) : null}
       {onClose ? (
         <Pressable role="button" onPress={onClose} aria-label="Fermer" hitSlop={12}>
-          <Text style={{ ...font('body', 800), color: colors.ink }}>×</Text>
+          <X size={16} color={colors.ink} strokeWidth={2.5} />
         </Pressable>
       ) : null}
     </View>

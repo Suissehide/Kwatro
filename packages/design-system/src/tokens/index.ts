@@ -1,3 +1,4 @@
+import { Check, CircleAlert, Info, type LucideIcon, TriangleAlert } from 'lucide-react-native'
 // Kwatro — design tokens « Plateau pop » (partagés mobile + web)
 import { Platform, type TextStyle } from 'react-native'
 
@@ -212,9 +213,9 @@ export const table = {
 
 export type Tone = 'ok' | 'warn' | 'err' | 'info'
 /** Fond doux, couleur pleine et pictogramme de chaque ton de retour (toast, bandeau). */
-export const toneStyles: Record<Tone, { soft: string; solid: string; icon: string }> = {
-  ok: { soft: colors.venueSoft, solid: colors.venue, icon: '✓' },
-  err: { soft: colors.roomSoft, solid: colors.room, icon: '!' },
-  warn: { soft: colors.kwoteSoft, solid: colors.kwote, icon: '⇅' },
-  info: { soft: colors.eventSoft, solid: colors.event, icon: 'i' },
+export const toneStyles: Record<Tone, { soft: string; solid: string; icon: LucideIcon }> = {
+  ok: { soft: colors.venueSoft, solid: colors.venue, icon: Check },
+  err: { soft: colors.roomSoft, solid: colors.room, icon: CircleAlert },
+  warn: { soft: colors.kwoteSoft, solid: colors.kwote, icon: TriangleAlert },
+  info: { soft: colors.eventSoft, solid: colors.event, icon: Info },
 }

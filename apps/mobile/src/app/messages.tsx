@@ -1,15 +1,16 @@
 import {
   Banner,
   CountBadge,
+  colors,
   EmptyState,
-  font,
   ListCard,
   ListRow,
   SkeletonCard,
   Typography,
 } from '@kwatro/design-system'
 import { formatTime } from '@kwatro/shared'
-import { Text, useWindowDimensions, View } from 'react-native'
+import { MessageCircle } from 'lucide-react-native'
+import { useWindowDimensions, View } from 'react-native'
 import { PlayerScreen } from '@/components/PlayerScreen'
 import { dayLabel, localDay } from '@/lib/explore'
 import { openChat } from '@/lib/navigation'
@@ -40,7 +41,7 @@ export default function MessagesScreen() {
     )
   ) : data.chats.length === 0 ? (
     <EmptyState
-      icon={<Text style={{ ...font('display'), fontSize: 24 }}>…</Text>}
+      icon={<MessageCircle size={28} color={colors.ink} strokeWidth={2.5} />}
       title="Pas encore de messages"
       text="Le chat d'une room s'ouvre quand tu y as ta place ; celui d'un tournoi, quand tu es inscrit·e."
     />

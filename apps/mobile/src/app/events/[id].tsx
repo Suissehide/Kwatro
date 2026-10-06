@@ -2,6 +2,7 @@ import {
   Banner,
   Button,
   ConfirmDialog,
+  colors,
   ListCard,
   ListRow,
   Note,
@@ -13,6 +14,7 @@ import {
 } from '@kwatro/design-system'
 import { EVENT_TYPE_LABELS, formatPrice } from '@kwatro/shared'
 import { router, useLocalSearchParams } from 'expo-router'
+import { ChevronRight } from 'lucide-react-native'
 import { useState } from 'react'
 import { Linking, View } from 'react-native'
 import { DetailScreen } from '@/components/DetailScreen'
@@ -134,7 +136,12 @@ export default function EventScreen() {
           inset={16}
           title={event.venue.name}
           subtitle={event.venue.address}
-          right={<Typography variant="small">Voir le lieu →</Typography>}
+          right={
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+              <Typography variant="small">Voir le lieu</Typography>
+              <ChevronRight size={16} color={colors.muted} strokeWidth={2.5} />
+            </View>
+          }
           last
           onPress={() => openVenue(event.venue.slug)}
         />
