@@ -11,6 +11,11 @@ export type ChatAccess = {
   memberIds: string[]
   /** Nom de la room ou de l'événement, pour le titre des push. */
   title: string
+  /** En-tête du chat. */
+  startsAt: Date
+  venueName: string | null
+  players: number
+  capacity: number | null
 }
 
 /**
@@ -30,6 +35,9 @@ export async function chatAccess(
         hostId: true,
         minorsAllowed: true,
         atHome: true,
+        startsAt: true,
+        capacity: true,
+        venue: { select: { name: true } },
         game: { select: { name: true } },
         format: { select: { name: true } },
         participants: { where: { status: 'ACCEPTED' }, select: { userId: true } },
@@ -42,6 +50,10 @@ export async function chatAccess(
       moderator: room.hostId === user.id,
       memberIds,
       title: room.format?.name ?? room.game.name,
+      startsAt: room.startsAt,
+      venueName: room.venue?.name ?? null,
+      players: memberIds.length,
+      capacity: room.capacity,
     }
   }
   const event = await prisma.event.findUnique({
@@ -49,13 +61,22 @@ export async function chatAccess(
     select: {
       title: true,
       minAge: true,
+      startsAt: true,
       registrations: { where: { status: 'REGISTERED' }, select: { userId: true } },
-      venue: { select: { staff: { select: { userId: true } } } },
+      venue: { select: { name: true, staff: { select: { userId: true } } } },
     },
   })
   if (!event || !eventVisibleTo(event, user)) return null
   const staffIds = event.venue.staff.map((s) => s.userId)
   const memberIds = [...new Set([...staffIds, ...event.registrations.map((r) => r.userId)])]
   if (!memberIds.includes(user.id)) return null
-  return { moderator: staffIds.includes(user.id), memberIds, title: event.title }
+  return {
+    moderator: staffIds.includes(user.id),
+    memberIds,
+    title: event.title,
+    startsAt: event.startsAt,
+    venueName: event.venue.name,
+    players: event.registrations.length,
+    capacity: null,
+  }
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { CircleHelp, ExternalLink, Plus, SlidersHorizontal } from 'lucide-react-native'
+import { CircleHelp, ExternalLink, Plus, SlidersHorizontal, Trash2 } from 'lucide-react-native'
 import { type ReactNode, useState } from 'react'
 import { ScrollView, View } from 'react-native'
 import {
@@ -37,6 +37,9 @@ import {
   ChatBubble,
   ChatComposer,
   ChatDivider,
+  ChatGroupLabel,
+  ChatHeader,
+  ChatRow,
   ChipGroup,
   ClosureRow,
   ContentCard,
@@ -54,6 +57,7 @@ import {
   Pagination,
   Panel,
   PerkBanner,
+  PinnedBanner,
   ProfileCard,
   ProfileIdentity,
   RankCard,
@@ -84,7 +88,9 @@ import {
 import {
   Accordion,
   BarChart,
+  ContextMenu,
   DataTable,
+  type MenuAnchor,
   MonthCalendar,
   type PlayerTab,
   PlayerTabBar,
@@ -133,6 +139,7 @@ export function Catalogue() {
   const [players, setPlayers] = useState(4)
   const [name, setName] = useState('')
   const [page, setPage] = useState(7)
+  const [menu, setMenu] = useState<MenuAnchor | null>(null)
   const [sort, setSort] = useState<Sort>({ key: 'date', dir: 'desc' })
   const [selected, setSelected] = useState<string[]>([])
   const [tab, setTab] = useState<PlayerTab>('explorer')
@@ -392,18 +399,66 @@ export function Catalogue() {
         <ShareBar label="Pioneer" percent={46} color={colors.room} />
         <Banner message="Ta room commence dans 1 h." action="Voir" onClose={() => {}} />
         <Toast message="Candidature envoyée" action="Annuler" />
+        <ListCard>
+          <ChatGroupLabel first label="À venir" />
+          <ChatRow
+            title="Commander à 4"
+            time="12:15"
+            context="Room classée · Ce soir 20:30 · Le Dé Fêlé"
+            preview="Alex : Ok pour moi, je ramène des tapis"
+            color={colors.room}
+            unread={1}
+            selected
+            onPress={() => {}}
+          />
+          <ChatRow
+            title="Tournoi Standard"
+            time="Lun."
+            context="Tournoi · Mer. 7 oct. · Carte Blanche"
+            preview="Pas encore de message"
+            color={colors.event}
+            muted
+            onPress={() => {}}
+          />
+        </ListCard>
         <View style={{ gap: 8 }}>
+          <ChatHeader
+            title="Avant-première Lorcana"
+            detail="Vendredi 16 octobre, 19:00 · Carte Blanche · 18 inscrits"
+            color={colors.event}
+            link="Voir l’événement"
+            onOpen={() => {}}
+            muted={false}
+            onMute={() => {}}
+          />
+          <PinnedBanner author="Carte Blanche" text="Accueil dès 18 h 30, boosters sur place." />
           <ChatBubble
             announcement
             author="Fêlé"
             time="19:02"
             text="Ronde 1 lancée, tables 1 à 6."
+            avatar={{ name: 'Fêlé', color: colors.venue }}
           />
-          <ChatBubble author="Léa" time="19:40" text="Je ramène mon deck Mono-rouge !" />
+          <ChatBubble
+            author="Léa"
+            time="19:40"
+            text="Je ramène mon deck Mono-rouge !"
+            avatar={{ name: 'Léa', color: colors.event }}
+          />
+          <ChatBubble indent text="Et des sleeves en rab." />
           <ChatDivider label="Nouveaux messages" />
-          <ChatBubble mine time="19:41" text="Parfait, on se retrouve à 20 h." onPress={() => {}} />
-          <ChatBubble mine pending text="J'arrive 🃏" />
+          <ChatBubble mine time="19:41" text="Parfait, on se retrouve à 20 h." onMenu={setMenu} />
+          <ContextMenu
+            anchor={menu}
+            align="right"
+            items={[
+              { label: 'Supprimer', icon: Trash2, danger: true, onPress: () => setMenu(null) },
+            ]}
+            onClose={() => setMenu(null)}
+          />
+          <ChatBubble mine pending text="J'arrive" />
           <ChatComposer value="" onChange={() => {}} onSend={() => {}} status="Léa écrit…" />
+          <ChatComposer compact value="" onChange={() => {}} onSend={() => {}} />
         </View>
         <EmptyState
           icon={<CircleHelp size={28} color={colors.ink} strokeWidth={2.5} />}

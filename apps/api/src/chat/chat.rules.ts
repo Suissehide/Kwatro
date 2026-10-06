@@ -36,6 +36,10 @@ export function pushRecipients({
 /** Une partie commencée depuis moins de 12 h compte encore comme en cours (onglet Messages). */
 export const ONGOING_MS = 12 * 60 * 60_000
 
+/** Partie terminée : après sa fin, ou 12 h après son début si elle n'a pas d'heure de fin. */
+export const isPast = (startsAt: Date, endsAt: Date | null, now: Date) =>
+  (endsAt?.getTime() ?? startsAt.getTime() + ONGOING_MS) < now.getTime()
+
 /** Onglet Messages : les chats écrits, du plus récent au plus ancien, puis les autres par date de partie. */
 export function sortChats<T extends { startsAt: Date; last: { createdAt: Date } | null }>(
   chats: T[],

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { EVENT_TYPES, ROOM_MODES } from '../constants'
 import { isoDateTime } from './common'
 import type { Channel } from './realtime'
 
@@ -52,6 +53,12 @@ export const chatPageSchema = z.object({
   muted: z.boolean(),
   /** Hôte de la room ou staff du lieu : annonces et suppression des messages des autres. */
   moderator: z.boolean(),
+  /** En-tête : date, lieu (null à domicile) et joueurs de la room ou inscrits de l'événement. */
+  startsAt: isoDateTime,
+  venueName: z.string().nullable(),
+  players: z.number().int(),
+  /** Places de la room ; null pour un événement (on affiche les inscrits). */
+  capacity: z.number().int().nullable(),
 })
 
 export type ChatPage = z.infer<typeof chatPageSchema>
@@ -72,11 +79,23 @@ export const myChatsSchema = z.object({
       id: z.string(),
       /** Format ou jeu de la room, titre de l'événement. */
       title: z.string(),
+      /** Mode de la room ou type de l'événement. */
+      kind: z.enum([...ROOM_MODES, ...EVENT_TYPES]),
       /** Date de la room ou de l'événement. */
       startsAt: isoDateTime,
+      /** null : room à domicile. */
+      venueName: z.string().nullable(),
+      /** Partie terminée ou annulée (groupe « Terminées »). */
+      past: z.boolean(),
+      muted: z.boolean(),
       /** null : personne n'a encore écrit. */
       last: z
-        .object({ pseudo: z.string().nullable(), body: z.string(), createdAt: isoDateTime })
+        .object({
+          pseudo: z.string().nullable(),
+          body: z.string(),
+          createdAt: isoDateTime,
+          mine: z.boolean(),
+        })
         .nullable(),
       unread: z.number().int(),
     }),

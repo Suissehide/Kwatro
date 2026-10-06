@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PUSH_GROUP_MS, pushRecipients, sortChats, startsBurst } from './chat.rules'
+import { isPast, PUSH_GROUP_MS, pushRecipients, sortChats, startsBurst } from './chat.rules'
 
 describe('startsBurst', () => {
   const now = new Date('2026-10-06T20:00:00Z')
@@ -54,5 +54,20 @@ describe('sortChats', () => {
       'vide-tot',
       'vide-tard',
     ])
+  })
+})
+
+describe('isPast', () => {
+  const now = new Date('2026-10-06T20:00:00Z')
+
+  it("terminée après l'heure de fin, sinon 12 h après le début", () => {
+    expect(isPast(new Date('2026-10-06T18:00:00Z'), new Date('2026-10-06T19:00:00Z'), now)).toBe(
+      true,
+    )
+    expect(isPast(new Date('2026-10-06T18:00:00Z'), new Date('2026-10-06T22:00:00Z'), now)).toBe(
+      false,
+    )
+    expect(isPast(new Date('2026-10-06T09:00:00Z'), null, now)).toBe(false)
+    expect(isPast(new Date('2026-10-06T07:00:00Z'), null, now)).toBe(true)
   })
 })
