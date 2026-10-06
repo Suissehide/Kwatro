@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { fromNodeHeaders, toNodeHandler } from 'better-auth/node'
 import type { Request } from 'express'
 import { loadEnv } from '../config/env'
-import type { User } from '../generated/prisma/client'
+import type { User, VenueStaffRole } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 import { type Auth, createAuth } from './better-auth'
 
@@ -29,5 +29,14 @@ export class AuthService {
     const id = session?.user.id ?? (this.devHeader ? request.header('x-dev-user-id') : undefined)
     if (!id) return null
     return this.prisma.user.findFirst({ where: { id, deletedAt: null } })
+  }
+
+  /** Rôle du joueur dans un lieu, ou null s'il n'en fait pas partie. */
+  async venueRole(userId: string, venueId: string): Promise<VenueStaffRole | null> {
+    const staff = await this.prisma.venueStaff.findUnique({
+      where: { userId_venueId: { userId, venueId } },
+      select: { role: true },
+    })
+    return staff?.role ?? null
   }
 }

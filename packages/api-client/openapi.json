@@ -308,6 +308,36 @@
                           "reliabilityPct"
                         ]
                       }
+                    },
+                    "venues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "slug": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "role": {
+                            "type": "string",
+                            "enum": [
+                              "MANAGER",
+                              "STAFF"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "slug",
+                          "name",
+                          "role"
+                        ]
+                      }
                     }
                   },
                   "required": [
@@ -327,7 +357,8 @@
                     "vibes",
                     "xp",
                     "mainKwote",
-                    "rankings"
+                    "rankings",
+                    "venues"
                   ]
                 }
               }
@@ -567,6 +598,36 @@
                           "reliabilityPct"
                         ]
                       }
+                    },
+                    "venues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "slug": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "role": {
+                            "type": "string",
+                            "enum": [
+                              "MANAGER",
+                              "STAFF"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "slug",
+                          "name",
+                          "role"
+                        ]
+                      }
                     }
                   },
                   "required": [
@@ -586,7 +647,8 @@
                     "vibes",
                     "xp",
                     "mainKwote",
-                    "rankings"
+                    "rankings",
+                    "venues"
                   ]
                 }
               }

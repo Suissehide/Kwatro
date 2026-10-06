@@ -491,6 +491,13 @@ export interface operations {
                             rankedGames: number;
                             reliabilityPct: number;
                         }[];
+                        venues: {
+                            id: string;
+                            slug: string;
+                            name: string;
+                            /** @enum {string} */
+                            role: "MANAGER" | "STAFF";
+                        }[];
                     };
                 };
             };
@@ -572,6 +579,13 @@ export interface operations {
                             kwote: number | null;
                             rankedGames: number;
                             reliabilityPct: number;
+                        }[];
+                        venues: {
+                            id: string;
+                            slug: string;
+                            name: string;
+                            /** @enum {string} */
+                            role: "MANAGER" | "STAFF";
                         }[];
                     };
                 };
