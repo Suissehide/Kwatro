@@ -140,7 +140,7 @@ deploy/
 - `pnpm db:restore <fichier>` : remplace la base locale par une sauvegarde (par ex. téléchargée depuis Dokploy).
 
 **Déploiement avec Dokploy**
-1. Dokploy › Create Service › **Compose** › dépôt `Suissehide/Kwatro`, branche `main`, *Compose Path* `./deploy/dokploy/docker-compose.dokploy.yml`.
+1. Dokploy › Create Service › **Compose** › dépôt `Suissehide/Lucko`, branche `main`, *Compose Path* `./deploy/dokploy/docker-compose.dokploy.yml`.
 2. Onglet **Environment** : recopier `deploy/.env.example` avec les vraies valeurs.
 3. Onglet **Domains** : un domaine pour `api` (port 3000) et un pour `web` (port 3000), HTTPS activé.
 4. **Deploy**. Les migrations Prisma en attente s'appliquent au démarrage de l'API.
