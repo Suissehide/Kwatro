@@ -1023,6 +1023,8 @@ export interface operations {
                             registeredCount: number;
                             /** @enum {string} */
                             registrationMode: "NONE" | "IN_APP" | "EXTERNAL";
+                            /** @enum {string|null} */
+                            myRegistration: "REGISTERED" | "WAITLISTED" | null;
                             games: {
                                 slug: string;
                                 name: string;
@@ -1087,6 +1089,8 @@ export interface operations {
                         registeredCount: number;
                         /** @enum {string} */
                         registrationMode: "NONE" | "IN_APP" | "EXTERNAL";
+                        /** @enum {string|null} */
+                        myRegistration: "REGISTERED" | "WAITLISTED" | null;
                         games: {
                             slug: string;
                             name: string;

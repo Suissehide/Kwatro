@@ -46,6 +46,7 @@ import {
   openTab,
   openVenue,
 } from '@/lib/navigation'
+import { agendaAction } from '@/lib/venue'
 import { useTabBadges } from '@/queries/useChat'
 import { useTonightQuery } from '@/queries/useExplore'
 import { useMeQuery } from '@/queries/useMe'
@@ -96,22 +97,21 @@ export default function HomeScreen() {
       }
     />
   ) : (
-    events.map((e, i) => (
-      <EventCard
-        key={e.id}
-        {...eventCardProps(e)}
-        wide={wide}
-        raised={i === 0}
-        onPress={() => openEvent(e.id)}
-        action={
-          e.registrationMode === 'NONE' ? (
-            <Button small kind="ghost" label="Voir" onPress={() => openEvent(e.id)} />
-          ) : (
-            <Button small label="S'inscrire" onPress={() => openEvent(e.id)} />
-          )
-        }
-      />
-    ))
+    events.map((e, i) => {
+      const action = agendaAction(e)
+      return (
+        <EventCard
+          key={e.id}
+          {...eventCardProps(e)}
+          wide={wide}
+          raised={i === 0}
+          onPress={() => openEvent(e.id)}
+          action={
+            <Button small kind={action.kind} label={action.label} onPress={() => openEvent(e.id)} />
+          }
+        />
+      )
+    })
   )
 
   const roomCards = rooms.map((r) => (
