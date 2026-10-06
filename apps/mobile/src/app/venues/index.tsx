@@ -9,8 +9,8 @@ import {
   SkeletonCard,
   Typography,
   VenueRow,
-} from '@kwatro/design-system'
-import { PARTNER_TIE_METERS, RADIUS_KM } from '@kwatro/shared'
+} from '@lucko/design-system'
+import { PARTNER_TIE_METERS, RADIUS_KM } from '@lucko/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useWindowDimensions, View } from 'react-native'
