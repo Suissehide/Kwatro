@@ -1987,12 +1987,14 @@ export interface operations {
                             type: "room" | "event";
                             id: string;
                             title: string;
+                            /** Format: date-time */
+                            startsAt: string;
                             last: {
                                 pseudo: string | null;
                                 body: string;
                                 /** Format: date-time */
                                 createdAt: string;
-                            };
+                            } | null;
                             unread: number;
                         }[];
                     };

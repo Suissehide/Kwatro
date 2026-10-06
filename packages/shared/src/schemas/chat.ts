@@ -60,7 +60,10 @@ export const chatPageQuerySchema = z.object({ cursor: z.string().max(64).optiona
 
 export const muteChatSchema = z.object({ muted: z.boolean() })
 
-/** GET /me/chats (onglet Messages) : conversations du joueur, la plus récente d'abord, et total des non-lus (badge). */
+/**
+ * GET /me/chats (onglet Messages) : chats du joueur, même sans message pour une partie à venir,
+ * et total des non-lus (badge).
+ */
 export const myChatsSchema = z.object({
   unread: z.number().int(),
   chats: z.array(
@@ -69,7 +72,12 @@ export const myChatsSchema = z.object({
       id: z.string(),
       /** Format ou jeu de la room, titre de l'événement. */
       title: z.string(),
-      last: z.object({ pseudo: z.string().nullable(), body: z.string(), createdAt: isoDateTime }),
+      /** Date de la room ou de l'événement. */
+      startsAt: isoDateTime,
+      /** null : personne n'a encore écrit. */
+      last: z
+        .object({ pseudo: z.string().nullable(), body: z.string(), createdAt: isoDateTime })
+        .nullable(),
       unread: z.number().int(),
     }),
   ),
