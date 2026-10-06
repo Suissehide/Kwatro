@@ -6,6 +6,7 @@ import {
   ListCard,
   ListRow,
   SkeletonCard,
+  space,
   Typography,
 } from '@lucko/design-system'
 import { formatTime } from '@lucko/shared'
@@ -78,7 +79,7 @@ export default function MessagesScreen() {
         tab="messages"
         wide={false}
         header={
-          <View style={{ paddingHorizontal: 20, paddingTop: 6, paddingBottom: 12 }}>
+          <View style={{ paddingHorizontal: space.screen, paddingTop: 6, paddingBottom: 12 }}>
             <Typography variant="h1">Messages</Typography>
           </View>
         }

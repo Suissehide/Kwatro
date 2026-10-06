@@ -11,6 +11,7 @@ import {
   Note,
   ScreenHeader,
   SkeletonCard,
+  space,
   TextLink,
   Toggle,
   Typography,
@@ -312,7 +313,7 @@ export default function ChatScreen() {
           width: '100%',
           maxWidth: 760,
           alignSelf: 'center',
-          paddingHorizontal: 32,
+          paddingHorizontal: space.page,
           paddingVertical: 24,
           gap: 16,
         }}
