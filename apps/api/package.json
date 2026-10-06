@@ -1,8 +1,8 @@
 {
-  "name": "@kwatro/api",
+  "name": "@lucko/api",
   "version": "0.0.0",
   "private": true,
-  "description": "API Kwatro (NestJS + PostgreSQL/PostGIS via Prisma)",
+  "description": "API Lucko (NestJS + PostgreSQL/PostGIS via Prisma)",
   "scripts": {
     "dev": "nest start --watch",
     "build": "nest build",
@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@better-auth/expo": "1.7.7",
-    "@kwatro/shared": "workspace:*",
+    "@lucko/shared": "workspace:*",
     "@nestjs/common": "^12.1.2",
     "@nestjs/config": "^12.0.1",
     "@nestjs/core": "^12.1.2",

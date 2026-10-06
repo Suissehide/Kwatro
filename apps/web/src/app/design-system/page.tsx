@@ -1,4 +1,4 @@
-import { Catalogue } from '@kwatro/design-system/catalogue'
+import { Catalogue } from '@lucko/design-system/catalogue'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {

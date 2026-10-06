@@ -1,4 +1,4 @@
-// Schéma initial Kwatro. Voir Obsidian « Architecture fonctionnelle — app joueurs » §16.
+// Schéma initial Lucko. Voir Obsidian « Architecture fonctionnelle — app joueurs » §16.
 // Après modification : `pnpm db:migrate` (crée la migration) puis commit du dossier migrations/.
 
 generator client {
@@ -20,49 +20,49 @@ enum UserRole {
 }
 
 model User {
-  id                 String    @id @default(cuid())
-  email              String    @unique
+  id                String              @id @default(cuid())
+  email             String              @unique
   /// Nom transmis par Apple / Google (champ `name` de Better Auth), jamais montré aux autres joueurs
-  name               String    @default("")
-  emailVerified      Boolean   @default(false)
-  image              String?
-  /// Choisi à l'onboarding (KWT-45) : null juste après la création du compte
-  pseudo             String?   @unique
+  name              String              @default("")
+  emailVerified     Boolean             @default(false)
+  image             String?
+  /// Choisi à l'onboarding (LKO-45) : null juste après la création du compte
+  pseudo            String?             @unique
   /// Saisie à l'inscription par e-mail, demandée après une première connexion Apple / Google
-  birthDate          DateTime? @db.Date
-  role               UserRole  @default(PLAYER)
+  birthDate         DateTime?           @db.Date
+  role              UserRole            @default(PLAYER)
   /// Photo de profil : visible des autres joueurs seulement une fois validée (sinon l'initiale)
-  avatarUrl          String?
-  avatarStatus       AvatarStatus?
-  city               String?
+  avatarUrl         String?
+  avatarStatus      AvatarStatus?
+  city              String?
   /// Centre de la ville choisie (géocodage IGN) ou position de l'appareil (« Me localiser »)
-  latitude           Float?
-  longitude          Float?
-  searchRadiusKm     Int       @default(10)
+  latitude          Float?
+  longitude         Float?
+  searchRadiusKm    Int                 @default(10)
   /// Créneaux habituels : jour × 3 + moment (0 = lundi matin … 20 = dimanche soir)
-  availability       Int[]     @default([])
-  vibes              PlayVibe[] @default([])
+  availability      Int[]               @default([])
+  vibes             PlayVibe[]          @default([])
   /// Compte parent lié (mineurs de 13-14 ans)
-  parentId           String?
-  parent             User?     @relation("ParentChild", fields: [parentId], references: [id])
-  children           User[]    @relation("ParentChild")
-  parentalConsentAt  DateTime?
-  xp                 Int       @default(0)
+  parentId          String?
+  parent            User?               @relation("ParentChild", fields: [parentId], references: [id])
+  children          User[]              @relation("ParentChild")
+  parentalConsentAt DateTime?
+  xp                Int                 @default(0)
   /// Sujets de notifications push coupés par le joueur (tout est activé par défaut)
-  notificationsOff   NotificationTopic[] @default([])
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  deletedAt          DateTime?
+  notificationsOff  NotificationTopic[] @default([])
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  deletedAt         DateTime?
 
-  gameProfiles     PlayerGameProfile[]
-  hostedRooms      Room[]              @relation("RoomHost")
-  participations   RoomParticipant[]
-  visits           Visit[]
-  staffOf          VenueStaff[]
+  gameProfiles       PlayerGameProfile[]
+  hostedRooms        Room[]              @relation("RoomHost")
+  participations     RoomParticipant[]
+  visits             Visit[]
+  staffOf            VenueStaff[]
   eventRegistrations EventRegistration[]
   sessions           Session[]
   accounts           Account[]
-  /// Jeux joués (KWT-46) ; le niveau par format TCG est dans PlayerGameProfile
+  /// Jeux joués (LKO-46) ; le niveau par format TCG est dans PlayerGameProfile
   playedGames        Game[]              @relation("PlayedGames")
   blocksGiven        Block[]             @relation("BlocksGiven")
   blocksReceived     Block[]             @relation("BlocksReceived")
@@ -79,7 +79,7 @@ enum NotificationTopic {
   VENUES
 }
 
-/// Appareil d'un joueur : jeton Expo Push (KWT-108). Un appareil change de joueur s'il s'y reconnecte.
+/// Appareil d'un joueur : jeton Expo Push (LKO-108). Un appareil change de joueur s'il s'y reconnecte.
 model PushToken {
   token     String   @id
   userId    String
@@ -106,7 +106,7 @@ enum PlayVibe {
   SOCIAL
 }
 
-// ---------- Auth (tables Better Auth, KWT-9) ----------
+// ---------- Auth (tables Better Auth, LKO-9) ----------
 
 model Session {
   id        String   @id
@@ -172,25 +172,25 @@ model Game {
   events     Event[]      @relation("EventGames")
   /// Lieux où ce jeu est disponible sur place
   venues     Venue[]      @relation("VenueGames")
-  /// Joueurs qui le déclarent dans leurs jeux (KWT-46)
+  /// Joueurs qui le déclarent dans leurs jeux (LKO-46)
   players    User[]       @relation("PlayedGames")
 }
 
 model GameFormat {
-  id       String              @id @default(cuid())
-  slug     String
-  name     String
-  gameId   String
-  game     Game                @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  /// Joueurs par partie (KWT-52) : 2 en duel, 2 à 5 en Commander, 6 à 8 en draft
-  minPlayers      Int     @default(2)
-  maxPlayers      Int     @default(2)
+  id              String              @id @default(cuid())
+  slug            String
+  name            String
+  gameId          String
+  game            Game                @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  /// Joueurs par partie (LKO-52) : 2 en duel, 2 à 5 en Commander, 6 à 8 en draft
+  minPlayers      Int                 @default(2)
+  maxPlayers      Int                 @default(2)
   /// Durée moyenne d'une partie, en minutes
-  durationMinutes Int     @default(60)
+  durationMinutes Int                 @default(60)
   /// Commander : brackets officiels Wizards 1 à 5 (puissance du deck)
-  hasBrackets     Boolean @default(false)
-  profiles PlayerGameProfile[]
-  rooms    Room[]
+  hasBrackets     Boolean             @default(false)
+  profiles        PlayerGameProfile[]
+  rooms           Room[]
 
   @@unique([gameId, slug])
 }
@@ -202,18 +202,18 @@ enum DeclaredLevel {
   EXPERT
 }
 
-/// Niveau d'un joueur sur un format TCG : Kwote (Elo, départ 1000) et fiabilité.
+/// Niveau d'un joueur sur un format TCG : LK (Elo, départ 1000) et fiabilité.
 model PlayerGameProfile {
-  id               String        @id @default(cuid())
-  userId           String
-  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  formatId         String
-  format           GameFormat    @relation(fields: [formatId], references: [id], onDelete: Cascade)
-  declaredLevel    DeclaredLevel @default(INTERMEDIATE)
-  kwote            Int           @default(1000)
-  rankedGames      Int           @default(0)
-  reliabilityPct   Int           @default(0)
-  updatedAt        DateTime      @updatedAt
+  id             String        @id @default(cuid())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  formatId       String
+  format         GameFormat    @relation(fields: [formatId], references: [id], onDelete: Cascade)
+  declaredLevel  DeclaredLevel @default(INTERMEDIATE)
+  rating         Int           @default(1000)
+  rankedGames    Int           @default(0)
+  reliabilityPct Int           @default(0)
+  updatedAt      DateTime      @updatedAt
 
   @@unique([userId, formatId])
 }
@@ -229,8 +229,8 @@ enum VenueType {
 }
 
 model Venue {
-  id                         String       @id @default(cuid())
-  slug                       String       @unique
+  id                         String                                 @id @default(cuid())
+  slug                       String                                 @unique
   name                       String
   type                       VenueType
   address                    String
@@ -239,32 +239,32 @@ model Venue {
   longitude                  Float
   /// Point PostGIS, rempli par une migration SQL / un trigger à partir de latitude/longitude
   location                   Unsupported("geography(Point, 4326)")?
-  isPartner                  Boolean      @default(false)
+  isPartner                  Boolean                                @default(false)
   /// Bars (débits de boissons) : pas de moins de 16 ans non accompagnés
-  acceptsUnaccompaniedMinors Boolean      @default(false)
+  acceptsUnaccompaniedMinors Boolean                                @default(false)
   description                String?
   /// Droit de jeu par personne (centimes) ; null = gratuit ou non renseigné
   playFeeCents               Int?
   /// Consommation minimum par personne (centimes)
   minSpendCents              Int?
-  /// Avantage Kwatro proposé aux joueurs (lieux partenaires), ex. « -10 % sur les boosters »
-  kwatroPerk                 String?
+  /// Avantage Lucko proposé aux joueurs (lieux partenaires), ex. « -10 % sur les boosters »
+  luckoPerk                  String?
   /// Quartier affiché après la ville, ex. « Saint-Pierre »
   quarter                    String?
   phone                      String?
   website                    String?
   /// Transports à proximité, ex. « Tram A et B · Porte de Bourgogne, 4 min à pied »
   transitInfo                String?
-  /// Accessibilité : [{ label, status: YES | NO | INFO, note? }] (schéma Zod dans @kwatro/shared)
-  accessibility              Json         @default("[]")
+  /// Accessibilité : [{ label, status: YES | NO | INFO, note? }] (schéma Zod dans @lucko/shared)
+  accessibility              Json                                   @default("[]")
   /// Note sous les TCG, ex. « Salle TCG de 12 tables, tapis au comptoir »
   tcgNote                    String?
   /// Ludothèque : quelques titres mis en avant, le total (« 300+ ») et une note
-  boardGames                 String[]     @default([])
+  boardGames                 String[]                               @default([])
   boardGameCount             Int?
   boardGameNote              String?
-  createdAt                  DateTime     @default(now())
-  updatedAt                  DateTime     @updatedAt
+  createdAt                  DateTime                               @default(now())
+  updatedAt                  DateTime                               @updatedAt
 
   staff        VenueStaff[]
   rooms        Room[]
@@ -360,30 +360,30 @@ enum RoomStatus {
 }
 
 model Room {
-  id            String     @id @default(cuid())
-  hostId        String
-  host          User       @relation("RoomHost", fields: [hostId], references: [id])
-  gameId        String
-  game          Game       @relation(fields: [gameId], references: [id])
-  formatId      String?
-  format        GameFormat? @relation(fields: [formatId], references: [id])
-  mode          RoomMode   @default(CASUAL)
-  status        RoomStatus @default(OPEN)
-  venueId       String?
-  venue         Venue?     @relation(fields: [venueId], references: [id])
+  id                   String      @id @default(cuid())
+  hostId               String
+  host                 User        @relation("RoomHost", fields: [hostId], references: [id])
+  gameId               String
+  game                 Game        @relation(fields: [gameId], references: [id])
+  formatId             String?
+  format               GameFormat? @relation(fields: [formatId], references: [id])
+  mode                 RoomMode    @default(CASUAL)
+  status               RoomStatus  @default(OPEN)
+  venueId              String?
+  venue                Venue?      @relation(fields: [venueId], references: [id])
   /// Domicile : seule une zone floue est publique ; adresse chiffrée, révélée 24 h avant
-  atHome        Boolean    @default(false)
-  homeAreaLabel String?
+  atHome               Boolean     @default(false)
+  homeAreaLabel        String?
   homeAddressEncrypted String?
-  startsAt      DateTime
-  capacity      Int
-  minorsAllowed Boolean    @default(false)
-  autoAccept    Boolean    @default(false)
-  description   String?
-  /// Bracket Commander visé (1 à 5), seulement pour un format qui en a (KWT-52)
-  bracket       Int?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  startsAt             DateTime
+  capacity             Int
+  minorsAllowed        Boolean     @default(false)
+  autoAccept           Boolean     @default(false)
+  description          String?
+  /// Bracket Commander visé (1 à 5), seulement pour un format qui en a (LKO-52)
+  bracket              Int?
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
 
   participants RoomParticipant[]
   conversation Conversation?
@@ -474,7 +474,7 @@ model EventRegistration {
   userId      String
   user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   status      RegistrationStatus @default(REGISTERED)
-  /// Présence pointée par le lieu (pointage, KWT-78)
+  /// Présence pointée par le lieu (pointage, LKO-78)
   checkedInAt DateTime?
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
@@ -483,7 +483,7 @@ model EventRegistration {
   @@index([userId])
 }
 
-// ---------- Chat (KWT-80) ----------
+// ---------- Chat (LKO-80) ----------
 
 /// Fil de discussion d'une room ou d'un événement (tournoi), créé au premier message ou à la première lecture.
 model Conversation {
@@ -543,22 +543,22 @@ enum VisitSource {
 
 /// Une venue = un joueur dans un lieu un soir. Un seul forfait par joueur, par lieu et par soirée.
 model Visit {
-  id            String      @id @default(cuid())
-  userId        String
-  user          User        @relation(fields: [userId], references: [id])
-  venueId       String
-  venue         Venue       @relation(fields: [venueId], references: [id])
-  source        VisitSource
+  id           String      @id @default(cuid())
+  userId       String
+  user         User        @relation(fields: [userId], references: [id])
+  venueId      String
+  venue        Venue       @relation(fields: [venueId], references: [id])
+  source       VisitSource
   /// Soirée de rattachement (date locale Europe/Paris)
-  businessDate  DateTime    @db.Date
-  spentCents    Int?
-  billable      Boolean     @default(false)
-  createdAt     DateTime    @default(now())
+  businessDate DateTime    @db.Date
+  spentCents   Int?
+  billable     Boolean     @default(false)
+  createdAt    DateTime    @default(now())
 
   @@unique([userId, venueId, businessDate])
 }
 
-// ---------- Modération (KWT-19) ----------
+// ---------- Modération (LKO-19) ----------
 
 /// Blocage d'un joueur par un autre. Effet dans les deux sens : aucun des deux ne voit plus l'autre.
 model Block {
@@ -572,7 +572,7 @@ model Block {
   @@index([blockedId])
 }
 
-/// Motif de signalement (identique à REPORT_REASONS dans @kwatro/shared)
+/// Motif de signalement (identique à REPORT_REASONS dans @lucko/shared)
 enum ReportReason {
   HARASSMENT
   INAPPROPRIATE_CONTENT
@@ -601,7 +601,7 @@ model Report {
 
 // ---------- Liste d'attente (landing) ----------
 
-/// Joueur inscrit à la liste d'attente du site, avant l'ouverture de l'app (KWT-3).
+/// Joueur inscrit à la liste d'attente du site, avant l'ouverture de l'app (LKO-3).
 model WaitlistEntry {
   id        String   @id @default(cuid())
   email     String   @unique

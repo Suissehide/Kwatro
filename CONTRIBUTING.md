@@ -1,10 +1,10 @@
-# Contribuer à Kwatro
+# Contribuer à Lucko
 
 ## Flux de travail
 
 1. Prendre un ticket dans Notion (base 🎫 Tickets), le passer en **En cours** et s'assigner.
-2. Créer une branche depuis `main` : `type/KWT-<n>-description-courte`
-   ex. `feat/KWT-56-creer-une-room`, `fix/KWT-80-chat-notifications`
+2. Créer une branche depuis `main` : `type/LKO-<n>-description-courte`
+   ex. `feat/LKO-56-creer-une-room`, `fix/LKO-80-chat-notifications`
 3. Commits au format **Conventional Commits** (vérifié par un hook) :
    `feat(api): créer une room`, `fix(mobile): …`, `chore: …`, `docs: …`, `refactor: …`, `test: …`
 4. Ouvrir une Pull Request vers `main`, lier le ticket, passer le ticket en **En revue**.
@@ -18,9 +18,9 @@
 - **Biome** formate et lint tout le monorepo. Le hook `pre-commit` corrige automatiquement les fichiers modifiés ; en cas de doute : `pnpm check:fix`.
 - **TypeScript strict** partout ; pas de `any` sans commentaire qui l'explique.
 - Les **types et schémas partagés** (Zod) vont dans `packages/shared` : l'API valide avec les mêmes schémas que l'app.
-- **La logique métier sensible reste dans l'API** : QR Kwatro, venues facturables, Kwote, XP, factures, règles mineurs. Jamais calculée côté app.
+- **La logique métier sensible reste dans l'API** : QR Lucko, venues facturables, LK, XP, factures, règles mineurs. Jamais calculée côté app.
 - **Pas d'émoji ni de glyphe Unicode comme pictogramme** (✓, ←, ▲, ◆, +…) dans l'interface : uniquement des icônes [Lucide](https://lucide.dev/icons) (`lucide-react-native` dans le design system et l'app Expo, `lucide-react` sur les pages HTML de `apps/web`).
-- Toute règle métier importante a un **test** (ex. `packages/shared/src/kwote.test.ts`).
+- Toute règle métier importante a un **test** (ex. `packages/shared/src/rating.test.ts`).
 
 ## App : données de l'API (TanStack Query)
 

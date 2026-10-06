@@ -1,4 +1,4 @@
-import type { AgendaPeriod } from '@kwatro/shared'
+import type { AgendaPeriod } from '@lucko/shared'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 import { AGENDA } from '@/constants/queryKeys'
 import { api } from '@/lib/api'

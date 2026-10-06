@@ -1,8 +1,8 @@
 {
-  "name": "@kwatro/api-client",
+  "name": "@lucko/api-client",
   "version": "0.0.0",
   "private": true,
-  "description": "Client typé de l'API Kwatro, généré depuis son OpenAPI (app Expo + site Next.js)",
+  "description": "Client typé de l'API Lucko, généré depuis son OpenAPI (app Expo + site Next.js)",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {

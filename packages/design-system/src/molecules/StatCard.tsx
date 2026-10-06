@@ -7,7 +7,7 @@ export function StatCard({
   value,
   label,
   delta,
-  bg = colors.kwote,
+  bg = colors.rating,
 }: {
   value: string
   label: string

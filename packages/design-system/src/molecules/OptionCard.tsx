@@ -4,7 +4,7 @@ import { Raised } from '../atoms/Raised'
 import { useHover } from '../atoms/useHover'
 import { border, colors, font, radius, shadow, transition } from '../tokens'
 
-/** Choix multiple en carte : case, libellé et description. Cochée : fond kwoteSoft relevé. */
+/** Choix multiple en carte : case, libellé et description. Cochée : fond ratingSoft relevé. */
 export function OptionCard({
   label,
   description,
@@ -28,7 +28,7 @@ export function OptionCard({
         borderWidth: border.thin,
         borderColor: colors.ink,
         borderRadius: radius.field,
-        backgroundColor: value ? colors.kwoteSoft : hovered ? colors.hover : colors.white,
+        backgroundColor: value ? colors.ratingSoft : hovered ? colors.hover : colors.white,
         ...transition(['background-color']),
       }}
     >
@@ -40,7 +40,7 @@ export function OptionCard({
           borderWidth: border.thin,
           borderColor: colors.ink,
           borderRadius: 6,
-          backgroundColor: value ? colors.kwote : colors.white,
+          backgroundColor: value ? colors.rating : colors.white,
           alignItems: 'center',
           justifyContent: 'center',
         }}

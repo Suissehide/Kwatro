@@ -21,7 +21,7 @@ export const venueListItemSchema = z.object({
   latitude: z.number(),
   longitude: z.number(),
   isPartner: z.boolean(),
-  kwatroPerk: z.string().nullable(),
+  luckoPerk: z.string().nullable(),
   distanceMeters: z.number().int(),
   /** Ouvert maintenant (heure de Paris) ; null si les horaires ne sont pas renseignés. */
   openNow: z.boolean().nullable(),
@@ -74,7 +74,7 @@ export const roomListItemSchema = z.object({
   }),
   /** Joueurs acceptés (hôte compris) : initiales seulement, la liste est publique. */
   players: z.array(z.object({ initial: z.string() })),
-  kwoteRange: z.object({ min: z.number().int(), max: z.number().int() }).nullable(),
+  ratingRange: z.object({ min: z.number().int(), max: z.number().int() }).nullable(),
 })
 
 export type VenueListItem = z.infer<typeof venueListItemSchema>
@@ -121,7 +121,7 @@ export const accessibilityItemSchema = z.object({
   note: z.string().nullish(),
 })
 
-/** Fiche lieu (B3, KWT-73) : photos, infos pratiques, horaires et fermetures, agenda, rooms, jeux, accès. */
+/** Fiche lieu (B3, LKO-73) : photos, infos pratiques, horaires et fermetures, agenda, rooms, jeux, accès. */
 export const venueDetailSchema = venueListItemSchema
   .omit({ distanceMeters: true, upcomingEventCount: true })
   .extend({

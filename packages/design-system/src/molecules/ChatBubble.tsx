@@ -25,7 +25,7 @@ export function ChatBubble({
   onPress?: () => void
 }) {
   const { hovered, hoverProps } = useHover()
-  const bg = announcement ? colors.kwoteSoft : mine ? colors.room : colors.white
+  const bg = announcement ? colors.ratingSoft : mine ? colors.room : colors.white
   const fg = mine && !announcement ? colors.white : colors.ink
   const meta = [announcement ? 'Annonce' : null, author, time].filter(Boolean).join(' · ')
   return (

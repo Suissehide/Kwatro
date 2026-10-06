@@ -27,8 +27,8 @@ import {
   TextLink,
   Typography,
   WebScreen,
-} from '@kwatro/design-system'
-import { formatDistance, metersBetween, VENUE_TYPE_LABELS } from '@kwatro/shared'
+} from '@lucko/design-system'
+import { formatDistance, metersBetween, VENUE_TYPE_LABELS } from '@lucko/shared'
 import { useLocalSearchParams } from 'expo-router'
 import { ArrowLeft } from 'lucide-react-native'
 import { type ReactNode, useState } from 'react'
@@ -60,7 +60,7 @@ const statusColor = { ok: colors.venue, warn: colors.muted, err: colors.room } a
 // Colonne latérale collée en haut au défilement (web uniquement, absent des types React Native)
 const sticky = { position: 'sticky', top: 24 } as unknown as ViewStyle
 
-/** Fiche lieu (B3, KWT-73) : photos, infos pratiques, horaires et fermetures, agenda, rooms, jeux, accès. */
+/** Fiche lieu (B3, LKO-73) : photos, infos pratiques, horaires et fermetures, agenda, rooms, jeux, accès. */
 export default function VenueScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>()
   const wide = useWindowDimensions().width >= WIDE
@@ -114,11 +114,11 @@ export default function VenueScreen() {
 
   const partner = venue.isPartner ? <Tag variant="partner" label="Partenaire" /> : null
   const perk =
-    venue.isPartner && venue.kwatroPerk ? (
-      <PerkBanner text={venue.kwatroPerk} compact={!wide} />
+    venue.isPartner && venue.luckoPerk ? (
+      <PerkBanner text={venue.luckoPerk} compact={!wide} />
     ) : null
   const createRoom = (
-    <Button kind="kwote" label="+ Créer une room ici" onPress={() => openCreateRoom(venue.slug)} />
+    <Button kind="rating" label="+ Créer une room ici" onPress={() => openCreateRoom(venue.slug)} />
   )
   const itineraryButton = <Button kind="ghost" label="Itinéraire" onPress={itinerary} />
 

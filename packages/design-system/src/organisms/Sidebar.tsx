@@ -46,7 +46,7 @@ export function Sidebar({
       <Text
         style={{ ...font('display'), fontSize: 20, textTransform: 'uppercase', color: colors.ink }}
       >
-        Kwatro
+        Lucko
       </Text>
       <Typography variant="label" style={{ marginBottom: 14 }}>
         {title}
@@ -110,7 +110,7 @@ function SidebarLink({
             ...font('mono', 700),
             fontSize: 11,
             color: colors.ink,
-            backgroundColor: on ? colors.white : colors.kwote,
+            backgroundColor: on ? colors.white : colors.rating,
             borderWidth: border.thin,
             borderColor: colors.ink,
             borderRadius: 99,

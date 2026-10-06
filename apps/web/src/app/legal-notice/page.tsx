@@ -1,4 +1,4 @@
-import { CONTACT_EMAIL } from '@kwatro/design-system'
+import { CONTACT_EMAIL } from '@lucko/design-system'
 import type { Metadata } from 'next'
 import { TextPage, ToFill } from '../text-page'
 
@@ -12,7 +12,7 @@ export default function LegalNoticePage() {
     <TextPage title="Mentions légales" updated="4 octobre 2026">
       <h2>Éditeur</h2>
       <p>
-        Le site kwatro.fr et l’application Kwatro sont édités par :
+        Le site lucko.fr et l’application Lucko sont édités par :
         <br />
         <ToFill>Raison sociale</ToFill>, <ToFill>forme juridique et capital</ToFill>
         <br />
@@ -39,7 +39,7 @@ export default function LegalNoticePage() {
 
       <h2>Propriété intellectuelle</h2>
       <p>
-        La marque Kwatro, son logo, ses textes, illustrations et le code du site comme de l’app sont
+        La marque Lucko, son logo, ses textes, illustrations et le code du site comme de l’app sont
         protégés. Toute reproduction sans autorisation écrite est interdite. Les noms de jeux cités
         appartiennent à leurs éditeurs respectifs. Les informations publiées par les lieux (photos,
         descriptions, événements) restent leur propriété.

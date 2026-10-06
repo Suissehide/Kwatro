@@ -2,18 +2,18 @@ import { View } from 'react-native'
 import { Raised } from '../atoms/Raised'
 import { Typography } from '../atoms/Typography'
 import { border, colors, radius, shadow } from '../tokens'
-import { KwoteBadge } from './KwoteBadge'
+import { RatingBadge } from './RatingBadge'
 import { XpBar } from './XpBar'
 
 export function ProfileCard({
   pseudo,
   format,
-  kwote,
+  rating,
   xp,
 }: {
   pseudo: string
   format?: string
-  kwote?: string
+  rating?: string
   xp: { level: number; name: string; current: number; max: number }
 }) {
   return (
@@ -38,10 +38,10 @@ export function ProfileCard({
           }}
         >
           <Typography variant="title">{pseudo}</Typography>
-          {kwote ? (
+          {rating ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               {format ? <Typography variant="small">{format}</Typography> : null}
-              <KwoteBadge value={kwote} />
+              <RatingBadge value={rating} />
             </View>
           ) : null}
         </View>

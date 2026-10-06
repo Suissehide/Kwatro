@@ -3,9 +3,9 @@ import type { ReactNode } from 'react'
 import { Text, View } from 'react-native'
 import { border, colors, font } from '../tokens'
 
-export type NoteTone = 'kwote' | 'room' | 'venue' | 'plain'
+export type NoteTone = 'rating' | 'room' | 'venue' | 'plain'
 const bg: Record<NoteTone, string> = {
-  kwote: colors.kwoteSoft, // info
+  rating: colors.ratingSoft, // info
   room: colors.roomSoft, // blocage
   venue: colors.venueSoft, // avantage
   plain: colors.white,
@@ -13,7 +13,7 @@ const bg: Record<NoteTone, string> = {
 
 export function Note({
   children,
-  tone = 'kwote',
+  tone = 'rating',
   icon: Icon,
 }: {
   children: ReactNode

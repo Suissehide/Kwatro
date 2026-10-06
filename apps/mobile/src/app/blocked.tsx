@@ -8,8 +8,8 @@ import {
   PageTitle,
   ScreenHeader,
   SkeletonCard,
-} from '@kwatro/design-system'
-import type { BlockedPlayer } from '@kwatro/shared'
+} from '@lucko/design-system'
+import type { BlockedPlayer } from '@lucko/shared'
 import { router } from 'expo-router'
 import { UserX } from 'lucide-react-native'
 import { useState } from 'react'
@@ -22,7 +22,7 @@ const WIDE = 900
 
 const backToSettings = () => (router.canGoBack() ? router.back() : router.replace('/settings'))
 
-/** Réglages → Joueurs bloqués (KWT-19) : liste et déblocage. */
+/** Réglages → Joueurs bloqués (LKO-19) : liste et déblocage. */
 export default function BlockedScreen() {
   const wide = useWindowDimensions().width >= WIDE
   useMeQuery({ required: true })

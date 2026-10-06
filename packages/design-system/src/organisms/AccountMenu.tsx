@@ -101,7 +101,7 @@ export function AccountMenu({
           style={{
             borderRadius: size / 2 + 3,
             transform: [{ translateX: -lift / 2 }, { translateY: -lift / 2 }],
-            ...(open && Platform.OS === 'web' ? { boxShadow: `0 0 0 3px ${colors.kwote}` } : null),
+            ...(open && Platform.OS === 'web' ? { boxShadow: `0 0 0 3px ${colors.rating}` } : null),
             ...move,
           }}
         >

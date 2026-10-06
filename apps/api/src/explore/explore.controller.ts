@@ -7,7 +7,7 @@ import {
   roomListItemSchema,
   venueDetailSchema,
   venueListItemSchema,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import { Controller, Get, Param } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'

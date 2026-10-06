@@ -65,7 +65,7 @@ export function formatHourBand(date: Date | string, timeZone = VENUE_TIME_ZONE):
   return `${Number(h)}H${m === '00' ? '' : m}`
 }
 
-export function formatKwote(value: number): string {
+export function formatRating(value: number): string {
   return value.toLocaleString('fr-FR')
 }
 

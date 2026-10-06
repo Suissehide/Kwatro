@@ -11,8 +11,8 @@ import {
   SkeletonCard,
   TextLink,
   Typography,
-} from '@kwatro/design-system'
-import { NOTIFICATION_TOPIC_LABELS, NOTIFICATION_TOPICS } from '@kwatro/shared'
+} from '@lucko/design-system'
+import { NOTIFICATION_TOPIC_LABELS, NOTIFICATION_TOPICS } from '@lucko/shared'
 import Constants from 'expo-constants'
 import { router } from 'expo-router'
 import { useEffect, useState } from 'react'
@@ -27,9 +27,9 @@ const WIDE = 900
 const backToProfile = () => (router.canGoBack() ? router.back() : router.replace('/profile'))
 
 // ponytail: mot de passe, fournisseur lié et langue attendent leurs écrans
-const KWATRO_ROWS = [
+const LUCKO_ROWS = [
   { label: 'Aide', onPress: () => openSite('/help') },
-  // Contact du support exigé par Apple et Google (KWT-19)
+  // Contact du support exigé par Apple et Google (LKO-19)
   {
     label: 'Nous contacter',
     value: CONTACT_EMAIL,
@@ -39,7 +39,7 @@ const KWATRO_ROWS = [
   { label: 'Politique de confidentialité', onPress: () => openSite('/privacy') },
 ]
 
-/** Réglages du compte : e-mail, joueurs bloqués, liens Kwatro et contact, déconnexion et suppression (KWT-18), notifications (KWT-108). */
+/** Réglages du compte : e-mail, joueurs bloqués, liens Lucko et contact, déconnexion et suppression (LKO-18), notifications (LKO-108). */
 export default function SettingsScreen() {
   const wide = useWindowDimensions().width >= WIDE
   const me = useMeQuery({ required: true })
@@ -98,7 +98,7 @@ export default function SettingsScreen() {
         ]}
       />
       <SettingsGroup title="Notifications" rows={notificationRows} />
-      <SettingsGroup title="Kwatro" rows={KWATRO_ROWS} />
+      <SettingsGroup title="Lucko" rows={LUCKO_ROWS} />
       <View style={{ marginTop: 20 }}>
         {/* Desktop : pas de confirmation, comme dans le menu du compte */}
         <Button
@@ -113,7 +113,7 @@ export default function SettingsScreen() {
       <View style={{ alignItems: 'center', gap: 6, marginTop: 8 }}>
         <TextLink muted label="Supprimer mon compte" onPress={() => setConfirm('delete')} />
         <Typography style={{ ...font('mono', 400), fontSize: 12, color: colors.muted }}>
-          Kwatro {Constants.expoConfig?.version}
+          Lucko {Constants.expoConfig?.version}
         </Typography>
       </View>
     </View>
@@ -138,7 +138,7 @@ export default function SettingsScreen() {
       )}
       <ConfirmDialog
         visible={confirm === 'signOut'}
-        title="Se déconnecter de Kwatro ?"
+        title="Se déconnecter de Lucko ?"
         message="Tu pourras te reconnecter quand tu veux."
         confirmLabel="Se déconnecter"
         cancelLabel="Annuler"

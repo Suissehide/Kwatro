@@ -1,8 +1,8 @@
-/** La Kwote : rank Elo des parties TCG classées. */
-export const KWOTE_START = 1000
-export const KWOTE_FLOOR = 100
-export const KWOTE_CALIBRATION_GAMES = 20
-export const KWOTE_TOURNAMENT_WEIGHT = 1.5
+/** Les LK : rank Elo des parties TCG classées. */
+export const RATING_START = 1000
+export const RATING_FLOOR = 100
+export const RATING_CALIBRATION_GAMES = 20
+export const RATING_TOURNAMENT_WEIGHT = 1.5
 
 export const DECLARED_LEVELS = {
   BEGINNER: 850,
@@ -18,22 +18,22 @@ export function expectedScore(ratingA: number, ratingB: number): number {
 }
 
 /**
- * Nouvelle Kwote après un duel.
+ * Nouveaux LK après un duel.
  * @param score 1 = victoire, 0.5 = nul, 0 = défaite
  */
-export function nextKwote(
+export function nextRating(
   rating: number,
   opponent: number,
   score: 0 | 0.5 | 1,
-  options: { gamesPlayed: number; weight?: number } = { gamesPlayed: KWOTE_CALIBRATION_GAMES },
+  options: { gamesPlayed: number; weight?: number } = { gamesPlayed: RATING_CALIBRATION_GAMES },
 ): number {
-  const k = options.gamesPlayed < KWOTE_CALIBRATION_GAMES ? 60 : 32
+  const k = options.gamesPlayed < RATING_CALIBRATION_GAMES ? 60 : 32
   const delta = k * (options.weight ?? 1) * (score - expectedScore(rating, opponent))
-  return Math.max(KWOTE_FLOOR, Math.round(rating + delta))
+  return Math.max(RATING_FLOOR, Math.round(rating + delta))
 }
 
-/** En dessous de ce nombre de parties classées sur un format, la Kwote est affichée « provisoire ». */
-export const KWOTE_PROVISIONAL_GAMES = 5
+/** En dessous de ce nombre de parties classées sur un format, les LK sont affichés « provisoires ». */
+export const RATING_PROVISIONAL_GAMES = 5
 
 export const DECLARED_LEVEL_LABELS: Record<DeclaredLevel, string> = {
   BEGINNER: 'Débutant',
@@ -43,9 +43,9 @@ export const DECLARED_LEVEL_LABELS: Record<DeclaredLevel, string> = {
 }
 
 /**
- * Questionnaire d'auto-évaluation par format TCG (A6, KWT-46) : 3 questions, 4 réponses notées 0 à 3.
+ * Questionnaire d'auto-évaluation par format TCG (A6, LKO-46) : 3 questions, 4 réponses notées 0 à 3.
  */
-// ponytail: mêmes questions pour tous les TCG ; des variantes par jeu (bracket Commander…) avec KWT-52
+// ponytail: mêmes questions pour tous les TCG ; des variantes par jeu (bracket Commander…) avec LKO-52
 export const LEVEL_QUESTIONS = [
   {
     key: 'experience',

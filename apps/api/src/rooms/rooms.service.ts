@@ -1,11 +1,11 @@
 import {
   type createRoomSchema,
   type HostAction,
-  KWOTE_PROVISIONAL_GAMES,
   openingStatus,
+  RATING_PROVISIONAL_GAMES,
   type RoomStatus,
   type roomDetailSchema,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import {
   BadRequestException,
   ConflictException,
@@ -150,8 +150,8 @@ export class RoomsService {
               status: status as 'PENDING' | 'WAITLISTED',
               minor: isMinor(user, now),
               xp: user.xp,
-              kwote:
-                profile && profile.rankedGames >= KWOTE_PROVISIONAL_GAMES ? profile.kwote : null,
+              rating:
+                profile && profile.rankedGames >= RATING_PROVISIONAL_GAMES ? profile.rating : null,
               rankedGames: profile?.rankedGames ?? 0,
               appliedAt: createdAt,
             }
@@ -237,7 +237,7 @@ export class RoomsService {
   }
 
   /**
-   * Action de l'hôte (KWT-57) : retirer un joueur (il ne peut plus revenir, sa place revient à la liste
+   * Action de l'hôte (LKO-57) : retirer un joueur (il ne peut plus revenir, sa place revient à la liste
    * d'attente), transférer le rôle d'hôte à un joueur accepté, fermer / rouvrir les inscriptions, annuler.
    */
   // ponytail: annulation sans délai ni effet sur la fiabilité

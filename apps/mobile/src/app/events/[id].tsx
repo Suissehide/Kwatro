@@ -11,8 +11,8 @@ import {
   StatusPill,
   Tag,
   Typography,
-} from '@kwatro/design-system'
-import { EVENT_TYPE_LABELS, formatPrice } from '@kwatro/shared'
+} from '@lucko/design-system'
+import { EVENT_TYPE_LABELS, formatPrice } from '@lucko/shared'
 import { router, useLocalSearchParams } from 'expo-router'
 import { ChevronRight } from 'lucide-react-native'
 import { useState } from 'react'
@@ -24,7 +24,7 @@ import { useChatUnread } from '@/queries/useChat'
 import { useEventMutations, useEventQuery } from '@/queries/useEvent'
 import { useMeQuery } from '@/queries/useMe'
 
-/** Fiche événement (B4, KWT-11) et inscription dans l'app, avec liste d'attente quand c'est complet. */
+/** Fiche événement (B4, LKO-11) et inscription dans l'app, avec liste d'attente quand c'est complet. */
 export default function EventScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const me = useMeQuery()

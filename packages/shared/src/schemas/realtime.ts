@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
 /**
- * Temps réel (KWT-105) : le client suit un canal (`watch`), l'API y signale qu'il a changé (`changed`)
+ * Temps réel (LKO-105) : le client suit un canal (`watch`), l'API y signale qu'il a changé (`changed`)
  * et le client recharge la fiche par HTTP. Le signal ne porte pas de données : la fiche dépend de qui la lit.
- * Les canaux `room-chat` / `event-chat` portent, eux, les messages du chat (CHAT_EVENTS, KWT-80).
+ * Les canaux `room-chat` / `event-chat` portent, eux, les messages du chat (CHAT_EVENTS, LKO-80).
  */
 export const REALTIME = { WATCH: 'watch', UNWATCH: 'unwatch', CHANGED: 'changed' } as const
 

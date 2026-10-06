@@ -13,9 +13,9 @@ import { border, colors, font, radius } from '../tokens'
 
 const focusRing: ViewStyle =
   Platform.OS === 'web'
-    ? { boxShadow: `0 0 0 4px ${colors.kwote}` }
+    ? { boxShadow: `0 0 0 4px ${colors.rating}` }
     : {
-        shadowColor: colors.kwote,
+        shadowColor: colors.rating,
         shadowOpacity: 1,
         shadowRadius: 0,
         shadowOffset: { width: 0, height: 0 },

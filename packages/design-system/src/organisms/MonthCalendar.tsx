@@ -252,7 +252,7 @@ function Day({
       />
     )
   }
-  const bg = selected ? colors.kwoteSoft : hovered ? colors.hover : colors.white
+  const bg = selected ? colors.ratingSoft : hovered ? colors.hover : colors.white
   const fade = d.past ? 0.55 : 1
   const number = (
     <View

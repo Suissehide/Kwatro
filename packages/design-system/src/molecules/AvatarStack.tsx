@@ -2,7 +2,7 @@ import { View } from 'react-native'
 import { Avatar } from '../atoms/Avatar'
 import { colors } from '../tokens'
 
-const palette = [colors.event, colors.venue, colors.room, colors.kwote]
+const palette = [colors.event, colors.venue, colors.room, colors.rating]
 
 export function AvatarStack({ names, size = 28 }: { names: string[]; size?: number }) {
   // Des initiales peuvent se répéter : la clé compte les occurrences (M, M2…)

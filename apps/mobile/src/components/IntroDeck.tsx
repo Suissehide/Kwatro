@@ -1,4 +1,4 @@
-import { border, colors, font, Raised, radius, textOn, type } from '@kwatro/design-system'
+import { border, colors, font, Raised, radius, textOn, type } from '@lucko/design-system'
 import { useEffect, useRef, useState } from 'react'
 import {
   AccessibilityInfo,
@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native'
 
-/** Quatre cartes, une par couleur de contenu : Kwatro se joue à quatre. */
+/** Quatre cartes, une par couleur de contenu. */
 const CARDS = [
   {
     color: colors.room,
@@ -28,13 +28,13 @@ const CARDS = [
     color: colors.venue,
     kind: 'Lieux',
     title: 'Où jouer en ville',
-    text: 'Boutiques TCG, bars à jeux, ludothèques : la carte de ta ville et leurs avantages Kwatro.',
+    text: 'Boutiques TCG, bars à jeux, ludothèques : la carte de ta ville et leurs avantages Lucko.',
   },
   {
-    color: colors.kwote,
-    kind: 'Kwote',
+    color: colors.rating,
+    kind: 'LK',
     title: 'Ton niveau, partie après partie',
-    text: 'En TCG, chaque partie classée fait bouger ta Kwote. Des adversaires à ta mesure.',
+    text: 'En TCG, chaque partie classée fait bouger tes LK. Des adversaires à ta mesure.',
   },
 ] as const
 

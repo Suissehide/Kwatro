@@ -11,15 +11,15 @@ import {
   StatusPill,
   Tag,
   Typography,
-} from '@kwatro/design-system'
+} from '@lucko/design-system'
 import {
   COMMANDER_BRACKETS,
   type CommanderBracket,
-  formatKwote,
+  formatRating,
   type HostAction,
   type RoomCandidate,
   type RoomDetail,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import { router, useLocalSearchParams } from 'expo-router'
 import { ChevronRight } from 'lucide-react-native'
 import { useState } from 'react'
@@ -51,7 +51,7 @@ const ROOM_STATUS: Partial<
 }
 
 /**
- * Fiche room (B6, KWT-56) : demander à rejoindre, liste d'attente quand c'est complet, quitter.
+ * Fiche room (B6, LKO-56) : demander à rejoindre, liste d'attente quand c'est complet, quitter.
  * L'hôte y gère les demandes (C5) avec le profil de jeu de chaque candidat (C6).
  */
 export default function RoomScreen() {
@@ -319,7 +319,7 @@ export default function RoomScreen() {
 type HostConfirm = { action: HostAction; title: string; message: string; label: string }
 type ManagedPlayer = { userId: string; pseudo: string }
 
-/** Joueurs acceptés vus par l'hôte (KWT-57) : retirer un joueur ou lui transférer la room. */
+/** Joueurs acceptés vus par l'hôte (LKO-57) : retirer un joueur ou lui transférer la room. */
 function HostPlayers({
   room,
   hostId,
@@ -367,7 +367,7 @@ function HostPlayers({
   )
 }
 
-/** Demandes et liste d'attente (C5) : niveau, Kwote sur le format, badge -18 ; accepter ou refuser. */
+/** Demandes et liste d'attente (C5) : niveau, LK sur le format, badge -18 ; accepter ou refuser. */
 function Candidates({
   candidates,
   full,
@@ -396,8 +396,8 @@ function Candidates({
                 subtitle={[
                   c.status === 'WAITLISTED' ? "Liste d'attente" : null,
                   `${c.xp} XP`,
-                  c.kwote !== null
-                    ? `Kwote ${formatKwote(c.kwote)}`
+                  c.rating !== null
+                    ? `LK ${formatRating(c.rating)}`
                     : c.rankedGames
                       ? `${c.rankedGames} parties classées`
                       : null,

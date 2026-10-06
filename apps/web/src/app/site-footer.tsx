@@ -1,5 +1,5 @@
 'use client'
-import { SiteFooter } from '@kwatro/design-system'
+import { SiteFooter } from '@lucko/design-system'
 import { useSyncExternalStore } from 'react'
 
 const COMPACT = '(max-width: 899px)'

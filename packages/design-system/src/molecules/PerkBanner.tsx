@@ -2,7 +2,7 @@ import { Text, View } from 'react-native'
 import { Raised } from '../atoms/Raised'
 import { border, colors, font, radius, shadow } from '../tokens'
 
-/** Avantage Kwatro d'un lieu partenaire : bandeau vert, étiquette jaune inclinée. */
+/** Avantage Lucko d'un lieu partenaire : bandeau vert, étiquette jaune inclinée. */
 export function PerkBanner({ text, compact }: { text: string; compact?: boolean }) {
   return (
     <Raised offset={compact ? shadow.md : shadow.card}>
@@ -25,7 +25,7 @@ export function PerkBanner({ text, compact }: { text: string; compact?: boolean 
             fontSize: compact ? 10 : 11,
             textTransform: 'uppercase',
             color: colors.ink,
-            backgroundColor: colors.kwote,
+            backgroundColor: colors.rating,
             borderWidth: border.thin,
             borderColor: colors.ink,
             borderRadius: radius.tag,
@@ -34,7 +34,7 @@ export function PerkBanner({ text, compact }: { text: string; compact?: boolean 
             transform: [{ rotate: '-3deg' }],
           }}
         >
-          Avantage Kwatro
+          Avantage Lucko
         </Text>
         <Text
           style={{

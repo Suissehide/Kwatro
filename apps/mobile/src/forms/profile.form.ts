@@ -1,4 +1,4 @@
-import { type Me, type PlayVibe, RADIUS_KM } from '@kwatro/shared'
+import { type Me, type PlayVibe, RADIUS_KM } from '@lucko/shared'
 import { formOptions } from '@tanstack/react-form'
 import { type CityValue, cityFields, cityValue } from '@/lib/city'
 

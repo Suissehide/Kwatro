@@ -1,5 +1,5 @@
 {
-  "name": "@kwatro/design-system",
+  "name": "@lucko/design-system",
   "version": "0.0.0",
   "private": true,
   "description": "Design system « Plateau pop » : tokens et composants React Native (mobile + web via react-native-web)",
@@ -9,7 +9,7 @@
     ".": "./src/index.ts",
     "./catalogue": "./src/catalogue/Catalogue.tsx",
     "./scene": "./src/scene/HeroScene.tsx",
-    "./kwatro.css": "./css/kwatro.css"
+    "./lucko.css": "./css/lucko.css"
   },
   "sideEffects": [
     "*.css"

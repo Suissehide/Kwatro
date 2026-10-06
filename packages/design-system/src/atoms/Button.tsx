@@ -15,12 +15,12 @@ import { Raised } from './Raised'
 import { useHover } from './useHover'
 
 /** `danger` : contour comme `ghost`, texte rouge (déconnexion). `ghost`, `soft` et `danger` n'ont pas d'ombre. */
-export type ButtonKind = 'room' | 'event' | 'venue' | 'kwote' | 'ink' | 'ghost' | 'soft' | 'danger'
+export type ButtonKind = 'room' | 'event' | 'venue' | 'rating' | 'ink' | 'ghost' | 'soft' | 'danger'
 const bg: Record<ButtonKind, string> = {
   room: colors.room,
   event: colors.event,
   venue: colors.venue,
-  kwote: colors.kwote,
+  rating: colors.rating,
   ink: colors.ink,
   ghost: colors.white,
   danger: colors.white,
@@ -30,7 +30,7 @@ const fg: Record<ButtonKind, string> = {
   room: onColor.room,
   event: onColor.event,
   venue: onColor.venue,
-  kwote: onColor.kwote,
+  rating: onColor.rating,
   ink: onColor.ink,
   ghost: colors.ink,
   danger: colors.room,

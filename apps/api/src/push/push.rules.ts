@@ -1,4 +1,4 @@
-import type { NotificationTopic } from '@kwatro/shared'
+import type { NotificationTopic } from '@lucko/shared'
 import { isMinor } from '../common/minors.rules'
 
 /** Pas de notification aux mineurs le soir tard (archi §14) : de 21 h à 8 h, heure de Paris. */

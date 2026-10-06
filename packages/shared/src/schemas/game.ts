@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { GAME_KINDS } from '../constants'
-import { DECLARED_LEVELS, type DeclaredLevel } from '../kwote'
+import { DECLARED_LEVELS, type DeclaredLevel } from '../rating'
 
 const DECLARED_LEVEL_KEYS = Object.keys(DECLARED_LEVELS) as [DeclaredLevel, ...DeclaredLevel[]]
 
@@ -8,7 +8,7 @@ export const gameFormatSchema = z.object({
   id: z.string(),
   slug: z.string(),
   name: z.string(),
-  /** Joueurs par partie (KWT-52). */
+  /** Joueurs par partie (LKO-52). */
   minPlayers: z.number().int(),
   maxPlayers: z.number().int(),
   /** Durée moyenne d'une partie, en minutes. */

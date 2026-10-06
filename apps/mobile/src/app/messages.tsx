@@ -7,8 +7,8 @@ import {
   ListRow,
   SkeletonCard,
   Typography,
-} from '@kwatro/design-system'
-import { formatTime } from '@kwatro/shared'
+} from '@lucko/design-system'
+import { formatTime } from '@lucko/shared'
 import { MessageCircle } from 'lucide-react-native'
 import { useWindowDimensions, View } from 'react-native'
 import { PlayerScreen } from '@/components/PlayerScreen'

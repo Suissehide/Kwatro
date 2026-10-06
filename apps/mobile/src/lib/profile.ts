@@ -1,24 +1,24 @@
-import type { StatusTone } from '@kwatro/design-system'
-import { type ContentKind, colors, contentColor } from '@kwatro/design-system'
+import type { StatusTone } from '@lucko/design-system'
+import { type ContentKind, colors, contentColor } from '@lucko/design-system'
 import {
   type AgendaItem,
   type AvatarStatus,
   EVENT_TYPE_LABELS,
   formatDayMonth,
   formatHour,
-  formatKwote,
-  KWOTE_PROVISIONAL_GAMES,
+  formatRating,
   type Me,
   PLAY_VIBE_LABELS,
+  RATING_PROVISIONAL_GAMES,
   type Ranking,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import { gameLabel } from './explore'
 
 // ponytail: couleur par jeu de la maquette, les autres jeux prennent la couleur des événements
 const GAME_KIND: Record<string, ContentKind> = {
   magic: 'room',
   lorcana: 'event',
-  pokemon: 'kwote',
+  pokemon: 'rating',
   'one-piece': 'venue',
 }
 export const gameColor = (slug: string) => contentColor[GAME_KIND[slug] ?? 'event']
@@ -56,15 +56,15 @@ const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? 's' : ''}`
 const ranked = (n: number) => `${plural(n, 'partie')} classée${n > 1 ? 's' : ''}`
 
 export function rankProps(ranking: Ranking) {
-  const provisional = ranking.kwote === null
+  const provisional = ranking.rating === null
   return {
     color: gameColor(ranking.game.slug),
     game: gameLabel(ranking.game),
     format: ranking.format,
-    kwote: ranking.kwote === null ? null : formatKwote(ranking.kwote),
-    progress: `${ranking.rankedGames} / ${KWOTE_PROVISIONAL_GAMES}`,
+    rating: ranking.rating === null ? null : formatRating(ranking.rating),
+    progress: `${ranking.rankedGames} / ${RATING_PROVISIONAL_GAMES}`,
     note: provisional
-      ? `Encore ${ranked(KWOTE_PROVISIONAL_GAMES - ranking.rankedGames)} avant ta première Kwote`
+      ? `Encore ${ranked(RATING_PROVISIONAL_GAMES - ranking.rankedGames)} avant tes premiers LK`
       : ranked(ranking.rankedGames),
     shortNote: provisional ? 'provisoire' : plural(ranking.rankedGames, 'partie'),
   }
@@ -90,7 +90,7 @@ export function agendaStatus(item: AgendaItem): { label: string; tone: StatusTon
   }
 }
 
-// ponytail: pas encore de résultats de partie (victoire, place, variation de Kwote) : ticket fin de partie
+// ponytail: pas encore de résultats de partie (victoire, place, variation de LK) : ticket fin de partie
 export function agendaTag(item: AgendaItem) {
   if (item.roomMode === 'CASUAL') return { label: 'Libre', variant: 'default' as const }
   if (item.roomMode === 'RANKED') return { label: 'Classée', variant: 'ranked' as const }

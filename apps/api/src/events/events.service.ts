@@ -1,4 +1,4 @@
-import type { eventDetailSchema } from '@kwatro/shared'
+import type { eventDetailSchema } from '@lucko/shared'
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common'
 import type { z } from 'zod'
 import type { User } from '../generated/prisma/client'
@@ -82,7 +82,7 @@ export class EventsService {
         where: { eventId: id, status: 'WAITLISTED' },
         orderBy: { createdAt: 'asc' },
       })
-      // ponytail: le joueur promu n'est pas encore prévenu, notification avec KWT-108
+      // ponytail: le joueur promu n'est pas encore prévenu, notification avec LKO-108
       if (next) {
         await tx.eventRegistration.update({
           where: { eventId_userId: { eventId: id, userId: next.userId } },

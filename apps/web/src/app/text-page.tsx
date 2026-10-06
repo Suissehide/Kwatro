@@ -1,4 +1,4 @@
-import { CONTACT_EMAIL } from '@kwatro/design-system'
+import { CONTACT_EMAIL } from '@lucko/design-system'
 import { ArrowLeft } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Footer } from './site-footer'
@@ -18,12 +18,12 @@ export function TextPage({
   return (
     <div className={s.page}>
       <main className={s.main}>
-        <a className={`kw-small ${s.back}`} href="/">
+        <a className={`lk-small ${s.back}`} href="/">
           <ArrowLeft size={14} strokeWidth={2.5} aria-hidden />
-          Kwatro
+          Lucko
         </a>
-        <h1 className="kw-h1">{title}</h1>
-        {updated ? <p className="kw-small">Dernière mise à jour : {updated}</p> : null}
+        <h1 className="lk-h1">{title}</h1>
+        {updated ? <p className="lk-small">Dernière mise à jour : {updated}</p> : null}
         <div className={s.content}>{children}</div>
         <p>
           Une question ? <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>

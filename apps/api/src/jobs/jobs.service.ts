@@ -4,8 +4,8 @@ import { loadEnv } from '../config/env'
 import type { Prisma } from '../generated/prisma/client'
 
 /**
- * File de tâches pg-boss (KWT-106), stockée dans Postgres (schéma `pgboss`, créé au premier
- * démarrage) : rappels, adresse à domicile, relances, facturation, saisons (KWT-97).
+ * File de tâches pg-boss (LKO-106), stockée dans Postgres (schéma `pgboss`, créé au premier
+ * démarrage) : rappels, adresse à domicile, relances, facturation, saisons (LKO-97).
  * Un module déclare ses tâches avec `handle()` dans son `onModuleInit` et les programme avec
  * `send()`. pg-boss ne démarre qu'à la première utilisation.
  */

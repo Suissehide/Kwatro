@@ -8,12 +8,12 @@ import {
   colors,
   EmptyState,
   EventCard,
-  KwoteBadge,
   ListCard,
   MobileScreen,
   PageTitle,
   PlayerTabBar,
   ProfileCard,
+  RatingBadge,
   RoomCard,
   radius,
   Section,
@@ -21,8 +21,8 @@ import {
   Typography,
   VenueRow,
   WebScreen,
-} from '@kwatro/design-system'
-import { formatKwote, xpLevel } from '@kwatro/shared'
+} from '@lucko/design-system'
+import { formatRating, xpLevel } from '@lucko/shared'
 import { Redirect } from 'expo-router'
 import { MoonStar } from 'lucide-react-native'
 import { useState } from 'react'
@@ -180,7 +180,9 @@ export default function HomeScreen() {
           <BrandHeader
             onHome={openHome}
             right={
-              me?.mainKwote ? <KwoteBadge value={formatKwote(me.mainKwote.kwote)} /> : undefined
+              me?.mainRating ? (
+                <RatingBadge value={formatRating(me.mainRating.rating)} />
+              ) : undefined
             }
           />
         }
@@ -215,8 +217,8 @@ export default function HomeScreen() {
           <View style={{ width: 380 }}>
             <ProfileCard
               pseudo={me.pseudo ?? ''}
-              format={me.mainKwote?.format}
-              kwote={me.mainKwote ? formatKwote(me.mainKwote.kwote) : undefined}
+              format={me.mainRating?.format}
+              rating={me.mainRating ? formatRating(me.mainRating.rating) : undefined}
               xp={xpLevel(me.xp)}
             />
           </View>

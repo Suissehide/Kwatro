@@ -10,7 +10,7 @@ import {
   type myChatsSchema,
   type reportSchema,
   type sendMessageSchema,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import {
   BadRequestException,
   ForbiddenException,

@@ -1,5 +1,5 @@
-import { Button, SkeletonCard, Typography } from '@kwatro/design-system'
-import type { Me } from '@kwatro/shared'
+import { Button, SkeletonCard, Typography } from '@lucko/design-system'
+import type { Me } from '@lucko/shared'
 import { router } from 'expo-router'
 import { type ReactNode, useContext, useState } from 'react'
 import { useWindowDimensions, View } from 'react-native'
@@ -39,7 +39,7 @@ export default function OnboardingScreen() {
         footer={<StepButton label="C’est parti" onPress={() => setStep('pseudo')} />}
       >
         <View style={{ flex: 1, justifyContent: 'center', gap: 24 }}>
-          <Typography variant="h1">Bienvenue sur Kwatro</Typography>
+          <Typography variant="h1">Bienvenue sur Lucko</Typography>
           <IntroDeck />
         </View>
       </Frame>
@@ -66,7 +66,7 @@ export default function OnboardingScreen() {
         <StepLayout
           aside={
             <View style={{ gap: 40 }}>
-              <Typography variant="hero">Bienvenue sur Kwatro</Typography>
+              <Typography variant="hero">Bienvenue sur Lucko</Typography>
               <IntroDeck />
             </View>
           }
@@ -187,7 +187,7 @@ function WhereStep({ me, onBack, onDone }: { me: Me; onBack: () => void; onDone:
   )
 }
 
-/** A6 : jeux joués et, par format TCG, 3 questions → niveau déclaré (Kwote de départ). Facultatif. */
+/** A6 : jeux joués et, par format TCG, 3 questions → niveau déclaré (LK de départ). Facultatif. */
 function GamesStep({ onBack }: { onBack: () => void }) {
   const wide = useContext(Wide)
   const games = useGamesQuery()
@@ -231,7 +231,7 @@ function GamesStep({ onBack }: { onBack: () => void }) {
     >
       <Typography>
         À quoi tu joues ? Pour chaque format TCG, 3 questions situent ton niveau : c’est le point de
-        départ de ta Kwote, ajustée ensuite par tes parties classées.
+        départ de tes LK, ajustés ensuite par tes parties classées.
       </Typography>
       {games.data ? (
         <form.AppField name="games" validators={{ onSubmit: validateGames }}>

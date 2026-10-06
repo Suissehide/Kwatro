@@ -64,7 +64,7 @@ export function Logo({ size = 32, rolling }: { size?: number; rolling?: boolean 
         style={{
           width: size,
           height: size,
-          backgroundColor: colors.kwote,
+          backgroundColor: colors.rating,
           borderWidth,
           borderColor: colors.ink,
           borderRadius: r,

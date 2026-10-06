@@ -1,4 +1,4 @@
-import { PARTNER_TIE_METERS } from '@kwatro/shared'
+import { PARTNER_TIE_METERS } from '@lucko/shared'
 
 /**
  * Tri honnête : la distance d'abord, par tranches de PARTNER_TIE_METERS ; dans une même tranche,

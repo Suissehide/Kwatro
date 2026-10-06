@@ -1,4 +1,4 @@
-import { adminReportSchema, ageOn, blockedPlayerSchema, reportSchema } from '@kwatro/shared'
+import { adminReportSchema, ageOn, blockedPlayerSchema, reportSchema } from '@lucko/shared'
 import {
   BadRequestException,
   Controller,
@@ -21,7 +21,7 @@ import { PrismaService } from '../prisma/prisma.service'
 const ADMIN_QUEUE_LIMIT = 200
 
 /**
- * Blocage, signalement et file de modération (KWT-19), exigés par Apple et Google pour une app
+ * Blocage, signalement et file de modération (LKO-19), exigés par Apple et Google pour une app
  * où les joueurs se rencontrent. Les effets du blocage sur les listes vivent dans chaque module
  * (voir `notBlockedWith` dans explore).
  */

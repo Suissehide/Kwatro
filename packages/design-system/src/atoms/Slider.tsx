@@ -5,7 +5,7 @@ import { Raised } from './Raised'
 
 const THUMB = 28
 
-/** Curseur : piste remplie en `color` jusqu'à la valeur, poignée kwote. Glisser, toucher la piste ou flèches du clavier. */
+/** Curseur : piste remplie en `color` jusqu'à la valeur, poignée rating. Glisser, toucher la piste ou flèches du clavier. */
 export function Slider({
   value,
   min,
@@ -119,7 +119,7 @@ export function Slider({
             width: THUMB,
             height: THUMB,
             borderRadius: THUMB / 2,
-            backgroundColor: colors.kwote,
+            backgroundColor: colors.rating,
             borderWidth: border.base,
             borderColor: colors.ink,
           }}

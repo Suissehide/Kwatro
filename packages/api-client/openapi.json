@@ -305,7 +305,7 @@
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
                     },
-                    "mainKwote": {
+                    "mainRating": {
                       "nullable": true,
                       "type": "object",
                       "properties": {
@@ -315,7 +315,7 @@
                         "format": {
                           "type": "string"
                         },
-                        "kwote": {
+                        "rating": {
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991
@@ -324,7 +324,7 @@
                       "required": [
                         "game",
                         "format",
-                        "kwote"
+                        "rating"
                       ]
                     },
                     "rankings": {
@@ -350,7 +350,7 @@
                           "format": {
                             "type": "string"
                           },
-                          "kwote": {
+                          "rating": {
                             "nullable": true,
                             "type": "integer",
                             "minimum": -9007199254740991,
@@ -370,7 +370,7 @@
                         "required": [
                           "game",
                           "format",
-                          "kwote",
+                          "rating",
                           "rankedGames",
                           "reliabilityPct"
                         ]
@@ -424,7 +424,7 @@
                     "vibes",
                     "notificationsOff",
                     "xp",
-                    "mainKwote",
+                    "mainRating",
                     "rankings",
                     "venues"
                   ]
@@ -618,7 +618,7 @@
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
                     },
-                    "mainKwote": {
+                    "mainRating": {
                       "nullable": true,
                       "type": "object",
                       "properties": {
@@ -628,7 +628,7 @@
                         "format": {
                           "type": "string"
                         },
-                        "kwote": {
+                        "rating": {
                           "type": "integer",
                           "minimum": -9007199254740991,
                           "maximum": 9007199254740991
@@ -637,7 +637,7 @@
                       "required": [
                         "game",
                         "format",
-                        "kwote"
+                        "rating"
                       ]
                     },
                     "rankings": {
@@ -663,7 +663,7 @@
                           "format": {
                             "type": "string"
                           },
-                          "kwote": {
+                          "rating": {
                             "nullable": true,
                             "type": "integer",
                             "minimum": -9007199254740991,
@@ -683,7 +683,7 @@
                         "required": [
                           "game",
                           "format",
-                          "kwote",
+                          "rating",
                           "rankedGames",
                           "reliabilityPct"
                         ]
@@ -737,7 +737,7 @@
                     "vibes",
                     "notificationsOff",
                     "xp",
-                    "mainKwote",
+                    "mainRating",
                     "rankings",
                     "venues"
                   ]
@@ -1171,7 +1171,7 @@
                       "isPartner": {
                         "type": "boolean"
                       },
-                      "kwatroPerk": {
+                      "luckoPerk": {
                         "nullable": true,
                         "type": "string"
                       },
@@ -1205,7 +1205,7 @@
                       "latitude",
                       "longitude",
                       "isPartner",
-                      "kwatroPerk",
+                      "luckoPerk",
                       "distanceMeters",
                       "openNow",
                       "closesAtMinute",
@@ -1274,7 +1274,7 @@
                     "isPartner": {
                       "type": "boolean"
                     },
-                    "kwatroPerk": {
+                    "luckoPerk": {
                       "nullable": true,
                       "type": "string"
                     },
@@ -1685,7 +1685,7 @@
                               ]
                             }
                           },
-                          "kwoteRange": {
+                          "ratingRange": {
                             "nullable": true,
                             "type": "object",
                             "properties": {
@@ -1715,7 +1715,7 @@
                           "format",
                           "bracket",
                           "players",
-                          "kwoteRange"
+                          "ratingRange"
                         ]
                       }
                     }
@@ -1729,7 +1729,7 @@
                     "latitude",
                     "longitude",
                     "isPartner",
-                    "kwatroPerk",
+                    "luckoPerk",
                     "openNow",
                     "closesAtMinute",
                     "city",
@@ -2090,7 +2090,7 @@
                           ]
                         }
                       },
-                      "kwoteRange": {
+                      "ratingRange": {
                         "nullable": true,
                         "type": "object",
                         "properties": {
@@ -2121,7 +2121,7 @@
                       "bracket",
                       "venue",
                       "players",
-                      "kwoteRange"
+                      "ratingRange"
                     ]
                   }
                 }
@@ -3253,7 +3253,7 @@
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
                           },
-                          "kwote": {
+                          "rating": {
                             "nullable": true,
                             "type": "integer",
                             "minimum": -9007199254740991,
@@ -3276,7 +3276,7 @@
                           "status",
                           "minor",
                           "xp",
-                          "kwote",
+                          "rating",
                           "rankedGames",
                           "appliedAt"
                         ]
@@ -3510,7 +3510,7 @@
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
                           },
-                          "kwote": {
+                          "rating": {
                             "nullable": true,
                             "type": "integer",
                             "minimum": -9007199254740991,
@@ -3533,7 +3533,7 @@
                           "status",
                           "minor",
                           "xp",
-                          "kwote",
+                          "rating",
                           "rankedGames",
                           "appliedAt"
                         ]
@@ -3765,7 +3765,7 @@
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
                           },
-                          "kwote": {
+                          "rating": {
                             "nullable": true,
                             "type": "integer",
                             "minimum": -9007199254740991,
@@ -3788,7 +3788,7 @@
                           "status",
                           "minor",
                           "xp",
-                          "kwote",
+                          "rating",
                           "rankedGames",
                           "appliedAt"
                         ]
@@ -4030,7 +4030,7 @@
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
                           },
-                          "kwote": {
+                          "rating": {
                             "nullable": true,
                             "type": "integer",
                             "minimum": -9007199254740991,
@@ -4053,7 +4053,7 @@
                           "status",
                           "minor",
                           "xp",
-                          "kwote",
+                          "rating",
                           "rankedGames",
                           "appliedAt"
                         ]
@@ -4295,7 +4295,7 @@
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
                           },
-                          "kwote": {
+                          "rating": {
                             "nullable": true,
                             "type": "integer",
                             "minimum": -9007199254740991,
@@ -4318,7 +4318,7 @@
                           "status",
                           "minor",
                           "xp",
-                          "kwote",
+                          "rating",
                           "rankedGames",
                           "appliedAt"
                         ]
@@ -4643,7 +4643,7 @@
                             "minimum": -9007199254740991,
                             "maximum": 9007199254740991
                           },
-                          "kwote": {
+                          "rating": {
                             "nullable": true,
                             "type": "integer",
                             "minimum": -9007199254740991,
@@ -4666,7 +4666,7 @@
                           "status",
                           "minor",
                           "xp",
-                          "kwote",
+                          "rating",
                           "rankedGames",
                           "appliedAt"
                         ]
@@ -5288,7 +5288,7 @@
     }
   },
   "info": {
-    "title": "API Kwatro",
+    "title": "API Lucko",
     "description": "",
     "version": "0.1.0",
     "contact": {}

@@ -1,4 +1,4 @@
-import { CHAT_EVENTS, type Channel, channelName, channelSchema, REALTIME } from '@kwatro/shared'
+import { CHAT_EVENTS, type Channel, channelName, channelSchema, REALTIME } from '@lucko/shared'
 import {
   type OnGatewayConnection,
   type OnGatewayInit,
@@ -23,9 +23,9 @@ const userRoom = (id: string) => `user:${id}`
 const MEMBER_STATUSES = ['ACCEPTED', 'PENDING', 'WAITLISTED'] as const
 
 /**
- * Temps réel (KWT-105) : un joueur connecté suit une room dont il est membre ou un événement qu'il peut voir,
- * et l'API lui signale chaque changement (places restantes, statut). Contrat dans @kwatro/shared (REALTIME).
- * Il suit aussi le chat (KWT-80) d'une room ou d'un événement dont il est membre (CHAT_EVENTS).
+ * Temps réel (LKO-105) : un joueur connecté suit une room dont il est membre ou un événement qu'il peut voir,
+ * et l'API lui signale chaque changement (places restantes, statut). Contrat dans @lucko/shared (REALTIME).
+ * Il suit aussi le chat (LKO-80) d'une room ou d'un événement dont il est membre (CHAT_EVENTS).
  */
 // ponytail: une seule instance d'API ; adaptateur Redis (@socket.io/redis-adapter) si on en lance plusieurs
 @WebSocketGateway({ cors: { origin: loadEnv().CORS_ORIGINS, credentials: true } })

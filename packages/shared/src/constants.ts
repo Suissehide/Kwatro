@@ -10,7 +10,7 @@ export const HOME_ADDRESS_REVEAL_HOURS = 24
 export const GAME_KINDS = ['TCG', 'BOARD_GAME'] as const
 export type GameKind = (typeof GAME_KINDS)[number]
 
-/** Classée : TCG uniquement, la Kwote bouge. Normale : aucun effet sur la Kwote, XP seulement. */
+/** Classée : TCG uniquement, les LK bougent. Normale : aucun effet sur les LK, XP seulement. */
 export const ROOM_MODES = ['RANKED', 'CASUAL'] as const
 export type RoomMode = (typeof ROOM_MODES)[number]
 

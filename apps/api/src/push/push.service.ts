@@ -1,4 +1,4 @@
-import type { NotificationTopic } from '@kwatro/shared'
+import type { NotificationTopic } from '@lucko/shared'
 import { Injectable, type OnModuleInit } from '@nestjs/common'
 import { loadEnv } from '../config/env'
 import type { Prisma } from '../generated/prisma/client'
@@ -31,12 +31,12 @@ type PendingReceipts = Record<string, string>
 
 /**
  * Contenu d'une notification ; `url` = écran de l'app ouvert au tap (ex. `/rooms/abc`).
- * Jamais d'adresse de domicile (KWT-71) : l'écran ouvert l'affiche à qui y a droit.
+ * Jamais d'adresse de domicile (LKO-71) : l'écran ouvert l'affiche à qui y a droit.
  */
 export type PushContent = { title: string; body: string; url?: string }
 
 /**
- * Notifications push (KWT-108) via Expo Push, un seul service pour iOS et Android.
+ * Notifications push (LKO-108) via Expo Push, un seul service pour iOS et Android.
  * Les envois passent par la file pg-boss : nouvel essai si Expo ne répond pas, envoi différé
  * pour les mineurs la nuit, et rien n'est envoyé si la transaction appelante échoue.
  */

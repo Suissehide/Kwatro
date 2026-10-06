@@ -8,7 +8,7 @@ import {
   myChatsSchema,
   reportSchema,
   sendMessageSchema,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import {
   Controller,
   Delete,
@@ -35,7 +35,7 @@ function chatRef(type: string, id: string): ChatRef {
 
 const typeParam = ApiParam({ name: 'type', enum: CHAT_TYPES })
 
-/** Chat de room et de tournoi (KWT-80). Réservé aux membres : 404 pour les autres. */
+/** Chat de room et de tournoi (LKO-80). Réservé aux membres : 404 pour les autres. */
 @ApiTags('chat')
 @Controller()
 export class ChatController {

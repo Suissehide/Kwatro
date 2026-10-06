@@ -1,4 +1,4 @@
-# Image de production de l'API Kwatro (NestJS + Prisma)
+# Image de production de l'API Lucko (NestJS + Prisma)
 # Build depuis la racine du dépôt : docker build -f deploy/api/Dockerfile .
 FROM node:22-alpine AS base
 RUN corepack enable
@@ -7,7 +7,7 @@ WORKDIR /app
 # 1. Ne garder que ce dont l'API a besoin dans le monorepo
 FROM base AS pruner
 COPY . .
-RUN pnpm dlx turbo@2.11.6 prune @kwatro/api --docker
+RUN pnpm dlx turbo@2.11.6 prune @lucko/api --docker
 
 # 2. Installer les dépendances (couche mise en cache tant que le lockfile ne change pas), puis builder
 FROM base AS builder
@@ -18,7 +18,7 @@ RUN pnpm install --frozen-lockfile
 COPY --from=pruner /app/out/full/ .
 # Fichiers racine non inclus par `turbo prune`
 COPY tsconfig.base.json ./
-RUN pnpm turbo run build --filter=@kwatro/api
+RUN pnpm turbo run build --filter=@lucko/api
 
 # 3. Image finale
 FROM base AS runner

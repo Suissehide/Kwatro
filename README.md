@@ -1,17 +1,17 @@
-# Kwatro
+# Lucko
 
 Trouver des joueurs et des lieux pour jouer aux TCG et aux jeux de société, près de chez soi.
 
 Monorepo TypeScript : app mobile (Expo), site public (Next.js), API (NestJS + PostgreSQL/PostGIS via Prisma), code partagé.
 
 ```
-kwatro/
+lucko/
 ├── apps/
 │   ├── api/        → API NestJS, Prisma (schéma, migrations, seed)        http://localhost:3000
 │   ├── web/        → site public Next.js (SEO : ville, lieux, événements)   http://localhost:3010
 │   └── mobile/     → app Expo iOS / Android (+ back-office lieu)            Expo : http://localhost:8081
 ├── packages/
-│   ├── shared/         → types, schémas Zod, constantes, règles (Kwote…)
+│   ├── shared/         → types, schémas Zod, constantes, règles (LK…)
 │   └── design-system/  → design system « Plateau pop » (tokens + composants RN, mobile et web)   catalogue : /design-system
 ├── deploy/             → tout Docker : stack locale, Dockerfiles, déploiement Dokploy, scripts
 ├── biome.json          → lint + format (remplace ESLint et Prettier)
@@ -75,20 +75,20 @@ Documentation interactive en dev : http://localhost:3000/docs (OpenAPI brut : `/
 >
 > | E-mail | Mot de passe | Id (`x-dev-user-id`) | Pour tester |
 > |---|---|---|---|
-> | `player@kwatro.dev` | `Player123!` | `joueur-demo` | Joueur complet : profil, Kwote, parties à venir et historique |
-> | `admin@kwatro.dev` | `Admin123!` | `admin-demo` | Admin Kwatro |
-> | `staff@kwatro.dev` | `Staff123!` | `staff-demo` | Gérant du Dé Fêlé |
-> | `mineur@kwatro.dev` | `Mineur123!` | `mineur-demo` | Joueur de 16 ans |
-> | `nouveau@kwatro.dev` | `Nouveau123!` | `nouveau-demo` | Compte neuf : l'app ouvre l'onboarding |
+> | `player@lucko.dev` | `Player123!` | `joueur-demo` | Joueur complet : profil, LK, parties à venir et historique |
+> | `admin@lucko.dev` | `Admin123!` | `admin-demo` | Admin Lucko |
+> | `staff@lucko.dev` | `Staff123!` | `staff-demo` | Gérant du Dé Fêlé |
+> | `mineur@lucko.dev` | `Mineur123!` | `mineur-demo` | Joueur de 16 ans |
+> | `nouveau@lucko.dev` | `Nouveau123!` | `nouveau-demo` | Compte neuf : l'app ouvre l'onboarding |
 >
-> Les autres joueurs (`maya@kwatro.dev`, `sam@kwatro.dev`…) n'ont pas de mot de passe.
+> Les autres joueurs (`maya@lucko.dev`, `sam@lucko.dev`…) n'ont pas de mot de passe.
 
 ## API : temps réel
 
 Socket.IO sur le même port que l'API (`apps/api/src/realtime/realtime.gateway.ts`). Contrat Zod dans `packages/shared/src/schemas/realtime.ts`.
 
 - **Connexion** : réservée aux joueurs connectés, refusée sinon (`connect_error` « Connexion requise »). Sur le web, le cookie de session part tout seul ; sur téléphone, l'app l'envoie dans `auth.cookie` (et `auth.devUserId` en dev, comme `x-dev-user-id`).
-- **Canaux** : `{ type, id }`, avec `type` dans `room`, `event`, `room-chat` ou `event-chat` (chat, KWT-80).
+- **Canaux** : `{ type, id }`, avec `type` dans `room`, `event`, `room-chat` ou `event-chat` (chat, LKO-80).
 
 | Message | Sens | Charge utile | Effet |
 |---|---|---|---|
@@ -115,8 +115,8 @@ Socket.IO sur le même port que l'API (`apps/api/src/realtime/realtime.gateway.t
 ## Ajouter une dépendance
 
 ```bash
-pnpm --filter @kwatro/api add nom-du-paquet
-pnpm --filter @kwatro/mobile exec expo install nom-du-paquet   # côté Expo : toujours via expo install
+pnpm --filter @lucko/api add nom-du-paquet
+pnpm --filter @lucko/mobile exec expo install nom-du-paquet   # côté Expo : toujours via expo install
 ```
 
 ## Docker
@@ -140,7 +140,7 @@ deploy/
 - `pnpm db:restore <fichier>` : remplace la base locale par une sauvegarde (par ex. téléchargée depuis Dokploy).
 
 **Déploiement avec Dokploy**
-1. Dokploy › Create Service › **Compose** › dépôt `Suissehide/Kwatro`, branche `main`, *Compose Path* `./deploy/dokploy/docker-compose.dokploy.yml`.
+1. Dokploy › Create Service › **Compose** › dépôt `Suissehide/Lucko`, branche `main`, *Compose Path* `./deploy/dokploy/docker-compose.dokploy.yml`.
 2. Onglet **Environment** : recopier `deploy/.env.example` avec les vraies valeurs.
 3. Onglet **Domains** : un domaine pour `api` (port 3000) et un pour `web` (port 3000), HTTPS activé.
 4. **Deploy**. Les migrations Prisma en attente s'appliquent au démarrage de l'API.
@@ -148,4 +148,4 @@ deploy/
 
 ## Contribuer
 
-Voir [CONTRIBUTING.md](CONTRIBUTING.md). Tickets : espace Notion Kwatro. Documentation : vault Obsidian Qwetle, `05-Technique/TCG/`.
+Voir [CONTRIBUTING.md](CONTRIBUTING.md). Tickets : espace Notion Lucko. Documentation : vault Obsidian Qwetle, `05-Technique/TCG/`.

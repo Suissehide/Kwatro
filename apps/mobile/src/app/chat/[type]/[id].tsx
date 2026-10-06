@@ -14,7 +14,7 @@ import {
   TextLink,
   Toggle,
   Typography,
-} from '@kwatro/design-system'
+} from '@lucko/design-system'
 import {
   CHAT_EVENTS,
   CHAT_MESSAGE_MAX,
@@ -24,7 +24,7 @@ import {
   formatTime,
   REPORT_REASON_LABELS,
   REPORT_REASONS,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import { useLocalSearchParams } from 'expo-router'
 import { ArrowLeft, Bell, BellOff, Pin } from 'lucide-react-native'
 import { useEffect, useRef, useState } from 'react'
@@ -47,7 +47,7 @@ const messageTime = (date: string) =>
     ? formatTime(date)
     : `${dayLabel(date)} · ${formatTime(date)}`
 
-/** Chat de room ou de tournoi (KWT-80) : messages en direct, annonces de l'organisateur, signalement. */
+/** Chat de room ou de tournoi (LKO-80) : messages en direct, annonces de l'organisateur, signalement. */
 export default function ChatScreen() {
   const params = useLocalSearchParams<{ type: string; id: string }>()
   const type: ChatType = (CHAT_TYPES as readonly string[]).includes(params.type)
@@ -150,7 +150,7 @@ export default function ChatScreen() {
   ) : (
     <View style={{ flex: 1, gap: 10 }}>
       {first.pinned ? (
-        <Note tone="kwote" icon={Pin}>
+        <Note tone="rating" icon={Pin}>
           {first.pinned.author.pseudo ?? 'Organisateur'} : {first.pinned.body}
         </Note>
       ) : null}
@@ -208,7 +208,7 @@ export default function ChatScreen() {
       {reported ? (
         <Banner
           tone="ok"
-          message="Merci, l’équipe Kwatro va examiner ce message."
+          message="Merci, l’équipe Lucko va examiner ce message."
           onClose={() => setReported(false)}
         />
       ) : null}

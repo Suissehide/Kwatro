@@ -10,8 +10,8 @@ import {
   StatusPill,
   Tag,
   Typography,
-} from '@kwatro/design-system'
-import { type AgendaItem, agendaGroup } from '@kwatro/shared'
+} from '@lucko/design-system'
+import { type AgendaItem, agendaGroup } from '@lucko/shared'
 import { router, useLocalSearchParams } from 'expo-router'
 import { CalendarX } from 'lucide-react-native'
 import { useState } from 'react'
@@ -124,7 +124,7 @@ function GameCard({ item, wide }: { item: AgendaItem; wide: boolean }) {
           <Tag label={tag.label} variant={tag.variant} />
         ) : null
       }
-      // Historique : pas encore de variation de Kwote à montrer (résultats de partie à venir)
+      // Historique : pas encore de variation de LK à montrer (résultats de partie à venir)
       side={item.status === 'PLAYED' ? null : undefined}
       onPress={() => (item.kind === 'ROOM' ? openRoom(item.id) : openEvent(item.id))}
     />
@@ -146,7 +146,7 @@ function Empty({ past, filtered }: { past: boolean; filtered: boolean }) {
       dashed
       icon={<CalendarX size={28} color={colors.ink} strokeWidth={2.5} />}
       title="Pas encore de partie"
-      text="Tes parties terminées apparaîtront ici, avec le résultat et ta Kwote."
+      text="Tes parties terminées apparaîtront ici, avec le résultat et tes LK."
     />
   ) : (
     <EmptyState
