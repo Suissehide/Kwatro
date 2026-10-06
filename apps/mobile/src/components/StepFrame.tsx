@@ -7,6 +7,7 @@ import {
   Raised,
   radius,
   ScreenHeader,
+  space,
   TopNav,
   Typography,
   WebScreen,
@@ -95,7 +96,7 @@ export function Frame({
       >
         {onBack ? (
           // ScreenHeader a ses marges d'écran : on les annule dans la carte
-          <View style={{ marginHorizontal: -16, marginVertical: -6 }}>
+          <View style={{ marginHorizontal: -space.screen, marginVertical: -6 }}>
             <ScreenHeader title={title} onBack={onBack} />
           </View>
         ) : (

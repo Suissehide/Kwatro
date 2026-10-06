@@ -4,7 +4,7 @@ import { Button } from '../atoms/Button'
 import { IconButton } from '../atoms/IconButton'
 import { Typography } from '../atoms/Typography'
 import { useHover } from '../atoms/useHover'
-import { border, colors, font, transition } from '../tokens'
+import { border, colors, font, space, transition } from '../tokens'
 
 /**
  * En-tête d'une conversation : titre, détail (date, lieu, joueurs) et cloche de sourdine.
@@ -54,7 +54,7 @@ export function ChatHeader({
           gap: 10,
           paddingTop: 4,
           paddingBottom: 12,
-          paddingHorizontal: 16,
+          paddingHorizontal: space.screen,
         }}
       >
         <IconButton

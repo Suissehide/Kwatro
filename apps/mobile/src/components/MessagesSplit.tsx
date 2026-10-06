@@ -1,4 +1,4 @@
-import { colors, EmptyState } from '@lucko/design-system'
+import { colors, EmptyState, space } from '@lucko/design-system'
 import type { ChatRef } from '@lucko/shared'
 import { router } from 'expo-router'
 import { MessageCircle } from 'lucide-react-native'
@@ -32,7 +32,7 @@ export function MessagesSplit({ selected }: { selected: ChatRef | null }) {
           maxWidth: 1200, // comme WebScreen
           alignSelf: 'center',
           paddingTop: 28,
-          paddingHorizontal: 32,
+          paddingHorizontal: space.page,
           paddingBottom: 32,
           flexDirection: 'row',
           gap: 24,

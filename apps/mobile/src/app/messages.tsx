@@ -1,3 +1,4 @@
+import { space } from '@lucko/design-system'
 import { useLocalSearchParams } from 'expo-router'
 import { useState } from 'react'
 import { useWindowDimensions, View } from 'react-native'
@@ -26,7 +27,7 @@ export default function MessagesScreen() {
       tab="messages"
       wide={false}
       header={
-        <View style={{ paddingHorizontal: 20, paddingTop: 6, paddingBottom: 12 }}>
+        <View style={{ paddingHorizontal: space.screen, paddingTop: 6, paddingBottom: 12 }}>
           <InboxHeader compact unread={data?.unread ?? 0} filter={filter} onFilter={setFilter} />
         </View>
       }
