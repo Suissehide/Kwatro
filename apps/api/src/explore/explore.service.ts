@@ -10,7 +10,7 @@ import {
   VENUE_AGENDA_MONTHS,
   type VenueListItem,
   type venueDetailSchema,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import { Injectable, NotFoundException } from '@nestjs/common'
 import type { z } from 'zod'
 import { eventVisibleTo, roomVisibleTo, type Viewer } from '../common/minors.rules'
@@ -67,22 +67,22 @@ const myRegistration = (viewer: Viewer) => ({
 const myStatus = (registrations: { status: string }[]) =>
   (registrations[0]?.status as 'REGISTERED' | 'WAITLISTED' | undefined) ?? null
 
-/** Room publique : initiales des joueurs et fourchette de Kwote des parties classées. */
+/** Room publique : initiales des joueurs et fourchette de LK des parties classées. */
 function roomItem({
   format,
   participants,
   ...room
 }: Prisma.RoomGetPayload<{ include: typeof roomInclude }>) {
-  const kwotes = participants.flatMap(({ user }) =>
-    user.gameProfiles.filter((p) => p.formatId === room.formatId).map((p) => p.kwote),
+  const ratings = participants.flatMap(({ user }) =>
+    user.gameProfiles.filter((p) => p.formatId === room.formatId).map((p) => p.rating),
   )
   return {
     ...room,
     format: format?.name ?? null,
     players: participants.map(({ user }) => ({ initial: user.pseudo?.slice(0, 1) ?? '?' })),
-    kwoteRange:
-      room.mode === 'RANKED' && kwotes.length
-        ? { min: Math.min(...kwotes), max: Math.max(...kwotes) }
+    ratingRange:
+      room.mode === 'RANKED' && ratings.length
+        ? { min: Math.min(...ratings), max: Math.max(...ratings) }
         : null,
   }
 }

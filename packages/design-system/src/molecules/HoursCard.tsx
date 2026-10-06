@@ -54,7 +54,7 @@ export function HoursCard({
             gap: 12,
             paddingVertical: 9,
             paddingHorizontal: title ? 18 : 14,
-            backgroundColor: row.today ? colors.kwoteSoft : colors.white,
+            backgroundColor: row.today ? colors.ratingSoft : colors.white,
             borderTopWidth: title || i ? border.thin : 0,
             borderColor: colors.line,
           }}

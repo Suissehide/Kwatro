@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native'
 import { border, colors, font } from '../tokens'
 
-/** Niveau d'XP : assiduité. Toujours une barre bleue + nom de palier. Ne doit jamais ressembler à la Kwote. */
+/** Niveau d'XP : assiduité. Toujours une barre bleue + nom de palier. Ne doit jamais ressembler aux LK. */
 export function XpBar({
   level,
   name,

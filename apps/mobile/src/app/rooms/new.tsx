@@ -5,7 +5,7 @@ import {
   ScreenHeader,
   SkeletonCard,
   Typography,
-} from '@kwatro/design-system'
+} from '@lucko/design-system'
 import {
   COMMANDER_BRACKETS,
   createRoomSchema,
@@ -17,7 +17,7 @@ import {
   ROOM_CAPACITY,
   ROOM_DESCRIPTION_MAX,
   type VenueListItem,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import { useStore } from '@tanstack/react-form'
 import { useQuery } from '@tanstack/react-query'
 import { router, useLocalSearchParams } from 'expo-router'
@@ -192,7 +192,7 @@ function RoomForm({
             {(field) => <field.Choice label="Mode" options={MODE_OPTIONS} />}
           </form.AppField>
           <Typography variant="small">
-            Classée : le résultat compte pour la Kwote. Normale : on joue pour le plaisir, XP
+            Classée : le résultat compte pour les LK. Normale : on joue pour le plaisir, XP
             seulement.
           </Typography>
         </>
@@ -287,7 +287,7 @@ function RoomForm({
       <form.AppForm>
         <form.FormError />
         <View style={wide ? { alignSelf: 'flex-start' } : null}>
-          <form.SubmitButton kind="kwote" label="Publier la room" />
+          <form.SubmitButton kind="rating" label="Publier la room" />
         </View>
       </form.AppForm>
     </View>

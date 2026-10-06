@@ -1,4 +1,4 @@
-import { type PlayerTab, SITE_URL } from '@kwatro/design-system'
+import { type PlayerTab, SITE_URL } from '@lucko/design-system'
 import { router } from 'expo-router'
 import { Linking } from 'react-native'
 

@@ -1,11 +1,11 @@
 import {
   type AgendaPeriod,
   type agendaItemSchema,
-  KWOTE_PROVISIONAL_GAMES,
   type meSchema,
   type myGamesSchema,
+  RATING_PROVISIONAL_GAMES,
   type updateProfileSchema,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common'
 import type { z } from 'zod'
 import { Prisma, type User } from '../generated/prisma/client'
@@ -26,7 +26,7 @@ export class UsersService {
     const [profiles, staffOf] = await Promise.all([
       this.prisma.playerGameProfile.findMany({
         where: { userId: user.id },
-        orderBy: [{ rankedGames: 'desc' }, { kwote: 'desc' }],
+        orderBy: [{ rankedGames: 'desc' }, { rating: 'desc' }],
         include: { format: { include: { game: true } } },
       }),
       this.prisma.venueStaff.findMany({
@@ -39,13 +39,13 @@ export class UsersService {
     return {
       ...user,
       hasBirthDate: user.birthDate !== null,
-      mainKwote: main
-        ? { game: main.format.game.name, format: main.format.name, kwote: main.kwote }
+      mainRating: main
+        ? { game: main.format.game.name, format: main.format.name, rating: main.rating }
         : null,
       rankings: profiles.map((p) => ({
         game: { slug: p.format.game.slug, name: p.format.game.name },
         format: p.format.name,
-        kwote: p.rankedGames < KWOTE_PROVISIONAL_GAMES ? null : p.kwote,
+        rating: p.rankedGames < RATING_PROVISIONAL_GAMES ? null : p.rating,
         rankedGames: p.rankedGames,
         reliabilityPct: p.reliabilityPct,
       })),
@@ -171,8 +171,8 @@ export class UsersService {
   }
 
   /**
-   * Remplace mes jeux. Un nouveau format part de la Kwote de son niveau déclaré ; un format retiré
-   * n'est effacé que s'il n'a pas de partie classée (sa Kwote est gardée sinon).
+   * Remplace mes jeux. Un nouveau format part des LK de son niveau déclaré ; un format retiré
+   * n'est effacé que s'il n'a pas de partie classée (ses LK sont gardés sinon).
    */
   async setMyGames(userId: string, input: z.output<typeof myGamesSchema>) {
     const catalog = await this.prisma.game.findMany({

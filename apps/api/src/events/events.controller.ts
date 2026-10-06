@@ -1,4 +1,4 @@
-import { eventDetailSchema } from '@kwatro/shared'
+import { eventDetailSchema } from '@lucko/shared'
 import { Controller, Delete, Get, Param, Post } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { CurrentUser, Public } from '../auth/auth.decorators'

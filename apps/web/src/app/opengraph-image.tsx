@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 // Image de partage (réseaux sociaux, messageries), générée au build aux couleurs « Plateau pop »
-export const alt = 'Kwatro : où jouer ce soir ? Soirées jeux et tournois TCG près de chez toi.'
+export const alt = 'Lucko : où jouer ce soir ? Soirées jeux et tournois TCG près de chez toi.'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -75,7 +75,7 @@ export default async function Image() {
           ))}
         </div>
         <div style={{ fontFamily: 'Archivo Black', fontSize: 64, textTransform: 'uppercase' }}>
-          Kwatro
+          Lucko
         </div>
       </div>
       <div

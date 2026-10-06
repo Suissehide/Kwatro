@@ -13,8 +13,8 @@ import {
   SkeletonCard,
   TextLink,
   Typography,
-} from '@kwatro/design-system'
-import { xpLevel } from '@kwatro/shared'
+} from '@lucko/design-system'
+import { xpLevel } from '@lucko/shared'
 import { router } from 'expo-router'
 import { Settings } from 'lucide-react-native'
 import { useWindowDimensions, View } from 'react-native'
@@ -28,7 +28,7 @@ const WIDE = 900
 const openEdit = () => router.push('/profile/edit')
 const openGames = () => router.push('/profile/games')
 
-/** Profil du joueur (F1) : identité, niveau, Kwote par jeu, disponibilités. Les parties sont dans Mes parties. */
+/** Profil du joueur (F1) : identité, niveau, LK par jeu, disponibilités. Les parties sont dans Mes parties. */
 export default function ProfileScreen() {
   const wide = useWindowDimensions().width >= WIDE
   const me = useMeQuery({ required: true })
@@ -106,7 +106,7 @@ export default function ProfileScreen() {
     )
   ) : (
     <Typography variant="small">
-      Pas encore de Kwote : elle apparaît après tes premières parties classées en TCG.
+      Pas encore de LK : ils apparaissent après tes premières parties classées en TCG.
     </Typography>
   )
 
@@ -132,7 +132,7 @@ export default function ProfileScreen() {
       <View style={{ gap: 14 }}>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 16 }}>
           <Typography variant="h2">Classements par jeu</Typography>
-          <Typography variant="small">Kwote calculée sur les parties classées</Typography>
+          <Typography variant="small">LK calculés sur les parties classées</Typography>
           <TextLink label="Mes jeux" onPress={openGames} />
         </View>
         {rankings}

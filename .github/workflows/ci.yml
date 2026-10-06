@@ -13,7 +13,7 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: postgresql://kwatro:kwatro@localhost:5432/kwatro?schema=public
+      DATABASE_URL: postgresql://lucko:lucko@localhost:5432/lucko?schema=public
     steps:
       - uses: actions/checkout@v4
 
@@ -36,7 +36,7 @@ jobs:
         run: pnpm test
 
       - name: Build API + site
-        run: pnpm turbo run build --filter=@kwatro/api --filter=@kwatro/web
+        run: pnpm turbo run build --filter=@lucko/api --filter=@lucko/web
 
       - name: Client API à jour avec l'OpenAPI
         run: |

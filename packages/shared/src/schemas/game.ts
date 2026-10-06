@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { GAME_KINDS } from '../constants'
-import { DECLARED_LEVELS, type DeclaredLevel } from '../kwote'
+import { DECLARED_LEVELS, type DeclaredLevel } from '../rating'
 
 const DECLARED_LEVEL_KEYS = Object.keys(DECLARED_LEVELS) as [DeclaredLevel, ...DeclaredLevel[]]
 

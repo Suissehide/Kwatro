@@ -8,7 +8,7 @@ import {
   myChatsSchema,
   reportSchema,
   sendMessageSchema,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import {
   Controller,
   Delete,

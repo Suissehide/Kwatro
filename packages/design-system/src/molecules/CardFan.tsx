@@ -6,8 +6,8 @@ import { border, colors, font, motion, onColor, radius, shadow } from '../tokens
 // Position du coin haut gauche dans l'éventail, par taille
 const ZERO = {
   digit: '0',
-  bg: colors.kwote,
-  fg: onColor.kwote,
+  bg: colors.rating,
+  fg: onColor.rating,
   deg: 2,
   lg: [170, 10],
   sm: [95, 6],

@@ -51,8 +51,8 @@ export const roomCandidateSchema = z.object({
   status: z.enum(['PENDING', 'WAITLISTED']),
   minor: z.boolean(),
   xp: z.number().int(),
-  /** Kwote sur le format de la room ; null si provisoire ou sans format. */
-  kwote: z.number().int().nullable(),
+  /** LK sur le format de la room ; null si provisoire ou sans format. */
+  rating: z.number().int().nullable(),
   rankedGames: z.number().int(),
   appliedAt: isoDateTime,
 })

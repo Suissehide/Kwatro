@@ -60,7 +60,7 @@ export function Toast({
             style={{
               ...font('body', 800),
               fontSize: 13,
-              color: colors.kwote,
+              color: colors.rating,
               textTransform: 'uppercase',
             }}
           >

@@ -1,4 +1,4 @@
-import type { DeclaredLevel, MyGames } from '@kwatro/shared'
+import type { DeclaredLevel, MyGames } from '@lucko/shared'
 import { formOptions } from '@tanstack/react-form'
 
 /** Un format TCG coché : réponses au questionnaire (null = pas répondu) et niveau qui en découle. */

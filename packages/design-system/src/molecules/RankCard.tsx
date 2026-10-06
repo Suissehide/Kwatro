@@ -1,17 +1,17 @@
 import { Text, View } from 'react-native'
 import { Typography } from '../atoms/Typography'
 import { border, colors, font, radius, semantic } from '../tokens'
-import { KwoteBadge } from './KwoteBadge'
+import { RatingBadge } from './RatingBadge'
 
 type Rank = {
   /** Couleur du jeu (bandeau ou liseré). */
   color: string
   game: string
   format: string
-  /** null : Kwote provisoire, `progress` affiche alors « 3 / 5 ». */
-  kwote: string | null
+  /** null : LK provisoires, `progress` affiche alors « 3 / 5 ». */
+  rating: string | null
   progress?: string
-  /** « 38 parties classées », ou ce qu'il reste avant la première Kwote. */
+  /** « 38 parties classées », ou ce qu'il reste avant les premiers LK. */
   note: string
 }
 
@@ -32,19 +32,23 @@ function Provisional() {
   )
 }
 
-function Score({ kwote, progress, large }: Pick<Rank, 'kwote' | 'progress'> & { large?: boolean }) {
+function Score({
+  rating,
+  progress,
+  large,
+}: Pick<Rank, 'rating' | 'progress'> & { large?: boolean }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-      {kwote ? <KwoteBadge value={kwote} large={large} /> : <Provisional />}
-      {!kwote && progress ? (
+      {rating ? <RatingBadge value={rating} large={large} /> : <Provisional />}
+      {!rating && progress ? (
         <Text style={{ ...font('mono', 700), fontSize: 13, color: colors.muted }}>{progress}</Text>
       ) : null}
     </View>
   )
 }
 
-/** Kwote d'un format TCG, en carte (profil web). */
-export function RankCard({ color, game, format, kwote, progress, note }: Rank) {
+/** LK d'un format TCG, en carte (profil web). */
+export function RankCard({ color, game, format, rating, progress, note }: Rank) {
   return (
     <View
       style={{
@@ -67,19 +71,19 @@ export function RankCard({ color, game, format, kwote, progress, note }: Rank) {
       <View style={{ padding: 16, gap: 8 }}>
         <Typography variant="label">{format}</Typography>
         <Typography variant="title">{game}</Typography>
-        <Score kwote={kwote} progress={progress} large />
+        <Score rating={rating} progress={progress} large />
         <Typography variant="small">{note}</Typography>
       </View>
     </View>
   )
 }
 
-/** Kwote d'un format TCG, en ligne de liste (profil téléphone). */
+/** LK d'un format TCG, en ligne de liste (profil téléphone). */
 export function RankRow({
   color,
   game,
   format,
-  kwote,
+  rating,
   progress,
   note,
   last,
@@ -105,7 +109,7 @@ export function RankRow({
           {format} · {note}
         </Typography>
       </View>
-      <Score kwote={kwote} progress={progress} />
+      <Score rating={rating} progress={progress} />
     </View>
   )
 }

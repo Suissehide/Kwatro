@@ -1,4 +1,4 @@
-import { MobileScreen, ScreenHeader, TextLink, WebScreen } from '@kwatro/design-system'
+import { MobileScreen, ScreenHeader, TextLink, WebScreen } from '@lucko/design-system'
 import { ArrowLeft } from 'lucide-react-native'
 import type { ReactNode } from 'react'
 import { useWindowDimensions, View } from 'react-native'

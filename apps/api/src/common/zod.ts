@@ -21,7 +21,7 @@ export function toOpenApi(schema: z.ZodType, io: 'input' | 'output'): SchemaObje
   return z.toJSONSchema(schema, { target: 'openapi-3.0', io }) as SchemaObject
 }
 
-/** Valide une entrée avec un schéma partagé (@kwatro/shared) ; 400 avec la liste des champs en erreur. */
+/** Valide une entrée avec un schéma partagé (@lucko/shared) ; 400 avec la liste des champs en erreur. */
 export class ZodValidationPipe implements PipeTransform {
   constructor(private readonly schema: z.ZodType) {}
 

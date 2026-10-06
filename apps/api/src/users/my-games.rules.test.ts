@@ -33,11 +33,11 @@ describe('myGamesRefusal', () => {
 })
 
 describe('profileData', () => {
-  it('la Kwote de départ suit le niveau tant qu’aucune partie classée n’est jouée', () => {
-    expect(profileData(null, 'BEGINNER')).toEqual({ declaredLevel: 'BEGINNER', kwote: 850 })
+  it('les LK de départ suivent le niveau tant qu’aucune partie classée n’est jouée', () => {
+    expect(profileData(null, 'BEGINNER')).toEqual({ declaredLevel: 'BEGINNER', rating: 850 })
     expect(profileData({ rankedGames: 0 }, 'EXPERT')).toEqual({
       declaredLevel: 'EXPERT',
-      kwote: 1300,
+      rating: 1300,
     })
     expect(profileData({ rankedGames: 3 }, 'EXPERT')).toEqual({ declaredLevel: 'EXPERT' })
   })

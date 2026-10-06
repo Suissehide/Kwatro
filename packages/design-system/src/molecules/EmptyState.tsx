@@ -4,7 +4,7 @@ import { border, colors, font, radius } from '../tokens'
 
 export function EmptyState({
   icon,
-  tint = colors.kwoteSoft,
+  tint = colors.ratingSoft,
   title,
   text,
   action,

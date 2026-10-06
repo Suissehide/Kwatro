@@ -4,7 +4,7 @@ import type {
   HostAction,
   ParticipantStatus,
   RoomStatus,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import type { z } from 'zod'
 
 /** Délai de réservation maximal d'une room. */

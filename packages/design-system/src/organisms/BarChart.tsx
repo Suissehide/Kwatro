@@ -2,7 +2,7 @@ import { View } from 'react-native'
 import { Typography } from '../atoms/Typography'
 import { border, colors } from '../tokens'
 
-/** Histogramme ; les barres de `highlight` (index) passent en kwote. */
+/** Histogramme ; les barres de `highlight` (index) passent en rating. */
 export function BarChart({
   data,
   max,
@@ -39,7 +39,7 @@ export function BarChart({
             style={{
               flex: 1,
               height: `${(d.value / m) * 100}%`,
-              backgroundColor: highlight.includes(i) ? colors.kwote : colors.venue,
+              backgroundColor: highlight.includes(i) ? colors.rating : colors.venue,
               borderWidth: border.base,
               borderBottomWidth: 0,
               borderColor: colors.ink,

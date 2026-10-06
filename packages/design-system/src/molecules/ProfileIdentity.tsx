@@ -35,7 +35,7 @@ export function ProfileIdentity({
   const chips = vibes.length ? (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
       {vibes.map((vibe) => (
-        <Chip key={vibe} label={vibe} active color={colors.kwoteSoft} />
+        <Chip key={vibe} label={vibe} active color={colors.ratingSoft} />
       ))}
       {wide && onEdit ? <TextLink label="Modifier le profil" onPress={onEdit} /> : null}
     </View>

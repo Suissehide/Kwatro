@@ -4,7 +4,7 @@ import { Typography } from '../atoms/Typography'
 import { border, colors, font, radius, shadow } from '../tokens'
 import { XpTrack } from './XpBar'
 
-/** Carte « Niveau Kwatro » du profil web : palier, XP du niveau et ce qu'il reste pour le suivant. */
+/** Carte « Niveau Lucko » du profil web : palier, XP du niveau et ce qu'il reste pour le suivant. */
 export function LevelCard({
   level,
   name,
@@ -30,7 +30,7 @@ export function LevelCard({
         }}
       >
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Typography variant="label">Niveau Kwatro</Typography>
+          <Typography variant="label">Niveau Lucko</Typography>
           <Text style={{ ...font('mono', 700), fontSize: 13, color: colors.ink }}>
             {current} / {max} XP
           </Text>

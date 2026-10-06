@@ -1,4 +1,4 @@
-import type { UpdateProfileInput } from '@kwatro/shared'
+import type { UpdateProfileInput } from '@lucko/shared'
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { router } from 'expo-router'
 import { useEffect } from 'react'

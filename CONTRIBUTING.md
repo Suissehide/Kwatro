@@ -1,4 +1,4 @@
-# Contribuer à Kwatro
+# Contribuer à Lucko
 
 ## Flux de travail
 
@@ -18,9 +18,9 @@
 - **Biome** formate et lint tout le monorepo. Le hook `pre-commit` corrige automatiquement les fichiers modifiés ; en cas de doute : `pnpm check:fix`.
 - **TypeScript strict** partout ; pas de `any` sans commentaire qui l'explique.
 - Les **types et schémas partagés** (Zod) vont dans `packages/shared` : l'API valide avec les mêmes schémas que l'app.
-- **La logique métier sensible reste dans l'API** : QR Kwatro, venues facturables, Kwote, XP, factures, règles mineurs. Jamais calculée côté app.
+- **La logique métier sensible reste dans l'API** : QR Lucko, venues facturables, LK, XP, factures, règles mineurs. Jamais calculée côté app.
 - **Pas d'émoji ni de glyphe Unicode comme pictogramme** (✓, ←, ▲, ◆, +…) dans l'interface : uniquement des icônes [Lucide](https://lucide.dev/icons) (`lucide-react-native` dans le design system et l'app Expo, `lucide-react` sur les pages HTML de `apps/web`).
-- Toute règle métier importante a un **test** (ex. `packages/shared/src/kwote.test.ts`).
+- Toute règle métier importante a un **test** (ex. `packages/shared/src/rating.test.ts`).
 
 ## App : données de l'API (TanStack Query)
 

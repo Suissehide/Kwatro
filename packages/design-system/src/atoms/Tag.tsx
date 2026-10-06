@@ -7,7 +7,7 @@ const variants: Record<TagVariant, { bg: string; fg: string; rotate: number }> =
   ranked: { bg: colors.ink, fg: colors.white, rotate: 0 },
   // Partenaire : toujours visible (exigence de classement honnête)
   partner: { bg: colors.venue, fg: colors.white, rotate: -3 },
-  tonight: { bg: colors.kwote, fg: colors.ink, rotate: 2 },
+  tonight: { bg: colors.rating, fg: colors.ink, rotate: 2 },
   event: { bg: colors.event, fg: colors.white, rotate: 0 },
 }
 

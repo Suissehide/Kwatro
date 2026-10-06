@@ -3,7 +3,7 @@ import {
   type DeclaredLevel,
   type GameKind,
   type myGamesSchema,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import type { z } from 'zod'
 
 export type CatalogGame = { id: string; name: string; kind: GameKind; formatIds: string[] }
@@ -31,11 +31,11 @@ export function myGamesRefusal(
 }
 
 /**
- * Niveau déclaré sur un format : tant qu'aucune partie classée n'est jouée, la Kwote suit le niveau
+ * Niveau déclaré sur un format : tant qu'aucune partie classée n'est jouée, les LK suivent le niveau
  * (départ 850 à 1300) ; ensuite seules les parties la font bouger.
  */
 export function profileData(existing: { rankedGames: number } | null, level: DeclaredLevel) {
   return !existing || existing.rankedGames === 0
-    ? { declaredLevel: level, kwote: DECLARED_LEVELS[level] }
+    ? { declaredLevel: level, rating: DECLARED_LEVELS[level] }
     : { declaredLevel: level }
 }

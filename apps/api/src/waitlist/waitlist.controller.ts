@@ -1,4 +1,4 @@
-import { type JoinWaitlistInput, joinWaitlistSchema } from '@kwatro/shared'
+import { type JoinWaitlistInput, joinWaitlistSchema } from '@lucko/shared'
 import { Controller, HttpCode, Post } from '@nestjs/common'
 import { ApiNoContentResponse, ApiTags } from '@nestjs/swagger'
 import { Public } from '../auth/auth.decorators'

@@ -1,4 +1,4 @@
-import { CONTACT_EMAIL } from '@kwatro/design-system'
+import { CONTACT_EMAIL } from '@lucko/design-system'
 import type { Metadata } from 'next'
 import { TextPage, ToFill } from '../text-page'
 
@@ -11,14 +11,14 @@ export default function PrivacyPage() {
   return (
     <TextPage title="Politique de confidentialité" updated="4 octobre 2026">
       <p>
-        Cette page explique quelles données Kwatro collecte, pourquoi, combien de temps elles sont
+        Cette page explique quelles données Lucko collecte, pourquoi, combien de temps elles sont
         gardées ainsi que tes droits. Version courte : on collecte le strict nécessaire pour te
         trouver une table, on ne vend rien à personne, aucun cookie publicitaire.
       </p>
 
       <h2>Responsable du traitement</h2>
       <p>
-        <ToFill>Raison sociale</ToFill>, éditeur de Kwatro (voir les{' '}
+        <ToFill>Raison sociale</ToFill>, éditeur de Lucko (voir les{' '}
         <a href="/legal-notice">mentions légales</a>). Pour toute question ou pour exercer tes
         droits : <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
       </p>
@@ -72,7 +72,7 @@ export default function PrivacyPage() {
 
       <h3>La liste d’attente du site</h3>
       <p>
-        E-mail et ville (facultative) : uniquement pour te prévenir du lancement de Kwatro près de
+        E-mail et ville (facultative) : uniquement pour te prévenir du lancement de Lucko près de
         chez toi. Base légale : ton consentement, retirable à tout moment.
       </p>
 
@@ -116,7 +116,7 @@ export default function PrivacyPage() {
 
       <h2>Cookies et mesure d’audience</h2>
       <p>
-        Kwatro ne dépose aucun cookie publicitaire ni traceur tiers. Le seul cookie utilisé garde ta
+        Lucko ne dépose aucun cookie publicitaire ni traceur tiers. Le seul cookie utilisé garde ta
         session ouverte une fois connecté : il est indispensable au service, il ne demande donc pas
         de consentement. La mesure d’audience (Umami) est anonyme, sans cookie : elle compte les
         visites sans te suivre d’un site à l’autre.
@@ -140,8 +140,8 @@ export default function PrivacyPage() {
 
       <h2>Mineurs</h2>
       <p>
-        Kwatro est interdit aux moins de 13 ans. Entre 13 et 14 ans, l’inscription nécessite
-        l’accord d’un parent, qui peut exercer les droits ci-dessus pour le compte de son enfant.
+        Lucko est interdit aux moins de 13 ans. Entre 13 et 14 ans, l’inscription nécessite l’accord
+        d’un parent, qui peut exercer les droits ci-dessus pour le compte de son enfant.
       </p>
     </TextPage>
   )

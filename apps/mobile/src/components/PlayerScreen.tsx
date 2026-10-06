@@ -1,4 +1,4 @@
-import { MobileScreen, type PlayerTab, PlayerTabBar, WebScreen } from '@kwatro/design-system'
+import { MobileScreen, type PlayerTab, PlayerTabBar, WebScreen } from '@lucko/design-system'
 import type { ReactNode } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { openCreateRoom, openTab } from '@/lib/navigation'

@@ -1,4 +1,4 @@
-import type { CreateRoomInput, HostAction, RoomDetail } from '@kwatro/shared'
+import type { CreateRoomInput, HostAction, RoomDetail } from '@lucko/shared'
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AGENDA, EXPLORE, ROOM, VENUE } from '@/constants/queryKeys'
 import { api } from '@/lib/api'

@@ -1,4 +1,4 @@
-import type { NotificationTopic } from '@kwatro/shared'
+import type { NotificationTopic } from '@lucko/shared'
 import { Injectable, type OnModuleInit } from '@nestjs/common'
 import { loadEnv } from '../config/env'
 import type { Prisma } from '../generated/prisma/client'

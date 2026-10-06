@@ -5,8 +5,8 @@ import {
   SkeletonCard,
   TextLink,
   Typography,
-} from '@kwatro/design-system'
-import { type Me, PLAY_VIBE_LABELS, PLAY_VIBES } from '@kwatro/shared'
+} from '@lucko/design-system'
+import { type Me, PLAY_VIBE_LABELS, PLAY_VIBES } from '@lucko/shared'
 import { useStore } from '@tanstack/react-form'
 import { router, useNavigation } from 'expo-router'
 import { usePreventRemove } from 'expo-router/react-navigation'

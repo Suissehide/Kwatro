@@ -1,4 +1,4 @@
-import { type Channel, channelName, channelSchema, REALTIME } from '@kwatro/shared'
+import { type Channel, channelName, channelSchema, REALTIME } from '@lucko/shared'
 import { type QueryKey, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef } from 'react'
 import { Platform } from 'react-native'

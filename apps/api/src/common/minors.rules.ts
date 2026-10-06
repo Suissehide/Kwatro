@@ -1,4 +1,4 @@
-import { ageOn, MIN_AGE } from '@kwatro/shared'
+import { ageOn, MIN_AGE } from '@lucko/shared'
 
 /** Joueur qui consulte une liste ; null = pas connecté (site public). */
 export type Viewer = { id: string; birthDate: Date | null; parentId: string | null } | null

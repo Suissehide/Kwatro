@@ -1,6 +1,6 @@
 'use client'
 import { useGSAP } from '@gsap/react'
-import { KWOTE_START } from '@kwatro/shared'
+import { RATING_START } from '@lucko/shared'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import dynamic from 'next/dynamic'
@@ -12,7 +12,7 @@ import { WaitlistForm } from './waitlist-form'
 gsap.registerPlugin(ScrollTrigger, useGSAP)
 
 // Three.js (~150 ko) chargé à part, après l'hydratation : le texte du hero reste le premier affichage
-const HeroScene = dynamic(() => import('@kwatro/design-system/scene'), { ssr: false })
+const HeroScene = dynamic(() => import('@lucko/design-system/scene'), { ssr: false })
 
 const games = [
   'Magic: The Gathering',
@@ -32,7 +32,7 @@ const games = [
 const steps = [
   {
     title: 'Dis-nous à quoi tu joues',
-    text: 'Tes jeux, tes formats, ton niveau. Kwatro s’en sert pour te proposer les bonnes soirées.',
+    text: 'Tes jeux, tes formats, ton niveau. Lucko s’en sert pour te proposer les bonnes soirées.',
   },
   {
     title: 'Choisis ta soirée',
@@ -40,7 +40,7 @@ const steps = [
   },
   {
     title: 'Viens jouer',
-    text: 'Inscris-toi en un geste, passe au lieu et ta partie compte pour ta Kwote et ton XP.',
+    text: 'Inscris-toi en un geste, passe au lieu et ta partie compte pour tes LK et ton XP.',
   },
 ]
 
@@ -78,8 +78,8 @@ export function Landing() {
   return (
     <div ref={root} className={s.page}>
       <nav className={s.nav} aria-label="Principale">
-        <span className={s.logo}>Kwatro</span>
-        <a className="kw-btn kw-btn--sm kw-btn--ink" href="#liste">
+        <span className={s.logo}>Lucko</span>
+        <a className="lk-btn lk-btn--sm lk-btn--ink" href="#liste">
           Rejoindre la liste
         </a>
       </nav>
@@ -92,46 +92,46 @@ export function Landing() {
           <div className={s.heroSplit}>
             <div className={s.heroText}>
               <p data-hero-line className={s.lead}>
-                Soirées jeux, tournois TCG, joueurs qui cherchent un adversaire : Kwatro réunit les
+                Soirées jeux, tournois TCG, joueurs qui cherchent un adversaire : Lucko réunit les
                 bars à jeux, boutiques et associations de toute la France dans une seule app.
               </p>
               <div data-hero-line className={s.ctas}>
-                <a className="kw-btn kw-btn--room" href="#liste">
+                <a className="lk-btn lk-btn--room" href="#liste">
                   Rejoindre la liste
                 </a>
-                <a className="kw-btn kw-btn--ghost" href="#comment">
+                <a className="lk-btn lk-btn--ghost" href="#comment">
                   Comment ça marche
                 </a>
               </div>
             </div>
             <div className={s.stack} aria-hidden="true">
               <HeroScene className={s.scene} />
-              <article data-hero-card className={`kw-card kw-card--raised ${s.mock} ${s.mock1}`}>
-                <div className="kw-card__stripe" style={{ background: 'var(--kw-event)' }} />
-                <div className="kw-card__body">
-                  <span className="kw-label">Soirée · jeudi 20 h</span>
-                  <span className="kw-title">Commander entre amis</span>
-                  <span className="kw-small">Bar à jeux · 1,2 km · 4 places</span>
+              <article data-hero-card className={`lk-card lk-card--raised ${s.mock} ${s.mock1}`}>
+                <div className="lk-card__stripe" style={{ background: 'var(--lk-event)' }} />
+                <div className="lk-card__body">
+                  <span className="lk-label">Soirée · jeudi 20 h</span>
+                  <span className="lk-title">Commander entre amis</span>
+                  <span className="lk-small">Bar à jeux · 1,2 km · 4 places</span>
                 </div>
               </article>
-              <article data-hero-card className={`kw-card kw-card--raised ${s.mock} ${s.mock2}`}>
-                <div className="kw-card__stripe" style={{ background: 'var(--kw-room)' }} />
-                <div className="kw-card__body">
-                  <span className="kw-label">Partie classée · Pokémon</span>
-                  <span className="kw-title">Il manque 2 joueurs</span>
+              <article data-hero-card className={`lk-card lk-card--raised ${s.mock} ${s.mock2}`}>
+                <div className="lk-card__stripe" style={{ background: 'var(--lk-room)' }} />
+                <div className="lk-card__body">
+                  <span className="lk-label">Partie classée · Pokémon</span>
+                  <span className="lk-title">Il manque 2 joueurs</span>
                   <span>
-                    <span className="kw-kwote">1 180 - 1 260</span>
+                    <span className="lk-rating">1 180 - 1 260</span>
                   </span>
                 </div>
               </article>
-              <article data-hero-card className={`kw-card kw-card--raised ${s.mock} ${s.mock3}`}>
-                <div className="kw-card__stripe" style={{ background: 'var(--kw-venue)' }} />
-                <div className="kw-card__body">
+              <article data-hero-card className={`lk-card lk-card--raised ${s.mock} ${s.mock3}`}>
+                <div className="lk-card__stripe" style={{ background: 'var(--lk-venue)' }} />
+                <div className="lk-card__body">
                   <span>
-                    <span className="kw-tag kw-tag--partner">Partenaire</span>
+                    <span className="lk-tag lk-tag--partner">Partenaire</span>
                   </span>
-                  <span className="kw-title">-10 % sur les boosters</span>
-                  <span className="kw-small">Boutique TCG · 800 m</span>
+                  <span className="lk-title">-10 % sur les boosters</span>
+                  <span className="lk-small">Boutique TCG · 800 m</span>
                 </div>
               </article>
             </div>
@@ -160,9 +160,9 @@ export function Landing() {
                 Tournoi, initiation ou partie libre. Tu choisis, tu t’inscris, tu viens.
               </p>
             </article>
-            <article data-reveal className={`${s.tile} ${s.tileKwote}`}>
-              <span className={s.tileNumber}>{KWOTE_START.toLocaleString('fr-FR')}</span>
-              <h3 className={s.tileTitle}>Ta Kwote de départ.</h3>
+            <article data-reveal className={`${s.tile} ${s.tileRating}`}>
+              <span className={s.tileNumber}>{RATING_START.toLocaleString('fr-FR')}</span>
+              <h3 className={s.tileTitle}>Tes LK de départ.</h3>
               <p className={s.tileText}>
                 Tu gagnes, elle monte. Tu perds, elle descend. En face, des joueurs de ton niveau.
               </p>
@@ -172,7 +172,7 @@ export function Landing() {
               <p className={s.tileText}>Ouvre ta table. Les joueurs du coin la voient.</p>
             </article>
             <article data-reveal className={`${s.tile} ${s.tileVenue}`}>
-              <h3 className={s.tileTitle}>Un bonus en venant avec Kwatro.</h3>
+              <h3 className={s.tileTitle}>Un bonus en venant avec Lucko.</h3>
               <p className={s.tileText}>
                 Une boisson, une réduc sur les boosters : chaque lieu partenaire choisit le sien.
               </p>
@@ -184,7 +184,7 @@ export function Landing() {
           <h2 className={`${s.h2} ${s.pinned}`}>Trois gestes et tu joues.</h2>
           <ol className={s.steps}>
             {steps.map((step) => (
-              <li key={step.title} data-reveal className={`kw-card kw-card--raised ${s.step}`}>
+              <li key={step.title} data-reveal className={`lk-card lk-card--raised ${s.step}`}>
                 <h3 className={s.stepTitle}>{step.title}</h3>
                 <p>{step.text}</p>
               </li>
@@ -197,11 +197,11 @@ export function Landing() {
             <div>
               <h2 className={s.actionTitle}>Sois là au lancement.</h2>
               <p className={s.actionLead}>
-                Kwatro ouvre ville par ville. Laisse ton e-mail, on te prévient dès que l’app arrive
+                Lucko ouvre ville par ville. Laisse ton e-mail, on te prévient dès que l’app arrive
                 près de chez toi.
               </p>
             </div>
-            <div className={`kw-card ${s.formCard}`}>
+            <div className={`lk-card ${s.formCard}`}>
               <WaitlistForm />
             </div>
           </div>

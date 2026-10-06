@@ -1,5 +1,5 @@
-import { colors } from '@kwatro/design-system'
-import type { VenueListItem } from '@kwatro/shared'
+import { colors } from '@lucko/design-system'
+import type { VenueListItem } from '@lucko/shared'
 import MapView, { Marker } from 'react-native-maps'
 import type { Place } from '@/lib/useLocation'
 

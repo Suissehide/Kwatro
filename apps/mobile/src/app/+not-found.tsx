@@ -5,7 +5,7 @@ import {
   NotFound,
   PlayerTabBar,
   WebScreen,
-} from '@kwatro/design-system'
+} from '@lucko/design-system'
 import { usePathname } from 'expo-router'
 import { Linking, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'

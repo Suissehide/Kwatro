@@ -9,8 +9,8 @@ import {
   Section,
   ToggleGroup,
   Typography,
-} from '@kwatro/design-system'
-import { addMonths, localDateTime, VENUE_AGENDA_MONTHS, type VenueDetail } from '@kwatro/shared'
+} from '@lucko/design-system'
+import { addMonths, localDateTime, VENUE_AGENDA_MONTHS, type VenueDetail } from '@lucko/shared'
 import { ExternalLink } from 'lucide-react-native'
 import { useState } from 'react'
 import { Linking, View } from 'react-native'

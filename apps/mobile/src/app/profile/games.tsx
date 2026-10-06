@@ -5,8 +5,8 @@ import {
   ScreenHeader,
   SkeletonCard,
   Typography,
-} from '@kwatro/design-system'
-import type { Game, MyGames } from '@kwatro/shared'
+} from '@lucko/design-system'
+import type { Game, MyGames } from '@lucko/shared'
 import { router } from 'expo-router'
 import { useWindowDimensions, View } from 'react-native'
 import { PlayerScreen } from '@/components/PlayerScreen'
@@ -91,9 +91,9 @@ function GamesForm({ catalog, saved, wide }: { catalog: Game[]; saved: MyGames; 
     <View style={{ gap: 16 }}>
       <Panel compact={!wide}>
         <Typography variant="small">
-          Pour chaque format TCG, réponds aux 3 questions pour situer ton niveau. Il fixe ta Kwote
-          de départ tant que tu n’as pas joué de partie classée ; ensuite, seules les parties la
-          font bouger.
+          Pour chaque format TCG, réponds aux 3 questions pour situer ton niveau. Il fixe tes LK de
+          départ tant que tu n’as pas joué de partie classée ; ensuite, seules les parties les font
+          bouger.
         </Typography>
         <form.AppField name="games" validators={{ onSubmit: validateGames }}>
           {(field) => <field.Games catalog={catalog} />}

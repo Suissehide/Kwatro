@@ -1,5 +1,5 @@
 # ────────────────────────────────────────────────────────────────
-# Kwatro — stack Docker LOCALE
+# Lucko — stack Docker LOCALE
 #
 #   pnpm db:up        → profil « db » : PostgreSQL/PostGIS + Mailpit (l'API et le site tournent avec `pnpm dev`)
 #   pnpm docker:up    → profils db + backend + frontend : tout en conteneurs, images de production
@@ -8,39 +8,39 @@
 # Équivalent sans pnpm, depuis ce dossier : docker compose --profile db up -d
 # Production : voir dokploy/docker-compose.dokploy.yml
 # ────────────────────────────────────────────────────────────────
-name: kwatro
+name: lucko
 
 networks:
   # Réseau privé api <-> postgres
-  kwatro-internal:
-    name: kwatro-internal
+  lucko-internal:
+    name: lucko-internal
 
 services:
   postgres:
-    container_name: kwatro-postgres
+    container_name: lucko-postgres
     # Image multi-architecture (Mac Apple Silicon + x86) ; postgis/postgis n'existe qu'en amd64
     image: imresamu/postgis:17-3.5
     profiles: [db]
     restart: unless-stopped
     environment:
-      POSTGRES_USER: kwatro
-      POSTGRES_PASSWORD: kwatro
-      POSTGRES_DB: kwatro
+      POSTGRES_USER: lucko
+      POSTGRES_PASSWORD: lucko
+      POSTGRES_DB: lucko
     # Port de l'hôte modifiable si déjà pris : POSTGRES_PORT=5470 pnpm db:up
     ports:
       - "127.0.0.1:${POSTGRES_PORT:-5469}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - kwatro-internal
+      - lucko-internal
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U kwatro -d kwatro"]
+      test: ["CMD-SHELL", "pg_isready -U lucko -d lucko"]
       interval: 5s
       timeout: 5s
       retries: 10
 
   mailpit:
-    container_name: kwatro-mailpit
+    container_name: lucko-mailpit
     # Boîte mail de test : http://localhost:8025 (SMTP sur le port 1025)
     image: axllent/mailpit:latest
     profiles: [db]
@@ -49,10 +49,10 @@ services:
       - "127.0.0.1:1025:1025"
       - "127.0.0.1:8025:8025"
     networks:
-      - kwatro-internal
+      - lucko-internal
 
   api:
-    container_name: kwatro-api
+    container_name: lucko-api
     profiles: [backend]
     build:
       context: ..
@@ -60,20 +60,20 @@ services:
     environment:
       NODE_ENV: production
       API_PORT: 3000
-      DATABASE_URL: postgresql://kwatro:kwatro@postgres:5432/kwatro?schema=public
+      DATABASE_URL: postgresql://lucko:lucko@postgres:5432/lucko?schema=public
       CORS_ORIGINS: http://localhost:3010,http://localhost:8081
       # Stack locale uniquement (comme les identifiants Postgres ci-dessus) : à remplacer sur un vrai serveur
-      BETTER_AUTH_SECRET: kwatro-local-docker-only-not-a-real-secret
+      BETTER_AUTH_SECRET: lucko-local-docker-only-not-a-real-secret
     ports:
       - "127.0.0.1:3000:3000"
     networks:
-      - kwatro-internal
+      - lucko-internal
     depends_on:
       postgres:
         condition: service_healthy
 
   web:
-    container_name: kwatro-web
+    container_name: lucko-web
     profiles: [frontend]
     build:
       context: ..

@@ -26,7 +26,7 @@ export function ClosureRow({
           textAlign: 'center',
           textTransform: 'uppercase',
           color: colors.ink,
-          backgroundColor: special ? colors.kwoteSoft : colors.roomSoft,
+          backgroundColor: special ? colors.ratingSoft : colors.roomSoft,
           borderWidth: border.thin,
           borderColor: colors.ink,
           borderRadius: radius.tag,

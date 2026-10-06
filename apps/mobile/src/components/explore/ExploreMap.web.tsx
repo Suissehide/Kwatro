@@ -1,6 +1,6 @@
 import 'leaflet/dist/leaflet.css'
-import { border, colors } from '@kwatro/design-system'
-import type { VenueListItem } from '@kwatro/shared'
+import { border, colors } from '@lucko/design-system'
+import type { VenueListItem } from '@lucko/shared'
 import { CircleMarker, MapContainer, TileLayer, Tooltip } from 'react-leaflet'
 import type { Place } from '@/lib/useLocation'
 

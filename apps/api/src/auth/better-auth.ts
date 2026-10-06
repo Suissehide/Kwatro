@@ -1,5 +1,5 @@
 import { expo } from '@better-auth/expo'
-import { ageRegime, birthDateSchema, MIN_AGE, PASSWORD_MIN } from '@kwatro/shared'
+import { ageRegime, birthDateSchema, MIN_AGE, PASSWORD_MIN } from '@lucko/shared'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import type { Env } from '../config/env'
@@ -29,7 +29,7 @@ export function createAuth(prisma: PrismaClient, env: Env) {
     // et le POST de retour d'Apple
     trustedOrigins: [
       ...env.CORS_ORIGINS,
-      'kwatro://',
+      'lucko://',
       ...(env.NODE_ENV === 'production' ? [] : ['exp://']),
       'https://appleid.apple.com',
     ],
@@ -41,7 +41,7 @@ export function createAuth(prisma: PrismaClient, env: Env) {
           required: false,
           validator: {
             input: birthDateSchema.refine((date) => ageRegime(date) !== 'too-young', {
-              message: `Kwatro est ouvert dès ${MIN_AGE} ans`,
+              message: `Lucko est ouvert dès ${MIN_AGE} ans`,
             }),
           },
         },

@@ -12,7 +12,7 @@ export function Brand({
 }: {
   size?: number
   fontSize?: number
-  /** Sur fond ink : texte blanc et ombre kwote (l'ombre ink y serait invisible). */
+  /** Sur fond ink : texte blanc et ombre rating (l'ombre ink y serait invisible). */
   onDark?: boolean
   onPress?: () => void
 }) {
@@ -21,7 +21,7 @@ export function Brand({
   const content = (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: Math.max(10, size * 0.32) }}>
       {onDark ? (
-        <Raised offset={Math.round(size / 11)} r={size * 0.2} color={colors.kwote}>
+        <Raised offset={Math.round(size / 11)} r={size * 0.2} color={colors.rating}>
           {logo}
         </Raised>
       ) : (
@@ -35,12 +35,12 @@ export function Brand({
           color: onDark ? colors.white : colors.ink,
         }}
       >
-        Kwatro
+        Lucko
       </Text>
     </View>
   )
   return onPress ? (
-    <Pressable role="link" aria-label="Kwatro, accueil" onPress={onPress} {...hoverProps}>
+    <Pressable role="link" aria-label="Lucko, accueil" onPress={onPress} {...hoverProps}>
       {content}
     </Pressable>
   ) : (

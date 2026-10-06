@@ -5,13 +5,13 @@ import {
   formatDistance,
   formatHour,
   formatHourBand,
-  formatKwote,
   formatMinuteOfDay,
+  formatRating,
   type RoomListItem,
   VENUE_TIME_ZONE,
   VENUE_TYPE_LABELS,
   type VenueListItem,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 
 export const GAMES: { key: string | null; label: string }[] = [
   { key: null, label: 'Tous' },
@@ -119,8 +119,8 @@ export function roomCardProps(
     meta: `${room.venue ? room.venue.name : dayLabel(room.startsAt)} · ${formatHour(room.startsAt)}`,
     players: room.players.map((p) => p.initial),
     capacity: room.capacity,
-    kwote: room.kwoteRange
-      ? `${formatKwote(room.kwoteRange.min)} – ${formatKwote(room.kwoteRange.max)}`
+    rating: room.ratingRange
+      ? `${formatRating(room.ratingRange.min)} – ${formatRating(room.ratingRange.max)}`
       : null,
   }
 }
@@ -133,6 +133,6 @@ export function venueRowProps(venue: VenueListItem) {
     subtitle: `${VENUE_TYPE_LABELS[venue.type]}${closes}`,
     distance: formatDistance(venue.distanceMeters),
     partner: venue.isPartner,
-    perk: venue.isPartner ? venue.kwatroPerk : null,
+    perk: venue.isPartner ? venue.luckoPerk : null,
   }
 }

@@ -1,4 +1,4 @@
-import type { MyGames } from '@kwatro/shared'
+import type { MyGames } from '@lucko/shared'
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ME, MY_GAMES } from '@/constants/queryKeys'
 import { api } from '@/lib/api'

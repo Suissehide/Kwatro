@@ -1,15 +1,15 @@
 /// <reference lib="dom" />
 'use client'
-// Web uniquement (Three.js + DOM) : importé à part via `@kwatro/design-system/scene`,
+// Web uniquement (Three.js + DOM) : importé à part via `@lucko/design-system/scene`,
 // jamais depuis l'index (l'app native ne doit pas l'embarquer).
 import gsap from 'gsap'
 import { type CSSProperties, useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 
-// Couleurs « Plateau pop » (packages/design-system/css/kwatro.css)
+// Couleurs « Plateau pop » (packages/design-system/css/lucko.css)
 const INK = 0x16130f
-const KWOTE = 0xf5b800
+const RATING = 0xf5b800
 const ROOM = 0xcf3a22
 const EVENT = 0x2747d6
 const VENUE = 0x157a55
@@ -50,7 +50,7 @@ function outlined(geometry: THREE.BufferGeometry, material: THREE.Material, thic
 /** Dé à 6 faces ; face 4 vers le haut (+y) au repos. */
 function makeDie(toon: (color: number) => THREE.Material) {
   const size = 1.1
-  const die = outlined(new RoundedBoxGeometry(size, size, size, 4, 0.16), toon(KWOTE))
+  const die = outlined(new RoundedBoxGeometry(size, size, size, 4, 0.16), toon(RATING))
   const pip = new THREE.CircleGeometry(0.09, 20)
   const pipMat = new THREE.MeshBasicMaterial({ color: INK })
   const o = 0.27
@@ -177,7 +177,7 @@ type Piece = {
 }
 
 /**
- * Quatre pièces lancées sur la table (hero de la landing, accueil de l'app sur desktop) : un dé (qui tombe sur 4, Kwatro), un pion,
+ * Quatre pièces lancées sur la table (hero de la landing, accueil de l'app sur desktop) : un dé (qui tombe sur 4, comme le logo), un pion,
  * une carte et un jeton. Purement décoratif (aria-hidden), chargé après l'hydratation.
  */
 export default function HeroScene({
@@ -219,7 +219,7 @@ export default function HeroScene({
     const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100)
 
     scene.add(new THREE.HemisphereLight(WHITE, 0xfff1d6, 1.4))
-    // Lumière en haut à gauche : ombres portées vers le bas à droite, comme --kw-sh-lg
+    // Lumière en haut à gauche : ombres portées vers le bas à droite, comme --lk-sh-lg
     const sun = new THREE.DirectionalLight(WHITE, 2.2)
     sun.position.set(-4, 10, -3)
     sun.castShadow = true

@@ -13,7 +13,7 @@ export const authClient = createAuthClient({
   baseURL: API_URL,
   fetchOptions: { credentials: 'include' },
   plugins: [
-    expoClient({ scheme: 'kwatro', storagePrefix: 'kwatro', storage: SecureStore }),
+    expoClient({ scheme: 'lucko', storagePrefix: 'lucko', storage: SecureStore }),
     // Envoyée en AAAA-MM-JJ à l'inscription par e-mail (l'API la valide et la convertit en date)
     inferAdditionalFields({ user: { birthDate: { type: 'string', required: false } } }),
   ],

@@ -1,4 +1,4 @@
-import { CHAT_EVENTS, type ChatRef, chatChannel, type ReportInput } from '@kwatro/shared'
+import { CHAT_EVENTS, type ChatRef, chatChannel, type ReportInput } from '@lucko/shared'
 import {
   type InfiniteData,
   queryOptions,

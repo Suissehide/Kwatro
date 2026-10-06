@@ -3,8 +3,8 @@ import { Text, View } from 'react-native'
 import { Typography } from '../atoms/Typography'
 import { border, colors, font, radius } from '../tokens'
 
-/** Kwote : force par format TCG. Toujours jaune + losange, chiffres en Space Mono. */
-export function KwoteBadge({
+/** LK : force par format TCG. Toujours jaune + losange, chiffres en Space Mono. */
+export function RatingBadge({
   value,
   reliability,
   large,
@@ -16,9 +16,9 @@ export function KwoteBadge({
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
       <View
-        aria-label={`Kwote ${value}`}
+        aria-label={`LK ${value}`}
         style={{
-          backgroundColor: colors.kwote,
+          backgroundColor: colors.rating,
           borderWidth: border.thin,
           borderColor: colors.ink,
           borderRadius: radius.pill,

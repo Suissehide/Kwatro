@@ -45,7 +45,6 @@ import {
   EventCard,
   FactCard,
   HoursCard,
-  KwoteBadge,
   LevelCard,
   ListCard,
   ListRow,
@@ -58,6 +57,7 @@ import {
   ProfileIdentity,
   RankCard,
   RankRow,
+  RatingBadge,
   RoomCard,
   RoomStatusTimeline,
   ScreenHeader,
@@ -140,7 +140,7 @@ export function Catalogue() {
       <View style={{ gap: 8 }}>
         <Typography variant="display">Plateau pop</Typography>
         <Typography variant="small">
-          Design system Kwatro : atomes, molécules, organismes, templates.
+          Design system Lucko : atomes, molécules, organismes, templates.
         </Typography>
       </View>
 
@@ -154,7 +154,7 @@ export function Catalogue() {
           <Button label="Rejoindre" />
           <Button label="Événement" kind="event" />
           <Button label="Lieu" kind="venue" />
-          <Button label="Kwote" kind="kwote" />
+          <Button label="LK" kind="rating" />
           <Button label="Ink" kind="ink" />
           <Button label="Annuler" kind="ghost" />
           <Button label="Désactivé" disabled />
@@ -179,14 +179,14 @@ export function Catalogue() {
         </Row>
         <Row>
           <Avatar name="Léa" />
-          <Avatar name="Max" color={colors.kwote} size={56} badge={<CountBadge count={2} />} />
+          <Avatar name="Max" color={colors.rating} size={56} badge={<CountBadge count={2} />} />
           <IconButton
             label="Filtrer"
             icon={<SlidersHorizontal size={18} color={colors.ink} strokeWidth={2.5} />}
           />
           <IconButton
             label="Ajouter"
-            bg={colors.kwote}
+            bg={colors.rating}
             icon={<Plus size={20} color={colors.ink} strokeWidth={2.5} />}
           />
           <DateBlock day="18" month="OCT" />
@@ -221,8 +221,8 @@ export function Catalogue() {
         <TextField label="E-mail" value="lea@" error="Adresse e-mail incomplète" />
         <Row>
           <Stepper value={players} min={2} max={8} onChange={setPlayers} />
-          <KwoteBadge value="1 184" reliability={96} />
-          <KwoteBadge value="1 184" large />
+          <RatingBadge value="1 184" reliability={96} />
+          <RatingBadge value="1 184" large />
         </Row>
         <XpBar level={7} name="Habitué" current={340} max={500} />
         <Slider label="Rayon" value={radiusKm} min={1} max={50} onChange={setRadiusKm} />
@@ -255,7 +255,7 @@ export function Catalogue() {
               color={colors.room}
               game="Magic"
               format="Commander"
-              kwote="1 214"
+              rating="1 214"
               note="38 parties classées"
             />
           </View>
@@ -264,9 +264,9 @@ export function Catalogue() {
               color={colors.venue}
               game="One Piece"
               format="Standard"
-              kwote={null}
+              rating={null}
               progress="3 / 5"
-              note="Encore 2 parties classées avant ta première Kwote"
+              note="Encore 2 parties classées avant tes premiers LK"
             />
           </View>
         </Row>
@@ -275,7 +275,7 @@ export function Catalogue() {
             color={colors.event}
             game="Lorcana"
             format="Core"
-            kwote="1 310"
+            rating="1 310"
             note="12 parties"
             last
           />
@@ -311,7 +311,7 @@ export function Catalogue() {
           </Row>
         </ContentCard>
         <View>
-          <ListRow left={<Avatar name="Léa" />} title="Léa" subtitle="Pioneer · Kwote 1 240" />
+          <ListRow left={<Avatar name="Léa" />} title="Léa" subtitle="Pioneer · LK 1 240" />
           <ListRow
             left={<Avatar name="Max" color={colors.venue} />}
             title="Max"
@@ -395,7 +395,7 @@ export function Catalogue() {
               meta="Le Dé Fêlé · 21 h"
               players={['M', 'S']}
               capacity={4}
-              kwote="1 180 – 1 260"
+              rating="1 180 – 1 260"
               onPress={() => {}}
             />
           </View>
@@ -403,7 +403,7 @@ export function Catalogue() {
             <ProfileCard
               pseudo="Léa"
               format="Commander"
-              kwote="1 214"
+              rating="1 214"
               xp={{ level: 4, name: 'Pilier de table', current: 340, max: 500 }}
             />
           </View>
@@ -416,7 +416,7 @@ export function Catalogue() {
             subtitle="Bar à jeux · jusqu'à 1 h"
             distance="1,2 km"
             partner
-            perk="Droit de jeu offert avec Kwatro"
+            perk="Droit de jeu offert avec Lucko"
             onPress={() => {}}
           />
           <VenueRow
@@ -522,7 +522,7 @@ export function Catalogue() {
           selectable
           selected={selected}
           onSelect={setSelected}
-          bulkActions={<Button label="Publier" kind="kwote" small />}
+          bulkActions={<Button label="Publier" kind="rating" small />}
           footer={<Pagination page={page} pages={20} total={58} perPage={3} onChange={setPage} />}
         />
         <BarChart
@@ -537,7 +537,7 @@ export function Catalogue() {
         />
         <Accordion
           items={[
-            { q: 'Comment marche la Kwote ?', a: 'Elle mesure ta force par format TCG.' },
+            { q: 'Comment marchent les LK ?', a: 'Ils mesurent ta force par format TCG.' },
             { q: "Et l'XP ?", a: "Elle récompense l'assiduité, pas la victoire." },
           ]}
         />
@@ -549,7 +549,7 @@ export function Catalogue() {
           items={playerNavItems}
           active={tab}
           onSelect={(key) => setTab(key as PlayerTab)}
-          right={<Button small kind="kwote" label="+ Créer une room" />}
+          right={<Button small kind="rating" label="+ Créer une room" />}
         />
         <View style={{ maxWidth: 420, width: '100%', gap: 12 }}>
           <PlayerTabBar active={tab} onSelect={setTab} onCreate={() => {}} bottomInset={10} />

@@ -1,4 +1,4 @@
-import type { eventDetailSchema } from '@kwatro/shared'
+import type { eventDetailSchema } from '@lucko/shared'
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common'
 import type { z } from 'zod'
 import type { User } from '../generated/prisma/client'

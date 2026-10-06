@@ -34,7 +34,7 @@ async function deviceToken(ask: boolean) {
   if (status !== 'granted') return null
   if (Platform.OS === 'android')
     await Notifications.setNotificationChannelAsync('default', {
-      name: 'Kwatro',
+      name: 'Lucko',
       importance: Notifications.AndroidImportance.DEFAULT,
     })
   const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId

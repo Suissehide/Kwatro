@@ -11,15 +11,15 @@ import {
   StatusPill,
   Tag,
   Typography,
-} from '@kwatro/design-system'
+} from '@lucko/design-system'
 import {
   COMMANDER_BRACKETS,
   type CommanderBracket,
-  formatKwote,
+  formatRating,
   type HostAction,
   type RoomCandidate,
   type RoomDetail,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import { router, useLocalSearchParams } from 'expo-router'
 import { ChevronRight } from 'lucide-react-native'
 import { useState } from 'react'
@@ -367,7 +367,7 @@ function HostPlayers({
   )
 }
 
-/** Demandes et liste d'attente (C5) : niveau, Kwote sur le format, badge -18 ; accepter ou refuser. */
+/** Demandes et liste d'attente (C5) : niveau, LK sur le format, badge -18 ; accepter ou refuser. */
 function Candidates({
   candidates,
   full,
@@ -396,8 +396,8 @@ function Candidates({
                 subtitle={[
                   c.status === 'WAITLISTED' ? "Liste d'attente" : null,
                   `${c.xp} XP`,
-                  c.kwote !== null
-                    ? `Kwote ${formatKwote(c.kwote)}`
+                  c.rating !== null
+                    ? `LK ${formatRating(c.rating)}`
                     : c.rankedGames
                       ? `${c.rankedGames} parties classées`
                       : null,

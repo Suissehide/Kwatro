@@ -44,7 +44,7 @@ export const queryClient = new QueryClient({
 })
 
 export const persistOptions = {
-  persister: createAsyncStoragePersister({ storage: AsyncStorage, key: 'kwatro.queries' }),
+  persister: createAsyncStoragePersister({ storage: AsyncStorage, key: 'lucko.queries' }),
   maxAge: DAY_MS,
   // Seul le joueur connecté est gardé entre deux lancements (pas d'avatar « ? » au démarrage)
   dehydrateOptions: {

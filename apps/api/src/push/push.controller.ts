@@ -1,4 +1,4 @@
-import { type PushTokenInput, pushTokenSchema } from '@kwatro/shared'
+import { type PushTokenInput, pushTokenSchema } from '@lucko/shared'
 import { Controller, Delete, HttpCode, Param, Put } from '@nestjs/common'
 import { ApiNoContentResponse, ApiTags } from '@nestjs/swagger'
 import { CurrentUser } from '../auth/auth.decorators'

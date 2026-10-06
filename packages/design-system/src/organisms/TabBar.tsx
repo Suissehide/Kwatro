@@ -141,7 +141,7 @@ export function PlayerTabBar({
                 width: 54,
                 height: 54,
                 borderRadius: 27,
-                backgroundColor: colors.kwote,
+                backgroundColor: colors.rating,
                 borderWidth: border.base,
                 borderColor: colors.ink,
                 alignItems: 'center',

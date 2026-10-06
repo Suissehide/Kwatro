@@ -1,6 +1,6 @@
 import { createServer } from 'node:http'
 import type { AddressInfo } from 'node:net'
-import { CHAT_EVENTS, REALTIME } from '@kwatro/shared'
+import { CHAT_EVENTS, REALTIME } from '@lucko/shared'
 import { Server } from 'socket.io'
 import { io, type Socket } from 'socket.io-client'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'

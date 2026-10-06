@@ -78,11 +78,11 @@ export const updateProfileSchema = z
 
 export type UpdateProfileInput = z.input<typeof updateProfileSchema>
 
-/** Kwote du joueur sur un format TCG ; `kwote` null tant qu'elle est provisoire (KWOTE_PROVISIONAL_GAMES). */
+/** LK du joueur sur un format TCG ; `rating` null tant qu'ils sont provisoires (RATING_PROVISIONAL_GAMES). */
 export const rankingSchema = z.object({
   game: z.object({ slug: z.string(), name: z.string() }),
   format: z.string(),
-  kwote: z.number().int().nullable(),
+  rating: z.number().int().nullable(),
   rankedGames: z.number().int(),
   reliabilityPct: z.number().int(),
 })
@@ -110,8 +110,10 @@ export const meSchema = z.object({
   /** Sujets de notifications push coupés (vide = tout activé). */
   notificationsOff: z.array(z.enum(NOTIFICATION_TOPICS)),
   xp: z.number().int(),
-  /** Kwote du format le plus joué en classé (null sans profil TCG). */
-  mainKwote: z.object({ game: z.string(), format: z.string(), kwote: z.number().int() }).nullable(),
+  /** LK du format le plus joué en classé (null sans profil TCG). */
+  mainRating: z
+    .object({ game: z.string(), format: z.string(), rating: z.number().int() })
+    .nullable(),
   rankings: z.array(rankingSchema),
   /** Lieux où le joueur est gérant ou staff : l'app affiche l'espace lieu s'il y en a un. */
   venues: z.array(

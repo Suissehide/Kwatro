@@ -11,8 +11,8 @@ import {
   StatusPill,
   Tag,
   Typography,
-} from '@kwatro/design-system'
-import { EVENT_TYPE_LABELS, formatPrice } from '@kwatro/shared'
+} from '@lucko/design-system'
+import { EVENT_TYPE_LABELS, formatPrice } from '@lucko/shared'
 import { router, useLocalSearchParams } from 'expo-router'
 import { ChevronRight } from 'lucide-react-native'
 import { useState } from 'react'

@@ -1,4 +1,4 @@
-import type { AgendaStatus } from '@kwatro/shared'
+import type { AgendaStatus } from '@lucko/shared'
 import type { ParticipantStatus, RegistrationStatus } from '../generated/prisma/client'
 
 /** Une partie commencée depuis moins de 3 h reste « à venir » (soirée en cours). */

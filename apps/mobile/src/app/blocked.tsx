@@ -8,8 +8,8 @@ import {
   PageTitle,
   ScreenHeader,
   SkeletonCard,
-} from '@kwatro/design-system'
-import type { BlockedPlayer } from '@kwatro/shared'
+} from '@lucko/design-system'
+import type { BlockedPlayer } from '@lucko/shared'
 import { router } from 'expo-router'
 import { UserX } from 'lucide-react-native'
 import { useState } from 'react'

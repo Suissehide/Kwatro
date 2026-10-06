@@ -1,11 +1,11 @@
 import {
   type createRoomSchema,
   type HostAction,
-  KWOTE_PROVISIONAL_GAMES,
   openingStatus,
+  RATING_PROVISIONAL_GAMES,
   type RoomStatus,
   type roomDetailSchema,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import {
   BadRequestException,
   ConflictException,
@@ -150,8 +150,8 @@ export class RoomsService {
               status: status as 'PENDING' | 'WAITLISTED',
               minor: isMinor(user, now),
               xp: user.xp,
-              kwote:
-                profile && profile.rankedGames >= KWOTE_PROVISIONAL_GAMES ? profile.kwote : null,
+              rating:
+                profile && profile.rankedGames >= RATING_PROVISIONAL_GAMES ? profile.rating : null,
               rankedGames: profile?.rankedGames ?? 0,
               appliedAt: createdAt,
             }

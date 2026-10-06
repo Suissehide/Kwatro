@@ -26,7 +26,7 @@ export function Accordion({ items }: { items: { q: string; a: string }[] }) {
             style={{
               padding: 14,
               gap: 8,
-              backgroundColor: expanded ? colors.kwoteSoft : colors.white,
+              backgroundColor: expanded ? colors.ratingSoft : colors.white,
               borderTopWidth: i ? border.thin : 0,
               borderColor: colors.line,
             }}

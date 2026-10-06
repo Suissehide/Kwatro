@@ -1,4 +1,4 @@
-import { adminReportSchema, ageOn, blockedPlayerSchema, reportSchema } from '@kwatro/shared'
+import { adminReportSchema, ageOn, blockedPlayerSchema, reportSchema } from '@lucko/shared'
 import {
   BadRequestException,
   Controller,

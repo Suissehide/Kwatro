@@ -3,8 +3,8 @@ import type {
   CalendarDay,
   ContentKind,
   StatusTone,
-} from '@kwatro/design-system'
-import { contentColor } from '@kwatro/design-system'
+} from '@lucko/design-system'
+import { contentColor } from '@lucko/design-system'
 import {
   EVENT_TYPE_LABELS,
   type EventType,
@@ -17,7 +17,7 @@ import {
   rangesOn,
   VENUE_TIME_ZONE,
   type VenueDetail,
-} from '@kwatro/shared'
+} from '@lucko/shared'
 import { eventPlaces, gameLabel, isFull, localDay } from './explore'
 
 type VenueEvent = VenueDetail['events'][number]

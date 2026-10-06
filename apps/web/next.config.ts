@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
   // Monorepo : trace les dépendances depuis la racine du dépôt
   outputFileTracingRoot: path.join(__dirname, '../../'),
   // Design system en React Native, rendu sur le web par react-native-web
-  transpilePackages: ['@kwatro/design-system', 'react-native-web'],
+  transpilePackages: ['@lucko/design-system', 'react-native-web'],
   turbopack: {
     resolveAlias: {
       'react-native': 'react-native-web',

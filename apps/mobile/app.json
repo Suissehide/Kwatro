@@ -1,17 +1,17 @@
 {
   "expo": {
-    "name": "Kwatro",
-    "slug": "kwatro",
-    "scheme": "kwatro",
+    "name": "Lucko",
+    "slug": "lucko",
+    "scheme": "lucko",
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "bundleIdentifier": "fr.kwatro.app",
+      "bundleIdentifier": "fr.lucko.app",
       "supportsTablet": false
     },
     "android": {
-      "package": "fr.kwatro.app"
+      "package": "fr.lucko.app"
     },
     "web": {
       "bundler": "metro",
@@ -24,7 +24,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Kwatro utilise ta position pour te montrer les lieux et les soirées de jeu autour de toi."
+          "locationWhenInUsePermission": "Lucko utilise ta position pour te montrer les lieux et les soirées de jeu autour de toi."
         }
       ],
       "expo-notifications",

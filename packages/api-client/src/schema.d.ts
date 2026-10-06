@@ -647,10 +647,10 @@ export interface operations {
                         vibes: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
                         notificationsOff: ("ROOMS" | "MESSAGES" | "VENUES")[];
                         xp: number;
-                        mainKwote: {
+                        mainRating: {
                             game: string;
                             format: string;
-                            kwote: number;
+                            rating: number;
                         } | null;
                         rankings: {
                             game: {
@@ -658,7 +658,7 @@ export interface operations {
                                 name: string;
                             };
                             format: string;
-                            kwote: number | null;
+                            rating: number | null;
                             rankedGames: number;
                             reliabilityPct: number;
                         }[];
@@ -738,10 +738,10 @@ export interface operations {
                         vibes: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
                         notificationsOff: ("ROOMS" | "MESSAGES" | "VENUES")[];
                         xp: number;
-                        mainKwote: {
+                        mainRating: {
                             game: string;
                             format: string;
-                            kwote: number;
+                            rating: number;
                         } | null;
                         rankings: {
                             game: {
@@ -749,7 +749,7 @@ export interface operations {
                                 name: string;
                             };
                             format: string;
-                            kwote: number | null;
+                            rating: number | null;
                             rankedGames: number;
                             reliabilityPct: number;
                         }[];
@@ -921,7 +921,7 @@ export interface operations {
                         latitude: number;
                         longitude: number;
                         isPartner: boolean;
-                        kwatroPerk: string | null;
+                        luckoPerk: string | null;
                         distanceMeters: number;
                         openNow: boolean | null;
                         closesAtMinute: number | null;
@@ -957,7 +957,7 @@ export interface operations {
                         latitude: number;
                         longitude: number;
                         isPartner: boolean;
-                        kwatroPerk: string | null;
+                        luckoPerk: string | null;
                         openNow: boolean | null;
                         closesAtMinute: number | null;
                         city: string;
@@ -1048,7 +1048,7 @@ export interface operations {
                             players: {
                                 initial: string;
                             }[];
-                            kwoteRange: {
+                            ratingRange: {
                                 min: number;
                                 max: number;
                             } | null;
@@ -1148,7 +1148,7 @@ export interface operations {
                         players: {
                             initial: string;
                         }[];
-                        kwoteRange: {
+                        ratingRange: {
                             min: number;
                             max: number;
                         } | null;
@@ -1587,7 +1587,7 @@ export interface operations {
                             status: "PENDING" | "WAITLISTED";
                             minor: boolean;
                             xp: number;
-                            kwote: number | null;
+                            rating: number | null;
                             rankedGames: number;
                             /** Format: date-time */
                             appliedAt: string;
@@ -1657,7 +1657,7 @@ export interface operations {
                             status: "PENDING" | "WAITLISTED";
                             minor: boolean;
                             xp: number;
-                            kwote: number | null;
+                            rating: number | null;
                             rankedGames: number;
                             /** Format: date-time */
                             appliedAt: string;
@@ -1727,7 +1727,7 @@ export interface operations {
                             status: "PENDING" | "WAITLISTED";
                             minor: boolean;
                             xp: number;
-                            kwote: number | null;
+                            rating: number | null;
                             rankedGames: number;
                             /** Format: date-time */
                             appliedAt: string;
@@ -1798,7 +1798,7 @@ export interface operations {
                             status: "PENDING" | "WAITLISTED";
                             minor: boolean;
                             xp: number;
-                            kwote: number | null;
+                            rating: number | null;
                             rankedGames: number;
                             /** Format: date-time */
                             appliedAt: string;
@@ -1869,7 +1869,7 @@ export interface operations {
                             status: "PENDING" | "WAITLISTED";
                             minor: boolean;
                             xp: number;
-                            kwote: number | null;
+                            rating: number | null;
                             rankedGames: number;
                             /** Format: date-time */
                             appliedAt: string;
@@ -1960,7 +1960,7 @@ export interface operations {
                             status: "PENDING" | "WAITLISTED";
                             minor: boolean;
                             xp: number;
-                            kwote: number | null;
+                            rating: number | null;
                             rankedGames: number;
                             /** Format: date-time */
                             appliedAt: string;

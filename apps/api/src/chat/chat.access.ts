@@ -1,4 +1,4 @@
-import type { ChatRef } from '@kwatro/shared'
+import type { ChatRef } from '@lucko/shared'
 import { eventVisibleTo, roomVisibleTo } from '../common/minors.rules'
 import { notBlockedWith } from '../explore/explore.service'
 import type { User } from '../generated/prisma/client'

@@ -140,7 +140,7 @@ type Account = {
 const accounts: Account[] = [
   {
     id: 'joueur-demo',
-    email: 'player@kwatro.dev',
+    email: 'player@lucko.dev',
     password: 'Player123!',
     pseudo: 'Lea',
     name: 'Léa Martin',
@@ -151,15 +151,15 @@ const accounts: Account[] = [
   },
   {
     id: 'admin-demo',
-    email: 'admin@kwatro.dev',
+    email: 'admin@lucko.dev',
     password: 'Admin123!',
     pseudo: 'admin',
-    name: 'Équipe Kwatro',
+    name: 'Équipe Lucko',
     role: 'ADMIN',
   },
   {
     id: 'staff-demo',
-    email: 'staff@kwatro.dev',
+    email: 'staff@lucko.dev',
     password: 'Staff123!',
     pseudo: 'gerant-de-fele',
     name: 'Karim Benali',
@@ -168,7 +168,7 @@ const accounts: Account[] = [
   },
   {
     id: 'mineur-demo',
-    email: 'mineur@kwatro.dev',
+    email: 'mineur@lucko.dev',
     password: 'Mineur123!',
     pseudo: 'Tom_16',
     name: 'Tom Leroy',
@@ -180,7 +180,7 @@ const accounts: Account[] = [
   {
     // Compte tout juste créé : l'app ouvre l'onboarding (pseudo, ville)
     id: 'nouveau-demo',
-    email: 'nouveau@kwatro.dev',
+    email: 'nouveau@lucko.dev',
     password: 'Nouveau123!',
     pseudo: null,
     city: null,
@@ -198,7 +198,7 @@ const accounts: Account[] = [
     ] as const
   ).map(([pseudo, xp, vibes, availability]) => ({
     id: `demo-${pseudo}`,
-    email: `${pseudo}@kwatro.dev`,
+    email: `${pseudo}@lucko.dev`,
     pseudo,
     xp,
     vibes: [...vibes],
@@ -248,7 +248,7 @@ async function main() {
       description: 'Bar à jeux : ludothèque de 400 jeux, tables TCG, soirées à thème.',
       playFeeCents: 300,
       minSpendCents: 500,
-      kwatroPerk: 'Droit de jeu offert sur présentation du QR Kwatro',
+      luckoPerk: 'Droit de jeu offert sur présentation du QR Lucko',
       quarter: 'Saint-Pierre',
       phone: '05 56 00 00 00',
       website: 'https://example.com',
@@ -275,7 +275,7 @@ async function main() {
     ],
     {
       photos: ['salle', 'ludotheque', 'comptoir', 'tournoi', 'terrasse'].map((name, order) => ({
-        url: `https://picsum.photos/seed/kwatro-${name}/1200/800`,
+        url: `https://picsum.photos/seed/lucko-${name}/1200/800`,
         caption: name,
         order,
       })),
@@ -351,7 +351,7 @@ async function main() {
       isPartner: true,
       description: 'Bar à jeux et arcade, tournois TCG le week-end.',
       playFeeCents: 400,
-      kwatroPerk: '-10 % sur les boosters avec le QR Kwatro',
+      luckoPerk: '-10 % sur les boosters avec le QR Lucko',
     },
     ['one-piece', 'lorcana', 'riftbound', 'jeux-de-societe'],
     tuesdayToSaturday(16 * 60, 2 * 60),
@@ -422,8 +422,8 @@ async function main() {
   const yugioh = await format('yugioh', 'advanced')
   const boardGames = await prisma.game.findUniqueOrThrow({ where: { slug: 'jeux-de-societe' } })
 
-  // Kwote par format : moins de 5 parties classées = provisoire
-  for (const [userId, f, kwote, rankedGames, reliabilityPct] of [
+  // LK par format : moins de 5 parties classées = provisoire
+  for (const [userId, f, rating, rankedGames, reliabilityPct] of [
     ['joueur-demo', commander, 1214, 38, 82],
     ['joueur-demo', lorcana, 1310, 12, 54],
     ['joueur-demo', pokemon, 1092, 21, 66],
@@ -442,8 +442,8 @@ async function main() {
   ] as const) {
     await prisma.playerGameProfile.upsert({
       where: { userId_formatId: { userId, formatId: f.id } },
-      update: { kwote, rankedGames, reliabilityPct },
-      create: { userId, formatId: f.id, kwote, rankedGames, reliabilityPct },
+      update: { rating, rankedGames, reliabilityPct },
+      create: { userId, formatId: f.id, rating, rankedGames, reliabilityPct },
     })
   }
 

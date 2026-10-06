@@ -1,5 +1,5 @@
 import { Check, CircleAlert, Info, type LucideIcon, TriangleAlert } from 'lucide-react-native'
-// Kwatro — design tokens « Plateau pop » (partagés mobile + web)
+// Lucko — design tokens « Plateau pop » (partagés mobile + web)
 import { Platform, type TextStyle } from 'react-native'
 
 export const colors = {
@@ -26,13 +26,13 @@ export const colors = {
   room: '#CF3A22', // rooms, action principale, danger
   event: '#2747D6', // événements, XP
   venue: '#157A55', // lieux, partenaire, mode lieu, succès
-  kwote: '#F5B800', // Kwote, mise en avant, bouton « + »
+  rating: '#F5B800', // LK, mise en avant, bouton « + »
 
   // Tons clairs
   roomSoft: '#FFDCD3',
   eventSoft: '#DCE3FF',
   venueSoft: '#CFEFE0',
-  kwoteSoft: '#FFE8A3',
+  ratingSoft: '#FFE8A3',
 } as const
 
 // Texte à poser sur chaque couleur pleine
@@ -40,7 +40,7 @@ export const onColor = {
   room: colors.white,
   event: colors.white,
   venue: colors.white,
-  kwote: colors.ink, // jamais de blanc sur le jaune
+  rating: colors.ink, // jamais de blanc sur le jaune
   ink: colors.white,
   white: colors.ink,
 } as const
@@ -52,7 +52,7 @@ export function textOn(bg: string): string {
 }
 
 // Polices : une famille par graisse, noms des paquets @expo-google-fonts.
-// Sur le web (Next.js), les polices Google sont chargées par kwatro.css sous leur nom
+// Sur le web (Next.js), les polices Google sont chargées par lucko.css sous leur nom
 // d'origine : la pile `Archivo_800ExtraBold, Archivo` + fontWeight couvre Expo web et Next.
 const families = {
   display: { 400: 'ArchivoBlack_400Regular' },
@@ -132,7 +132,7 @@ export const contentColor = {
   room: colors.room,
   event: colors.event,
   venue: colors.venue,
-  kwote: colors.kwote,
+  rating: colors.rating,
 } as const
 export type ContentKind = keyof typeof contentColor
 
@@ -142,8 +142,8 @@ export const semantic = {
   successSoft: colors.venueSoft,
   danger: colors.room,
   dangerSoft: colors.roomSoft,
-  warning: colors.kwote,
-  warningSoft: colors.kwoteSoft,
+  warning: colors.rating,
+  warningSoft: colors.ratingSoft,
   warningDot: '#B88700',
   info: colors.event,
   infoSoft: colors.eventSoft,
@@ -205,7 +205,7 @@ export const table = {
   headerBg: colors.creamDark,
   rowBorder: colors.line,
   rowHover: colors.hover,
-  rowSelected: colors.kwoteSoft,
+  rowSelected: colors.ratingSoft,
   paddingComfort: { v: 13, h: 16 },
   paddingCompact: { v: 8, h: 14 },
   bulkBarBg: colors.ink,
@@ -216,6 +216,6 @@ export type Tone = 'ok' | 'warn' | 'err' | 'info'
 export const toneStyles: Record<Tone, { soft: string; solid: string; icon: LucideIcon }> = {
   ok: { soft: colors.venueSoft, solid: colors.venue, icon: Check },
   err: { soft: colors.roomSoft, solid: colors.room, icon: CircleAlert },
-  warn: { soft: colors.kwoteSoft, solid: colors.kwote, icon: TriangleAlert },
+  warn: { soft: colors.ratingSoft, solid: colors.rating, icon: TriangleAlert },
   info: { soft: colors.eventSoft, solid: colors.event, icon: Info },
 }

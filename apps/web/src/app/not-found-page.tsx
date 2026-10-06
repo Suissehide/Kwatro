@@ -1,5 +1,5 @@
 'use client'
-import { CONTACT_EMAIL, NotFound, TopNav } from '@kwatro/design-system'
+import { CONTACT_EMAIL, NotFound, TopNav } from '@lucko/design-system'
 import { usePathname, useRouter } from 'next/navigation'
 import { useSyncExternalStore } from 'react'
 import { View } from 'react-native'

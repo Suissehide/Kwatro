@@ -1,4 +1,4 @@
-import { Button, playerNavItems, TopNav } from '@kwatro/design-system'
+import { Button, playerNavItems, TopNav } from '@lucko/design-system'
 import { openCreateRoom, openHome, openSettings, openSite, openTab } from '@/lib/navigation'
 import { visibleAvatar } from '@/lib/profile'
 import { useTabBadges } from '@/queries/useChat'
@@ -16,7 +16,7 @@ export function PlayerNav({ active, create = true }: { active: string; create?: 
       onHome={openHome}
       right={
         create ? (
-          <Button small kind="kwote" label="+ Créer une room" onPress={() => openCreateRoom()} />
+          <Button small kind="rating" label="+ Créer une room" onPress={() => openCreateRoom()} />
         ) : null
       }
       account={
