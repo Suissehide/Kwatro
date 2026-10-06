@@ -6,6 +6,7 @@ import {
   planProfileMerge,
   suspensionEnd,
   suspensionMail,
+  warningMail,
 } from './admin.rules'
 
 const now = new Date('2026-10-06T12:00:00Z')
@@ -80,14 +81,21 @@ describe('fusion de jeux', () => {
 describe('e-mails de la modération', () => {
   it('suspension : durée, motif et contact', () => {
     const until = new Date('2026-10-13T12:00:00Z')
-    const { subject, text } = suspensionMail(
+    const { subject, html } = suspensionMail(
       { pseudo: 'Tom_16', suspendedAt: now, suspendedUntil: until },
       'Insultes répétées',
     )
     expect(subject).toBe('Ton compte Kwatro est suspendu')
-    expect(text).toContain('Bonjour Tom_16,')
-    expect(text).toContain('suspendu jusqu’au 13 octobre')
-    expect(text).toContain('Motif : Insultes répétées')
-    expect(text).toContain('contact@kwatro.fr')
+    expect(html).toContain('Bonjour Tom_16,')
+    expect(html).toContain('Jusqu’au 13 octobre')
+    expect(html).toContain('Insultes répétées')
+    expect(html).toContain('mailto:contact@kwatro.fr')
+  })
+
+  it('échappe le texte saisi : pas de HTML injecté par un motif ou un pseudo', () => {
+    const { html } = warningMail('<b>x</b>', '<script>alert(1)</script> & "co"')
+    expect(html).not.toContain('<script>')
+    expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt; &amp; &quot;co&quot;')
+    expect(html).toContain('Bonjour &lt;b&gt;x&lt;/b&gt;,')
   })
 })

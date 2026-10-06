@@ -1,4 +1,5 @@
 import { addDays, fromLocalDateTime } from '@kwatro/shared'
+import { mailHtml } from '../mail/mail.layout'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -26,39 +27,56 @@ export function suspensionMessage(user: Suspendable) {
 // Même adresse que CONTACT_EMAIL du design system (pied de page, Réglages)
 const SUPPORT_EMAIL = 'contact@kwatro.fr'
 
-const hello = (pseudo: string | null) => (pseudo ? `Bonjour ${pseudo},` : 'Bonjour,')
+const greeting = (pseudo: string | null) => (pseudo ? `Bonjour ${pseudo},` : 'Bonjour,')
+
+const longDay = (date: Date) =>
+  new Intl.DateTimeFormat('fr-FR', {
+    timeZone: 'Europe/Paris',
+    day: 'numeric',
+    month: 'long',
+  }).format(date)
 
 /** E-mail au joueur suspendu : durée, motif, contact pour contester. */
-export const suspensionMail = (user: Suspendable & { pseudo: string | null }, reason: string) => ({
-  subject: 'Ton compte Kwatro est suspendu',
-  text: [
-    hello(user.pseudo),
-    '',
-    `${suspensionMessage(user)} Tu ne peux plus te connecter, tes rooms à venir sont annulées.`,
-    '',
-    `Motif : ${reason}`,
-    '',
-    `Pour contester cette décision, écris-nous à ${SUPPORT_EMAIL}.`,
-    '',
-    'L’équipe Kwatro',
-  ].join('\n'),
-})
+export function suspensionMail(user: Suspendable & { pseudo: string | null }, reason: string) {
+  const until = user.suspendedUntil
+    ? `Jusqu’au ${longDay(user.suspendedUntil)}`
+    : 'Suspension définitive'
+  return {
+    subject: 'Ton compte Kwatro est suspendu',
+    html: mailHtml({
+      preheader: `${until}. Motif : ${reason}`,
+      tone: 'danger',
+      verdict: 'Compte suspendu',
+      headline: until,
+      greeting: greeting(user.pseudo),
+      paragraphs: [
+        `L’équipe de modération a suspendu ton compte. Tu ne peux plus te connecter à Kwatro${user.suspendedUntil ? ' jusqu’à cette date' : ''}, tes rooms à venir ont été annulées.`,
+      ],
+      quote: { label: 'Le motif', text: reason },
+      action: { label: 'Contester la décision', href: `mailto:${SUPPORT_EMAIL}` },
+      closing: `Explique ta version dans ton message : un membre de l’équipe relira ton dossier. Adresse du support : ${SUPPORT_EMAIL}.`,
+    }),
+  }
+}
 
 /** E-mail d'avertissement de la modération (envoyé aussi en notification). */
-export const warningMail = (pseudo: string | null, reason: string) => ({
-  subject: 'Avertissement de la modération Kwatro',
-  text: [
-    hello(pseudo),
-    '',
-    'L’équipe de modération a reçu un signalement à ton sujet :',
-    '',
-    reason,
-    '',
-    `Si cela se reproduit, ton compte pourra être suspendu. Une question : ${SUPPORT_EMAIL}.`,
-    '',
-    'L’équipe Kwatro',
-  ].join('\n'),
-})
+export function warningMail(pseudo: string | null, reason: string) {
+  return {
+    subject: 'Avertissement de la modération Kwatro',
+    html: mailHtml({
+      preheader: reason,
+      tone: 'warning',
+      verdict: 'Avertissement',
+      headline: 'Un signalement te concerne',
+      greeting: greeting(pseudo),
+      paragraphs: [
+        'L’équipe de modération a examiné un signalement à ton sujet. Ton compte reste actif, mais voici ce qui doit changer :',
+      ],
+      quote: { label: 'Le message de l’équipe', text: reason },
+      closing: `Si cela se reproduit, ton compte pourra être suspendu. Une question ? Écris-nous à ${SUPPORT_EMAIL}.`,
+    }),
+  }
+}
 
 const minuteOf = (time: string) => {
   const [hours = 0, minutes = 0] = time.split(':').map(Number)

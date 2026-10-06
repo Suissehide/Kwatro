@@ -6,7 +6,8 @@ import { JobsService } from '../jobs/jobs.service'
 
 const MAIL_JOB = 'mail'
 
-export type MailContent = { to: string; subject: string; text: string }
+/** E-mail en HTML seul (gabarit dans mail.layout.ts). */
+export type MailContent = { to: string; subject: string; html: string }
 
 /**
  * E-mails transactionnels par SMTP : Mailpit en local (http://localhost:8025), Resend en production
