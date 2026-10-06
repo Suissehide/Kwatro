@@ -18,6 +18,7 @@ import { isMinor, roomVisibleTo, type Viewer } from '../common/minors.rules'
 import { closureRange, notBlockedWith } from '../explore/explore.service'
 import type { Prisma, User } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
+import { PushService } from '../push/push.service'
 import {
   acceptRefusal,
   createRoomRefusal,
@@ -54,7 +55,10 @@ const detailInclude = {
 
 @Injectable()
 export class RoomsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly push: PushService,
+  ) {}
 
   /** Crée la room ; l'hôte en est le premier joueur accepté. */
   async create(host: User, input: z.output<typeof createRoomSchema>) {
@@ -211,6 +215,17 @@ export class RoomsService {
         data: { status: accept ? 'ACCEPTED' : 'DECLINED' },
       })
       await this.refreshStatus(tx, id)
+      if (accept)
+        await this.push.notify(
+          [userId],
+          'ROOMS',
+          {
+            title: 'Candidature acceptée',
+            body: 'Ta place est réservée. Retrouve la room dans Mes parties.',
+            url: `/rooms/${id}`,
+          },
+          tx,
+        )
     })
     return this.detail(id, host)
   }
@@ -219,7 +234,7 @@ export class RoomsService {
    * Action de l'hôte (KWT-57) : retirer un joueur (il ne peut plus revenir, sa place revient à la liste
    * d'attente), transférer le rôle d'hôte à un joueur accepté, fermer / rouvrir les inscriptions, annuler.
    */
-  // ponytail: annulation sans délai ni effet sur la fiabilité, et joueurs pas prévenus (KWT-108)
+  // ponytail: annulation sans délai ni effet sur la fiabilité
   async hostAction(id: string, host: User, action: HostAction) {
     await this.prisma.$transaction(async (tx) => {
       const room = await this.lock(tx, id, host)
@@ -249,6 +264,19 @@ export class RoomsService {
           break
         case 'cancel':
           await tx.room.update({ where: { id }, data: { status: 'CANCELLED' } })
+          // Joueurs acceptés, en attente ou sur liste d'attente : tous prévenus
+          await this.push.notify(
+            room.participants
+              .filter((p) => p.userId !== host.id && p.status !== 'DECLINED' && p.status !== 'LEFT')
+              .map((p) => p.userId),
+            'ROOMS',
+            {
+              title: 'Room annulée',
+              body: 'L’hôte a annulé une room où tu étais inscrit·e.',
+              url: `/rooms/${id}`,
+            },
+            tx,
+          )
           break
       }
       await this.refreshStatus(tx, id)
@@ -286,6 +314,17 @@ export class RoomsService {
       where: { roomId: room.id, userId: { in: next.map((p) => p.userId) } },
       data: { status: promotedStatus(room.autoAccept) },
     })
+    if (room.autoAccept)
+      await this.push.notify(
+        next.map((p) => p.userId),
+        'ROOMS',
+        {
+          title: 'Une place s’est libérée',
+          body: 'Tu passes de la liste d’attente à la table.',
+          url: `/rooms/${room.id}`,
+        },
+        tx,
+      )
   }
 
   /** Ouverte / complète selon les acceptés (une room confirmée, annulée… ne bouge pas). */

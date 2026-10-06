@@ -4,6 +4,38 @@
  */
 
 export interface paths {
+    "/me/push-tokens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["PushController_register"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/push-tokens/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["PushController_forget"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -384,6 +416,48 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    PushController_register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    token: string;
+                };
+            };
+        };
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PushController_forget: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     HealthController_check: {
         parameters: {
             query?: never;
@@ -475,6 +549,7 @@ export interface operations {
                         searchRadiusKm: number;
                         availability: number[];
                         vibes: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
+                        notificationsOff: ("ROOMS" | "MESSAGES" | "VENUES")[];
                         xp: number;
                         mainKwote: {
                             game: string;
@@ -538,6 +613,7 @@ export interface operations {
                     searchRadiusKm?: number;
                     availability?: number[];
                     vibes?: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
+                    notificationsOff?: ("ROOMS" | "MESSAGES" | "VENUES")[];
                 };
             };
         };
@@ -564,6 +640,7 @@ export interface operations {
                         searchRadiusKm: number;
                         availability: number[];
                         vibes: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
+                        notificationsOff: ("ROOMS" | "MESSAGES" | "VENUES")[];
                         xp: number;
                         mainKwote: {
                             game: string;

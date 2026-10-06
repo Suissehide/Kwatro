@@ -50,6 +50,7 @@ describe('schémas de réponse', () => {
       searchRadiusKm: 10,
       availability: [],
       vibes: [],
+      notificationsOff: [],
       xp: 0,
       mainKwote: null,
       rankings: [],

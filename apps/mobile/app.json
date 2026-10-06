@@ -27,6 +27,7 @@
           "locationWhenInUsePermission": "Kwatro utilise ta position pour te montrer les lieux et les soirées de jeu autour de toi."
         }
       ],
+      "expo-notifications",
       "expo-secure-store",
       "expo-web-browser"
     ],

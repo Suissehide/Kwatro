@@ -12,19 +12,21 @@ import {
   TextLink,
   Typography,
 } from '@kwatro/design-system'
+import { NOTIFICATION_TOPIC_LABELS, NOTIFICATION_TOPICS } from '@kwatro/shared'
 import Constants from 'expo-constants'
 import { router } from 'expo-router'
-import { useState } from 'react'
-import { Linking, useWindowDimensions, View } from 'react-native'
+import { useEffect, useState } from 'react'
+import { Linking, Platform, useWindowDimensions, View } from 'react-native'
 import { PlayerScreen } from '@/components/PlayerScreen'
 import { openSite } from '@/lib/navigation'
+import { registerPush } from '@/lib/push'
 import { signOut, useMeMutations, useMeQuery } from '@/queries/useMe'
 
 const WIDE = 900
 
 const backToProfile = () => (router.canGoBack() ? router.back() : router.replace('/profile'))
 
-// ponytail: mot de passe, fournisseur lié et préférences (notifications, langue) attendent leurs écrans
+// ponytail: mot de passe, fournisseur lié et langue attendent leurs écrans
 const KWATRO_ROWS = [
   { label: 'Aide', onPress: () => openSite('/aide') },
   // Contact du support exigé par Apple et Google (KWT-19)
@@ -37,12 +39,49 @@ const KWATRO_ROWS = [
   { label: 'Politique de confidentialité', onPress: () => openSite('/confidentialite') },
 ]
 
-/** Réglages du compte : e-mail, joueurs bloqués, liens Kwatro et contact, déconnexion et suppression (KWT-18). */
+/** Réglages du compte : e-mail, joueurs bloqués, liens Kwatro et contact, déconnexion et suppression (KWT-18), notifications (KWT-108). */
 export default function SettingsScreen() {
   const wide = useWindowDimensions().width >= WIDE
   const me = useMeQuery({ required: true })
-  const { deleteAccount } = useMeMutations()
+  const { deleteAccount, updateProfile } = useMeMutations()
   const [confirm, setConfirm] = useState<'signOut' | 'delete' | null>(null)
+  // Notifications sur ce téléphone : null tant qu'on ne sait pas
+  const [phonePush, setPhonePush] = useState<boolean | null>(null)
+  useEffect(() => {
+    void registerPush().then(setPhonePush, () => setPhonePush(false))
+  }, [])
+
+  // Refusées une fois, la demande système ne revient plus : on renvoie vers les réglages du téléphone
+  const enablePhonePush = async () => {
+    const enabled = await registerPush(true).catch(() => false)
+    setPhonePush(enabled)
+    if (!enabled) void Linking.openSettings()
+  }
+
+  const notificationRows = me
+    ? [
+        Platform.OS === 'web'
+          ? { label: 'Ce téléphone', value: 'Sur l’app mobile' }
+          : {
+              label: 'Ce téléphone',
+              value: phonePush ? 'Activées' : phonePush === false ? 'Désactivées' : '…',
+              onPress: phonePush ? undefined : enablePhonePush,
+            },
+        ...NOTIFICATION_TOPICS.map((topic) => {
+          const off = me.notificationsOff.includes(topic)
+          return {
+            label: NOTIFICATION_TOPIC_LABELS[topic],
+            value: off ? 'Coupées' : 'Activées',
+            onPress: () =>
+              updateProfile.mutate({
+                notificationsOff: off
+                  ? me.notificationsOff.filter((t) => t !== topic)
+                  : [...me.notificationsOff, topic],
+              }),
+          }
+        }),
+      ]
+    : []
 
   const confirmDelete = () => {
     setConfirm(null)
@@ -58,6 +97,7 @@ export default function SettingsScreen() {
           { label: 'Joueurs bloqués', onPress: () => router.push('/blocked') },
         ]}
       />
+      <SettingsGroup title="Notifications" rows={notificationRows} />
       <SettingsGroup title="Kwatro" rows={KWATRO_ROWS} />
       <View style={{ marginTop: 20 }}>
         {/* Desktop : pas de confirmation, comme dans le menu du compte */}
