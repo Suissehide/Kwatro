@@ -193,7 +193,27 @@ model PlayerGameProfile {
   reliabilityPct   Int           @default(0)
   updatedAt        DateTime      @updatedAt
 
+  history KwoteChange[]
+
   @@unique([userId, formatId])
+}
+
+/// Historique de la Kwote : une ligne par joueur et par partie classée confirmée (KWT-86).
+model KwoteChange {
+  id          String            @id @default(cuid())
+  profileId   String
+  profile     PlayerGameProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  /// Room classée d'origine (null pour un tournoi, ou si la room a été supprimée)
+  roomId      String?
+  room        Room?             @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  kwoteBefore Int
+  kwoteAfter  Int
+  place       Int
+  /// Adversaires de la partie : sert à la variété de l'indice de fiabilité
+  opponentIds String[]
+  createdAt   DateTime          @default(now())
+
+  @@index([profileId, createdAt])
 }
 
 // ---------- Lieux ----------
@@ -364,6 +384,7 @@ model Room {
   updatedAt     DateTime   @updatedAt
 
   participants RoomParticipant[]
+  kwoteChanges KwoteChange[]
 
   @@index([startsAt])
 }
