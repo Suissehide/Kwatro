@@ -8,12 +8,15 @@ export function TextLink({
   label,
   muted,
   icon: Icon,
+  iconAfter,
   onPress,
 }: {
   label: string
   muted?: boolean
   /** Icône Lucide avant le libellé (ex. retour). */
   icon?: LucideIcon
+  /** Icône après le libellé (ex. chevron « Profil › »). */
+  iconAfter?: boolean
   onPress?: () => void
 }) {
   const { hovered, hoverProps } = useHover()
@@ -21,7 +24,7 @@ export function TextLink({
   return (
     <Pressable role="link" onPress={onPress} {...hoverProps}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-        {Icon ? <Icon size={15} color={color} strokeWidth={2.5} /> : null}
+        {Icon && !iconAfter ? <Icon size={15} color={color} strokeWidth={2.5} /> : null}
         <Text
           style={{
             ...font('body', muted ? 600 : 800),
@@ -33,6 +36,7 @@ export function TextLink({
         >
           {label}
         </Text>
+        {Icon && iconAfter ? <Icon size={15} color={color} strokeWidth={2.5} /> : null}
       </View>
     </Pressable>
   )

@@ -30,6 +30,7 @@ export const colors = {
 
   // Tons clairs
   roomSoft: '#FFDCD3',
+  roomPale: '#FFF5F2', // zone de suppression
   eventSoft: '#DCE3FF',
   venueSoft: '#CFEFE0',
   ratingSoft: '#FFE8A3',

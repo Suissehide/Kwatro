@@ -58,9 +58,22 @@ export const NOTIFICATION_TOPICS = ['ROOMS', 'MESSAGES', 'VENUES'] as const
 export type NotificationTopic = (typeof NOTIFICATION_TOPICS)[number]
 
 export const NOTIFICATION_TOPIC_LABELS: Record<NotificationTopic, string> = {
-  ROOMS: 'Mes rooms (candidatures, rappels, annulations)',
+  ROOMS: 'Mes rooms',
   MESSAGES: 'Messages',
   VENUES: 'Lieux suivis',
+}
+
+/** Ce que couvre chaque sujet : `long` sur le web, `short` sur téléphone. */
+export const NOTIFICATION_TOPIC_DESCRIPTIONS: Record<
+  NotificationTopic,
+  { long: string; short: string }
+> = {
+  ROOMS: {
+    long: 'Candidatures, rappels avant la partie, annulations.',
+    short: 'Candidatures, rappels, annulations',
+  },
+  MESSAGES: { long: 'Nouveaux messages dans tes rooms.', short: 'Nouveaux messages' },
+  VENUES: { long: 'Nouveaux événements des lieux que tu suis.', short: 'Nouveaux événements' },
 }
 
 export const VENUE_TYPES = ['GAME_BAR', 'TCG_SHOP', 'LUDOTHEQUE', 'ASSOCIATION', 'OTHER'] as const
