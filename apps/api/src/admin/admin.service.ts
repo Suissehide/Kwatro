@@ -1,4 +1,4 @@
-import type { SuspendInput } from '@lucko/shared'
+import type { AdminActionKind, SuspendInput } from '@lucko/shared'
 import {
   BadRequestException,
   ForbiddenException,
@@ -10,6 +10,7 @@ import { MailService } from '../mail/mail.service'
 import { PrismaService } from '../prisma/prisma.service'
 import { PushService } from '../push/push.service'
 import {
+  ACTION_TARGET,
   planFormatMerge,
   planProfileMerge,
   suspensionEnd,
@@ -18,6 +19,8 @@ import {
 } from './admin.rules'
 
 type Tx = Prisma.TransactionClient
+type Action = { action: AdminActionKind; targetId: string; data: Prisma.JsonValue }
+type Target = { type: 'user' | 'venue' | 'game'; id: string; label: string }
 
 const UPCOMING_ROOM = ['OPEN', 'FULL', 'CONFIRMED'] as const
 
@@ -147,5 +150,50 @@ export class AdminService {
       // Il ne reste au doublon que des formats vidés, supprimés avec lui
       await tx.game.delete({ where: { id: sourceId } })
     })
+  }
+
+  /** Fiche que désigne chaque action du journal (joueur, lieu ou jeu gardé), avec son nom. */
+  async withTargets<A extends Action>(actions: A[]): Promise<(A & { target: Target | null })[]> {
+    const ids = (kind: string) =>
+      actions.filter((a) => ACTION_TARGET[a.action] === kind).map((a) => a.targetId)
+    const mergedInto = (a: Action) => String((a.data as { intoId?: unknown } | null)?.intoId ?? '')
+    const user = (u: { id: string; pseudo: string | null }): Target => ({
+      type: 'user',
+      id: u.id,
+      label: u.pseudo ?? 'Sans pseudo',
+    })
+    const [reports, users, venues, events, games] = await Promise.all([
+      this.prisma.report.findMany({
+        where: { id: { in: ids('report') } },
+        select: { id: true, target: { select: { id: true, pseudo: true } } },
+      }),
+      this.prisma.user.findMany({
+        where: { id: { in: ids('user') } },
+        select: { id: true, pseudo: true },
+      }),
+      this.prisma.venue.findMany({
+        where: { id: { in: ids('venue') } },
+        select: { id: true, name: true },
+      }),
+      this.prisma.event.findMany({
+        where: { id: { in: ids('event') } },
+        select: { id: true, title: true, venueId: true },
+      }),
+      this.prisma.game.findMany({
+        where: { id: { in: actions.filter((a) => a.action === 'GAME_MERGE').map(mergedInto) } },
+        select: { id: true, name: true },
+      }),
+    ])
+    const targets = new Map<string, Target>([
+      ...reports.map((r) => [r.id, user(r.target)] as const),
+      ...users.map((u) => [u.id, user(u)] as const),
+      ...venues.map((v) => [v.id, { type: 'venue', id: v.id, label: v.name }] as const),
+      ...events.map((e) => [e.id, { type: 'venue', id: e.venueId, label: e.title }] as const),
+      ...games.map((g) => [g.id, { type: 'game', id: g.id, label: g.name }] as const),
+    ])
+    return actions.map((a) => ({
+      ...a,
+      target: targets.get(a.action === 'GAME_MERGE' ? mergedInto(a) : a.targetId) ?? null,
+    }))
   }
 }

@@ -1,12 +1,14 @@
 import {
+  ADMIN_USER_FILTERS,
   type AdminActionKind,
+  type AdminUserFilter,
   adminActionSchema,
   adminDashboardSchema,
   adminReasonSchema,
   adminReportSchema,
-  adminSearchSchema,
   adminUserDetailSchema,
-  adminUserSchema,
+  adminUserListSchema,
+  adminUserQuerySchema,
   ageOn,
   pendingAvatarSchema,
   type ReportResolution,
@@ -71,6 +73,31 @@ function toAdminUser({
 
 const actionInclude = { admin: { select: { id: true, pseudo: true } } }
 
+const suspendedNow = (now: Date) =>
+  ({
+    suspendedAt: { not: null },
+    OR: [{ suspendedUntil: null }, { suspendedUntil: { gt: now } }],
+  }) satisfies Prisma.UserWhereInput
+
+// Même règle que ageOn : date de naissance (en UTC) après la date du jour d'il y a 18 ans
+const minorSince = (now: Date) =>
+  new Date(Date.UTC(now.getFullYear() - 18, now.getMonth(), now.getDate()))
+
+function userFilter(filter: AdminUserFilter, now: Date): Prisma.UserWhereInput {
+  switch (filter) {
+    case 'all':
+      return {}
+    case 'reported':
+      return { reportsReceived: { some: { resolvedAt: null } } }
+    case 'minor':
+      return { birthDate: { gt: minorSince(now) } }
+    case 'suspended':
+      return suspendedNow(now)
+    case 'staff':
+      return { role: { not: 'PLAYER' } }
+  }
+}
+
 /** Back-office (LKO-20) : tableau de bord, signalements, joueurs, suspensions, photos de profil, journal. */
 @ApiTags('admin')
 @Controller('admin')
@@ -85,26 +112,41 @@ export class AdminModerationController {
   @ZodResponse(adminDashboardSchema)
   async dashboard() {
     const now = new Date()
-    const [open, pendingAvatars, pendingVenues, suspendedPlayers] = await Promise.all([
-      this.prisma.report.findMany({
-        where: { resolvedAt: null },
-        select: { target: { select: { birthDate: true } } },
-      }),
-      this.prisma.user.count({ where: { avatarStatus: 'PENDING', deletedAt: null } }),
-      this.prisma.venue.count({ where: { status: 'PENDING' } }),
-      this.prisma.user.count({
-        where: {
-          suspendedAt: { not: null },
-          OR: [{ suspendedUntil: null }, { suspendedUntil: { gt: now } }],
-        },
-      }),
-    ])
+    const pendingAvatar = {
+      avatarStatus: 'PENDING',
+      avatarUrl: { not: null },
+      deletedAt: null,
+    } as const
+    const [open, pendingAvatars, oldestAvatar, pendingVenues, suspendedPlayers] = await Promise.all(
+      [
+        this.prisma.report.findMany({
+          where: { resolvedAt: null },
+          orderBy: { createdAt: 'asc' },
+          select: { createdAt: true, target: { select: { birthDate: true } } },
+        }),
+        this.prisma.user.count({ where: pendingAvatar }),
+        this.prisma.user.findFirst({
+          where: pendingAvatar,
+          orderBy: { updatedAt: 'asc' },
+          select: { updatedAt: true },
+        }),
+        this.prisma.venue.findMany({
+          where: { status: 'PENDING' },
+          orderBy: { name: 'asc' },
+          select: { name: true },
+        }),
+        this.prisma.user.count({ where: suspendedNow(now) }),
+      ],
+    )
     return {
       openReports: open.length,
       minorReports: open.filter((r) => isMinor(r.target.birthDate)).length,
       pendingAvatars,
-      pendingVenues,
+      pendingVenues: pendingVenues.length,
       suspendedPlayers,
+      oldestReportAt: open[0]?.createdAt ?? null,
+      oldestAvatarAt: oldestAvatar?.updatedAt ?? null,
+      pendingVenueNames: pendingVenues.slice(0, 3).map((v) => v.name),
     }
   }
 
@@ -160,19 +202,31 @@ export class AdminModerationController {
 
   @Get('users')
   @Admin()
-  @ZodResponse(z.array(adminUserSchema))
-  async users(@ZodQuery(adminSearchSchema) { q }: z.output<typeof adminSearchSchema>) {
+  @ZodResponse(adminUserListSchema)
+  async users(
+    @ZodQuery(adminUserQuerySchema) { q, filter }: z.output<typeof adminUserQuerySchema>,
+  ) {
+    const now = new Date()
     const contains = { contains: q, mode: 'insensitive' } as const
-    const users = await this.prisma.user.findMany({
-      where: {
-        deletedAt: null,
-        ...(q ? { OR: [{ id: q }, { pseudo: contains }, { email: contains }] } : {}),
-      },
-      orderBy: { createdAt: 'desc' },
-      take: SEARCH_LIMIT,
-      select: userSelect,
-    })
-    return users.map(toAdminUser)
+    const search: Prisma.UserWhereInput = {
+      deletedAt: null,
+      ...(q ? { OR: [{ id: q }, { pseudo: contains }, { email: contains }] } : {}),
+    }
+    const [users, ...counts] = await Promise.all([
+      this.prisma.user.findMany({
+        where: { AND: [search, userFilter(filter, now)] },
+        orderBy: { createdAt: 'desc' },
+        take: SEARCH_LIMIT,
+        select: userSelect,
+      }),
+      ...ADMIN_USER_FILTERS.map((f) =>
+        this.prisma.user.count({ where: { AND: [search, userFilter(f, now)] } }),
+      ),
+    ])
+    return {
+      users: users.map(toAdminUser),
+      counts: Object.fromEntries(ADMIN_USER_FILTERS.map((f, i) => [f, counts[i] ?? 0])),
+    }
   }
 
   /** Fiche joueur : signalements reçus et actions des admins sur lui ou sur ces signalements. */
@@ -195,11 +249,13 @@ export class AdminModerationController {
     })
     if (!user) throw new NotFoundException('Joueur introuvable')
     const { reportsReceived, deletedAt, ...rest } = user
-    const actions = await this.prisma.adminAction.findMany({
-      where: { targetId: { in: [id, ...reportsReceived.map((r) => r.id)] } },
-      orderBy: { createdAt: 'desc' },
-      include: actionInclude,
-    })
+    const actions = await this.admin.withTargets(
+      await this.prisma.adminAction.findMany({
+        where: { targetId: { in: [id, ...reportsReceived.map((r) => r.id)] } },
+        orderBy: { createdAt: 'desc' },
+        include: actionInclude,
+      }),
+    )
     return {
       ...toAdminUser(rest),
       avatarUrl: rest.avatarUrl,
@@ -241,9 +297,9 @@ export class AdminModerationController {
       where: { avatarStatus: 'PENDING', avatarUrl: { not: null }, deletedAt: null },
       orderBy: { updatedAt: 'asc' },
       take: QUEUE_LIMIT,
-      select: { id: true, pseudo: true, avatarUrl: true },
+      select: { id: true, pseudo: true, avatarUrl: true, updatedAt: true },
     })
-    return users
+    return users.map(({ updatedAt, ...user }) => ({ ...user, submittedAt: updatedAt }))
   }
 
   /** `:id` = le joueur. Approuvée, la photo devient visible des autres joueurs. */
@@ -279,11 +335,13 @@ export class AdminModerationController {
   @Get('actions')
   @Admin()
   @ZodResponse(z.array(adminActionSchema))
-  actions() {
-    return this.prisma.adminAction.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: ACTIONS_LIMIT,
-      include: actionInclude,
-    })
+  async actions() {
+    return this.admin.withTargets(
+      await this.prisma.adminAction.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: ACTIONS_LIMIT,
+        include: actionInclude,
+      }),
+    )
   }
 }

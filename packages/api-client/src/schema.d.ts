@@ -2191,6 +2191,11 @@ export interface operations {
                         pendingAvatars: number;
                         pendingVenues: number;
                         suspendedPlayers: number;
+                        /** Format: date-time */
+                        oldestReportAt: string | null;
+                        /** Format: date-time */
+                        oldestAvatarAt: string | null;
+                        pendingVenueNames: string[];
                     };
                 };
             };
@@ -2273,6 +2278,7 @@ export interface operations {
         parameters: {
             query?: {
                 q?: string;
+                filter?: "all" | "reported" | "minor" | "suspended" | "staff";
             };
             header?: never;
             path?: never;
@@ -2286,23 +2292,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        id: string;
-                        pseudo: string | null;
-                        email: string;
-                        /** @enum {string} */
-                        role: "PLAYER" | "VENUE_STAFF" | "ADMIN";
-                        minor: boolean;
-                        /** Format: date-time */
-                        createdAt: string;
-                        suspension: {
+                        users: {
+                            id: string;
+                            pseudo: string | null;
+                            email: string;
+                            /** @enum {string} */
+                            role: "PLAYER" | "VENUE_STAFF" | "ADMIN";
+                            minor: boolean;
                             /** Format: date-time */
-                            at: string;
-                            /** Format: date-time */
-                            until: string | null;
-                            reason: string;
-                        } | null;
-                        openReports: number;
-                    }[];
+                            createdAt: string;
+                            suspension: {
+                                /** Format: date-time */
+                                at: string;
+                                /** Format: date-time */
+                                until: string | null;
+                                reason: string;
+                            } | null;
+                            openReports: number;
+                        }[];
+                        counts: {
+                            [key: string]: number;
+                        };
+                    };
                 };
             };
         };
@@ -2365,6 +2376,12 @@ export interface operations {
                             /** @enum {string} */
                             action: "REPORT_DISMISS" | "REPORT_WARN" | "REPORT_SUSPEND" | "USER_SUSPEND" | "USER_UNSUSPEND" | "AVATAR_APPROVE" | "AVATAR_REJECT" | "VENUE_UPDATE" | "EVENT_CREATE" | "EVENT_UPDATE" | "EVENT_CANCEL" | "GAME_MERGE";
                             targetId: string;
+                            target: {
+                                /** @enum {string} */
+                                type: "user" | "venue" | "game";
+                                id: string;
+                                label: string;
+                            } | null;
                             reason: string;
                             /** Format: date-time */
                             createdAt: string;
@@ -2447,6 +2464,8 @@ export interface operations {
                         id: string;
                         pseudo: string | null;
                         avatarUrl: string;
+                        /** Format: date-time */
+                        submittedAt: string;
                     }[];
                 };
             };
@@ -2515,6 +2534,12 @@ export interface operations {
                         /** @enum {string} */
                         action: "REPORT_DISMISS" | "REPORT_WARN" | "REPORT_SUSPEND" | "USER_SUSPEND" | "USER_UNSUSPEND" | "AVATAR_APPROVE" | "AVATAR_REJECT" | "VENUE_UPDATE" | "EVENT_CREATE" | "EVENT_UPDATE" | "EVENT_CANCEL" | "GAME_MERGE";
                         targetId: string;
+                        target: {
+                            /** @enum {string} */
+                            type: "user" | "venue" | "game";
+                            id: string;
+                            label: string;
+                        } | null;
                         reason: string;
                         /** Format: date-time */
                         createdAt: string;
@@ -2564,6 +2589,7 @@ export interface operations {
                             opensAtMinute: number;
                             closesAtMinute: number;
                         }[];
+                        photoCount: number;
                         /** Format: date-time */
                         createdAt: string;
                     }[];
@@ -2617,6 +2643,7 @@ export interface operations {
                             opensAtMinute: number;
                             closesAtMinute: number;
                         }[];
+                        photoCount: number;
                         /** Format: date-time */
                         createdAt: string;
                     };

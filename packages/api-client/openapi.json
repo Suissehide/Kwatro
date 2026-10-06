@@ -4618,6 +4618,24 @@
                       "type": "integer",
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
+                    },
+                    "oldestReportAt": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "oldestAvatarAt": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "pendingVenueNames": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     }
                   },
                   "required": [
@@ -4625,7 +4643,10 @@
                     "minorReports",
                     "pendingAvatars",
                     "pendingVenues",
-                    "suspendedPlayers"
+                    "suspendedPlayers",
+                    "oldestReportAt",
+                    "oldestAvatarAt",
+                    "pendingVenueNames"
                   ]
                 }
               }
@@ -4848,6 +4869,22 @@
               "type": "string",
               "maxLength": 100
             }
+          },
+          {
+            "name": "filter",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "all",
+              "type": "string",
+              "enum": [
+                "all",
+                "reported",
+                "minor",
+                "suspended",
+                "staff"
+              ]
+            }
           }
         ],
         "responses": {
@@ -4856,78 +4893,102 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "pseudo": {
-                        "nullable": true,
-                        "type": "string"
-                      },
-                      "email": {
-                        "type": "string"
-                      },
-                      "role": {
-                        "type": "string",
-                        "enum": [
-                          "PLAYER",
-                          "VENUE_STAFF",
-                          "ADMIN"
-                        ]
-                      },
-                      "minor": {
-                        "type": "boolean"
-                      },
-                      "createdAt": {
-                        "type": "string",
-                        "format": "date-time",
-                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                      },
-                      "suspension": {
-                        "nullable": true,
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": {
                         "type": "object",
                         "properties": {
-                          "at": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "until": {
-                            "nullable": true,
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "reason": {
+                          "id": {
                             "type": "string"
+                          },
+                          "pseudo": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "email": {
+                            "type": "string"
+                          },
+                          "role": {
+                            "type": "string",
+                            "enum": [
+                              "PLAYER",
+                              "VENUE_STAFF",
+                              "ADMIN"
+                            ]
+                          },
+                          "minor": {
+                            "type": "boolean"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "suspension": {
+                            "nullable": true,
+                            "type": "object",
+                            "properties": {
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "until": {
+                                "nullable": true,
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "reason": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "at",
+                              "until",
+                              "reason"
+                            ]
+                          },
+                          "openReports": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
                           }
                         },
                         "required": [
-                          "at",
-                          "until",
-                          "reason"
+                          "id",
+                          "pseudo",
+                          "email",
+                          "role",
+                          "minor",
+                          "createdAt",
+                          "suspension",
+                          "openReports"
                         ]
-                      },
-                      "openReports": {
+                      }
+                    },
+                    "counts": {
+                      "type": "object",
+                      "additionalProperties": {
                         "type": "integer",
                         "minimum": -9007199254740991,
                         "maximum": 9007199254740991
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "pseudo",
-                      "email",
-                      "role",
-                      "minor",
-                      "createdAt",
-                      "suspension",
-                      "openReports"
-                    ]
-                  }
+                      },
+                      "required": [
+                        "all",
+                        "reported",
+                        "minor",
+                        "suspended",
+                        "staff"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "users",
+                    "counts"
+                  ]
                 }
               }
             }
@@ -5129,6 +5190,31 @@
                           "targetId": {
                             "type": "string"
                           },
+                          "target": {
+                            "nullable": true,
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "user",
+                                  "venue",
+                                  "game"
+                                ]
+                              },
+                              "id": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "id",
+                              "label"
+                            ]
+                          },
                           "reason": {
                             "type": "string"
                           },
@@ -5158,6 +5244,7 @@
                           "id",
                           "action",
                           "targetId",
+                          "target",
                           "reason",
                           "createdAt",
                           "admin"
@@ -5306,12 +5393,18 @@
                       },
                       "avatarUrl": {
                         "type": "string"
+                      },
+                      "submittedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
                       }
                     },
                     "required": [
                       "id",
                       "pseudo",
-                      "avatarUrl"
+                      "avatarUrl",
+                      "submittedAt"
                     ]
                   }
                 }
@@ -5427,6 +5520,31 @@
                       "targetId": {
                         "type": "string"
                       },
+                      "target": {
+                        "nullable": true,
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "user",
+                              "venue",
+                              "game"
+                            ]
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "id",
+                          "label"
+                        ]
+                      },
                       "reason": {
                         "type": "string"
                       },
@@ -5456,6 +5574,7 @@
                       "id",
                       "action",
                       "targetId",
+                      "target",
                       "reason",
                       "createdAt",
                       "admin"
@@ -5586,6 +5705,11 @@
                           ]
                         }
                       },
+                      "photoCount": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
                       "createdAt": {
                         "type": "string",
                         "format": "date-time",
@@ -5606,6 +5730,7 @@
                       "luckoPerk",
                       "acceptsUnaccompaniedMinors",
                       "openingHours",
+                      "photoCount",
                       "createdAt"
                     ]
                   }
@@ -5748,6 +5873,11 @@
                         ]
                       }
                     },
+                    "photoCount": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
                     "createdAt": {
                       "type": "string",
                       "format": "date-time",
@@ -5768,6 +5898,7 @@
                     "luckoPerk",
                     "acceptsUnaccompaniedMinors",
                     "openingHours",
+                    "photoCount",
                     "createdAt"
                   ]
                 }
