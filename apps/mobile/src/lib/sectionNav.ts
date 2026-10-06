@@ -58,7 +58,8 @@ export function useSectionNav(ids: readonly string[], ready: boolean) {
     const el = Platform.OS === 'web' ? document.getElementById(ids[index] ?? '') : null
     if (!el) return
     const root = scrollParent(el)
-    root.scrollTo({
+    // scroll() et non scrollTo() : react-native-web remplace scrollTo sur sa ScrollView ({ x, y })
+    root.scroll({
       top: el.getBoundingClientRect().top - root.getBoundingClientRect().top + root.scrollTop - 24,
       behavior: prefersReducedMotion() ? 'auto' : 'smooth',
     })
