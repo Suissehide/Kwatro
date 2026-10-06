@@ -25,7 +25,7 @@ import { PrismaService } from '../prisma/prisma.service'
 import { PushService } from '../push/push.service'
 import { RealtimeGateway } from '../realtime/realtime.gateway'
 import { chatAccess } from './chat.access'
-import { FLOOD, pushRecipients, startsBurst } from './chat.rules'
+import { FLOOD, ONGOING_MS, pushRecipients, sortChats, startsBurst } from './chat.rules'
 
 const withAuthor = {
   author: { select: { id: true, pseudo: true } },
@@ -251,53 +251,84 @@ export class ChatService {
   }
 
   /**
-   * Onglet Messages : conversations dont le joueur est membre et qui ont au moins un message visible,
-   * avec le dernier message et les non-lus (messages des autres postés après son dernier passage).
+   * Onglet Messages : chats des rooms et des événements dont le joueur est membre. Ceux d'une partie
+   * à venir ou en cours y sont même sans message ; une partie passée n'y reste que si on y a écrit.
+   * Le staff d'un lieu ne voit que les événements qui ont des inscrits.
    */
   // ponytail: toutes les conversations du joueur triées en mémoire, paginer s'il y en a des centaines
   async chats(user: User): Promise<z.output<typeof myChatsSchema>> {
     const visible = { deletedAt: null, ...notBlockedWith(user.id) }
-    const [conversations, unread] = await Promise.all([
-      this.prisma.conversation.findMany({
+    const since = new Date(Date.now() - ONGOING_MS)
+    const conversation = {
+      select: {
+        id: true,
+        messages: {
+          where: visible,
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          include: { author: { select: { pseudo: true } } },
+        },
+      },
+    } satisfies Prisma.ConversationDefaultArgs
+    const written = { conversation: { messages: { some: visible } } }
+    const registered = { some: { status: 'REGISTERED' as const } }
+    const [rooms, events, unread] = await Promise.all([
+      this.prisma.room.findMany({
         where: {
-          messages: { some: visible },
           OR: [
-            { room: { hostId: user.id } },
-            { room: { participants: { some: { userId: user.id, status: 'ACCEPTED' } } } },
-            { event: { registrations: { some: { userId: user.id, status: 'REGISTERED' } } } },
-            { event: { venue: { staff: { some: { userId: user.id } } } } },
+            { hostId: user.id },
+            { participants: { some: { userId: user.id, status: 'ACCEPTED' } } },
           ],
+          AND: { OR: [{ startsAt: { gte: since }, status: { not: 'CANCELLED' } }, written] },
         },
-        include: {
-          room: {
-            select: { game: { select: { name: true } }, format: { select: { name: true } } },
-          },
-          event: { select: { title: true } },
-          messages: {
-            where: visible,
-            orderBy: { createdAt: 'desc' },
-            take: 1,
-            include: { author: { select: { pseudo: true } } },
-          },
+        select: {
+          id: true,
+          startsAt: true,
+          game: { select: { name: true } },
+          format: { select: { name: true } },
+          conversation,
         },
+      }),
+      this.prisma.event.findMany({
+        where: {
+          OR: [
+            { registrations: { some: { userId: user.id, status: 'REGISTERED' } } },
+            { venue: { staff: { some: { userId: user.id } } }, registrations: registered },
+          ],
+          AND: { OR: [{ startsAt: { gte: since }, cancelledAt: null }, written] },
+        },
+        select: { id: true, title: true, startsAt: true, conversation },
       }),
       this.unreadCounts(user.id),
     ])
-    const chats = conversations
-      .flatMap(({ id, roomId, eventId, room, event, messages: [last] }) =>
-        last
-          ? [
-              {
-                type: (roomId ? 'room' : 'event') as ChatType,
-                id: (roomId ?? eventId) as string,
-                title: event?.title ?? room?.format?.name ?? room?.game.name ?? '',
-                last: { pseudo: last.author.pseudo, body: last.body, createdAt: last.createdAt },
-                unread: unread.get(id) ?? 0,
-              },
-            ]
-          : [],
-      )
-      .sort((a, b) => b.last.createdAt.getTime() - a.last.createdAt.getTime())
+    const item = (
+      type: ChatType,
+      id: string,
+      title: string,
+      startsAt: Date,
+      chat: {
+        id: string
+        messages: { body: string; createdAt: Date; author: { pseudo: string | null } }[]
+      } | null,
+    ) => {
+      const last = chat?.messages[0]
+      return {
+        type,
+        id,
+        title,
+        startsAt,
+        last: last
+          ? { pseudo: last.author.pseudo, body: last.body, createdAt: last.createdAt }
+          : null,
+        unread: chat ? (unread.get(chat.id) ?? 0) : 0,
+      }
+    }
+    const chats = sortChats([
+      ...rooms.map((r) =>
+        item('room', r.id, r.format?.name ?? r.game.name, r.startsAt, r.conversation),
+      ),
+      ...events.map((e) => item('event', e.id, e.title, e.startsAt, e.conversation)),
+    ])
     return { unread: chats.reduce((sum, chat) => sum + chat.unread, 0), chats }
   }
 

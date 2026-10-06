@@ -32,3 +32,21 @@ export function pushRecipients({
       id !== authorId && !watching.has(id) && !blocked.has(id) && (announcement || !muted.has(id)),
   )
 }
+
+/** Une partie commencée depuis moins de 12 h compte encore comme en cours (onglet Messages). */
+export const ONGOING_MS = 12 * 60 * 60_000
+
+/** Onglet Messages : les chats écrits, du plus récent au plus ancien, puis les autres par date de partie. */
+export function sortChats<T extends { startsAt: Date; last: { createdAt: Date } | null }>(
+  chats: T[],
+) {
+  return [...chats].sort((a, b) =>
+    a.last && b.last
+      ? b.last.createdAt.getTime() - a.last.createdAt.getTime()
+      : a.last
+        ? -1
+        : b.last
+          ? 1
+          : a.startsAt.getTime() - b.startsAt.getTime(),
+  )
+}

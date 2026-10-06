@@ -21,7 +21,7 @@ const WIDE = 900
 const when = (date: string) =>
   localDay(date) === localDay(new Date()) ? formatTime(date) : dayLabel(date)
 
-/** Onglet Messages : chats des rooms et des événements du joueur, le plus récent d'abord. */
+/** Onglet Messages : chats des rooms et des événements du joueur, écrits ou à venir. */
 export default function MessagesScreen() {
   const wide = useWindowDimensions().width >= WIDE
   const me = useMeQuery({ required: true })
@@ -51,10 +51,16 @@ export default function MessagesScreen() {
           key={`${chat.type}-${chat.id}`}
           inset={16}
           title={chat.title}
-          subtitle={`${chat.last.pseudo ?? 'Joueur'} : ${chat.last.body}`}
+          subtitle={
+            chat.last
+              ? `${chat.last.pseudo ?? 'Joueur'} : ${chat.last.body}`
+              : 'Pas encore de message'
+          }
           right={
             <View style={{ alignItems: 'flex-end', gap: 4 }}>
-              <Typography variant="small">{when(chat.last.createdAt)}</Typography>
+              <Typography variant="small">
+                {chat.last ? when(chat.last.createdAt) : dayLabel(chat.startsAt)}
+              </Typography>
               {chat.unread ? <CountBadge count={chat.unread} /> : null}
             </View>
           }
