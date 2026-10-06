@@ -37,4 +37,4 @@ export const adminReportSchema = z.object({
   }),
 })
 
-export type AdminReport = z.infer<typeof adminReportSchema>
+export type AdminReport = z.input<typeof adminReportSchema>

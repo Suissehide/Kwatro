@@ -50,6 +50,10 @@ model User {
   xp                Int                 @default(0)
   /// Sujets de notifications push coupés par le joueur (tout est activé par défaut)
   notificationsOff  NotificationTopic[] @default([])
+  /// Suspendu par un admin (LKO-20) : plus de connexion ; `suspendedUntil` null = définitive
+  suspendedAt       DateTime?
+  suspendedUntil    DateTime?
+  suspendedReason   String?
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   deletedAt         DateTime?
@@ -69,6 +73,7 @@ model User {
   reportsMade        Report[]            @relation("ReportsMade")
   reportsReceived    Report[]            @relation("ReportsReceived")
   pushTokens         PushToken[]
+  adminActions       AdminAction[]
   messages           Message[]
   conversationReads  ConversationRead[]
 }
@@ -228,8 +233,15 @@ enum VenueType {
   OTHER
 }
 
+/// Lieu proposé ou importé : visible des joueurs seulement une fois publié par un admin (LKO-20)
+enum VenueStatus {
+  PENDING
+  PUBLISHED
+}
+
 model Venue {
   id                         String                                 @id @default(cuid())
+  status                     VenueStatus                            @default(PUBLISHED)
   slug                       String                                 @unique
   name                       String
   type                       VenueType
@@ -584,19 +596,60 @@ enum ReportReason {
 
 /// Signalement d'un joueur, traité par un admin. Gardé après la suppression des comptes (preuve).
 model Report {
-  id         String       @id @default(cuid())
+  id         String            @id @default(cuid())
   reporterId String
-  reporter   User         @relation("ReportsMade", fields: [reporterId], references: [id])
+  reporter   User              @relation("ReportsMade", fields: [reporterId], references: [id])
   targetId   String
-  target     User         @relation("ReportsReceived", fields: [targetId], references: [id])
+  target     User              @relation("ReportsReceived", fields: [targetId], references: [id])
   reason     ReportReason
-  details    String       @default("")
-  createdAt  DateTime     @default(now())
+  details    String            @default("")
+  createdAt  DateTime          @default(now())
   /// null tant que le signalement est dans la file des admins
   resolvedAt DateTime?
+  resolution ReportResolution?
 
   @@index([resolvedAt, createdAt])
   @@index([targetId])
+}
+
+enum ReportResolution {
+  DISMISSED
+  WARNED
+  SUSPENDED
+}
+
+// ---------- Back-office admin (LKO-20) ----------
+
+enum AdminActionKind {
+  REPORT_DISMISS
+  REPORT_WARN
+  REPORT_SUSPEND
+  USER_SUSPEND
+  USER_UNSUSPEND
+  AVATAR_APPROVE
+  AVATAR_REJECT
+  VENUE_UPDATE
+  EVENT_CREATE
+  EVENT_UPDATE
+  EVENT_CANCEL
+  GAME_MERGE
+}
+
+/// Journal d'audit : chaque action d'un admin (qui, quoi, quand, cible, motif). Jamais modifié ni supprimé.
+model AdminAction {
+  id        String          @id @default(cuid())
+  adminId   String
+  admin     User            @relation(fields: [adminId], references: [id])
+  action    AdminActionKind
+  /// Id de la cible (signalement, joueur, lieu, événement, jeu supprimé), selon l'action
+  targetId  String
+  reason    String          @default("")
+  /// Corps de la requête, pour retrouver le détail (durée, champs modifiés, jeu cible)
+  data      Json?
+  createdAt DateTime        @default(now())
+
+  @@index([targetId])
+  @@index([createdAt])
 }
 
 // ---------- Liste d'attente (landing) ----------

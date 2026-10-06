@@ -59,6 +59,7 @@ import {
   RankCard,
   RankRow,
   RatingBadge,
+  ReviewCard,
   RoomCard,
   RoomStatusTimeline,
   ScreenHeader,
@@ -367,12 +368,25 @@ export function Catalogue() {
           />
         </View>
         <RoomStatusTimeline current={2} />
+        <ReviewCard
+          title="Tom_16"
+          tags={<Tag label="-18" variant="tonight" />}
+          meta="Signalé par hugo · il y a 2 h"
+          body="Pseudo limite dans le chat de la room."
+          onPress={() => {}}
+          actions={
+            <>
+              <Button small kind="ghost" label="Classer" onPress={() => {}} />
+              <Button small kind="room" label="Suspendre" onPress={() => {}} />
+            </>
+          }
+        />
         <Row>
           <View style={{ flex: 1, minWidth: 160 }}>
             <StatCard value="42" label="Joueurs ce soir" delta={{ text: '12 %', up: true }} />
           </View>
           <View style={{ flex: 1, minWidth: 160 }}>
-            <StatCard value="7" label="Événements" bg={colors.event} />
+            <StatCard value="7" label="Événements" bg={colors.event} onPress={() => {}} />
           </View>
         </Row>
         <ShareBar label="Pioneer" percent={46} color={colors.room} />

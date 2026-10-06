@@ -183,3 +183,55 @@ export const REPORT_REASON_LABELS: Record<ReportReason, string> = {
   MINOR_SAFETY: 'Comportement suspect envers un mineur',
   OTHER: 'Autre',
 }
+
+/** Issue d'un signalement traité par un admin (identique à l'enum Prisma ReportResolution). */
+export const REPORT_RESOLUTIONS = ['DISMISSED', 'WARNED', 'SUSPENDED'] as const
+export type ReportResolution = (typeof REPORT_RESOLUTIONS)[number]
+
+export const REPORT_RESOLUTION_LABELS: Record<ReportResolution, string> = {
+  DISMISSED: 'Classé',
+  WARNED: 'Averti',
+  SUSPENDED: 'Suspendu',
+}
+
+/** Lieu proposé ou importé, puis publié par un admin (identique à l'enum Prisma VenueStatus). */
+export const VENUE_STATUSES = ['PENDING', 'PUBLISHED'] as const
+export type VenueStatus = (typeof VENUE_STATUSES)[number]
+
+/** Action tracée dans le journal d'audit du back-office (identique à l'enum Prisma AdminActionKind). */
+export const ADMIN_ACTION_KINDS = [
+  'REPORT_DISMISS',
+  'REPORT_WARN',
+  'REPORT_SUSPEND',
+  'USER_SUSPEND',
+  'USER_UNSUSPEND',
+  'AVATAR_APPROVE',
+  'AVATAR_REJECT',
+  'VENUE_UPDATE',
+  'EVENT_CREATE',
+  'EVENT_UPDATE',
+  'EVENT_CANCEL',
+  'GAME_MERGE',
+] as const
+export type AdminActionKind = (typeof ADMIN_ACTION_KINDS)[number]
+
+export const ADMIN_ACTION_LABELS: Record<AdminActionKind, string> = {
+  REPORT_DISMISS: 'Signalement classé',
+  REPORT_WARN: 'Joueur averti',
+  REPORT_SUSPEND: 'Suspendu après un signalement',
+  USER_SUSPEND: 'Joueur suspendu',
+  USER_UNSUSPEND: 'Suspension levée',
+  AVATAR_APPROVE: 'Photo approuvée',
+  AVATAR_REJECT: 'Photo refusée',
+  VENUE_UPDATE: 'Lieu modifié',
+  EVENT_CREATE: 'Événement créé',
+  EVENT_UPDATE: 'Événement modifié',
+  EVENT_CANCEL: 'Événement annulé',
+  GAME_MERGE: 'Jeux fusionnés',
+}
+
+/** Suspension : 1 jour à 1 an, ou définitive. */
+export const SUSPENSION_MAX_DAYS = 365
+
+/** Événement récurrent créé depuis le back-office : 26 semaines de plus au maximum. */
+export const EVENT_REPEAT_MAX_WEEKS = 26

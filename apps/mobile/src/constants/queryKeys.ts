@@ -54,6 +54,26 @@ export const MY_GAMES = {
   SET: 'set_my_games',
 } as const
 
+export const ADMIN = {
+  DASHBOARD: 'admin_dashboard',
+  ACTIONS: 'admin_actions',
+  REPORTS: 'admin_reports',
+  RESOLVE_REPORT: 'admin_resolve_report',
+  USERS: 'admin_users',
+  USER: 'admin_user',
+  SUSPEND: 'admin_suspend',
+  UNSUSPEND: 'admin_unsuspend',
+  AVATARS: 'admin_avatars',
+  REVIEW_AVATAR: 'admin_review_avatar',
+  VENUES: 'admin_venues',
+  UPDATE_VENUE: 'admin_update_venue',
+  EVENTS: 'admin_events',
+  SAVE_EVENT: 'admin_save_event',
+  CANCEL_EVENT: 'admin_cancel_event',
+  GAMES: 'admin_games',
+  MERGE_GAMES: 'admin_merge_games',
+} as const
+
 export const CHAT = {
   LIST: 'chats',
   MESSAGES: 'chat_messages',

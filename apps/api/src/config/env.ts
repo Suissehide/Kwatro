@@ -30,6 +30,9 @@ const envSchema = z
     APPLE_CLIENT_SECRET: z.string().optional(),
     /** Jeton d'accès Expo, seulement si la sécurité des push est activée sur le projet Expo. */
     EXPO_ACCESS_TOKEN: z.string().optional(),
+    /** Serveur d'envoi des e-mails (Resend en SMTP en production) ; hors production, Mailpit par défaut. */
+    SMTP_URL: z.string().url().optional(),
+    MAIL_FROM: z.string().default('Lucko <noreply@lucko.fr>'),
   })
   .refine((env) => !(env.NODE_ENV === 'production' && env.DEV_AUTH_HEADER), {
     message: 'DEV_AUTH_HEADER est interdit en production',

@@ -1,4 +1,4 @@
-import { adminReportSchema, ageOn, blockedPlayerSchema, reportSchema } from '@lucko/shared'
+import { blockedPlayerSchema, reportSchema } from '@lucko/shared'
 import {
   BadRequestException,
   Controller,
@@ -12,18 +12,15 @@ import {
 } from '@nestjs/common'
 import { ApiNoContentResponse, ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
-import { CurrentUser, Roles } from '../auth/auth.decorators'
+import { CurrentUser } from '../auth/auth.decorators'
 import { ZodBody, ZodResponse } from '../common/zod'
 import type { User } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 
-// ponytail: file limitée aux 200 plus anciens signalements ouverts, paginer si elle grossit
-const ADMIN_QUEUE_LIMIT = 200
-
 /**
- * Blocage, signalement et file de modération (LKO-19), exigés par Apple et Google pour une app
+ * Blocage et signalement (LKO-19), exigés par Apple et Google pour une app
  * où les joueurs se rencontrent. Les effets du blocage sur les listes vivent dans chaque module
- * (voir `notBlockedWith` dans explore).
+ * (voir `notBlockedWith` dans explore). Les signalements sont traités dans le back-office (admin/).
  */
 @ApiTags('moderation')
 @Controller()
@@ -83,50 +80,5 @@ export class ModerationController {
   ) {
     await this.target(user, id)
     await this.prisma.report.create({ data: { ...body, reporterId: user.id, targetId: id } })
-  }
-
-  /** File des admins : signalements ouverts, ceux qui visent un mineur d'abord, puis du plus ancien. */
-  @Get('admin/reports')
-  @Roles('ADMIN')
-  @ZodResponse(z.array(adminReportSchema))
-  async queue() {
-    const reports = await this.prisma.report.findMany({
-      where: { resolvedAt: null },
-      orderBy: { createdAt: 'asc' },
-      take: ADMIN_QUEUE_LIMIT,
-      include: {
-        reporter: { select: { id: true, pseudo: true } },
-        target: {
-          select: {
-            id: true,
-            pseudo: true,
-            birthDate: true,
-            _count: { select: { reportsReceived: { where: { resolvedAt: null } } } },
-          },
-        },
-      },
-    })
-    return reports
-      .map(({ target: { birthDate, _count, ...target }, ...report }) => ({
-        ...report,
-        target: {
-          ...target,
-          minor: birthDate !== null && ageOn(birthDate) < 18,
-          openReports: _count.reportsReceived,
-        },
-      }))
-      .sort((a, b) => Number(b.target.minor) - Number(a.target.minor))
-  }
-
-  @Post('admin/reports/:id/resolve')
-  @Roles('ADMIN')
-  @HttpCode(204)
-  @ApiNoContentResponse()
-  async resolve(@Param('id') id: string) {
-    const { count } = await this.prisma.report.updateMany({
-      where: { id, resolvedAt: null },
-      data: { resolvedAt: new Date() },
-    })
-    if (!count) throw new NotFoundException('Signalement introuvable ou déjà traité')
   }
 }

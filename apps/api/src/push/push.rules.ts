@@ -35,8 +35,11 @@ export function quietUntil(
   return at
 }
 
-/** Le joueur reçoit ce sujet : compte actif et sujet pas coupé dans ses réglages. */
+/**
+ * Le joueur reçoit ce sujet : compte actif et sujet pas coupé dans ses réglages.
+ * `null` = message du service (avertissement de la modération), qu'on ne peut pas couper.
+ */
 export const wantsTopic = (
   user: { deletedAt: Date | null; notificationsOff: NotificationTopic[] },
-  topic: NotificationTopic,
-) => user.deletedAt === null && !user.notificationsOff.includes(topic)
+  topic: NotificationTopic | null,
+) => user.deletedAt === null && (topic === null || !user.notificationsOff.includes(topic))

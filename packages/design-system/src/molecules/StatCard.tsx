@@ -1,25 +1,32 @@
 import { TrendingDown, TrendingUp } from 'lucide-react-native'
-import { Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 import { Raised } from '../atoms/Raised'
-import { border, colors, font, radius, shadow, textOn } from '../tokens'
+import { useHover } from '../atoms/useHover'
+import { border, colors, font, radius, shadow, textOn, transition } from '../tokens'
 
+/** Chiffre clé ; avec `onPress`, lien vers le détail (soulevé au survol, comme un bouton). */
 export function StatCard({
   value,
   label,
   delta,
   bg = colors.rating,
+  onPress,
 }: {
   value: string
   label: string
   delta?: { text: string; up: boolean }
   bg?: string
+  onPress?: () => void
 }) {
   const fg = textOn(bg)
+  const { hovered, hoverProps } = useHover()
   const Trend = delta?.up ? TrendingUp : TrendingDown
-  return (
+  const card = (
     <Raised offset={shadow.md}>
       <View
         style={{
+          transform: onPress && hovered ? [{ translateX: -1 }, { translateY: -1 }] : [],
+          ...transition(['transform']),
           backgroundColor: bg,
           borderWidth: border.base,
           borderColor: colors.ink,
@@ -47,5 +54,12 @@ export function StatCard({
         ) : null}
       </View>
     </Raised>
+  )
+  return onPress ? (
+    <Pressable role="link" aria-label={`${label} : ${value}`} onPress={onPress} {...hoverProps}>
+      {card}
+    </Pressable>
+  ) : (
+    card
   )
 }
