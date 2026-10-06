@@ -2,6 +2,8 @@ import { expo } from '@better-auth/expo'
 import { ageRegime, birthDateSchema, MIN_AGE, PASSWORD_MIN } from '@kwatro/shared'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
+import { APIError } from 'better-auth/api'
+import { isSuspended, suspensionMessage } from '../admin/admin.rules'
 import type { Env } from '../config/env'
 import type { PrismaClient } from '../generated/prisma/client'
 
@@ -51,6 +53,19 @@ export function createAuth(prisma: PrismaClient, env: Env) {
       user: {
         // La date de naissance règle les droits du compte : jamais modifiable via /api/auth/update-user
         update: { before: async (data) => ('birthDate' in data ? false : undefined) },
+      },
+      session: {
+        // Compte suspendu (KWT-20) : connexion refusée, quel que soit le moyen (e-mail, Apple, Google)
+        create: {
+          before: async (session) => {
+            const user = await prisma.user.findUnique({
+              where: { id: session.userId },
+              select: { suspendedAt: true, suspendedUntil: true },
+            })
+            if (user && isSuspended(user))
+              throw new APIError('FORBIDDEN', { message: suspensionMessage(user) })
+          },
+        },
       },
     },
     plugins: [expo()],

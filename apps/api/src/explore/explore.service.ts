@@ -76,12 +76,12 @@ function roomItem({
 export class ExploreService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /** Lieux à moins de `radiusKm` du point, avec leur distance en mètres (PostGIS, index GiST). */
+  /** Lieux publiés à moins de `radiusKm` du point, avec leur distance en mètres (PostGIS, index GiST). */
   private async distances({ lat, lng, radiusKm }: GeoQuery) {
     const rows = await this.prisma.$queryRaw<{ id: string; distance: number }[]>`
       SELECT "id", ST_Distance("location", ST_MakePoint(${lng}::float8, ${lat}::float8)::geography) AS distance
       FROM "Venue"
-      WHERE ST_DWithin("location", ST_MakePoint(${lng}::float8, ${lat}::float8)::geography, ${radiusKm * 1000}::float8)`
+      WHERE "status" = 'PUBLISHED' AND ST_DWithin("location", ST_MakePoint(${lng}::float8, ${lat}::float8)::geography, ${radiusKm * 1000}::float8)`
     return new Map(rows.map((row) => [row.id, Math.round(Number(row.distance))]))
   }
 
@@ -127,8 +127,8 @@ export class ExploreService {
     // Un jour de marge de chaque côté : l'app regroupe les événements par jour à l'heure de Paris
     const agendaFrom = new Date(monthStart.getTime() - DAY_MS)
     const agendaTo = new Date(Date.UTC(year, month - 1 + VENUE_AGENDA_MONTHS, 1) + DAY_MS)
-    const venue = await this.prisma.venue.findUnique({
-      where: { slug },
+    const venue = await this.prisma.venue.findFirst({
+      where: { slug, status: 'PUBLISHED' },
       include: {
         openingHours: { orderBy: [{ weekday: 'asc' }, { opensAtMinute: 'asc' }] },
         closures: { where: { endsOn: { gte: monthStart } }, orderBy: { startsOn: 'asc' } },

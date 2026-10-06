@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { AdminModule } from './admin/admin.module'
 import { AuthModule } from './auth/auth.module'
 import { EventsModule } from './events/events.module'
 import { ExploreModule } from './explore/explore.module'
@@ -26,6 +27,7 @@ import { WaitlistModule } from './waitlist/waitlist.module'
     WaitlistModule,
     ModerationModule,
     RoomsModule,
+    AdminModule,
   ],
 })
 export class AppModule {}

@@ -95,6 +95,9 @@ export default function SettingsScreen() {
         rows={[
           { label: 'E-mail', value: me.email },
           { label: 'Joueurs bloqués', onPress: () => router.push('/blocked') },
+          ...(me.role === 'ADMIN'
+            ? [{ label: 'Back-office', onPress: () => router.push('/admin') }]
+            : []),
         ]}
       />
       <SettingsGroup title="Notifications" rows={notificationRows} />

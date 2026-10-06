@@ -785,6 +785,73 @@ async function main() {
     }
   }
 
+  // ---------- Back-office admin (KWT-20) ----------
+
+  // Lieu proposé, en attente de validation : absent d'Explorer tant qu'un admin ne l'a pas publié
+  await upsertVenue(
+    {
+      slug: 'taverne-des-des-demo',
+      name: 'La Taverne des Dés',
+      type: 'GAME_BAR',
+      status: 'PENDING',
+      address: '21 cours de la Somme',
+      city: 'Bordeaux',
+      latitude: 44.8268,
+      longitude: -0.5701,
+      description: 'Bar à jeux proposé par un joueur, à vérifier.',
+    },
+    ['jeux-de-societe'],
+    tuesdayToSaturday(18 * 60, 1 * 60),
+  )
+  // Photo de profil à valider
+  await prisma.user.update({
+    where: { id: 'demo-jade' },
+    data: { avatarUrl: 'https://picsum.photos/seed/kwatro-jade/400/400', avatarStatus: 'PENDING' },
+  })
+  // Doublon de Magic à fusionner, avec un joueur et un profil Commander
+  const duplicate = await prisma.game.upsert({
+    where: { slug: 'mtg-demo' },
+    update: {},
+    create: { slug: 'mtg-demo', name: 'MTG', kind: 'TCG' },
+  })
+  const duplicateCommander = await prisma.gameFormat.upsert({
+    where: { gameId_slug: { gameId: duplicate.id, slug: 'commander' } },
+    update: {},
+    create: { slug: 'commander', name: 'Commander', gameId: duplicate.id, maxPlayers: 5 },
+  })
+  await prisma.user.update({
+    where: { id: 'demo-hugo' },
+    data: { playedGames: { connect: { id: duplicate.id } } },
+  })
+  await prisma.playerGameProfile.upsert({
+    where: { userId_formatId: { userId: 'demo-hugo', formatId: duplicateCommander.id } },
+    update: {},
+    create: { userId: 'demo-hugo', formatId: duplicateCommander.id, kwote: 1090, rankedGames: 6 },
+  })
+  // Signalements ouverts, dont un sur un mineur (en tête de file)
+  for (const report of [
+    {
+      id: 'demo-signalement-mineur',
+      reporterId: 'demo-hugo',
+      targetId: 'mineur-demo',
+      reason: 'INAPPROPRIATE_CONTENT' as const,
+      details: 'Pseudo limite dans le chat de la room.',
+    },
+    {
+      id: 'demo-signalement-noah',
+      reporterId: 'joueur-demo',
+      targetId: 'demo-noah',
+      reason: 'HARASSMENT' as const,
+      details: 'Insultes après la partie de Lorcana.',
+    },
+  ]) {
+    await prisma.report.upsert({
+      where: { id: report.id },
+      update: { resolvedAt: null, resolution: null },
+      create: report,
+    })
+  }
+
   console.log('Seed terminé ✔')
   console.log('Comptes de test (e-mail / mot de passe) :')
   for (const { email, password, role } of accounts.filter((a) => a.password)) {

@@ -44,12 +44,12 @@ export class PushService implements OnModuleInit {
   }
 
   /**
-   * Prévient des joueurs sur tous leurs appareils, sauf s'ils ont coupé ce sujet.
+   * Prévient des joueurs sur tous leurs appareils, sauf s'ils ont coupé ce sujet (`null` : message du service).
    * Avec `tx`, la notification ne part que si la transaction est validée.
    */
   async notify(
     userIds: string[],
-    topic: NotificationTopic,
+    topic: NotificationTopic | null,
     { title, body, url }: PushContent,
     tx?: Prisma.TransactionClient,
   ) {

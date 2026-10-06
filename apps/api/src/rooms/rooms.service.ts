@@ -68,8 +68,8 @@ export class RoomsService {
         where: { id: input.gameId },
         include: { formats: true },
       }),
-      this.prisma.venue.findUnique({
-        where: { id: input.venueId },
+      this.prisma.venue.findFirst({
+        where: { id: input.venueId, status: 'PUBLISHED' },
         include: { openingHours: true, closures: { where: { endsOn: { gte: now } } } },
       }),
       this.prisma.room.count({
