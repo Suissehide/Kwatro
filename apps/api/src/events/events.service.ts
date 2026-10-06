@@ -90,6 +90,7 @@ export class EventsService {
         })
       }
     })
+    await this.realtime.revoke({ type: 'event-chat', id }, [user.id])
     this.realtime.changed({ type: 'event', id })
     return this.detail(id, user.id)
   }

@@ -69,6 +69,8 @@ model User {
   reportsMade        Report[]            @relation("ReportsMade")
   reportsReceived    Report[]            @relation("ReportsReceived")
   pushTokens         PushToken[]
+  messages           Message[]
+  conversationReads  ConversationRead[]
 }
 
 enum NotificationTopic {
@@ -384,6 +386,7 @@ model Room {
   updatedAt     DateTime   @updatedAt
 
   participants RoomParticipant[]
+  conversation Conversation?
 
   @@index([startsAt])
 }
@@ -451,6 +454,7 @@ model Event {
   updatedAt        DateTime         @updatedAt
 
   registrations EventRegistration[]
+  conversation  Conversation?
 
   @@index([venueId, startsAt])
   @@index([startsAt])
@@ -476,6 +480,57 @@ model EventRegistration {
   updatedAt   DateTime           @updatedAt
 
   @@id([eventId, userId])
+  @@index([userId])
+}
+
+// ---------- Chat (KWT-80) ----------
+
+/// Fil de discussion d'une room ou d'un événement (tournoi), créé au premier message ou à la première lecture.
+model Conversation {
+  id        String   @id @default(cuid())
+  roomId    String?  @unique
+  room      Room?    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  eventId   String?  @unique
+  event     Event?   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  messages Message[]
+  reads    ConversationRead[]
+}
+
+enum MessageKind {
+  MESSAGE
+  /// Annonce de l'hôte ou de l'organisateur : épinglée et notifiée à tous
+  ANNOUNCEMENT
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  authorId       String
+  author         User         @relation(fields: [authorId], references: [id])
+  /// Texte et emojis seulement en v1
+  body           String
+  kind           MessageKind  @default(MESSAGE)
+  createdAt      DateTime     @default(now())
+  /// Supprimé par son auteur, l'hôte ou l'organisateur : plus montré, gardé pour la modération
+  deletedAt      DateTime?
+
+  @@index([conversationId, createdAt])
+  @@index([authorId, createdAt])
+}
+
+/// Où en est un joueur dans une conversation : dernier passage (non-lus) et sourdine des push.
+model ConversationRead {
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastReadAt     DateTime     @default(now())
+  muted          Boolean      @default(false)
+
+  @@id([conversationId, userId])
   @@index([userId])
 }
 

@@ -1,12 +1,14 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { Pressable, Text, View } from 'react-native'
+import { CountBadge } from '../atoms/CountBadge'
 import { Raised } from '../atoms/Raised'
 import { useHover } from '../atoms/useHover'
 import { Brand } from '../molecules/Brand'
 import { border, colors, font, motion, radius, shadow, textOn, transition, z } from '../tokens'
 import { AccountMenu } from './AccountMenu'
 
-export type TopNavItem = { key: string; label: string }
+/** `badge` : pastille de compte (messages non lus), masquée à 0. */
+export type TopNavItem = { key: string; label: string; badge?: number }
 
 export function TopNav({
   items = [],
@@ -47,6 +49,7 @@ export function TopNav({
             <NavLink
               key={item.key}
               label={item.label}
+              badge={item.badge}
               active={item.key === active}
               color={color}
               onPress={() => onSelect?.(item.key)}
@@ -63,11 +66,13 @@ export function TopNav({
 
 function NavLink({
   label,
+  badge,
   active,
   color,
   onPress,
 }: {
   label: string
+  badge?: number
   active: boolean
   color: string
   onPress: () => void
@@ -78,6 +83,9 @@ function NavLink({
       style={{
         paddingVertical: 8,
         paddingHorizontal: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
         borderRadius: radius.field,
         borderWidth: border.thin,
         borderColor: active ? colors.ink : 'transparent',
@@ -95,6 +103,7 @@ function NavLink({
       >
         {label}
       </Text>
+      {badge ? <CountBadge count={badge} /> : null}
       {active ? null : (
         <View
           style={{

@@ -24,7 +24,8 @@ import { useState } from 'react'
 import { View } from 'react-native'
 import { DetailScreen } from '@/components/DetailScreen'
 import { eventWhen, gameLabel } from '@/lib/explore'
-import { openVenue } from '@/lib/navigation'
+import { openChat, openVenue } from '@/lib/navigation'
+import { useChatUnread } from '@/queries/useChat'
 import { useMeQuery } from '@/queries/useMe'
 import { useParticipationMutations, useRoomQuery } from '@/queries/useRoom'
 
@@ -56,6 +57,8 @@ export default function RoomScreen() {
   const me = useMeQuery()
   const { data: room, isError: failed, refetch } = useRoomQuery(id)
   const { join, leave, decide, hostAction } = useParticipationMutations(id)
+  const member = room?.isHost === true || room?.myStatus === 'ACCEPTED'
+  const unread = useChatUnread({ type: 'room', id }, member)
   const [confirmLeave, setConfirmLeave] = useState(false)
   const [confirmAction, setConfirmAction] = useState<HostConfirm | null>(null)
   const pending = join.isPending || leave.isPending || decide.isPending || hostAction.isPending
@@ -163,6 +166,16 @@ export default function RoomScreen() {
         {room.venue?.isPartner ? <Tag variant="partner" label="Lieu partenaire" /> : null}
       </View>
       {error ? <Banner tone="err" message={error.message} onClose={clearError} /> : null}
+      {member ? (
+        <View style={{ alignSelf: 'flex-start' }}>
+          <Button
+            small
+            kind="soft"
+            label={`Chat de la room${unread ? ` · ${unread} non lu${unread > 1 ? 's' : ''}` : ''}`}
+            onPress={() => openChat('room', id)}
+          />
+        </View>
+      ) : null}
 
       <ListCard>
         {details.map((row) => (
