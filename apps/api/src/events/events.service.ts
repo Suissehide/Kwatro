@@ -3,13 +3,17 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import type { z } from 'zod'
 import type { User } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
+import { RealtimeGateway } from '../realtime/realtime.gateway'
 import { registrationOutcome } from './events.rules'
 
 const registered = { registrations: { where: { status: 'REGISTERED' as const } } }
 
 @Injectable()
 export class EventsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly realtime: RealtimeGateway,
+  ) {}
 
   /** Fiche événement ; `userId` ajoute l'inscription du joueur connecté. */
   async detail(id: string, userId?: string): Promise<z.output<typeof eventDetailSchema>> {
@@ -57,6 +61,7 @@ export class EventsService {
         create: { eventId: id, userId: user.id, status: outcome.status },
       })
     })
+    this.realtime.changed({ type: 'event', id })
     return this.detail(id, user.id)
   }
 
@@ -85,6 +90,7 @@ export class EventsService {
         })
       }
     })
+    this.realtime.changed({ type: 'event', id })
     return this.detail(id, user.id)
   }
 }

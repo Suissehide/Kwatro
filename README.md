@@ -83,6 +83,25 @@ Documentation interactive en dev : http://localhost:3000/docs (OpenAPI brut : `/
 >
 > Les autres joueurs (`maya@kwatro.dev`, `sam@kwatro.dev`…) n'ont pas de mot de passe.
 
+## API : temps réel
+
+Socket.IO sur le même port que l'API (`apps/api/src/realtime/realtime.gateway.ts`). Contrat Zod dans `packages/shared/src/schemas/realtime.ts`.
+
+- **Connexion** : réservée aux joueurs connectés, refusée sinon (`connect_error` « Connexion requise »). Sur le web, le cookie de session part tout seul ; sur téléphone, l'app l'envoie dans `auth.cookie` (et `auth.devUserId` en dev, comme `x-dev-user-id`).
+- **Canaux** : `{ type, id }`, avec `type` dans `room` ou `event`.
+
+| Message | Sens | Charge utile | Effet |
+|---|---|---|---|
+| `watch` | app → API | `{ type, id }` | Suivre un canal. Accusé `true`, ou `false` si le joueur n'y a pas droit |
+| `unwatch` | app → API | `{ type, id }` | Ne plus suivre |
+| `changed` | API → app | `{ type, id }` | La fiche a changé : l'app la recharge par HTTP |
+
+- **Droits** : une room seulement pour son hôte et ses joueurs (acceptés, en attente, liste d'attente), règles mineurs comprises. Un joueur qui part, est retiré ou refusé quitte le canal. Un événement pour tout joueur connecté qui peut le voir (âge minimum).
+- `changed` ne porte aucune donnée : la fiche dépend de qui la lit (pseudos, candidatures). Les services l'émettent après le commit : `this.realtime.changed({ type: 'room', id })`.
+- **Côté app** : `useRealtime(channel, queryKey, enabled)` (`apps/mobile/src/lib/realtime.ts`), déjà branché dans `useRoomQuery` et `useEventQuery`.
+- **Nouveau canal** (chat, tournois) : ajouter le type à `channelSchema`, sa règle d'accès dans `canWatch`, puis émettre depuis le service.
+- Une seule instance d'API : pour en lancer plusieurs, ajouter l'adaptateur Redis (`@socket.io/redis-adapter`), sinon un message émis par une instance n'atteint pas les clients des autres.
+
 ## Base de données
 
 - Schéma : `apps/api/prisma/schema.prisma`. Client Prisma généré dans `apps/api/src/generated/` (non versionné). Depuis Prisma 7, `migrate dev` ne régénère plus le client tout seul : les scripts `db:migrate`, `db:seed` et `pnpm dev` le font pour toi ; sinon `pnpm db:generate`.
