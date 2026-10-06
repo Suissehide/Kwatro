@@ -29,7 +29,7 @@ export function MessagesSplit({ selected }: { selected: ChatRef | null }) {
           flex: 1,
           minHeight: 0,
           width: '100%',
-          maxWidth: 1280,
+          maxWidth: 1200, // comme WebScreen
           alignSelf: 'center',
           paddingTop: 28,
           paddingHorizontal: 32,
