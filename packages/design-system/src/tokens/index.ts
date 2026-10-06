@@ -111,7 +111,9 @@ export const space = {
   xl: 20,
   xxl: 24,
   xxxl: 32,
+  // Marges latérales des pages : téléphone, puis web (desktop)
   screen: 20,
+  page: 32,
 } as const
 
 export const radius = {
