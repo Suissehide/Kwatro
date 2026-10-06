@@ -14,6 +14,7 @@ export function Toast({
   onAction?: () => void
 }) {
   const t = toneStyles[tone]
+  const Icon = t.icon
   const toneShadow: ViewStyle | null =
     Platform.OS === 'web' ? { boxShadow: `4px 4px 0 ${t.solid}` } : null
   return (
@@ -48,7 +49,7 @@ export function Toast({
           justifyContent: 'center',
         }}
       >
-        <Text style={{ ...font('body', 800), fontSize: 13, color: textOn(t.solid) }}>{t.icon}</Text>
+        <Icon size={14} color={textOn(t.solid)} strokeWidth={3} />
       </View>
       <Text style={{ flex: 1, ...font('body', 600), fontSize: 14, color: colors.white }}>
         {message}

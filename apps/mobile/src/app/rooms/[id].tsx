@@ -3,6 +3,7 @@ import {
   Banner,
   Button,
   ConfirmDialog,
+  colors,
   ListCard,
   ListRow,
   PageTitle,
@@ -20,6 +21,7 @@ import {
   type RoomDetail,
 } from '@kwatro/shared'
 import { router, useLocalSearchParams } from 'expo-router'
+import { ChevronRight } from 'lucide-react-native'
 import { useState } from 'react'
 import { View } from 'react-native'
 import { DetailScreen } from '@/components/DetailScreen'
@@ -186,7 +188,12 @@ export default function RoomScreen() {
             inset={16}
             title={room.venue.name}
             subtitle={room.venue.address}
-            right={<Typography variant="small">Voir le lieu →</Typography>}
+            right={
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                <Typography variant="small">Voir le lieu</Typography>
+                <ChevronRight size={16} color={colors.muted} strokeWidth={2.5} />
+              </View>
+            }
             last
             onPress={() => room.venue && openVenue(room.venue.slug)}
           />

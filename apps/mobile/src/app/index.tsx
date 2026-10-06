@@ -24,6 +24,7 @@ import {
 } from '@kwatro/design-system'
 import { formatKwote, xpLevel } from '@kwatro/shared'
 import { Redirect } from 'expo-router'
+import { MoonStar } from 'lucide-react-native'
 import { useState } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -87,7 +88,7 @@ export default function HomeScreen() {
     <SkeletonCard />
   ) : events.length === 0 ? (
     <EmptyState
-      icon={<Typography variant="h2">◎</Typography>}
+      icon={<MoonStar size={28} color={colors.ink} strokeWidth={2.5} />}
       title="Pas de soirée ce soir"
       text={
         game

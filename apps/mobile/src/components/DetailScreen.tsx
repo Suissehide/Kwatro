@@ -1,4 +1,5 @@
 import { MobileScreen, ScreenHeader, TextLink, WebScreen } from '@kwatro/design-system'
+import { ArrowLeft } from 'lucide-react-native'
 import type { ReactNode } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -39,7 +40,7 @@ export function DetailScreen({
     <WebScreen nav={<PlayerNav active="explorer" create={false} />}>
       <View style={{ width: '100%', maxWidth: 760, alignSelf: 'center', gap: 28 }}>
         <View style={{ alignSelf: 'flex-start' }}>
-          <TextLink label="← Retour" onPress={goBack} />
+          <TextLink icon={ArrowLeft} label="Retour" onPress={goBack} />
         </View>
         {children}
         {footer ? <View style={{ alignSelf: 'flex-start', gap: 12 }}>{footer}</View> : null}

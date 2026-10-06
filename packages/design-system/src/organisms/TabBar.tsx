@@ -1,3 +1,15 @@
+import {
+  CalendarDays,
+  Compass,
+  Dices,
+  type LucideIcon,
+  MessageCircle,
+  Moon,
+  Plus,
+  ScanLine,
+  Store,
+  User,
+} from 'lucide-react-native'
 import { Pressable, Text, View } from 'react-native'
 import { CountBadge } from '../atoms/CountBadge'
 import { Raised } from '../atoms/Raised'
@@ -7,21 +19,20 @@ import { border, colors, font, motion, shadow, transition } from '../tokens'
 export type PlayerTab = 'explorer' | 'parties' | 'messages' | 'profil'
 export type VenueTab = 'ce-soir' | 'scanner' | 'evenements' | 'lieu'
 
-// ponytail: pictogrammes = formes des maquettes (rond / carré) ; passer à Phosphor « bold » quand le jeu d'icônes est choisi.
-export type TabItem<K extends string> = { key: K; label: string; round: boolean }
+export type TabItem<K extends string> = { key: K; label: string; icon: LucideIcon }
 export const playerItems: TabItem<PlayerTab>[] = [
-  { key: 'explorer', label: 'Explorer', round: true },
-  { key: 'parties', label: 'Mes parties', round: false },
-  { key: 'messages', label: 'Messages', round: false },
-  { key: 'profil', label: 'Profil', round: true },
+  { key: 'explorer', label: 'Explorer', icon: Compass },
+  { key: 'parties', label: 'Mes parties', icon: Dices },
+  { key: 'messages', label: 'Messages', icon: MessageCircle },
+  { key: 'profil', label: 'Profil', icon: User },
 ]
 /** Barre du site (desktop) : le profil s'ouvre par l'avatar à droite, pas par un onglet. */
 export const playerNavItems = playerItems.filter((item) => item.key !== 'profil')
 const venueItems: TabItem<VenueTab>[] = [
-  { key: 'ce-soir', label: 'Ce soir', round: true },
-  { key: 'scanner', label: 'Scanner', round: false },
-  { key: 'evenements', label: 'Événements', round: true },
-  { key: 'lieu', label: 'Mon lieu', round: true },
+  { key: 'ce-soir', label: 'Ce soir', icon: Moon },
+  { key: 'scanner', label: 'Scanner', icon: ScanLine },
+  { key: 'evenements', label: 'Événements', icon: CalendarDays },
+  { key: 'lieu', label: 'Mon lieu', icon: Store },
 ]
 
 function Tab<K extends string>({
@@ -50,17 +61,12 @@ function Tab<K extends string>({
       {...hoverProps}
       style={{ flex: 1, alignItems: 'center', gap: 4, paddingTop: 10, paddingBottom: bottomInset }}
     >
-      <View
-        style={{
-          width: 22,
-          height: 22,
-          borderRadius: item.round ? 11 : 4,
-          backgroundColor: active ? activeColor : 'transparent',
-          borderWidth: border.thin,
-          borderColor: strong ? colors.ink : colors.muted,
-          ...transition(['border-color', 'background-color']),
-        }}
-      >
+      <View style={{ width: 24, height: 24 }}>
+        <item.icon
+          size={24}
+          color={active ? activeColor : strong ? colors.ink : colors.muted}
+          strokeWidth={active ? 2.5 : 2}
+        />
         {badge ? (
           <View style={{ position: 'absolute', top: -9, left: 12 }}>
             <CountBadge count={badge} />
@@ -144,7 +150,7 @@ export function PlayerTabBar({
                 ...transition(['transform'], motion.fast),
               }}
             >
-              <Text style={{ ...font('display'), fontSize: 28, color: colors.ink }}>+</Text>
+              <Plus size={28} color={colors.ink} strokeWidth={3} />
             </View>
           </Raised>
         </Pressable>

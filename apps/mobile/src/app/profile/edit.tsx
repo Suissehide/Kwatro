@@ -10,6 +10,7 @@ import { type Me, PLAY_VIBE_LABELS, PLAY_VIBES } from '@kwatro/shared'
 import { useStore } from '@tanstack/react-form'
 import { router, useNavigation } from 'expo-router'
 import { usePreventRemove } from 'expo-router/react-navigation'
+import { ArrowLeft } from 'lucide-react-native'
 import { type ReactNode, useEffect, useState } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { PlayerScreen } from '@/components/PlayerScreen'
@@ -153,7 +154,7 @@ function EditForm({ me, wide }: { me: Me; wide: boolean }) {
     <PlayerScreen tab="profil" wide>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 24 }}>
         <View style={{ flex: 1, minWidth: 0, gap: 12, alignItems: 'flex-start' }}>
-          <TextLink label="← Profil" onPress={backToProfile} />
+          <TextLink icon={ArrowLeft} label="Profil" onPress={backToProfile} />
           <Typography variant="hero">Modifier le profil</Typography>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>

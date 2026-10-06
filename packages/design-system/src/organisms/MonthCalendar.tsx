@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight, type LucideIcon } from 'lucide-react-native'
 import type { ReactNode } from 'react'
 import { Platform, Pressable, Text, View } from 'react-native'
 import { Typography } from '../atoms/Typography'
@@ -78,7 +79,7 @@ export function MonthCalendar({
           borderColor: colors.ink,
         }}
       >
-        <Arrow label="Mois précédent" icon="←" onPress={onPrev} compact={compact} />
+        <Arrow label="Mois précédent" icon={ChevronLeft} onPress={onPrev} compact={compact} />
         <Text
           style={{
             ...font('display'),
@@ -89,7 +90,7 @@ export function MonthCalendar({
         >
           {title}
         </Text>
-        <Arrow label="Mois suivant" icon="→" onPress={onNext} compact={compact} />
+        <Arrow label="Mois suivant" icon={ChevronRight} onPress={onNext} compact={compact} />
       </View>
       <View style={compact ? { paddingTop: 6, paddingBottom: 8, paddingHorizontal: 6 } : null}>
         <View style={{ flexDirection: 'row' }}>
@@ -177,12 +178,12 @@ export function MonthCalendar({
 
 function Arrow({
   label,
-  icon,
+  icon: Icon,
   onPress,
   compact,
 }: {
   label: string
-  icon: string
+  icon: LucideIcon
   onPress?: () => void
   compact?: boolean
 }) {
@@ -209,7 +210,7 @@ function Arrow({
         ...transition(['background-color']),
       }}
     >
-      <Text style={{ ...font('body', 800), fontSize: 15, color: colors.ink }}>{icon}</Text>
+      <Icon size={18} color={colors.ink} strokeWidth={2.5} />
     </Pressable>
   )
 }

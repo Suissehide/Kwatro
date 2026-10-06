@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react-native'
 import { Pressable, Text, View } from 'react-native'
 import {
   border,
@@ -42,10 +43,13 @@ export function Button({
   kind = 'room',
   small,
   disabled,
+  icon: Icon,
   onPress,
 }: {
   label: string
   kind?: ButtonKind
+  /** Icône Lucide après le libellé (ex. lien externe). */
+  icon?: LucideIcon
   small?: boolean
   disabled?: boolean
   onPress?: () => void
@@ -81,6 +85,8 @@ export function Button({
               paddingVertical: small ? 7 : 14,
               paddingHorizontal: small ? 12 : 16,
               minHeight: small ? 36 : 52,
+              flexDirection: 'row',
+              gap: 6,
               alignItems: 'center',
               justifyContent: 'center',
               ...transition(['transform', 'background-color'], motion.fast),
@@ -102,6 +108,13 @@ export function Button({
             >
               {label}
             </Text>
+            {Icon ? (
+              <Icon
+                size={small ? 14 : 18}
+                color={disabled ? colors.disabledText : fg[kind]}
+                strokeWidth={2.5}
+              />
+            ) : null}
           </View>
         )
         // Structure fixe pendant l'appui : la face glisse pile sur son ombre, qui disparaît dessous.
