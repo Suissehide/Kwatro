@@ -68,7 +68,7 @@ export default function AdminVenueEventsScreen() {
       ) : (
         <View style={{ gap: 12 }}>
           {events.data.map((event) => {
-            const cancelled = event.cancelledAt !== null
+            const cancelled = event.status === 'CANCELLED' || event.status === 'HIDDEN'
             const past = new Date(event.startsAt) < new Date()
             return (
               <ReviewCard

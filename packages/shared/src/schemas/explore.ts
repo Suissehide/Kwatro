@@ -10,6 +10,7 @@ import {
   VENUE_TYPES,
 } from '../constants'
 import { geoQuerySchema, isoDateTime } from './common'
+import { EVENT_STATUSES } from './event'
 
 /** Lieu dans la carte / la liste « Où jouer ce soir » (B1, B2). */
 export const venueListItemSchema = z.object({
@@ -93,7 +94,10 @@ export const eventDetailSchema = z.object({
   description: z.string().nullable(),
   startsAt: isoDateTime,
   endsAt: isoDateTime.nullable(),
-  cancelledAt: isoDateTime.nullable(),
+  /** PUBLISHED, ou CANCELLED (fiche gardée pour les inscrits) ; brouillon et masqué : 404. */
+  status: z.enum(EVENT_STATUSES),
+  /** « Chaque vendredi » pour une date d'une série. */
+  recurrenceLabel: z.string().nullable(),
   priceCents: z.number().int().nullable(),
   capacity: z.number().int().nullable(),
   minAge: z.number().int().nullable(),
@@ -168,6 +172,7 @@ export const venueDetailSchema = venueListItemSchema
     events: z.array(
       eventListItemSchema.omit({ venue: true }).extend({
         seriesId: z.string().nullable(),
+        recurrenceLabel: z.string().nullable(),
         externalUrl: z.string().nullable(),
       }),
     ),
