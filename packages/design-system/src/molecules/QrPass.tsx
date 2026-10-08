@@ -1,10 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Animated, Easing, Platform, View } from 'react-native'
-import QRCode from 'react-native-qrcode-svg'
 import { Logo } from '../atoms/Logo'
 import { Raised } from '../atoms/Raised'
 import { useReducedMotion } from '../atoms/useReducedMotion'
 import { border, colors, radius } from '../tokens'
+import { qrRuns } from './qrRuns'
 
 /**
  * QR de venue (jeton signé) sur cadre jaune, pensé pour un écran noir. `scanning` : ligne qui balaie
@@ -21,6 +21,8 @@ export function QrPass({
   size?: number
   scanning?: boolean
 }) {
+  const qr = useMemo(() => qrRuns(value), [value])
+  const cell = size / qr.size
   return (
     <Raised offset={6} r={radius.sheet} color={colors.rating} style={{ alignSelf: 'center' }}>
       <View
@@ -35,13 +37,20 @@ export function QrPass({
         }}
       >
         <View style={{ width: size, height: size, overflow: 'hidden' }}>
-          <QRCode
-            value={value}
-            size={size}
-            ecl="H"
-            color={colors.ink}
-            backgroundColor={colors.white}
-          />
+          {/* Segments de modules en View : react-native-svg ne compile pas sur le site Next */}
+          {qr.runs.map((r) => (
+            <View
+              key={`${r.x}-${r.y}`}
+              style={{
+                position: 'absolute',
+                left: r.x * cell,
+                top: r.y * cell,
+                width: r.w * cell,
+                height: cell,
+                backgroundColor: colors.ink,
+              }}
+            />
+          ))}
           <View
             style={{
               position: 'absolute',
