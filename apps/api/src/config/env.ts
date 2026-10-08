@@ -33,6 +33,17 @@ const envSchema = z
     /** Serveur d'envoi des e-mails (Resend en SMTP en production) ; hors production, Mailpit par défaut. */
     SMTP_URL: z.string().url().optional(),
     MAIL_FROM: z.string().default('Lucko <noreply@lucko.fr>'),
+    /** Stockage objet S3 (RustFS en local, voir deploy/compose.yaml) ; sans bucket, l'envoi de photo répond 503. */
+    S3_ENDPOINT: z.string().url().optional(),
+    S3_REGION: z.string().default('fr-par'),
+    S3_BUCKET: z.string().optional(),
+    S3_ACCESS_KEY_ID: z.string().optional(),
+    S3_SECRET_ACCESS_KEY: z.string().optional(),
+    /** Base publique des fichiers (bucket ou CDN), ex. https://lucko-prod.s3.fr-par.scw.cloud */
+    S3_PUBLIC_URL: z.string().url().optional(),
+    /** Analyse automatique des photos (sightengine.com) ; sans clé, chaque photo attend un admin. */
+    SIGHTENGINE_API_USER: z.string().optional(),
+    SIGHTENGINE_API_SECRET: z.string().optional(),
   })
   .refine((env) => !(env.NODE_ENV === 'production' && env.DEV_AUTH_HEADER), {
     message: 'DEV_AUTH_HEADER est interdit en production',

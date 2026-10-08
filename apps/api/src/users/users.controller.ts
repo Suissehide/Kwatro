@@ -11,6 +11,7 @@ import {
   updateProfileSchema,
 } from '@lucko/shared'
 import {
+  BadRequestException,
   ConflictException,
   Controller,
   Delete,
@@ -20,13 +21,18 @@ import {
   Patch,
   Post,
   Put,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common'
-import { ApiNoContentResponse, ApiTags } from '@nestjs/swagger'
+import { FileInterceptor } from '@nestjs/platform-express'
+import { ApiBody, ApiConsumes, ApiNoContentResponse, ApiTags } from '@nestjs/swagger'
 import { z } from 'zod'
 import { CurrentUser } from '../auth/auth.decorators'
 import { ZodBody, ZodQuery, ZodResponse } from '../common/zod'
 import type { User } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
+import { StorageService } from '../storage/storage.service'
+import { AVATAR_MAX_BYTES } from './avatar.rules'
 import { UsersService } from './users.service'
 
 @ApiTags('users')
@@ -35,6 +41,7 @@ export class UsersController {
   constructor(
     private readonly prisma: PrismaService,
     private readonly users: UsersService,
+    private readonly storage: StorageService,
   ) {}
 
   @Get('me')
@@ -51,6 +58,19 @@ export class UsersController {
     @ZodBody(updateProfileSchema) body: z.output<typeof updateProfileSchema>,
   ) {
     return this.users.profile(await this.users.update(user, body))
+  }
+
+  /** Photo de profil (champ `file`, 5 Mo max). 400 si ce n'est pas une image, 422 si elle est refusée. */
+  @Post('me/avatar')
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: AVATAR_MAX_BYTES } }))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } },
+  })
+  @ZodResponse(meSchema)
+  async setAvatar(@CurrentUser() user: User, @UploadedFile() file?: { buffer: Buffer }) {
+    if (!file) throw new BadRequestException('Photo manquante')
+    return this.users.profile(await this.users.setAvatar(user, file.buffer))
   }
 
   /** Mes parties (D1) : à venir par date croissante, historique du plus récent au plus ancien. */
@@ -147,5 +167,6 @@ export class UsersController {
         },
       }),
     ])
+    await this.storage.remove(user.avatarUrl)
   }
 }

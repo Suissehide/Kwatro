@@ -1,7 +1,7 @@
 # ────────────────────────────────────────────────────────────────
 # Lucko — stack Docker LOCALE
 #
-#   pnpm db:up        → profil « db » : PostgreSQL/PostGIS + Mailpit (l'API et le site tournent avec `pnpm dev`)
+#   pnpm db:up        → profil « db » : PostgreSQL/PostGIS + Mailpit + stockage S3 (l'API et le site tournent avec `pnpm dev`)
 #   pnpm docker:up    → profils db + backend + frontend : tout en conteneurs, images de production
 #   pnpm db:down / pnpm docker:down
 #
@@ -51,6 +51,44 @@ services:
     networks:
       - lucko-internal
 
+  s3:
+    container_name: lucko-s3
+    # Stockage S3 des photos (RustFS, compatible MinIO) : API sur le port 9000, console sur http://localhost:9001
+    image: rustfs/rustfs:latest
+    profiles: [db]
+    restart: unless-stopped
+    environment:
+      RUSTFS_ACCESS_KEY: lucko
+      RUSTFS_SECRET_KEY: lucko-s3-local
+      RUSTFS_CONSOLE_ENABLE: "true"
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - s3-data:/data
+    networks:
+      - lucko-internal
+
+  s3-init:
+    container_name: lucko-s3-init
+    # Crée le bucket « lucko » : les photos de profil sont lisibles par URL, le bucket n'est pas listable
+    image: amazon/aws-cli:latest
+    profiles: [db]
+    depends_on: [s3]
+    environment:
+      AWS_ACCESS_KEY_ID: lucko
+      AWS_SECRET_ACCESS_KEY: lucko-s3-local
+      AWS_DEFAULT_REGION: fr-par
+    entrypoint: [sh, -c]
+    command:
+      - |
+        s3="aws --endpoint-url http://s3:9000 s3api"
+        until $$s3 list-buckets > /dev/null 2>&1; do sleep 1; done
+        $$s3 create-bucket --bucket lucko 2> /dev/null
+        $$s3 put-bucket-policy --bucket lucko --policy '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":"*","Action":"s3:GetObject","Resource":"arn:aws:s3:::lucko/avatars/*"}]}'
+    networks:
+      - lucko-internal
+
   api:
     container_name: lucko-api
     profiles: [backend]
@@ -66,6 +104,11 @@ services:
       BETTER_AUTH_SECRET: lucko-local-docker-only-not-a-real-secret
       # E-mails dans Mailpit (http://localhost:8025), joint par son nom sur le réseau Docker
       SMTP_URL: smtp://mailpit:1025
+      S3_ENDPOINT: http://s3:9000
+      S3_BUCKET: lucko
+      S3_ACCESS_KEY_ID: lucko
+      S3_SECRET_ACCESS_KEY: lucko-s3-local
+      S3_PUBLIC_URL: http://localhost:9000/lucko
     ports:
       - "127.0.0.1:3000:3000"
     networks:
@@ -90,3 +133,4 @@ services:
 
 volumes:
   postgres-data:
+  s3-data:
