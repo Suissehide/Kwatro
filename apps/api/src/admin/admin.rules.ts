@@ -1,4 +1,4 @@
-import { addDays, fromLocalDateTime } from '@lucko/shared'
+import { type AdminActionKind, addDays, fromLocalDateTime } from '@lucko/shared'
 import { mailHtml } from '../mail/mail.layout'
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -141,4 +141,26 @@ export function planProfileMerge(source: Profile[], target: Profile[]) {
     } else remove.push(profile.id)
   }
   return { move, remove }
+}
+
+/**
+ * Ce que désigne le `targetId` d'une action du journal : la création d'un événement vise le lieu
+ * (route /venues/:id/events), la fusion vise le doublon supprimé (on montre le jeu gardé).
+ */
+export const ACTION_TARGET: Record<
+  AdminActionKind,
+  'report' | 'user' | 'venue' | 'event' | 'merge'
+> = {
+  REPORT_DISMISS: 'report',
+  REPORT_WARN: 'report',
+  REPORT_SUSPEND: 'report',
+  USER_SUSPEND: 'user',
+  USER_UNSUSPEND: 'user',
+  AVATAR_APPROVE: 'user',
+  AVATAR_REJECT: 'user',
+  VENUE_UPDATE: 'venue',
+  EVENT_CREATE: 'venue',
+  EVENT_UPDATE: 'event',
+  EVENT_CANCEL: 'event',
+  GAME_MERGE: 'merge',
 }

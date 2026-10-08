@@ -12,14 +12,17 @@ import {
   DateBlock,
   IconButton,
   InfoChip,
+  Inset,
   Logo,
   Note,
   ProgressSteps,
+  Quote,
   Radio,
   Skeleton,
   Slider,
   Spinner,
   StatusPill,
+  Swatch,
   Tag,
   TextLink,
   Toggle,
@@ -40,10 +43,12 @@ import {
   ChatGroupLabel,
   ChatHeader,
   ChatRow,
+  ChecklistItem,
   ChipGroup,
   ClosureRow,
   ContentCard,
   DayEventRow,
+  DecisionCard,
   EmptyState,
   EventCard,
   FactCard,
@@ -57,17 +62,24 @@ import {
   Pagination,
   Panel,
   PerkBanner,
+  PersonCell,
+  PhotoReviewCard,
   PinnedBanner,
+  PriorityBanner,
   ProfileCard,
   ProfileIdentity,
+  QueueCard,
+  QueueItem,
   RankCard,
   RankRow,
   RatingBadge,
+  ReasonForm,
   ReviewCard,
   RoomCard,
   RoomStatusTimeline,
   ScreenHeader,
   Segmented,
+  SettingRow,
   SettingsCard,
   SettingsField,
   SettingsGroup,
@@ -77,8 +89,11 @@ import {
   ShareBar,
   SkeletonCard,
   StatCard,
+  StatStrip,
   Stepper,
+  StripeRow,
   TextField,
+  TimelineItem,
   Section as TitledSection,
   Toast,
   ToggleGroup,
@@ -90,6 +105,7 @@ import {
   BarChart,
   ContextMenu,
   DataTable,
+  DetailCard,
   type MenuAnchor,
   MonthCalendar,
   type PlayerTab,
@@ -687,6 +703,139 @@ export function Catalogue() {
         <SiteFooter compact={false} />
         <View style={{ maxWidth: 420, width: '100%' }}>
           <SiteFooter compact />
+        </View>
+      </Section>
+
+      <Section title="Back-office">
+        <View style={{ height: 300, flexDirection: 'row' }}>
+          <Sidebar
+            dark
+            title="Back-office"
+            active="reports"
+            onSelect={() => {}}
+            items={[
+              { key: 'dashboard', label: 'Tableau de bord' },
+              {
+                key: 'reports',
+                label: 'Signalements',
+                group: 'Modération',
+                badge: '2',
+                alert: true,
+              },
+              { key: 'avatars', label: 'Photos de profil', badge: '3' },
+              { key: 'venues', label: 'Lieux et événements', group: 'Catalogue', badge: '1' },
+            ]}
+            footer={<TextLink onDark label="Retour à l’app" onPress={() => {}} />}
+          />
+        </View>
+        <PriorityBanner
+          tag="Prioritaire"
+          message="1 signalement concerne un joueur mineur."
+          action="Traiter maintenant"
+          onAction={() => {}}
+        />
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14 }}>
+          <QueueCard
+            value={2}
+            label="Signalements ouverts"
+            note="Le plus ancien : il y a 2 j"
+            color={colors.room}
+            onPress={() => {}}
+          />
+          <QueueCard
+            value={0}
+            label="Joueurs suspendus"
+            note="Aucune suspension en cours"
+            color={colors.ink}
+            onPress={() => {}}
+          />
+        </View>
+        <View style={{ maxWidth: 360, gap: 10 }}>
+          <QueueItem
+            title="Tom_16"
+            tags={<Tag label="-18" variant="alert" />}
+            age="il y a 3 h"
+            line="Pseudo ou photo inappropriés"
+            meta="par Maya"
+            stripe={colors.room}
+            selected
+            onPress={() => {}}
+          />
+          <PersonCell name="Léa" subtitle="lea@lucko.dev" />
+          <Swatch color={colors.venue} label="Suspension levée" />
+          <ChecklistItem ok label="Adresse" detail="Géolocalisée sur la carte" />
+          <ChecklistItem ok={false} label="Photos" detail="Aucune photo" />
+          <TimelineItem color={colors.rating} title="Joueur averti" meta="admin · Mar. 6 oct." />
+          <SettingRow
+            title="Lieu partenaire"
+            description="Badge et avantage Lucko."
+            value
+            onChange={() => {}}
+          />
+        </View>
+        <DetailCard
+          sections={[
+            {
+              key: 'stats',
+              flush: true,
+              children: (
+                <StatStrip
+                  items={[
+                    { label: 'Avertissements', value: 0 },
+                    { label: 'Suspensions', value: 1 },
+                  ]}
+                />
+              ),
+            },
+            { key: 'quote', children: <Quote text="Sa photo montre un autre joueur." /> },
+            {
+              key: 'decision',
+              label: 'Décision',
+              children: (
+                <>
+                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <DecisionCard title="Classer" description="Aucune suite" onPress={() => {}} />
+                    <DecisionCard
+                      title="Suspendre"
+                      description="Compte bloqué"
+                      color={colors.room}
+                      selected
+                      onPress={() => {}}
+                    />
+                  </View>
+                  <ReasonForm
+                    label="Motif"
+                    durations={[
+                      { key: '7', label: '7 jours' },
+                      { key: 'def', label: 'Définitive' },
+                    ]}
+                    consequence="Déconnecté partout."
+                    confirmLabel="Suspendre"
+                    onConfirm={() => {}}
+                    onCancel={() => {}}
+                  />
+                </>
+              ),
+            },
+          ]}
+        />
+        <Inset>
+          <StripeRow
+            stripe={colors.event}
+            title="Soirée Commander"
+            subtitle="Ven. 9 oct. · 12 places"
+          />
+        </Inset>
+        <View style={{ maxWidth: 300 }}>
+          <PhotoReviewCard
+            uri="https://picsum.photos/400"
+            name="Jade"
+            age="il y a 1 h"
+            badge="Photo envoyée"
+            onOpen={() => {}}
+            onApprove={() => {}}
+            onReject={() => {}}
+          />
         </View>
       </Section>
 

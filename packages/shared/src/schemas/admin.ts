@@ -48,11 +48,16 @@ export type AdminReasonInput = z.infer<typeof adminReasonSchema>
 
 const actorSchema = z.object({ id: z.string(), pseudo: z.string().nullable() })
 
-/** Ligne du journal d'audit. */
+export const ADMIN_TARGET_TYPES = ['user', 'venue', 'game'] as const
+
+/** Ligne du journal d'audit. `target` : fiche à ouvrir (joueur, lieu, jeu), null si elle n'existe plus. */
 export const adminActionSchema = z.object({
   id: z.string(),
   action: z.enum(ADMIN_ACTION_KINDS),
   targetId: z.string(),
+  target: z
+    .object({ type: z.enum(ADMIN_TARGET_TYPES), id: z.string(), label: z.string() })
+    .nullable(),
   reason: z.string(),
   createdAt: isoDateTime,
   admin: actorSchema,
@@ -66,10 +71,21 @@ export const adminDashboardSchema = z.object({
   pendingAvatars: z.number().int(),
   pendingVenues: z.number().int(),
   suspendedPlayers: z.number().int(),
+  oldestReportAt: isoDateTime.nullable(),
+  oldestAvatarAt: isoDateTime.nullable(),
+  /** Les 3 premiers lieux en attente. */
+  pendingVenueNames: z.array(z.string()),
 })
-export type AdminDashboard = z.infer<typeof adminDashboardSchema>
+export type AdminDashboard = z.input<typeof adminDashboardSchema>
 
 export const adminSearchSchema = z.object({ q: z.string().trim().max(100).default('') })
+
+export const ADMIN_USER_FILTERS = ['all', 'reported', 'minor', 'suspended', 'staff'] as const
+export type AdminUserFilter = (typeof ADMIN_USER_FILTERS)[number]
+
+export const adminUserQuerySchema = adminSearchSchema.extend({
+  filter: z.enum(ADMIN_USER_FILTERS).default('all'),
+})
 
 const suspensionSchema = z
   .object({ at: isoDateTime, until: isoDateTime.nullable(), reason: z.string() })
@@ -88,6 +104,13 @@ export const adminUserSchema = z.object({
   openReports: z.number().int(),
 })
 export type AdminUser = z.input<typeof adminUserSchema>
+
+/** GET /admin/users : joueurs du filtre, et nombre de comptes par filtre (pour la même recherche). */
+export const adminUserListSchema = z.object({
+  users: z.array(adminUserSchema),
+  counts: z.record(z.enum(ADMIN_USER_FILTERS), z.number().int()),
+})
+export type AdminUserList = z.input<typeof adminUserListSchema>
 
 /** GET /admin/users/:id : historique du joueur (signalements reçus, actions des admins). */
 export const adminUserDetailSchema = adminUserSchema.extend({
@@ -114,8 +137,9 @@ export const pendingAvatarSchema = z.object({
   id: z.string(),
   pseudo: z.string().nullable(),
   avatarUrl: z.string(),
+  submittedAt: isoDateTime,
 })
-export type PendingAvatar = z.infer<typeof pendingAvatarSchema>
+export type PendingAvatar = z.input<typeof pendingAvatarSchema>
 
 export const adminVenueQuerySchema = adminSearchSchema.extend({
   status: z.enum(VENUE_STATUSES).optional(),
@@ -142,6 +166,7 @@ export const adminVenueSchema = z.object({
       closesAtMinute: z.number().int(),
     }),
   ),
+  photoCount: z.number().int(),
   createdAt: isoDateTime,
 })
 export type AdminVenue = z.input<typeof adminVenueSchema>

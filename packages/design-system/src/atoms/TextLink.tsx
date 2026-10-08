@@ -9,10 +9,13 @@ export function TextLink({
   muted,
   icon: Icon,
   iconAfter,
+  onDark,
   onPress,
 }: {
   label: string
   muted?: boolean
+  /** Sur fond ink : jaune, blanc au survol. */
+  onDark?: boolean
   /** Icône Lucide avant le libellé (ex. retour). */
   icon?: LucideIcon
   /** Icône après le libellé (ex. chevron « Profil › »). */
@@ -20,7 +23,15 @@ export function TextLink({
   onPress?: () => void
 }) {
   const { hovered, hoverProps } = useHover()
-  const color = hovered ? colors.room : muted ? colors.muted : colors.event
+  const color = onDark
+    ? hovered
+      ? colors.white
+      : colors.rating
+    : hovered
+      ? colors.room
+      : muted
+        ? colors.muted
+        : colors.event
   return (
     <Pressable role="link" onPress={onPress} {...hoverProps}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>

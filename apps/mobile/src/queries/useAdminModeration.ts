@@ -1,4 +1,9 @@
-import type { AdminReasonInput, ResolveReportInput, SuspendInput } from '@lucko/shared'
+import type {
+  AdminReasonInput,
+  AdminUserFilter,
+  ResolveReportInput,
+  SuspendInput,
+} from '@lucko/shared'
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ADMIN } from '@/constants/queryKeys'
 import { api } from '@/lib/api'
@@ -22,11 +27,11 @@ export const useAdminActionsQuery = () =>
 export const useAdminReportsQuery = () =>
   useQuery({ queryKey: [ADMIN.REPORTS], queryFn: () => unwrap(api.GET('/admin/reports')) })
 
-/** Recherche par pseudo, e-mail ou id (vide : derniers inscrits). */
-export const useAdminUsersQuery = (q: string) =>
+/** Recherche par pseudo, e-mail ou id (vide : derniers inscrits), avec le nombre de comptes par filtre. */
+export const useAdminUsersQuery = (query: { q: string; filter: AdminUserFilter }) =>
   useQuery({
-    queryKey: [ADMIN.USERS, q],
-    queryFn: () => unwrap(api.GET('/admin/users', { params: { query: { q } } })),
+    queryKey: [ADMIN.USERS, query],
+    queryFn: () => unwrap(api.GET('/admin/users', { params: { query } })),
     placeholderData: (previous) => previous,
   })
 

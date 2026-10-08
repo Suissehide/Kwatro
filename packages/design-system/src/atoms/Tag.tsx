@@ -2,7 +2,7 @@ import type { LucideIcon } from 'lucide-react-native'
 import { Text, View } from 'react-native'
 import { border, colors, font, radius } from '../tokens'
 
-export type TagVariant = 'default' | 'ranked' | 'partner' | 'tonight' | 'event' | 'pinned'
+export type TagVariant = 'default' | 'ranked' | 'partner' | 'tonight' | 'event' | 'pinned' | 'alert'
 const variants: Record<TagVariant, { bg: string; fg: string; rotate: number }> = {
   default: { bg: colors.white, fg: colors.ink, rotate: 0 },
   ranked: { bg: colors.ink, fg: colors.white, rotate: 0 },
@@ -10,6 +10,7 @@ const variants: Record<TagVariant, { bg: string; fg: string; rotate: number }> =
   partner: { bg: colors.venue, fg: colors.white, rotate: -3 },
   tonight: { bg: colors.rating, fg: colors.ink, rotate: 2 },
   event: { bg: colors.event, fg: colors.white, rotate: 0 },
+  alert: { bg: colors.room, fg: colors.white, rotate: 0 },
   pinned: { bg: colors.rating, fg: colors.ink, rotate: 0 },
 }
 

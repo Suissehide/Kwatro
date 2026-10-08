@@ -40,7 +40,16 @@ const venueInclude = {
     orderBy: [{ weekday: 'asc' }, { opensAtMinute: 'asc' }],
     select: { weekday: true, opensAtMinute: true, closesAtMinute: true },
   },
+  _count: { select: { photos: true } },
 } satisfies Prisma.VenueInclude
+
+const toAdminVenue = ({
+  _count,
+  ...venue
+}: Prisma.VenueGetPayload<{ include: typeof venueInclude }>) => ({
+  ...venue,
+  photoCount: _count.photos,
+})
 
 const eventInclude = {
   games: { select: { id: true } },
@@ -79,9 +88,11 @@ export class AdminCatalogController {
   @Get('venues')
   @Admin()
   @ZodResponse(z.array(adminVenueSchema))
-  venues(@ZodQuery(adminVenueQuerySchema) { q, status }: z.output<typeof adminVenueQuerySchema>) {
+  async venues(
+    @ZodQuery(adminVenueQuerySchema) { q, status }: z.output<typeof adminVenueQuerySchema>,
+  ) {
     const contains = { contains: q, mode: 'insensitive' } as const
-    return this.prisma.venue.findMany({
+    const venues = await this.prisma.venue.findMany({
       where: {
         ...(status ? { status } : {}),
         ...(q ? { OR: [{ name: contains }, { city: contains }, { address: contains }] } : {}),
@@ -89,6 +100,7 @@ export class AdminCatalogController {
       orderBy: [{ status: 'asc' }, { name: 'asc' }],
       include: venueInclude,
     })
+    return venues.map(toAdminVenue)
   }
 
   /** Publication, passage en partenaire (badge, avantage Lucko), accès des mineurs. */
@@ -100,7 +112,9 @@ export class AdminCatalogController {
     @ZodBody(updateVenueSchema) body: z.output<typeof updateVenueSchema>,
   ) {
     await this.venueOr404(id)
-    return this.prisma.venue.update({ where: { id }, data: body, include: venueInclude })
+    return toAdminVenue(
+      await this.prisma.venue.update({ where: { id }, data: body, include: venueInclude }),
+    )
   }
 
   @Get('venues/:id/events')

@@ -100,3 +100,17 @@ export function formatDuration(minutes: number): string {
   const m = minutes % 60
   return m ? `${h} h ${String(m).padStart(2, '0')}` : `${h} h`
 }
+
+/** Ancienneté : « il y a 5 min », « il y a 3 h », « hier », « il y a 4 j ». */
+export function formatAgo(
+  date: Date | string,
+  { now = new Date(), timeZone = VENUE_TIME_ZONE } = {},
+): string {
+  const at = new Date(date)
+  const minutes = Math.max(0, Math.floor((now.getTime() - at.getTime()) / 60_000))
+  if (minutes < 60) return `il y a ${Math.max(1, minutes)} min`
+  if (localDay(at, timeZone) === localDay(now, timeZone))
+    return `il y a ${Math.floor(minutes / 60)} h`
+  if (localDay(at, timeZone) === localDay(new Date(now.getTime() - DAY_MS), timeZone)) return 'hier'
+  return `il y a ${Math.max(2, Math.round(minutes / 1440))} j`
+}

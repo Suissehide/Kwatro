@@ -11,6 +11,7 @@ export function ListRow({
   right,
   last,
   inset = 0,
+  selected,
   onPress,
 }: {
   left?: ReactNode
@@ -20,6 +21,7 @@ export function ListRow({
   right?: ReactNode
   last?: boolean
   inset?: number
+  selected?: boolean
   onPress?: () => void
 }) {
   const { hovered, hoverProps } = useHover()
@@ -28,6 +30,7 @@ export function ListRow({
       onPress={onPress}
       disabled={!onPress}
       role={onPress ? 'button' : undefined}
+      aria-pressed={onPress ? !!selected : undefined}
       {...hoverProps}
       style={{
         flexDirection: 'row',
@@ -38,7 +41,11 @@ export function ListRow({
         paddingHorizontal: inset,
         borderBottomWidth: last ? 0 : border.thin,
         borderColor: colors.line,
-        backgroundColor: onPress && hovered ? colors.hover : 'transparent',
+        backgroundColor: selected
+          ? colors.ratingSoft
+          : onPress && hovered
+            ? colors.hover
+            : 'transparent',
         ...transition(['background-color']),
       }}
     >

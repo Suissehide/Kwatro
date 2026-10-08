@@ -1,89 +1,186 @@
 import {
   Banner,
   Button,
-  ChipGroup,
-  ConfirmDialog,
-  ReviewCard,
+  Chip,
+  type Column,
+  colors,
+  DataTable,
+  Inset,
   SkeletonCard,
+  Tag,
   Typography,
 } from '@lucko/design-system'
 import type { AdminGame } from '@lucko/shared'
 import { useState } from 'react'
-import { View } from 'react-native'
+import { useWindowDimensions, View } from 'react-native'
 import { AdminScreen } from '@/components/admin/AdminScreen'
+import { duplicateOf, mergeSummary } from '@/lib/admin'
 import { useAdminCatalogMutations, useAdminGamesQuery } from '@/queries/useAdminCatalog'
 
-const plural = (count: number, word: string) => `${count} ${word}${count > 1 ? 's' : ''}`
+const NARROW = 768
+
+const count = (key: 'rooms' | 'events' | 'players', label: string, width: number) =>
+  ({
+    key,
+    label,
+    width,
+    align: 'right',
+    render: (g) => (
+      <Typography variant="number" style={{ color: g[key] ? colors.ink : colors.inkMuted }}>
+        {g[key]}
+      </Typography>
+    ),
+  }) satisfies Column<AdminGame>
 
 /**
  * Catalogue des jeux : fusionner un doublon dans le bon jeu. Formats, profils (LK), rooms,
  * événements, lieux et joueurs passent au jeu cible, puis le doublon est supprimé.
  */
 export default function AdminGamesScreen() {
+  const narrow = useWindowDimensions().width < NARROW
   const games = useAdminGamesQuery()
   const { mergeGames } = useAdminCatalogMutations()
-  const [duplicate, setDuplicate] = useState<AdminGame | null>(null)
+  const [mergingId, setMergingId] = useState<string | null>(null)
   const [intoId, setIntoId] = useState<string | null>(null)
-  const target = games.data?.find((g) => g.id === intoId)
-  const close = () => {
-    setDuplicate(null)
-    setIntoId(null)
+  const [merged, setMerged] = useState<string | null>(null)
+  const all = games.data ?? []
+  const merging = all.find((g) => g.id === mergingId)
+
+  const open = (game: AdminGame) => {
     mergeGames.reset()
+    setMergingId(mergingId === game.id ? null : game.id)
+    setIntoId(duplicateOf(game, all)?.id ?? null)
+  }
+
+  const columns: Column<AdminGame>[] = [
+    {
+      key: 'name',
+      label: 'Jeu',
+      flex: 1.3,
+      render: (g) => (
+        <View style={{ gap: 2 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+            <Typography variant="title" style={{ fontSize: 15 }}>
+              {g.name}
+            </Typography>
+            {duplicateOf(g, all) ? <Tag label="Doublon ?" variant="tonight" /> : null}
+          </View>
+          <Typography variant="number" weight={400} style={{ fontSize: 12 }}>
+            {g.slug}
+          </Typography>
+        </View>
+      ),
+    },
+    {
+      key: 'formats',
+      label: 'Formats',
+      flex: 1.6,
+      render: (g) => (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
+          {g.formats.map((f) => (
+            <Chip key={f.id} label={f.name} />
+          ))}
+        </View>
+      ),
+    },
+    count('rooms', 'Rooms', 70),
+    count('events', 'Événem.', 90),
+    count('players', 'Joueurs', 80),
+    {
+      key: 'merge',
+      label: '',
+      width: 180,
+      align: 'right',
+      render: (g) => (
+        <Button
+          small
+          kind={mergingId === g.id ? 'rating' : 'ghost'}
+          label="Fusionner dans…"
+          onPress={() => open(g)}
+        />
+      ),
+    },
+  ]
+
+  const mergePanel = (source: AdminGame) => {
+    const target = all.find((g) => g.id === intoId)
+    return (
+      <Inset>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+          <Typography variant="title" style={{ fontSize: 14 }}>
+            Fusionner « {source.name} » dans
+          </Typography>
+          {all
+            .filter((g) => g.id !== source.id)
+            .map((g) => (
+              <Chip
+                key={g.id}
+                label={g.name}
+                active={g.id === intoId}
+                onPress={() => setIntoId(g.id)}
+              />
+            ))}
+        </View>
+        {target ? (
+          <View style={{ gap: 4 }}>
+            {mergeSummary(source, target).map((line) => (
+              <Typography key={line} variant="small" style={{ color: colors.ink }}>
+                · {line}
+              </Typography>
+            ))}
+            <Typography variant="small" weight={800} style={{ color: colors.room }}>
+              « {source.name} » sera supprimé. Cette action est définitive.
+            </Typography>
+          </View>
+        ) : null}
+        {mergeGames.isError ? <Banner tone="err" message={mergeGames.error.message} /> : null}
+        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8 }}>
+          <Button small kind="ghost" label="Annuler" onPress={() => setMergingId(null)} />
+          <Button
+            small
+            kind="room"
+            label="Fusionner"
+            disabled={!target || mergeGames.isPending}
+            onPress={() =>
+              target &&
+              mergeGames.mutate(
+                { id: source.id, intoId: target.id },
+                {
+                  onSuccess: () => {
+                    setMerged(`« ${source.name} » a été fusionné dans « ${target.name} ».`)
+                    setMergingId(null)
+                  },
+                },
+              )
+            }
+          />
+        </View>
+      </Inset>
+    )
   }
 
   return (
-    <AdminScreen section="games">
+    <AdminScreen
+      section="games"
+      note="Fusionne les doublons : les rooms, événements et profils de jeu sont déplacés vers le jeu cible."
+    >
+      {merged ? <Banner tone="ok" message={merged} /> : null}
       {games.isError ? (
         <Banner tone="err" message={games.error.message} />
       ) : !games.data ? (
         <SkeletonCard />
       ) : (
-        <View style={{ gap: 12 }}>
-          {games.data.map((game) => (
-            <ReviewCard
-              key={game.id}
-              title={game.name}
-              meta={`${game.slug} · ${game.formats.map((f) => f.name).join(', ') || 'sans format'}`}
-              body={`${plural(game.rooms, 'room')} · ${plural(game.events, 'événement')} · ${plural(game.players, 'joueur')}`}
-              actions={
-                <Button
-                  small
-                  kind="ghost"
-                  label="Fusionner dans…"
-                  onPress={() => setDuplicate(game)}
-                />
-              }
-            />
-          ))}
-        </View>
-      )}
-      <ConfirmDialog
-        visible={duplicate !== null}
-        title={`Fusionner ${duplicate?.name ?? ''} ?`}
-        message={
-          target
-            ? `${duplicate?.name} est fondu dans ${target.name} puis supprimé. Un joueur présent dans les deux garde le profil le plus joué en classé. Irréversible.`
-            : 'Choisis le jeu à garder.'
-        }
-        confirmLabel="Fusionner"
-        cancelLabel="Annuler"
-        confirmDisabled={!target || mergeGames.isPending}
-        onCancel={close}
-        onConfirm={() => {
-          if (duplicate && target)
-            mergeGames.mutate({ id: duplicate.id, intoId: target.id }, { onSuccess: close })
-        }}
-      >
-        <Typography variant="label">Jeu à garder</Typography>
-        <ChipGroup
-          items={(games.data ?? [])
-            .filter((g) => g.id !== duplicate?.id)
-            .map((g) => ({ key: g.id, label: g.name }))}
-          value={intoId}
-          onChange={setIntoId}
+        <DataTable
+          columns={columns}
+          rows={all}
+          selected={mergingId ? [mergingId] : []}
+          expanded={(g) => (g.id === mergingId ? mergePanel(g) : null)}
+          mobileCards={narrow}
+          primary="name"
+          cardKeys={['formats', 'merge']}
         />
-        {mergeGames.isError ? <Banner tone="err" message={mergeGames.error.message} /> : null}
-      </ConfirmDialog>
+      )}
+      {narrow && merging ? mergePanel(merging) : null}
     </AdminScreen>
   )
 }

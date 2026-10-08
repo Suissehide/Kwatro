@@ -22,6 +22,10 @@ export const colors = {
   skeleton: '#F3DFB8',
   skeletonSoft: '#FBEACB',
   scrim: 'rgba(22,19,15,0.55)',
+  // Surfaces sur fond ink (barre latérale du back-office)
+  inkHover: '#2A2520',
+  inkLine: '#3A332C',
+  inkMuted: '#A69A88',
 
   // Couleurs de contenu (une par type)
   room: '#CF3A22', // rooms, action principale, danger
