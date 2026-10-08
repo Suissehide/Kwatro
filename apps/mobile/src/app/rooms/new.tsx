@@ -258,7 +258,8 @@ export default function CreateRoomScreen() {
                 .filter(Boolean)
                 .join(' · ')}
               adult={!draft.minorsAllowed}
-              places={`1/${draft.capacity}${draft.ranked ? ' · classée' : ''}`}
+              ranked={draft.ranked}
+              places={`1/${draft.capacity}`}
             />
             {game ? <DemandCard count={demandCount} text={demandText} /> : null}
             {venue?.isPartner && venue.luckoPerk ? (
@@ -337,6 +338,11 @@ function Grid({ columns, children }: { columns: number; children: ReactNode[] })
   )
 }
 
+/** « Stratégie, ambiance, coopératif… » : les catégories se choisissent juste après. */
+const BOARD_GAME_HINT = `${BOARD_GAME_CATEGORIES.slice(0, 3)
+  .map((c) => BOARD_GAME_CATEGORY_LABELS[c].label.toLowerCase())
+  .join(', ')}…`.replace(/^./, (c) => c.toUpperCase())
+
 const pills = { flexDirection: 'row', flexWrap: 'wrap', gap: 6 } as const
 
 function GameStep({
@@ -354,21 +360,39 @@ function GameStep({
 }) {
   const board = game ? game.kind !== 'TCG' : false
   const format = formatOf(game, draft)
+  const tcgs = games.filter((g) => g.kind === 'TCG')
+  const boardGames = games.filter((g) => g.kind !== 'TCG')
   return (
     <>
-      <Field label="Jeu">
+      <Field label="Cartes à collectionner">
         <Grid columns={wide ? 4 : 2}>
-          {games.map((g) => (
+          {tcgs.map((g) => (
             <ChoiceCard
               key={g.id}
               label={gameLabel(g)}
-              swatch={g.kind === 'TCG' ? gameColor(g.slug) : colors.venue}
+              swatch={gameColor(g.slug)}
               selected={g.id === draft.gameId}
               onPress={() => setDraft((d) => withGame(d, g))}
             />
           ))}
         </Grid>
       </Field>
+      {boardGames.length ? (
+        <Field label="Jeux de société">
+          <Grid columns={wide ? 2 : 1}>
+            {boardGames.map((g) => (
+              <ChoiceCard
+                key={g.id}
+                label={gameLabel(g)}
+                description={BOARD_GAME_HINT}
+                swatch={colors.venue}
+                selected={g.id === draft.gameId}
+                onPress={() => setDraft((d) => withGame(d, g))}
+              />
+            ))}
+          </Grid>
+        </Field>
+      ) : null}
       {game ? (
         <Field label={board ? 'Catégorie' : 'Format'}>
           <View style={pills}>

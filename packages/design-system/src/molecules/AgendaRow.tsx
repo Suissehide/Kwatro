@@ -15,6 +15,8 @@ export type AgendaRowProps = {
   /** « Le Dé Fêlé · 450 m · Magic ». */
   meta: string
   adult?: boolean
+  /** Room classée : étiquette « Classée ». */
+  ranked?: boolean
   partner?: boolean
   places?: string | null
   /** `alert` : dernière place (rouge) ; `off` : complet (grisé). */
@@ -38,6 +40,7 @@ export function AgendaRow({
   title,
   meta,
   adult,
+  ranked,
   partner,
   places,
   placesTone,
@@ -68,6 +71,7 @@ export function AgendaRow({
     </View>
   )
   const adultTag = adult ? <Tag label="18+" variant="ranked" /> : null
+  const rankedTag = ranked ? <Tag label="Classée" variant="ranked" /> : null
   const placesText = places ? (
     <Text style={{ ...font('mono', 700), fontSize: wide ? 13 : 12, color: placesColor }}>
       {places}
@@ -114,6 +118,7 @@ export function AgendaRow({
             >
               {meta}
             </Text>
+            {rankedTag}
           </View>
         </View>
       </Pressable>
@@ -156,6 +161,7 @@ export function AgendaRow({
           <Text style={{ ...font('body', 800), fontSize: 17, color: colors.ink }}>{title}</Text>
           {typeTag}
           {adultTag}
+          {rankedTag}
           {partner ? <Tag label="Partenaire" variant="partner" /> : null}
         </View>
         <Text style={{ ...font('body', 400), fontSize: 13, lineHeight: 18, color: colors.muted }}>
