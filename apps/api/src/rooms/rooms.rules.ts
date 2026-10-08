@@ -69,7 +69,7 @@ export type JoinableRoom = {
   autoAccept: boolean
 }
 
-const ACTIVE: ParticipantStatus[] = ['PENDING', 'ACCEPTED', 'WAITLISTED']
+export const ACTIVE: ParticipantStatus[] = ['PENDING', 'ACCEPTED', 'WAITLISTED']
 
 /**
  * Demande à rejoindre (LKO-56) : complète → liste d'attente ; sinon acceptée d'office si l'inscription

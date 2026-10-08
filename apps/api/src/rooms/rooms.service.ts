@@ -28,6 +28,7 @@ import { PrismaService } from '../prisma/prisma.service'
 import { PushService } from '../push/push.service'
 import { RealtimeGateway } from '../realtime/realtime.gateway'
 import {
+  ACTIVE,
   acceptRefusal,
   createRoomRefusal,
   fillStatus,
@@ -137,10 +138,12 @@ export class RoomsService {
       where: { id, ...notBlockedWith(viewer?.id) },
       include: detailInclude,
     })
-    if (!room || !roomVisibleTo(room, viewer, now)) throw new NotFoundException('Room introuvable')
+    const mine = room?.participants.find((p) => p.userId === viewer?.id)
+    // Un joueur déjà passé par la room la voit encore si les règles ont changé depuis (lieu qui refuse désormais les mineurs seuls)
+    if (!room || (!mine && !roomVisibleTo(room, viewer, now)))
+      throw new NotFoundException('Room introuvable')
 
     const isHost = room.hostId === viewer?.id
-    const mine = room.participants.find((p) => p.userId === viewer?.id)
     const member = isHost || mine?.status === 'ACCEPTED'
     const accepted = room.participants.filter((p) => p.status === 'ACCEPTED')
     const waiting = room.participants.filter(
@@ -309,8 +312,11 @@ export class RoomsService {
     return this.detail(id, host)
   }
 
-  /** Verrou sur la room (deux demandes simultanées ne prennent pas la même dernière place), visibilité comprise. */
-  /** `minorCode` : 403 `MINOR_REFUSED` avec le motif au lieu de « Room introuvable » (candidature, LKO-51). */
+  /**
+   * Verrou sur la room (deux demandes simultanées ne prennent pas la même dernière place), visibilité comprise.
+   * Règles mineurs ignorées pour un joueur qui y a déjà une place ou une demande : il peut toujours la quitter.
+   * `minorCode` : 403 `MINOR_REFUSED` avec le motif au lieu de « Room introuvable » (candidature, LKO-51).
+   */
   private async lock(tx: Tx, id: string, user: User, { minorCode = false } = {}) {
     await tx.$queryRaw`SELECT 1 FROM "Room" WHERE "id" = ${id} FOR UPDATE`
     const room = await tx.room.findFirst({
@@ -321,7 +327,8 @@ export class RoomsService {
       },
     })
     if (!room) throw new NotFoundException('Room introuvable')
-    const refusal = minorRefusal(room, user)
+    const active = room.participants.some((p) => p.userId === user.id && ACTIVE.includes(p.status))
+    const refusal = active ? null : minorRefusal(room, user)
     if (refusal && minorCode)
       throw new ForbiddenException({ code: MINOR_REFUSED, message: refusal })
     if (refusal) throw new NotFoundException('Room introuvable')
