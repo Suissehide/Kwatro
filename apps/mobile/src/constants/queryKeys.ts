@@ -20,6 +20,7 @@ export const AGENDA = {
 export const EXPLORE = {
   TONIGHT: 'explore_tonight',
   VENUES: 'explore_venues',
+  CITY_AGENDA: 'explore_city_agenda',
 } as const
 
 export const EVENT = {

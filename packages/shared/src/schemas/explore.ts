@@ -45,6 +45,8 @@ export const eventListItemSchema = z.object({
   capacity: z.number().int().nullable(),
   registeredCount: z.number().int(),
   registrationMode: z.enum(REGISTRATION_MODES),
+  /** Âge minimum (18 = soirée 18+) ; les mineurs ne reçoivent jamais un événement au-dessus de leur âge. */
+  minAge: z.number().int().nullable(),
   /** Inscription du joueur connecté ; null s'il n'est pas inscrit ou pas connecté. */
   myRegistration: z.enum(REGISTRATION_STATUSES).nullable(),
   games: z.array(z.object({ slug: z.string(), name: z.string() })),

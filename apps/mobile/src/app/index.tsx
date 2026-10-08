@@ -38,6 +38,7 @@ import {
 } from '@/lib/explore'
 import {
   notYet,
+  openAgenda,
   openCreateRoom,
   openEvent,
   openHome,
@@ -188,7 +189,9 @@ export default function HomeScreen() {
         {title}
         {filters}
         {error}
-        <Section title="Soirées ce soir">{eventList}</Section>
+        <Section title="Soirées ce soir" link="Agenda" onLink={openAgenda}>
+          {eventList}
+        </Section>
         <Section title="Il manque des joueurs">{roomList}</Section>
         <Section title="Lieux ouverts" link="Tous les lieux" onLink={openVenues}>
           {map(200)}
@@ -217,7 +220,7 @@ export default function HomeScreen() {
       {error}
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 40 }}>
         <View style={{ flex: 7, minWidth: 0, gap: 40 }}>
-          <Section title="Soirées ce soir" link="Tout le programme" onLink={notYet}>
+          <Section title="Soirées ce soir" link="Tout l'agenda" onLink={openAgenda}>
             {eventList}
           </Section>
           <Section title="Il manque des joueurs" link="Voir les rooms" onLink={notYet}>

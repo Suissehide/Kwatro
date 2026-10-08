@@ -1,6 +1,7 @@
 import { queryOptions, useQuery } from '@tanstack/react-query'
 import { EXPLORE } from '@/constants/queryKeys'
 import { api } from '@/lib/api'
+import { agendaEntries } from '@/lib/cityAgenda'
 import { localDay } from '@/lib/explore'
 import { unwrap } from '@/lib/queryClient'
 import { type Place, useLocation } from '@/lib/useLocation'
@@ -36,6 +37,20 @@ export function useTonightQuery(radiusKm = 10) {
   })
   return { place, data: data ?? null, failed: isError, retry: () => void refetch() }
 }
+
+/** Agenda de la ville : événements et rooms des 7 prochains jours autour d'un point (LKO-62). */
+export const cityAgendaQueryOptions = (place: Place, radiusKm: number) =>
+  queryOptions({
+    queryKey: [EXPLORE.CITY_AGENDA, place.lat, place.lng, radiusKm],
+    queryFn: async () => {
+      const query = { lat: place.lat, lng: place.lng, radiusKm, days: 7 }
+      const [events, rooms] = await Promise.all([
+        unwrap(api.GET('/events', { params: { query } })),
+        unwrap(api.GET('/rooms', { params: { query } })),
+      ])
+      return agendaEntries(events, rooms)
+    },
+  })
 
 /** Lieux autour d'un point (choix du lieu d'une room), du plus proche au plus loin. */
 export const venuesQueryOptions = (lat: number, lng: number, radiusKm: number) =>

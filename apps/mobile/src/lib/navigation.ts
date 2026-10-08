@@ -17,6 +17,9 @@ export const goBack = () => (router.canGoBack() ? router.back() : openHome())
 /** Tous les lieux autour du joueur (B2, KWT-75). */
 export const openVenues = () => router.push('/venues')
 
+/** Agenda de la ville : rooms et événements des prochains jours (LKO-62). */
+export const openAgenda = () => router.push('/agenda')
+
 export const openVenue = (slug: string) =>
   router.push({ pathname: '/venues/[slug]', params: { slug } })
 
