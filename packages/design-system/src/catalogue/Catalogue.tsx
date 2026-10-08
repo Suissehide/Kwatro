@@ -115,6 +115,7 @@ import {
   MonthCalendar,
   type PlayerTab,
   PlayerTabBar,
+  PlayIntentsCard,
   playerNavItems,
   Sidebar,
   SiteFooter,

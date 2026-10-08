@@ -127,7 +127,7 @@ export class PlayIntentsService implements OnModuleInit {
         venue: { select: { name: true, latitude: true, longitude: true } },
       },
     })
-    if (!room || room.status !== 'OPEN') return
+    if (room?.status !== 'OPEN') return
     const intents = await this.prisma.playIntent.findMany({
       where: {
         gameId: room.gameId,
