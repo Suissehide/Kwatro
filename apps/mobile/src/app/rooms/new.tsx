@@ -14,6 +14,7 @@ import {
   ListRow,
   MonthCalendar,
   PerkBanner,
+  Popover,
   radius,
   Segmented,
   SettingRow,
@@ -22,6 +23,7 @@ import {
   SuccessState,
   Tag,
   TextField,
+  TimePicker,
   Typography,
   WizardDialog,
 } from '@lucko/design-system'
@@ -54,7 +56,6 @@ import { Platform, ScrollView, Share, useWindowDimensions, View } from 'react-na
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ExploreMap } from '@/components/explore/ExploreMap'
 import {
-  clampMinute,
   clockLabel,
   dayChip,
   formatOf,
@@ -483,8 +484,7 @@ function WhereStep({
   radiusKm: number
   wide: boolean
 }) {
-  const [calendar, setCalendar] = useState<string | null>(null)
-  const [timeOpen, setTimeOpen] = useState(false)
+  const [month, setMonth] = useState(draft.day.slice(0, 7))
   const [mapView, setMapView] = useState(false)
   const days = presetDays(today)
   const otherDay = !days.includes(draft.day)
@@ -555,62 +555,63 @@ function WhereStep({
               compact={!wide}
               {...dayChip(day, today)}
               active={draft.day === day}
-              onPress={() => {
-                setCalendar(null)
-                set({ day })
-              }}
+              onPress={() => set({ day })}
             />
           ))}
-          <DayChip
-            other
-            compact={!wide}
-            {...(otherDay ? otherDayLabel(draft.day) : { top: 'Autre', label: 'date…' })}
-            active={otherDay}
-            open={!!calendar}
-            onPress={() => setCalendar(calendar ? null : draft.day.slice(0, 7))}
-          />
+          <Popover
+            bare
+            label="Choisir une date"
+            trigger={({ open, toggle }) => (
+              <DayChip
+                other
+                compact={!wide}
+                {...(otherDay ? otherDayLabel(draft.day) : { top: 'Autre', label: 'date…' })}
+                active={otherDay}
+                open={open}
+                onPress={() => {
+                  setMonth(draft.day.slice(0, 7))
+                  toggle()
+                }}
+              />
+            )}
+          >
+            {(close) => (
+              <MonthCalendar
+                compact
+                title={new Intl.DateTimeFormat('fr-FR', {
+                  timeZone: 'UTC',
+                  month: 'long',
+                  year: 'numeric',
+                }).format(new Date(`${month}-15T12:00:00Z`))}
+                days={monthGrid(month).map(
+                  (day, i): CalendarDay =>
+                    day
+                      ? {
+                          key: day,
+                          day: Number(day.slice(8)),
+                          today: day === today,
+                          past: day < today || day > lastDay,
+                          items: [],
+                        }
+                      : { key: `${month}-${i}`, day: null, items: [] },
+                )}
+                selected={draft.day}
+                onSelect={(day) => {
+                  if (day < today || day > lastDay) return
+                  set({ day })
+                  close()
+                }}
+                onPrev={
+                  month > today.slice(0, 7) ? () => setMonth(addMonths(month, -1)) : undefined
+                }
+                onNext={
+                  month < lastDay.slice(0, 7) ? () => setMonth(addMonths(month, 1)) : undefined
+                }
+                dayTitle={whenLabel(draft, today)}
+              />
+            )}
+          </Popover>
         </ScrollView>
-        {calendar ? (
-          <View style={{ maxWidth: wide ? 360 : undefined }}>
-            <MonthCalendar
-              compact
-              title={new Intl.DateTimeFormat('fr-FR', {
-                timeZone: 'UTC',
-                month: 'long',
-                year: 'numeric',
-              }).format(new Date(`${calendar}-15T12:00:00Z`))}
-              days={monthGrid(calendar).map(
-                (day, i): CalendarDay =>
-                  day
-                    ? {
-                        key: day,
-                        day: Number(day.slice(8)),
-                        today: day === today,
-                        past: day < today || day > lastDay,
-                        items: [],
-                      }
-                    : { key: `${calendar}-${i}`, day: null, items: [] },
-              )}
-              selected={draft.day}
-              onSelect={(day) => {
-                if (day < today || day > lastDay) return
-                set({ day })
-                setCalendar(null)
-              }}
-              onPrev={
-                calendar > today.slice(0, 7)
-                  ? () => setCalendar(addMonths(calendar, -1))
-                  : undefined
-              }
-              onNext={
-                calendar < lastDay.slice(0, 7)
-                  ? () => setCalendar(addMonths(calendar, 1))
-                  : undefined
-              }
-              dayTitle={whenLabel(draft, today)}
-            />
-          </View>
-        ) : null}
         <View style={pills}>
           {PRESET_MINUTES.map((minute) => (
             <Chip
@@ -618,44 +619,45 @@ function WhereStep({
               tall
               label={clockLabel(minute)}
               active={draft.minute === minute}
-              onPress={() => {
-                setTimeOpen(false)
-                set({ minute })
-              }}
+              onPress={() => set({ minute })}
             />
           ))}
-          <Chip
-            tall
-            dashed
-            label={otherTime ? clockLabel(draft.minute) : 'Autre heure…'}
-            active={otherTime || timeOpen}
-            onPress={() => setTimeOpen(!timeOpen)}
-          />
+          <Popover
+            label="Choisir une heure"
+            width={340}
+            trigger={({ open, toggle }) => (
+              <Chip
+                tall
+                dashed
+                label={otherTime ? clockLabel(draft.minute) : 'Autre heure…'}
+                active={otherTime || open}
+                onPress={toggle}
+              />
+            )}
+          >
+            {(close) => (
+              <View style={{ padding: 14, gap: 12 }}>
+                <TimePicker
+                  value={draft.minute}
+                  min={MINUTE_RANGE.min}
+                  max={MINUTE_RANGE.max}
+                  step={MINUTE_RANGE.step}
+                  onChange={(minute) => set({ minute })}
+                />
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Typography variant="small">Par pas de 15 min.</Typography>
+                  <Button small kind="ink" label="OK" onPress={close} />
+                </View>
+              </View>
+            )}
+          </Popover>
         </View>
-        {timeOpen ? (
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 10 }}>
-            <Stepper
-              label="d'heures"
-              value={Math.floor(draft.minute / 60)}
-              min={8}
-              max={23}
-              format={(h) => String(h).padStart(2, '0')}
-              onChange={(h) => set({ minute: clampMinute(h * 60 + (draft.minute % 60)) })}
-            />
-            <Typography variant="h2">:</Typography>
-            <Stepper
-              label="de minutes"
-              value={draft.minute % 60}
-              min={-MINUTE_RANGE.step}
-              max={60}
-              step={MINUTE_RANGE.step}
-              format={(m) => String(m).padStart(2, '0')}
-              // Les minutes débordent sur l'heure voisine : 45 + 15 = heure suivante
-              onChange={(m) => set({ minute: clampMinute(draft.minute - (draft.minute % 60) + m) })}
-            />
-            <Typography variant="small">Par pas de 15 min.</Typography>
-          </View>
-        ) : null}
       </Field>
 
       <View style={{ gap: 10 }}>

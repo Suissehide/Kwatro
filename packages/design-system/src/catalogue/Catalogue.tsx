@@ -102,6 +102,7 @@ import {
   SuccessState,
   TextField,
   TimelineItem,
+  TimePicker,
   Section as TitledSection,
   Toast,
   ToggleGroup,
@@ -120,6 +121,7 @@ import {
   type PlayerTab,
   PlayerTabBar,
   PlayIntentsCard,
+  Popover,
   playerNavItems,
   Sidebar,
   SiteFooter,
@@ -163,6 +165,7 @@ export function Catalogue() {
   const [check, setCheck] = useState(true)
   const [radio, setRadio] = useState(0)
   const [players, setPlayers] = useState(4)
+  const [minute, setMinute] = useState(19 * 60 + 30)
   const [name, setName] = useState('')
   const [page, setPage] = useState(7)
   const [menu, setMenu] = useState<MenuAnchor | null>(null)
@@ -296,6 +299,19 @@ export function Catalogue() {
             onPress={() => {}}
           />
         </Row>
+        <Popover
+          label="Choisir une heure"
+          width={340}
+          trigger={({ open, toggle }) => (
+            <Chip tall dashed label="Autre heure…" active={open} onPress={toggle} />
+          )}
+        >
+          {() => (
+            <View style={{ padding: 14 }}>
+              <TimePicker value={minute} min={8 * 60} max={23 * 60 + 45} onChange={setMinute} />
+            </View>
+          )}
+        </Popover>
         <DemandCard
           count="23"
           text="joueurs attendent du Magic près d'ici. Ils seront prévenus dès que la room est créée."

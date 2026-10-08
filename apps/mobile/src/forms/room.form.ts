@@ -109,10 +109,6 @@ export function roomTitle(game: Game | undefined, d: RoomDraft) {
   return d.bracket ? `${format.name} · bracket ${d.bracket}` : format.name
 }
 
-/** Heure ajustée par le réglage + / − : les minutes débordent sur l'heure, bornées de 8 h à 23 h 45. */
-export const clampMinute = (minute: number) =>
-  Math.min(MINUTE_RANGE.max, Math.max(MINUTE_RANGE.min, minute))
-
 const dayDate = (day: string) => new Date(`${day}T12:00:00Z`)
 const dayFormat = (day: string, options: Intl.DateTimeFormatOptions) =>
   new Intl.DateTimeFormat('fr-FR', { timeZone: 'UTC', ...options }).format(dayDate(day))
