@@ -1,10 +1,18 @@
 import { z } from 'zod'
-import { PARTICIPANT_STATUSES, ROOM_MODES, ROOM_STATUSES } from '../constants'
+import {
+  BOARD_GAME_CATEGORIES,
+  PARTICIPANT_STATUSES,
+  ROOM_MODES,
+  ROOM_STATUSES,
+  ROOM_VIBES,
+} from '../constants'
 import { hasBannedWord } from '../moderation'
 import { isoDateTime } from './common'
 
 export const ROOM_CAPACITY = { min: 2, max: 16 } as const
-export const ROOM_DESCRIPTION_MAX = 1000
+export const ROOM_DESCRIPTION_MAX = 280
+/** Délai de réservation maximal d'une room. */
+export const ROOM_MAX_DAYS_AHEAD = 60
 
 // ponytail: rooms à domicile (zone floue, adresse chiffrée, garde-fous) ajoutées avec LKO-71 / LKO-72
 /** Création d'une room (C1-C3) : validée par l'app et par l'API, règles métier dans l'API (rooms.rules.ts). */
@@ -12,6 +20,8 @@ export const createRoomSchema = z.object({
   gameId: z.string().min(1, { message: 'Choisis un jeu' }),
   /** Format TCG ; null pour les jeux de société. */
   formatId: z.string().min(1).nullish(),
+  /** Catégorie, jeux de société seulement. */
+  boardGameCategory: z.enum(BOARD_GAME_CATEGORIES).nullish(),
   mode: z.enum(ROOM_MODES),
   venueId: z.string().min(1, { message: 'Choisis un lieu' }),
   startsAt: isoDateTime,
@@ -30,7 +40,8 @@ export const createRoomSchema = z.object({
   minorsAllowed: z.boolean().default(false),
   /** Inscription automatique ; sinon l'hôte accepte chaque candidature (par défaut). */
   autoAccept: z.boolean().default(false),
-  /** Description et règles maison. */
+  vibes: z.array(z.enum(ROOM_VIBES)).default([]),
+  /** Un mot pour les joueurs : règles maison, proxys… */
   description: z
     .string()
     .trim()
@@ -67,7 +78,9 @@ export const roomDetailSchema = z.object({
   description: z.string().nullable(),
   minorsAllowed: z.boolean(),
   autoAccept: z.boolean(),
+  vibes: z.array(z.enum(ROOM_VIBES)),
   game: z.object({ slug: z.string(), name: z.string() }),
+  /** Format TCG, ou catégorie pour les jeux de société. */
   format: z.string().nullable(),
   bracket: z.number().int().nullable(),
   venue: z

@@ -12,6 +12,7 @@ import { useFonts } from 'expo-font'
 import { Stack, usePathname } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect } from 'react'
+import { Platform } from 'react-native'
 import { trackPage } from '@/lib/analytics'
 import { usePush } from '@/lib/push'
 import { persistOptions, queryClient } from '@/lib/queryClient'
@@ -46,7 +47,17 @@ export default function RootLayout() {
     <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
       <PushSetup />
       <PageViews />
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        {/* Créer une room : popup par-dessus la page en cours sur le web, plein écran sur téléphone */}
+        <Stack.Screen
+          name="rooms/new"
+          options={
+            Platform.OS === 'web'
+              ? { presentation: 'transparentModal', animation: 'fade' }
+              : { presentation: 'fullScreenModal' }
+          }
+        />
+      </Stack>
       <StatusBar style="auto" />
     </PersistQueryClientProvider>
   )

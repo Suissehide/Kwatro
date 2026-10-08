@@ -22,7 +22,7 @@ import {
   type Viewer,
   venueRefuses,
 } from '../common/minors.rules'
-import { closureRange, notBlockedWith } from '../explore/explore.service'
+import { closureRange, formatLabel, notBlockedWith } from '../explore/explore.service'
 import type { Prisma, User } from '../generated/prisma/client'
 import { PlayIntentsService } from '../play-intents/play-intents.service'
 import { PrismaService } from '../prisma/prisma.service'
@@ -121,6 +121,7 @@ export class RoomsService {
       data: {
         ...input,
         formatId: input.formatId ?? null,
+        boardGameCategory: input.boardGameCategory ?? null,
         bracket: input.bracket ?? null,
         description: input.description || null,
         hostId: host.id,
@@ -157,7 +158,7 @@ export class RoomsService {
     return {
       ...room,
       status: lifecycleStatus(room, now),
-      format: room.format?.name ?? null,
+      format: formatLabel(room),
       players: accepted.map(({ userId, user }) => ({
         initial: user.pseudo?.slice(0, 1) ?? '?',
         pseudo: member ? user.pseudo : null,

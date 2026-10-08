@@ -11,6 +11,7 @@ import {
   Chip,
   CountBadge,
   DateBlock,
+  DayChip,
   FilterButton,
   FilterTag,
   IconButton,
@@ -54,6 +55,7 @@ import {
   ChecklistItem,
   ChecklistRow,
   ChipGroup,
+  ChoiceCard,
   ClosureRow,
   CodeInput,
   ColorLegend,
@@ -61,6 +63,7 @@ import {
   Countdown,
   DayEventRow,
   DecisionCard,
+  DemandCard,
   EmptyState,
   EventCard,
   FactCard,
@@ -109,8 +112,10 @@ import {
   StatStrip,
   Stepper,
   StripeRow,
+  SuccessState,
   TextField,
   TimelineItem,
+  TimePicker,
   Section as TitledSection,
   Toast,
   ToggleGroup,
@@ -130,6 +135,7 @@ import {
   type PlayerTab,
   PlayerTabBar,
   PlayIntentsCard,
+  Popover,
   playerNavItems,
   RankPicker,
   Sidebar,
@@ -174,6 +180,7 @@ export function Catalogue() {
   const [check, setCheck] = useState(true)
   const [radio, setRadio] = useState(0)
   const [players, setPlayers] = useState(4)
+  const [minute, setMinute] = useState(19 * 60 + 30)
   const [name, setName] = useState('')
   const [page, setPage] = useState(7)
   const [menu, setMenu] = useState<MenuAnchor | null>(null)
@@ -292,6 +299,49 @@ export function Catalogue() {
             }
           />
         </Panel>
+        <Row>
+          <DayChip top="Auj." label="8" active onPress={() => {}} />
+          <DayChip top="Ven." label="9" active={false} onPress={() => {}} />
+          <DayChip other top="Autre" label="date…" active={false} onPress={() => {}} />
+          <Chip tall dashed label="Autre heure…" onPress={() => {}} />
+        </Row>
+        <Row>
+          <ChoiceCard
+            label="Amicale"
+            description="Pour le plaisir. Pas de résultat à saisir."
+            selected
+            onPress={() => {}}
+          />
+          <ChoiceCard
+            label="Classée"
+            description="Indisponible pour les jeux de société."
+            disabled
+            selected={false}
+            onPress={() => {}}
+          />
+        </Row>
+        <Popover
+          label="Choisir une heure"
+          width={340}
+          trigger={({ open, toggle }) => (
+            <Chip tall dashed label="Autre heure…" active={open} onPress={toggle} />
+          )}
+        >
+          {() => (
+            <View style={{ padding: 14 }}>
+              <TimePicker value={minute} min={8 * 60} max={23 * 60 + 45} onChange={setMinute} />
+            </View>
+          )}
+        </Popover>
+        <DemandCard
+          count="23"
+          text="joueurs attendent du Magic près d'ici. Ils seront prévenus dès que la room est créée."
+        />
+        <SuccessState
+          title="Room créée"
+          text="Ta room « Commander · bracket 3 » est en ligne au Dé Fêlé."
+          actions={<Button kind="rating" label="Voir la room" onPress={() => {}} />}
+        />
         <OptionCard
           label="Détente"
           description="On joue pour le plaisir, sans pression."
@@ -1022,8 +1072,8 @@ export function Catalogue() {
           current={2}
           total={3}
           color={colors.venue}
-          labels={['1. Trouver', '2. Prouver', '3. Vérifier']}
-          onStepPress={() => {}}
+          labels={['Trouver', 'Prouver', 'Vérifier']}
+          onStep={() => {}}
         />
         <Row>
           <StatCard

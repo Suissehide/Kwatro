@@ -179,6 +179,52 @@ export const PLAY_VIBE_LABELS: Record<PlayVibe, { label: string; description: st
   SOCIAL: { label: 'Convivial', description: 'On discute et on boit un verre entre deux parties.' },
 }
 
+/** Ambiance d'une room, choisie par l'hôte (identique à l'enum Prisma RoomVibe). */
+export const ROOM_VIBES = [
+  'CHILL',
+  'COMPETITIVE',
+  'BEGINNERS_WELCOME',
+  'LENDS_DECKS',
+  'ENGLISH_OK',
+] as const
+export type RoomVibe = (typeof ROOM_VIBES)[number]
+
+export const ROOM_VIBE_LABELS: Record<RoomVibe, string> = {
+  CHILL: 'Détendu',
+  COMPETITIVE: 'Compétitif',
+  BEGINNERS_WELCOME: 'Débutants bienvenus',
+  LENDS_DECKS: 'Je prête des decks',
+  ENGLISH_OK: 'Anglais OK',
+}
+
+/** Catégorie d'une room jeux de société (identique à l'enum Prisma BoardGameCategory). */
+export const BOARD_GAME_CATEGORIES = [
+  'STRATEGY',
+  'AMBIANCE',
+  'COOPERATIVE',
+  'FAMILY',
+  'INVESTIGATION',
+  'ROLE_PLAYING',
+  'WARGAME',
+  'PARTY',
+] as const
+export type BoardGameCategory = (typeof BOARD_GAME_CATEGORIES)[number]
+
+/** Libellé et nombre de joueurs proposé à la création de la room. */
+export const BOARD_GAME_CATEGORY_LABELS: Record<
+  BoardGameCategory,
+  { label: string; players: number }
+> = {
+  STRATEGY: { label: 'Stratégie', players: 4 },
+  AMBIANCE: { label: 'Ambiance', players: 6 },
+  COOPERATIVE: { label: 'Coopératif', players: 4 },
+  FAMILY: { label: 'Familial', players: 4 },
+  INVESTIGATION: { label: 'Enquête', players: 4 },
+  ROLE_PLAYING: { label: 'Jeu de rôle', players: 5 },
+  WARGAME: { label: 'Wargame', players: 2 },
+  PARTY: { label: 'Party game', players: 8 },
+}
+
 /** Disponibilités : créneau = jour × 3 + moment (jour 0 = lundi ; moment 0 matin, 1 après-midi, 2 soir). */
 export const AVAILABILITY_SLOT_COUNT = 21
 

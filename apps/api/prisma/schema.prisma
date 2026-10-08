@@ -122,6 +122,27 @@ enum PlayVibe {
   SOCIAL
 }
 
+/// Ambiance d'une room, choisie par l'hôte
+enum RoomVibe {
+  CHILL
+  COMPETITIVE
+  BEGINNERS_WELCOME
+  LENDS_DECKS
+  ENGLISH_OK
+}
+
+/// Catégorie d'une room jeux de société (pas de format)
+enum BoardGameCategory {
+  STRATEGY
+  AMBIANCE
+  COOPERATIVE
+  FAMILY
+  INVESTIGATION
+  ROLE_PLAYING
+  WARGAME
+  PARTY
+}
+
 // ---------- Auth (tables Better Auth, LKO-9) ----------
 
 model Session {
@@ -426,6 +447,8 @@ model Room {
   description          String?
   /// Bracket Commander visé (1 à 5), seulement pour un format qui en a (LKO-52)
   bracket              Int?
+  boardGameCategory    BoardGameCategory?
+  vibes                RoomVibe[]         @default([])
   createdAt            DateTime    @default(now())
   updatedAt            DateTime    @updatedAt
 
