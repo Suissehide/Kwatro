@@ -3,6 +3,7 @@ import {
   createRoomSchema,
   type HostAction,
   hostActionSchema,
+  roomAddressSchema,
   roomDetailSchema,
 } from '@lucko/shared'
 import { Controller, Delete, Get, Param, Post } from '@nestjs/common'
@@ -37,8 +38,19 @@ export class RoomsController {
   }
 
   /**
+   * Adresse d'une room à domicile : l'hôte, et les joueurs acceptés à partir de 24 h avant le début.
+   * 403 avec le motif sinon ; 404 si l'hôte la donne dans le chat.
+   */
+  @Get(':id/address')
+  @ZodResponse(roomAddressSchema)
+  address(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.rooms.address(id, user)
+  }
+
+  /**
    * Demander à rejoindre. 409 avec le motif si c'est impossible (room commencée, demande refusée…),
-   * 403 `MINOR_REFUSED` si les règles mineurs l'interdisent (room 18+, bar pour un moins de 16 ans).
+   * 403 `MINOR_REFUSED` si les règles mineurs l'interdisent (room 18+, bar pour un moins de 16 ans),
+   * 403 `HOME_SAFETY_REQUIRED` pour une room à domicile tant que l'avertissement sécurité n'est pas accepté.
    */
   @Post(':id/participation')
   @ZodResponse(roomDetailSchema, 201)

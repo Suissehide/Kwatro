@@ -19,6 +19,7 @@ import type { z } from 'zod'
 import { eventVisibleTo, roomVisibleTo, type Viewer } from '../common/minors.rules'
 import type { Prisma } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
+import { distanceMeters } from '../rooms/home.rules'
 import { compareByDistance } from './explore.rules'
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -231,14 +232,17 @@ export class ExploreService {
       )
   }
 
+  /**
+   * Rooms ouvertes autour du point : dans un lieu du rayon, ou à domicile avec la zone floue dans le rayon
+   * (quartier et distance jusqu'au centre de la zone, jamais l'adresse).
+   */
   async rooms(query: EventsQuery, viewer: Viewer): Promise<z.output<typeof roomListItemSchema>[]> {
     const distances = await this.distances(query)
     const now = new Date()
-    // ponytail: rooms à domicile exclues (zone floue à afficher, ticket des rooms à domicile)
     const rooms = await this.prisma.room.findMany({
       where: {
         status: 'OPEN',
-        venueId: { in: [...distances.keys()] },
+        OR: [{ venueId: { in: [...distances.keys()] } }, { atHome: true, fuzzyLat: { not: null } }],
         startsAt: { gte: now, lt: new Date(now.getTime() + query.days * DAY_MS) },
         ...notBlockedWith(viewer?.id),
       },
@@ -249,21 +253,42 @@ export class ExploreService {
         },
       },
     })
+    // ponytail: distance des rooms à domicile calculée ici, une requête PostGIS si elles deviennent nombreuses
+    const homeDistance = (room: { fuzzyLat: number | null; fuzzyLng: number | null }) =>
+      Math.round(
+        distanceMeters(query, { lat: room.fuzzyLat ?? query.lat, lng: room.fuzzyLng ?? query.lng }),
+      )
     return rooms
       .filter((room) => roomVisibleTo(room, viewer, now))
-      .flatMap(({ venue, ...room }) =>
-        venue
+      .flatMap(({ venue, ...room }): z.output<typeof roomListItemSchema>[] => {
+        if (venue)
+          return [
+            {
+              ...roomItem(room),
+              venue: { ...venue, distanceMeters: distances.get(venue.id) ?? 0 },
+              home: null,
+            },
+          ]
+        const distance = homeDistance(room)
+        return room.atHome && distance <= query.radiusKm * 1000
           ? [
               {
                 ...roomItem(room),
-                venue: { ...venue, distanceMeters: distances.get(venue.id) ?? 0 },
+                venue: null,
+                home: { areaLabel: room.homeAreaLabel ?? 'À domicile', distanceMeters: distance },
               },
             ]
-          : [],
-      )
+          : []
+      })
       .sort(
         (a, b) =>
-          a.startsAt.getTime() - b.startsAt.getTime() || compareByDistance(a.venue, b.venue),
+          a.startsAt.getTime() - b.startsAt.getTime() || compareByDistance(placeOf(a), placeOf(b)),
       )
   }
 }
+
+/** Lieu ou zone d'une room, pour le tri par distance (une room à domicile n'est jamais partenaire). */
+const placeOf = (room: {
+  venue: { isPartner: boolean; distanceMeters: number } | null
+  home: { distanceMeters: number } | null
+}) => room.venue ?? { isPartner: false, distanceMeters: room.home?.distanceMeters ?? 0 }

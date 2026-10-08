@@ -44,10 +44,24 @@ const envSchema = z
     /** Analyse automatique des photos (sightengine.com) ; sans clé, chaque photo attend un admin. */
     SIGHTENGINE_API_USER: z.string().optional(),
     SIGHTENGINE_API_SECRET: z.string().optional(),
+    /**
+     * Clé AES-256 des adresses de rooms à domicile (32 octets en base64 : `openssl rand -base64 32`).
+     * Obligatoire en production ; ailleurs, une clé de développement fixe.
+     */
+    HOME_ADDRESS_KEY: z
+      .string()
+      .refine((key) => Buffer.from(key, 'base64').length === 32, {
+        message: '32 octets en base64 attendus',
+      })
+      .optional(),
   })
   .refine((env) => !(env.NODE_ENV === 'production' && env.DEV_AUTH_HEADER), {
     message: 'DEV_AUTH_HEADER est interdit en production',
     path: ['DEV_AUTH_HEADER'],
+  })
+  .refine((env) => env.NODE_ENV !== 'production' || env.HOME_ADDRESS_KEY, {
+    message: 'HOME_ADDRESS_KEY est obligatoire en production',
+    path: ['HOME_ADDRESS_KEY'],
   })
 
 export type Env = z.infer<typeof envSchema>

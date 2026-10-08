@@ -6,6 +6,7 @@ export const ME = {
   SET_BIRTH_DATE: 'set_me_birth_date',
   SET_AVATAR: 'set_me_avatar',
   DELETE: 'delete_me',
+  ACCEPT_HOME_SAFETY: 'accept_home_safety',
 } as const
 
 export const BLOCKS = {
@@ -36,6 +37,7 @@ export const VENUE = {
 export const GEOCODE = {
   SEARCH: 'geocode_search',
   REVERSE: 'geocode_reverse',
+  ADDRESS: 'geocode_address',
 } as const
 
 export const GAMES = {
@@ -45,6 +47,7 @@ export const GAMES = {
 export const ROOM = {
   CREATE: 'create_room',
   GET: 'room',
+  ADDRESS: 'room_address',
   JOIN: 'join_room',
   LEAVE: 'leave_room',
   DECIDE: 'decide_room_candidate',

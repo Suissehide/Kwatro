@@ -1,5 +1,8 @@
 import {
   type createRoomSchema,
+  HOME_FUZZY_RADIUS_M,
+  HOME_SAFETY_REQUIRED,
+  HOME_SAFETY_VERSION,
   type HostAction,
   openingStatus,
   RATING_PROVISIONAL_GAMES,
@@ -11,7 +14,9 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
+  type OnModuleInit,
 } from '@nestjs/common'
 import type { z } from 'zod'
 import {
@@ -22,12 +27,23 @@ import {
   type Viewer,
   venueRefuses,
 } from '../common/minors.rules'
+import { loadEnv } from '../config/env'
 import { closureRange, formatLabel, notBlockedWith } from '../explore/explore.service'
 import type { Prisma, User } from '../generated/prisma/client'
+import { JobsService } from '../jobs/jobs.service'
 import { PlayIntentsService } from '../play-intents/play-intents.service'
 import { PrismaService } from '../prisma/prisma.service'
 import { PushService } from '../push/push.service'
 import { RealtimeGateway } from '../realtime/realtime.gateway'
+import {
+  addressKey,
+  addressRefusal,
+  fuzzyCenter,
+  openAddress,
+  purgeBefore,
+  revealAt,
+  sealAddress,
+} from './home.rules'
 import {
   ACTIVE,
   acceptRefusal,
@@ -40,6 +56,11 @@ import {
 } from './rooms.rules'
 
 type Tx = Prisma.TransactionClient
+
+/** Adresse d'une room à domicile ouverte aux acceptés (LKO-71). */
+const HOME_REVEAL_JOB = 'rooms.home-reveal'
+/** Suppression des adresses des rooms passées (filet de sécurité, l'annulation les supprime tout de suite). */
+const HOME_PURGE_JOB = 'rooms.home-purge'
 
 const detailInclude = {
   host: { select: { pseudo: true } },
@@ -55,6 +76,7 @@ const detailInclude = {
       acceptsUnaccompaniedMinors: true,
     },
   },
+  privateAddress: { select: { keyVersion: true } },
   participants: {
     orderBy: { createdAt: 'asc' },
     include: {
@@ -73,42 +95,65 @@ const detailInclude = {
 } satisfies Prisma.RoomInclude
 
 @Injectable()
-export class RoomsService {
+export class RoomsService implements OnModuleInit {
+  private readonly logger = new Logger('Rooms')
+  private readonly addressKey = addressKey(loadEnv().HOME_ADDRESS_KEY)
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly push: PushService,
     private readonly realtime: RealtimeGateway,
     private readonly intents: PlayIntentsService,
+    private readonly jobs: JobsService,
   ) {}
 
+  async onModuleInit() {
+    await this.jobs.handle<{ roomId: string }>(HOME_REVEAL_JOB, ({ roomId }) =>
+      this.addressRevealed(roomId),
+    )
+    await this.jobs.handle(
+      HOME_PURGE_JOB,
+      async () => {
+        await this.prisma.roomPrivateAddress.deleteMany({
+          where: {
+            room: { OR: [{ startsAt: { lt: purgeBefore() } }, { status: 'CANCELLED' }] },
+          },
+        })
+      },
+      { cron: '0 * * * *' },
+    )
+  }
+
   /** Crée la room ; l'hôte en est le premier joueur accepté. */
-  async create(host: User, input: z.output<typeof createRoomSchema>) {
+  async create(host: User, { home, ...input }: z.output<typeof createRoomSchema>) {
     const now = new Date()
+    if (home) requireHomeSafety(host)
     const [game, venue, hostOpenRooms] = await Promise.all([
       this.prisma.game.findUnique({
         where: { id: input.gameId },
         include: { formats: true },
       }),
-      this.prisma.venue.findFirst({
-        where: { id: input.venueId, status: 'PUBLISHED' },
-        include: { openingHours: true, closures: { where: { endsOn: { gte: now } } } },
-      }),
+      input.venueId
+        ? this.prisma.venue.findFirst({
+            where: { id: input.venueId, status: 'PUBLISHED' },
+            include: { openingHours: true, closures: { where: { endsOn: { gte: now } } } },
+          })
+        : null,
       this.prisma.room.count({
         where: { hostId: host.id, status: { in: ['OPEN', 'FULL'] }, startsAt: { gte: now } },
       }),
     ])
     if (!game) throw new NotFoundException('Jeu introuvable')
-    if (!venue) throw new NotFoundException('Lieu introuvable')
+    if (input.venueId && !venue) throw new NotFoundException('Lieu introuvable')
 
     const refusal = createRoomRefusal(
-      input,
+      { ...input, home },
       {
         game,
-        venueOpen: openingStatus(
-          venue.openingHours,
-          venue.closures.map(closureRange),
-          input.startsAt,
-        ).openNow,
+        venueOpen: venue
+          ? openingStatus(venue.openingHours, venue.closures.map(closureRange), input.startsAt)
+              .openNow
+          : null,
         hostIsMinor: isMinor(host, now),
         venueRefusesHost: venueRefuses(venue, host, now),
         hostOpenRooms,
@@ -117,9 +162,31 @@ export class RoomsService {
     )
     if (refusal) throw new BadRequestException(refusal)
 
+    // Seule la zone floue est gardée en clair ; position exacte et adresse, chiffrées, si l'hôte la donne
+    const center = home ? fuzzyCenter(home.lat, home.lng) : null
     const room = await this.prisma.room.create({
       data: {
         ...input,
+        venueId: input.venueId ?? null,
+        ...(home && center
+          ? {
+              atHome: true,
+              homeAreaLabel: home.areaLabel,
+              fuzzyLat: center.lat,
+              fuzzyLng: center.lng,
+              ...(home.address
+                ? {
+                    privateAddress: {
+                      create: sealAddress(this.addressKey, {
+                        address: home.address,
+                        lat: home.lat,
+                        lng: home.lng,
+                      }),
+                    },
+                  }
+                : {}),
+            }
+          : {}),
         formatId: input.formatId ?? null,
         boardGameCategory: input.boardGameCategory ?? null,
         bracket: input.bracket ?? null,
@@ -129,9 +196,58 @@ export class RoomsService {
       },
       select: { id: true },
     })
+    if (home?.address)
+      await this.jobs.send(
+        HOME_REVEAL_JOB,
+        { roomId: room.id },
+        { startAfter: revealAt(input.startsAt), singletonKey: room.id },
+      )
     // Joueurs qui attendent ce jeu près du lieu (LKO-17)
     await this.intents.roomOpened(room.id)
     return room
+  }
+
+  /**
+   * Adresse d'une room à domicile (LKO-71) : l'hôte, et les joueurs acceptés à partir de 24 h avant le
+   * début. 403 avec le motif sinon, 404 si l'hôte la donne dans le chat ou si elle a été supprimée.
+   */
+  async address(id: string, user: User) {
+    const room = await this.prisma.room.findFirst({
+      where: { id, atHome: true, ...notBlockedWith(user.id) },
+      include: {
+        participants: { select: { userId: true, status: true } },
+        privateAddress: true,
+      },
+    })
+    if (!room) throw new NotFoundException('Room introuvable')
+    const refusal = addressRefusal(room, user.id)
+    if (refusal) throw new ForbiddenException(refusal)
+    if (!room.privateAddress)
+      throw new NotFoundException('Pas d’adresse enregistrée : l’hôte la donne dans le chat')
+    // Journal des accès, sans l'adresse
+    this.logger.log(`Adresse de la room ${id} lue par ${user.id}`)
+    return openAddress(this.addressKey, room.privateAddress)
+  }
+
+  /** 24 h avant : les joueurs acceptés sont prévenus que l'adresse est visible. */
+  private async addressRevealed(roomId: string) {
+    const room = await this.prisma.room.findUnique({
+      where: { id: roomId },
+      include: {
+        privateAddress: { select: { keyVersion: true } },
+        participants: { where: { status: 'ACCEPTED' }, select: { userId: true } },
+      },
+    })
+    if (!room?.privateAddress || room.status === 'CANCELLED') return
+    await this.push.notify(
+      room.participants.map((p) => p.userId).filter((id) => id !== room.hostId),
+      'ROOMS',
+      {
+        title: 'Adresse disponible',
+        body: 'L’adresse de la room à domicile est visible dans la room.',
+        url: `/rooms/${roomId}`,
+      },
+    )
   }
 
   /**
@@ -146,7 +262,7 @@ export class RoomsService {
     })
     const mine = room?.participants.find((p) => p.userId === viewer?.id)
     // Un joueur déjà passé par la room la voit encore si les règles ont changé depuis (lieu qui refuse désormais les mineurs seuls)
-    if (!room || (!mine && !roomVisibleTo(room, viewer, now)))
+    if (!room || (!mine && !roomVisibleTo(withAccepted(room), viewer, now)))
       throw new NotFoundException('Room introuvable')
 
     const isHost = room.hostId === viewer?.id
@@ -157,6 +273,17 @@ export class RoomsService {
     )
     return {
       ...room,
+      home:
+        room.atHome && room.fuzzyLat !== null && room.fuzzyLng !== null
+          ? {
+              areaLabel: room.homeAreaLabel ?? 'À domicile',
+              lat: room.fuzzyLat,
+              lng: room.fuzzyLng,
+              radiusM: HOME_FUZZY_RADIUS_M,
+              revealAt: revealAt(room.startsAt),
+              hasAddress: room.privateAddress !== null,
+            }
+          : null,
       status: lifecycleStatus(room, now),
       format: formatLabel(room),
       players: accepted.map(({ userId, user }) => ({
@@ -191,6 +318,8 @@ export class RoomsService {
     await this.prisma.$transaction(async (tx) => {
       const room = await this.lock(tx, id, user, { minorCode: true })
       const current = room.participants.find((p) => p.userId === user.id)?.status ?? null
+      // Avertissement sécurité avant toute première demande pour une room à domicile (LKO-72)
+      if (room.atHome && !(current && ACTIVE.includes(current))) requireHomeSafety(user)
       const outcome = joinOutcome(room, accepted(room), user.id, current)
       if ('refused' in outcome) throw new ConflictException(outcome.refused)
       if (outcome.status === current) return
@@ -296,6 +425,7 @@ export class RoomsService {
           break
         case 'cancel':
           await tx.room.update({ where: { id }, data: { status: 'CANCELLED' } })
+          await tx.roomPrivateAddress.deleteMany({ where: { roomId: id } })
           // Joueurs acceptés, en attente ou sur liste d'attente : tous prévenus
           await this.push.notify(
             room.participants
@@ -334,7 +464,7 @@ export class RoomsService {
     })
     if (!room) throw new NotFoundException('Room introuvable')
     const active = room.participants.some((p) => p.userId === user.id && ACTIVE.includes(p.status))
-    const refusal = active ? null : minorRefusal(room, user)
+    const refusal = active ? null : minorRefusal(withAccepted(room), user)
     if (refusal && minorCode)
       throw new ForbiddenException({ code: MINOR_REFUSED, message: refusal })
     if (refusal) throw new NotFoundException('Room introuvable')
@@ -384,6 +514,23 @@ export class RoomsService {
     if (status !== room.status) await tx.room.update({ where: { id }, data: { status } })
   }
 }
+
+/** 403 `HOME_SAFETY_REQUIRED` tant que l'avertissement sécurité n'est pas accepté dans sa version actuelle. */
+function requireHomeSafety(user: User) {
+  if ((user.homeSafetyVersion ?? 0) < HOME_SAFETY_VERSION)
+    throw new ForbiddenException({
+      code: HOME_SAFETY_REQUIRED,
+      message: 'Lis et accepte les conseils de sécurité des rooms à domicile',
+    })
+}
+
+/** Mineur avec son parent accepté dans la room (LKO-72) : voir `minorRefusal`. */
+const withAccepted = <T extends { participants: { userId: string; status: string }[] }>(
+  room: T,
+) => ({
+  ...room,
+  acceptedUserIds: room.participants.filter((p) => p.status === 'ACCEPTED').map((p) => p.userId),
+})
 
 const accepted = (room: { participants: { status: string }[] }) =>
   room.participants.filter((p) => p.status === 'ACCEPTED').length

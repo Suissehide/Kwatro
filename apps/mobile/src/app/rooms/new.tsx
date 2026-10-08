@@ -55,6 +55,8 @@ import { type ReactNode, useState } from 'react'
 import { Platform, ScrollView, Share, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ExploreMap } from '@/components/explore/ExploreMap'
+import { HomeSafetyDialog } from '@/components/HomeSafetyDialog'
+import { HomeAddressPicker } from '@/components/rooms/HomeAddressPicker'
 import {
   clockLabel,
   dayChip,
@@ -89,10 +91,9 @@ const STEPS = ['Le jeu', 'Lieu et heure', 'Joueurs']
 const STEP_TITLES = ['Quel jeu ?', 'Où et quand ?', 'Les joueurs']
 
 /**
- * Créer une room (19a popup web, 19b plein écran) : le jeu, le lieu et l'heure, les joueurs, puis
- * « Room créée ». `?venue=<slug>` présélectionne le lieu (« Créer une room ici » de la fiche lieu).
+ * Créer une room (19a popup web, 19b plein écran) : le jeu, le lieu (ou chez soi) et l'heure, les joueurs,
+ * puis « Room créée ». `?venue=<slug>` présélectionne le lieu (« Créer une room ici » de la fiche lieu).
  */
-// ponytail: « Chez moi » (room à domicile) arrive avec LKO-71 / LKO-72
 export default function CreateRoomScreen() {
   const wide = useWindowDimensions().width >= WIDE
   const insets = useSafeAreaInsets()
@@ -106,6 +107,7 @@ export default function CreateRoomScreen() {
   const [createdId, setCreatedId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [confirmClose, setConfirmClose] = useState(false)
+  const [safety, setSafety] = useState(false)
   const { createRoom } = useRoomMutations()
 
   const center = { lat: me?.latitude ?? DEFAULT_CITY.lat, lng: me?.longitude ?? DEFAULT_CITY.lng }
@@ -125,7 +127,8 @@ export default function CreateRoomScreen() {
   if (preset && !draft.venueId) set({ venueId: preset.id })
 
   const game = games.data?.find((g) => g.id === draft.gameId)
-  const venue = venues.data?.find((v) => v.id === draft.venueId)
+  const venue = draft.atHome ? undefined : venues.data?.find((v) => v.id === draft.venueId)
+  const place = draft.atHome ? (draft.home?.areaLabel ?? 'Chez moi') : venue?.name
   const title = roomTitle(game, draft)
   const waiting = demand.data?.find((d) => d.game.id === draft.gameId)?.waitingCount
   const demandCount = waiting == null ? `< ${PLAY_INTENT_MIN_COUNT}` : String(waiting)
@@ -133,20 +136,32 @@ export default function CreateRoomScreen() {
     ? `${waiting === 1 ? 'joueur attend' : 'joueurs attendent'} ${game.kind === 'TCG' ? `du ${gameLabel(game)}` : 'des jeux de société'} près d'ici. Ils seront prévenus dès que la room est créée.`
     : ''
 
+  const whereBlocker = draft.atHome
+    ? draft.home
+      ? null
+      : 'Choisis ton adresse dans la liste.'
+    : !venue
+      ? 'Choisis un lieu.'
+      : venue.openNow === false
+        ? 'Ce lieu est fermé à cette heure : choisis-en un autre.'
+        : null
   const blocker =
     step === 0 && !game
       ? 'Choisis un jeu.'
       : step === 1 && startsAt(draft) <= new Date()
         ? 'Choisis une heure à venir.'
-        : step === 1 && !venue
-          ? 'Choisis un lieu.'
-          : step === 1 && venue?.openNow === false
-            ? 'Ce lieu est fermé à cette heure : choisis-en un autre.'
-            : null
+        : step === 1
+          ? whereBlocker
+          : null
   const last = step === STEPS.length - 1
 
-  const next = async () => {
+  const next = () => {
     if (!last) return setStep(step + 1)
+    // Room à domicile : avertissement sécurité accepté avant de la créer (LKO-72)
+    if (draft.atHome && !me?.homeSafetyAccepted) return setSafety(true)
+    void create()
+  }
+  const create = async () => {
     setError(null)
     try {
       const room = await createRoom.mutateAsync(roomBody(draft))
@@ -167,7 +182,7 @@ export default function CreateRoomScreen() {
     <SuccessState
       compact={!wide}
       title="Room créée"
-      text={`Ta room « ${title} » est en ligne à ${venue?.name ?? 'ce lieu'}. On prévient ${waiting == null ? 'les joueurs' : `les ${waiting} joueurs`} qui attendent ce jeu près d'ici.`}
+      text={`Ta room « ${title} » est en ligne ${draft.atHome ? 'chez toi' : `à ${venue?.name ?? 'ce lieu'}`}. On prévient ${waiting == null ? 'les joueurs' : `les ${waiting} joueurs`} qui attendent ce jeu près d'ici.`}
       actions={
         <>
           <Button
@@ -234,7 +249,7 @@ export default function CreateRoomScreen() {
           label: last ? 'Créer la room' : 'Continuer',
           kind: last ? 'room' : 'rating',
           disabled: !!blocker || createRoom.isPending,
-          onPress: () => void next(),
+          onPress: next,
         }}
         insets={insets}
         onStep={(i) => {
@@ -255,7 +270,7 @@ export default function CreateRoomScreen() {
               tint={colors.ratingPale}
               type="Room"
               title={title}
-              meta={[venue?.name ?? 'Lieu à choisir', game ? gameLabel(game) : null]
+              meta={[place ?? 'Lieu à choisir', game ? gameLabel(game) : null]
                 .filter(Boolean)
                 .join(' · ')}
               adult={!draft.minorsAllowed}
@@ -283,6 +298,15 @@ export default function CreateRoomScreen() {
           goBack()
         }}
         onCancel={() => setConfirmClose(false)}
+      />
+      <HomeSafetyDialog
+        visible={safety}
+        sheet={!wide}
+        onAccepted={() => {
+          setSafety(false)
+          void create()
+        }}
+        onCancel={() => setSafety(false)}
       />
     </>
   )
@@ -670,7 +694,7 @@ function WhereStep({
           }}
         >
           <Typography variant="label">Où</Typography>
-          {wide ? (
+          {draft.atHome ? null : wide ? (
             <Typography variant="small">Ouverts à cette heure · triés par distance</Typography>
           ) : (
             <View style={{ width: 160 }}>
@@ -683,7 +707,21 @@ function WhereStep({
             </View>
           )}
         </View>
-        {wide ? (
+        <Segmented
+          items={['Dans un lieu', 'Chez moi']}
+          value={draft.atHome ? 1 : 0}
+          onChange={(i) => set({ atHome: i === 1 })}
+          color={colors.ink}
+        />
+        {draft.atHome ? (
+          <HomeAddressPicker
+            value={draft.home}
+            saveAddress={draft.saveAddress}
+            onChange={(home) => set({ home })}
+            onSaveAddress={(saveAddress) => set({ saveAddress })}
+            wide={wide}
+          />
+        ) : wide ? (
           <>
             {map}
             {list}
@@ -764,20 +802,29 @@ function PlayersStep({
         </View>
       </Field>
       <Field label="Qui peut rejoindre">
-        <View style={{ flexDirection: wide ? 'row' : 'column', gap: wide ? 10 : 8 }}>
-          <ChoiceCard
-            label="Tout le monde"
-            description="Les joueurs rejoignent directement tant qu'il reste des places."
-            selected={draft.autoAccept}
-            onPress={() => set({ autoAccept: true })}
-          />
+        {draft.atHome ? (
           <ChoiceCard
             label="Sur acceptation"
-            description="Tu valides chaque demande."
-            selected={!draft.autoAccept}
-            onPress={() => set({ autoAccept: false })}
+            description="Chez toi, tu valides chaque demande : c'est obligatoire pour une room à domicile."
+            selected
+            onPress={() => undefined}
           />
-        </View>
+        ) : (
+          <View style={{ flexDirection: wide ? 'row' : 'column', gap: wide ? 10 : 8 }}>
+            <ChoiceCard
+              label="Tout le monde"
+              description="Les joueurs rejoignent directement tant qu'il reste des places."
+              selected={draft.autoAccept}
+              onPress={() => set({ autoAccept: true })}
+            />
+            <ChoiceCard
+              label="Sur acceptation"
+              description="Tu valides chaque demande."
+              selected={!draft.autoAccept}
+              onPress={() => set({ autoAccept: false })}
+            />
+          </View>
+        )}
       </Field>
       <Field label="Ambiance">
         <View style={pills}>
@@ -806,14 +853,21 @@ function PlayersStep({
         value={draft.description}
         onChangeText={(description) => set({ description })}
       />
-      <ListCard style={{ padding: 14, borderWidth: border.thin, borderRadius: radius.button }}>
-        <SettingRow
-          title="Ouverte aux mineurs"
-          description="Les 13–17 ans peuvent rejoindre. Les règles de sécurité mineurs s'appliquent."
-          value={draft.minorsAllowed}
-          onChange={(minorsAllowed) => set({ minorsAllowed })}
-        />
-      </ListCard>
+      {draft.atHome ? (
+        <Typography variant="small">
+          Room à domicile réservée aux adultes. Seuls tes enfants liés à ton compte peuvent la
+          rejoindre.
+        </Typography>
+      ) : (
+        <ListCard style={{ padding: 14, borderWidth: border.thin, borderRadius: radius.button }}>
+          <SettingRow
+            title="Ouverte aux mineurs"
+            description="Les 13–17 ans peuvent rejoindre. Les règles de sécurité mineurs s'appliquent."
+            value={draft.minorsAllowed}
+            onChange={(minorsAllowed) => set({ minorsAllowed })}
+          />
+        </ListCard>
+      )}
       {wide ? null : demand}
     </>
   )

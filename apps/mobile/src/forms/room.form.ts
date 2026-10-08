@@ -8,6 +8,7 @@ import {
   type Game,
   type RoomVibe,
 } from '@lucko/shared'
+import type { AddressSuggestion } from '@/lib/geocode'
 
 /** Brouillon de « Créer une room » (19a / 19b), gardé tant que la popup est ouverte. */
 export type RoomDraft = {
@@ -22,6 +23,11 @@ export type RoomDraft = {
   /** Minutes depuis minuit, heure du lieu. */
   minute: number
   venueId: string
+  /** Room à domicile (LKO-71) : adresse choisie dans les propositions IGN. */
+  atHome: boolean
+  home: AddressSuggestion | null
+  /** Adresse enregistrée (chiffrée) ; sinon l'hôte la donne dans le chat. */
+  saveAddress: boolean
   capacity: number
   autoAccept: boolean
   vibes: RoomVibe[]
@@ -46,6 +52,9 @@ export const roomDraft = (today: string, venueId = ''): RoomDraft => ({
   day: today,
   minute: 19 * 60 + 30,
   venueId,
+  atHome: false,
+  home: null,
+  saveAddress: true,
   capacity: 4,
   autoAccept: true,
   vibes: [],
@@ -148,18 +157,28 @@ export const startsAt = (d: RoomDraft) => fromLocalDateTime(d.day, d.minute)
 export const presetDays = (today: string) =>
   Array.from({ length: PRESET_DAYS }, (_, i) => addDays(today, i))
 
-/** Corps du POST /rooms. */
+/** Corps du POST /rooms. À domicile : sur acceptation, réservée aux adultes (LKO-72). */
 export const roomBody = (d: RoomDraft): CreateRoomInput => ({
   gameId: d.gameId,
   formatId: d.formatId || null,
   boardGameCategory: d.category,
   bracket: d.bracket,
   mode: d.ranked ? 'RANKED' : 'CASUAL',
-  venueId: d.venueId,
+  ...(d.atHome && d.home
+    ? {
+        venueId: null,
+        home: {
+          lat: d.home.lat,
+          lng: d.home.lng,
+          areaLabel: d.home.areaLabel,
+          address: d.saveAddress ? d.home.label : undefined,
+        },
+      }
+    : { venueId: d.venueId, home: null }),
   startsAt: startsAt(d).toISOString(),
   capacity: d.capacity,
-  autoAccept: d.autoAccept,
+  autoAccept: d.atHome ? false : d.autoAccept,
   vibes: d.vibes,
   description: d.description.trim() || undefined,
-  minorsAllowed: d.minorsAllowed,
+  minorsAllowed: d.atHome ? false : d.minorsAllowed,
 })

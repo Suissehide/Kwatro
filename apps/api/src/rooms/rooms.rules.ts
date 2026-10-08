@@ -21,7 +21,7 @@ export type RoomContext = {
     kind: GameKind
     formats: (PlayerRange & { id: string; hasBrackets: boolean })[]
   }
-  /** Lieu ouvert à l'heure de la room ; null si ses horaires ne sont pas renseignés. */
+  /** Lieu ouvert à l'heure de la room ; null si ses horaires ne sont pas renseignés ou à domicile. */
   venueOpen: boolean | null
   hostIsMinor: boolean
   /** Moins de 16 ans dans un lieu qui ne les accueille pas seuls (LKO-51). */
@@ -54,6 +54,10 @@ export function createRoomRefusal(
   if (room.startsAt.getTime() > now.getTime() + ROOM_MAX_DAYS_AHEAD * DAY_MS)
     return `Une room se crée au plus ${ROOM_MAX_DAYS_AHEAD} jours à l’avance`
   if (venueOpen === false) return 'Le lieu est fermé à cette heure-là'
+  // Garde-fous domicile (LKO-72) : adultes seulement, chaque joueur accepté par l'hôte
+  if (room.home && hostIsMinor) return 'Les rooms à domicile sont réservées aux adultes'
+  if (room.home && room.autoAccept)
+    return 'Chez toi, tu acceptes chaque joueur : l’inscription automatique n’est pas possible'
   // Un mineur ne pourrait pas jouer dans sa propre room 18+
   if (hostIsMinor && !room.minorsAllowed) return 'Ta room doit être ouverte aux mineurs'
   if (venueRefusesHost) return 'Ce lieu n’accueille pas les moins de 16 ans sans adulte'

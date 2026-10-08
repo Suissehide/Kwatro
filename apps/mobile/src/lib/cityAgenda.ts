@@ -110,7 +110,12 @@ function roomEntry(r: RoomListItem): AgendaEntry {
     title: [`Room ${gameLabel(r.game)}`, r.format, r.bracket ? `Bracket ${r.bracket}` : null]
       .filter(Boolean)
       .join(' · '),
-    venue: r.venue,
+    // À domicile : le quartier et la distance jusqu'à la zone floue
+    venue: r.venue ?? {
+      name: r.home?.areaLabel ?? 'À domicile',
+      isPartner: false,
+      distanceMeters: r.home?.distanceMeters ?? 0,
+    },
     games: [r.game],
     places: seats(r.players.length, r.capacity),
     price: 'Gratuit',

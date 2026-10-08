@@ -71,12 +71,16 @@ export const roomListItemSchema = z.object({
   format: z.string().nullable(),
   /** Bracket Commander visé (1 à 5). */
   bracket: z.number().int().nullable(),
-  venue: z.object({
-    id: z.string(),
-    name: z.string(),
-    isPartner: z.boolean(),
-    distanceMeters: z.number().int(),
-  }),
+  venue: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+      isPartner: z.boolean(),
+      distanceMeters: z.number().int(),
+    })
+    .nullable(),
+  /** Room à domicile (LKO-71) : quartier et distance jusqu'à la zone floue, jamais l'adresse. */
+  home: z.object({ areaLabel: z.string(), distanceMeters: z.number().int() }).nullable(),
   /** Joueurs acceptés (hôte compris) : initiales seulement, la liste est publique. */
   players: z.array(z.object({ initial: z.string() })),
   ratingRange: z.object({ min: z.number().int(), max: z.number().int() }).nullable(),
@@ -177,7 +181,7 @@ export const venueDetailSchema = venueListItemSchema
         externalUrl: z.string().nullable(),
       }),
     ),
-    rooms: z.array(roomListItemSchema.omit({ venue: true })),
+    rooms: z.array(roomListItemSchema.omit({ venue: true, home: true })),
   })
 
 export type EventDetail = z.input<typeof eventDetailSchema>

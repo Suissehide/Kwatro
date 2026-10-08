@@ -239,6 +239,7 @@ export const REPORT_REASONS = [
   'CHEATING',
   'NO_SHOW',
   'MINOR_SAFETY',
+  'SAFETY',
   'OTHER',
 ] as const
 export type ReportReason = (typeof REPORT_REASONS)[number]
@@ -249,6 +250,7 @@ export const REPORT_REASON_LABELS: Record<ReportReason, string> = {
   CHEATING: 'Triche ou résultat faussé',
   NO_SHOW: 'Absences répétées',
   MINOR_SAFETY: 'Comportement suspect envers un mineur',
+  SAFETY: 'Comportement inapproprié ou problème de sécurité',
   OTHER: 'Autre',
 }
 

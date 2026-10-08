@@ -26,6 +26,8 @@ import { ChevronRight } from 'lucide-react-native'
 import { useState } from 'react'
 import { View } from 'react-native'
 import { DetailScreen } from '@/components/DetailScreen'
+import { HomeSafetyDialog } from '@/components/HomeSafetyDialog'
+import { HomeZoneCard } from '@/components/rooms/HomeZoneCard'
 import { eventWhen, gameLabel } from '@/lib/explore'
 import { openChat, openVenue } from '@/lib/navigation'
 import { useChatUnread } from '@/queries/useChat'
@@ -64,6 +66,7 @@ export default function RoomScreen() {
   const unread = useChatUnread({ type: 'room', id }, member)
   const [confirmLeave, setConfirmLeave] = useState(false)
   const [confirmAction, setConfirmAction] = useState<HostConfirm | null>(null)
+  const [safety, setSafety] = useState(false)
   const pending = join.isPending || leave.isPending || decide.isPending || hostAction.isPending
   const error = join.error ?? leave.error ?? decide.error ?? hostAction.error
   const clearError = () => {
@@ -154,7 +157,8 @@ export default function RoomScreen() {
               : 'Demander à rejoindre'
         }
         disabled={pending}
-        onPress={() => join.mutate()}
+        // Room à domicile : avertissement sécurité avant la première demande (LKO-72)
+        onPress={() => (room.home && !me.homeSafetyAccepted ? setSafety(true) : join.mutate())}
       />
     )
   }
@@ -203,6 +207,16 @@ export default function RoomScreen() {
           />
         ) : null}
       </ListCard>
+
+      {room.home ? (
+        <HomeZoneCard
+          roomId={id}
+          home={room.home}
+          isHost={room.isHost}
+          accepted={room.myStatus === 'ACCEPTED'}
+          over={room.status === 'FINISHED' || room.status === 'CANCELLED'}
+        />
+      ) : null}
 
       {room.description ? <Typography>{room.description}</Typography> : null}
 
@@ -315,6 +329,16 @@ export default function RoomScreen() {
           leave.mutate()
         }}
         onCancel={() => setConfirmLeave(false)}
+      />
+
+      <HomeSafetyDialog
+        visible={safety}
+        sheet={false}
+        onAccepted={() => {
+          setSafety(false)
+          join.mutate()
+        }}
+        onCancel={() => setSafety(false)}
       />
     </DetailScreen>
   )

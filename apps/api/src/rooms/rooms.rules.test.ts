@@ -108,6 +108,21 @@ describe('createRoomRefusal', () => {
   })
 })
 
+describe('createRoomRefusal à domicile (LKO-72)', () => {
+  const home = {
+    ...room,
+    venueId: null,
+    home: { lat: 44.83, lng: -0.57, areaLabel: 'Bordeaux · Saint-Michel' },
+  }
+  const atHome = { ...ctx, venueOpen: null }
+
+  it('réservée aux adultes, acceptation obligatoire', () => {
+    expect(createRoomRefusal(home, atHome, now)).toBeNull()
+    expect(createRoomRefusal(home, { ...atHome, hostIsMinor: true }, now)).toMatch(/adultes/)
+    expect(createRoomRefusal({ ...home, autoAccept: true }, atHome, now)).toMatch(/acceptes/)
+  })
+})
+
 describe('joinOutcome', () => {
   const open: JoinableRoom = {
     hostId: 'host',

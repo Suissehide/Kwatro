@@ -110,6 +110,8 @@ export const meSchema = z.object({
   /** Sujets de notifications push coupés (vide = tout activé). */
   notificationsOff: z.array(z.enum(NOTIFICATION_TOPICS)),
   xp: z.number().int(),
+  /** Avertissement sécurité des rooms à domicile déjà accepté dans sa version actuelle (LKO-72). */
+  homeSafetyAccepted: z.boolean(),
   /** LK du format le plus joué en classé (null sans profil TCG). */
   mainRating: z
     .object({ game: z.string(), format: z.string(), rating: z.number().int() })
