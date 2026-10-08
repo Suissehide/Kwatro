@@ -11,7 +11,7 @@ import {
 import { Typography } from '../atoms/Typography'
 import { border, colors, font, radius } from '../tokens'
 
-const focusRing: ViewStyle =
+export const focusRing: ViewStyle =
   Platform.OS === 'web'
     ? { boxShadow: `0 0 0 4px ${colors.rating}` }
     : {
@@ -23,7 +23,7 @@ const focusRing: ViewStyle =
 
 // Web : l'anneau de focus est sur le cadre ; on retire celui du navigateur sur le texte (style « solid » de largeur 0 :
 // avec le style « auto » par défaut, Chrome ignore la largeur et dessine quand même un rectangle bleu)
-const noOutline: TextStyle | null =
+export const noOutline: TextStyle | null =
   Platform.OS === 'web' ? { outlineWidth: 0, outlineStyle: 'solid', boxShadow: 'none' } : null
 
 /** Champ : libellé, aide ou erreur dessous, compteur si `multiline` + `maxLength`. */

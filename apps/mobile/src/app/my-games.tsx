@@ -8,6 +8,7 @@ import {
   Segmented,
   SkeletonCard,
   StatusPill,
+  space,
   Tag,
   Typography,
 } from '@lucko/design-system'
@@ -84,7 +85,9 @@ export default function MyGamesScreen() {
         tab="parties"
         wide={false}
         header={
-          <View style={{ paddingHorizontal: 20, paddingTop: 6, paddingBottom: 12, gap: 12 }}>
+          <View
+            style={{ paddingHorizontal: space.screen, paddingTop: 6, paddingBottom: 12, gap: 12 }}
+          >
             <Typography variant="h1">Mes parties</Typography>
             {segments}
             {filters}

@@ -130,7 +130,13 @@ function PseudoStep({
         Choisis le pseudo que les autres joueurs verront. Ton nom et ta date de naissance restent
         privés.
       </Typography>
-      <IdentityFields form={form} compact autoFocus avatarStatus={me?.avatarStatus} />
+      <IdentityFields
+        form={form}
+        compact
+        autoFocus
+        avatarUri={me?.avatarUrl}
+        avatarStatus={me?.avatarStatus}
+      />
       <form.AppForm>
         <form.FormError />
       </form.AppForm>

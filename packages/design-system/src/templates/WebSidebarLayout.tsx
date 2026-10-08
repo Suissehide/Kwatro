@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { ScrollView, View } from 'react-native'
-import { colors, grid } from '../tokens'
+import { colors, grid, space } from '../tokens'
 
 /** Squelette web à barre latérale (espace lieu W2, admin W3) : sidebar fixe + contenu défilant. */
 export function WebSidebarLayout({
@@ -17,7 +17,11 @@ export function WebSidebarLayout({
       {sidebar}
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: grid.desktop.margin, gap: grid.desktop.gutter }}
+        contentContainerStyle={{
+          paddingVertical: grid.desktop.margin,
+          paddingHorizontal: space.page,
+          gap: grid.desktop.gutter,
+        }}
       >
         {children}
       </ScrollView>

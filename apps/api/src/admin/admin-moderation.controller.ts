@@ -21,6 +21,7 @@ import { z } from 'zod'
 import { ZodBody, ZodQuery, ZodResponse } from '../common/zod'
 import type { Prisma } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
+import { StorageService } from '../storage/storage.service'
 import { Admin } from './admin.decorators'
 import { isSuspended } from './admin.rules'
 import { AdminService } from './admin.service'
@@ -105,6 +106,7 @@ export class AdminModerationController {
   constructor(
     private readonly prisma: PrismaService,
     private readonly admin: AdminService,
+    private readonly storage: StorageService,
   ) {}
 
   @Get('dashboard')
@@ -324,11 +326,17 @@ export class AdminModerationController {
   }
 
   private async reviewAvatar(id: string, status: 'APPROVED' | 'REJECTED') {
-    const { count } = await this.prisma.user.updateMany({
+    const pending = await this.prisma.user.findFirst({
       where: { id, avatarStatus: 'PENDING' },
+      select: { avatarUrl: true },
+    })
+    const { count } = await this.prisma.user.updateMany({
+      // Même photo qu'à la lecture : le joueur a pu en envoyer une autre entre-temps
+      where: { id, avatarStatus: 'PENDING', avatarUrl: pending?.avatarUrl },
       data: { avatarStatus: status, ...(status === 'REJECTED' ? { avatarUrl: null } : {}) },
     })
     if (!count) throw new NotFoundException('Aucune photo en attente pour ce joueur')
+    if (status === 'REJECTED') await this.storage.remove(pending?.avatarUrl ?? null)
   }
 
   /** Journal d'audit : dernières actions des admins. */

@@ -18,7 +18,6 @@ import { IdentityFields } from '@/components/profile/IdentityFields'
 import { WhereFields } from '@/components/profile/WhereFields'
 import { profileBody, profileDefaults, profileFormOpts } from '@/forms/profile.form'
 import { useAppForm } from '@/hooks/formConfig'
-import { visibleAvatar } from '@/lib/profile'
 import { ApiError } from '@/lib/queryClient'
 import { useMeMutations, useMeQuery } from '@/queries/useMe'
 
@@ -83,7 +82,7 @@ function EditForm({ me, wide }: { me: Me; wide: boolean }) {
     <IdentityFields
       form={form}
       compact={!wide}
-      avatarUri={visibleAvatar(me)}
+      avatarUri={me.avatarUrl}
       avatarStatus={me.avatarStatus}
       withName
     />

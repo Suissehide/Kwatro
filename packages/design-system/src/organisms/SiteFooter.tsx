@@ -2,7 +2,7 @@ import { Pressable, Text, useWindowDimensions, View } from 'react-native'
 import { linkProps } from '../atoms/InlineLink'
 import { useHover } from '../atoms/useHover'
 import { Brand } from '../molecules/Brand'
-import { border, colors, font, radius, sizes, transition, type } from '../tokens'
+import { border, colors, font, radius, sizes, space, transition, type } from '../tokens'
 
 export type FooterLink = { label: string; href: string; short?: string }
 
@@ -100,7 +100,12 @@ export function SiteFooter({
     return (
       <View
         role="contentinfo"
-        style={{ backgroundColor: colors.ink, paddingHorizontal: 20, paddingVertical: 28, gap: 20 }}
+        style={{
+          backgroundColor: colors.ink,
+          paddingHorizontal: space.screen,
+          paddingVertical: 28,
+          gap: 20,
+        }}
       >
         <Brand onDark />
         <Text style={{ ...type.h1, color: colors.white }}>{PITCH}</Text>
@@ -126,7 +131,14 @@ export function SiteFooter({
 
   return (
     <View role="contentinfo" style={{ backgroundColor: colors.ink }}>
-      <View style={{ width: '100%', maxWidth: 1200, alignSelf: 'center', paddingHorizontal: 32 }}>
+      <View
+        style={{
+          width: '100%',
+          maxWidth: 1200,
+          alignSelf: 'center',
+          paddingHorizontal: space.page,
+        }}
+      >
         <View style={{ flexDirection: 'row', gap: 48, paddingTop: 64, paddingBottom: 40 }}>
           <View style={{ flex: 2, minWidth: 0, gap: 20 }}>
             <Brand onDark size={44} fontSize={32} />

@@ -4,7 +4,18 @@ import { CountBadge } from '../atoms/CountBadge'
 import { Raised } from '../atoms/Raised'
 import { useHover } from '../atoms/useHover'
 import { Brand } from '../molecules/Brand'
-import { border, colors, font, motion, radius, shadow, textOn, transition, z } from '../tokens'
+import {
+  border,
+  colors,
+  font,
+  motion,
+  radius,
+  shadow,
+  space,
+  textOn,
+  transition,
+  z,
+} from '../tokens'
 import { AccountMenu } from './AccountMenu'
 
 /** `badge` : pastille de compte (messages non lus), masquée à 0. */
@@ -35,7 +46,7 @@ export function TopNav({
         alignItems: 'center',
         gap: 10,
         paddingVertical: 12,
-        paddingHorizontal: 32,
+        paddingHorizontal: space.page,
         borderBottomWidth: border.base,
         borderColor: colors.ink,
         // Le menu du compte déborde sur le contenu

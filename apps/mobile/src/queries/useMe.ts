@@ -62,6 +62,14 @@ export function useMeMutations() {
     onSuccess: () => client.invalidateQueries({ queryKey: meQueryOptions.queryKey }),
   })
 
+  /** Photo de profil analysée à l'envoi. ApiError 422 : refusée d'office, l'ancienne reste. */
+  const setAvatar = useMutation({
+    mutationKey: [ME.SET_AVATAR],
+    mutationFn: (file: FormData) =>
+      unwrap(api.POST('/me/avatar', { body: file as never, bodySerializer: (body) => body })),
+    onSuccess: (me) => client.setQueryData(meQueryOptions.queryKey, me),
+  })
+
   const deleteAccount = useMutation({
     mutationKey: [ME.DELETE],
     mutationFn: () => unwrap(api.DELETE('/me')),
@@ -69,5 +77,5 @@ export function useMeMutations() {
     onSuccess: () => client.clear(),
   })
 
-  return { updateProfile, setBirthDate, deleteAccount }
+  return { updateProfile, setBirthDate, setAvatar, deleteAccount }
 }

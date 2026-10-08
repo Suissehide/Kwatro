@@ -2,7 +2,7 @@ import { ArrowLeft } from 'lucide-react-native'
 import type { ReactNode } from 'react'
 import { Text, View } from 'react-native'
 import { IconButton } from '../atoms/IconButton'
-import { colors, font } from '../tokens'
+import { colors, font, space } from '../tokens'
 
 /** En-tête d'écran mobile : retour (si `onBack`), titre tronqué, actions à droite. */
 export function ScreenHeader({
@@ -22,7 +22,7 @@ export function ScreenHeader({
         gap: 10,
         paddingTop: 6,
         paddingBottom: 10,
-        paddingHorizontal: 16,
+        paddingHorizontal: space.screen,
       }}
     >
       {onBack ? (

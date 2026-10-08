@@ -11,6 +11,7 @@ import {
   RankRow,
   Section,
   SkeletonCard,
+  space,
   TextLink,
   Typography,
 } from '@lucko/design-system'
@@ -39,7 +40,7 @@ export default function ProfileScreen() {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 20,
+        paddingHorizontal: space.screen,
         paddingTop: 6,
         paddingBottom: 10,
       }}

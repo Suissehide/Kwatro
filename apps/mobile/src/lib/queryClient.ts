@@ -5,8 +5,8 @@ import { AppState, Platform } from 'react-native'
 import { ME } from '@/constants/queryKeys'
 
 /**
- * Réponse de l'API en erreur : `status` permet de traiter un 401 ou un 409 à part,
- * `message` est celui renvoyé par l'API (NestJS) quand il y en a un, à afficher tel quel.
+ * Réponse de l'API en erreur : `status` permet de traiter un 401 ou un 409 à part (0 : API injoignable),
+ * `message` est toujours affichable tel quel : celui de l'API pour une erreur 4xx, sinon un message générique.
  */
 export class ApiError extends Error {
   constructor(
@@ -21,10 +21,17 @@ export class ApiError extends Error {
 export async function unwrap<T>(
   request: Promise<{ data?: T; error?: unknown; response: Response }>,
 ): Promise<T> {
-  const { data, error, response } = await request
+  // « Failed to fetch », « Network request failed » : jamais montrés au joueur
+  const { data, error, response } = await request.catch(() => {
+    throw new ApiError(0, 'Connexion impossible : vérifie ton réseau et réessaie.')
+  })
   if (!response.ok) {
     const message = (error as { message?: unknown } | undefined)?.message
-    throw new ApiError(response.status, typeof message === 'string' ? message : undefined)
+    // 5xx : message technique (« Internal server error »), remplacé par le message générique
+    throw new ApiError(
+      response.status,
+      response.status < 500 && typeof message === 'string' ? message : undefined,
+    )
   }
   return data as T
 }
@@ -37,8 +44,9 @@ export const queryClient = new QueryClient({
       staleTime: 30_000,
       // Gardées un jour : c'est ce que le persister peut restaurer au lancement suivant
       gcTime: DAY_MS,
-      // Une erreur 4xx ne se règle pas en réessayant
-      retry: (count, error) => !(error instanceof ApiError && error.status < 500) && count < 2,
+      // Une erreur 4xx ne se règle pas en réessayant (contrairement au réseau ou à un 5xx)
+      retry: (count, error) =>
+        !(error instanceof ApiError && error.status >= 400 && error.status < 500) && count < 2,
     },
   },
 })

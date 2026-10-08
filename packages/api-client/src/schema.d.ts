@@ -84,6 +84,22 @@ export interface paths {
         patch: operations["UsersController_update"];
         trace?: never;
     };
+    "/me/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["UsersController_setAvatar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/me/agenda": {
         parameters: {
             query?: never;
@@ -966,6 +982,73 @@ export interface operations {
                     availability?: number[];
                     vibes?: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
                     notificationsOff?: ("ROOMS" | "MESSAGES" | "VENUES")[];
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        email: string;
+                        pseudo: string | null;
+                        name: string;
+                        hasBirthDate: boolean;
+                        /** @enum {string} */
+                        role: "PLAYER" | "VENUE_STAFF" | "ADMIN";
+                        avatarUrl: string | null;
+                        /** @enum {string|null} */
+                        avatarStatus: "PENDING" | "APPROVED" | "REJECTED" | null;
+                        city: string | null;
+                        latitude: number | null;
+                        longitude: number | null;
+                        searchRadiusKm: number;
+                        availability: number[];
+                        vibes: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
+                        notificationsOff: ("ROOMS" | "MESSAGES" | "VENUES")[];
+                        xp: number;
+                        mainRating: {
+                            game: string;
+                            format: string;
+                            rating: number;
+                        } | null;
+                        rankings: {
+                            game: {
+                                slug: string;
+                                name: string;
+                            };
+                            format: string;
+                            rating: number | null;
+                            rankedGames: number;
+                            reliabilityPct: number;
+                        }[];
+                        venues: {
+                            id: string;
+                            slug: string;
+                            name: string;
+                            /** @enum {string} */
+                            role: "MANAGER" | "STAFF";
+                        }[];
+                    };
+                };
+            };
+        };
+    };
+    UsersController_setAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file?: string;
                 };
             };
         };
@@ -2949,13 +3032,19 @@ export interface operations {
                             type: "room" | "event";
                             id: string;
                             title: string;
+                            /** @enum {string} */
+                            kind: "RANKED" | "CASUAL" | "GAME_NIGHT" | "INITIATION" | "TOURNAMENT" | "PRERELEASE" | "THEMED";
                             /** Format: date-time */
                             startsAt: string;
+                            venueName: string | null;
+                            past: boolean;
+                            muted: boolean;
                             last: {
                                 pseudo: string | null;
                                 body: string;
                                 /** Format: date-time */
                                 createdAt: string;
+                                mine: boolean;
                             } | null;
                             unread: number;
                         }[];
@@ -3014,6 +3103,11 @@ export interface operations {
                         lastReadAt: string | null;
                         muted: boolean;
                         moderator: boolean;
+                        /** Format: date-time */
+                        startsAt: string;
+                        venueName: string | null;
+                        players: number;
+                        capacity: number | null;
                     };
                 };
             };
