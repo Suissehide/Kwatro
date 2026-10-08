@@ -10,6 +10,7 @@ import {
   Chip,
   CountBadge,
   DateBlock,
+  DayChip,
   FilterButton,
   FilterTag,
   IconButton,
@@ -48,11 +49,13 @@ import {
   ChatRow,
   ChecklistItem,
   ChipGroup,
+  ChoiceCard,
   ClosureRow,
   ColorLegend,
   ContentCard,
   DayEventRow,
   DecisionCard,
+  DemandCard,
   EmptyState,
   EventCard,
   FactCard,
@@ -96,6 +99,7 @@ import {
   StatStrip,
   Stepper,
   StripeRow,
+  SuccessState,
   TextField,
   TimelineItem,
   Section as TitledSection,
@@ -271,6 +275,36 @@ export function Catalogue() {
             }
           />
         </Panel>
+        <Row>
+          <DayChip top="Auj." label="8" active onPress={() => {}} />
+          <DayChip top="Ven." label="9" active={false} onPress={() => {}} />
+          <DayChip other top="Autre" label="date…" active={false} onPress={() => {}} />
+          <Chip tall dashed label="Autre heure…" onPress={() => {}} />
+        </Row>
+        <Row>
+          <ChoiceCard
+            label="Amicale"
+            description="Pour le plaisir. Pas de résultat à saisir."
+            selected
+            onPress={() => {}}
+          />
+          <ChoiceCard
+            label="Classée"
+            description="Indisponible pour les jeux de société."
+            disabled
+            selected={false}
+            onPress={() => {}}
+          />
+        </Row>
+        <DemandCard
+          count="23"
+          text="joueurs attendent du Magic près d'ici. Ils seront prévenus dès que la room est créée."
+        />
+        <SuccessState
+          title="Room créée"
+          text="Ta room « Commander · bracket 3 » est en ligne au Dé Fêlé."
+          actions={<Button kind="rating" label="Voir la room" onPress={() => {}} />}
+        />
         <OptionCard
           label="Détente"
           description="On joue pour le plaisir, sans pression."

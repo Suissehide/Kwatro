@@ -1,84 +1,189 @@
 import {
+  AgendaRow,
   Banner,
-  PageTitle,
-  Panel,
-  ScreenHeader,
+  Button,
+  border,
+  type CalendarDay,
+  Chip,
+  ChoiceCard,
+  ConfirmDialog,
+  colors,
+  DayChip,
+  DemandCard,
+  ListCard,
+  ListRow,
+  MonthCalendar,
+  PerkBanner,
+  radius,
+  Segmented,
+  SettingRow,
   SkeletonCard,
+  Stepper,
+  SuccessState,
+  Tag,
+  TextField,
   Typography,
+  WizardDialog,
 } from '@lucko/design-system'
 import {
+  addDays,
+  addMonths,
+  BOARD_GAME_CATEGORIES,
+  BOARD_GAME_CATEGORY_LABELS,
   COMMANDER_BRACKETS,
-  createRoomSchema,
   DEFAULT_CITY,
   formatDistance,
-  formatDuration,
+  formatMinuteOfDay,
   type Game,
+  localDateTime,
+  monthGrid,
+  PLAY_INTENT_MIN_COUNT,
   RADIUS_KM,
-  ROOM_CAPACITY,
   ROOM_DESCRIPTION_MAX,
+  ROOM_MAX_DAYS_AHEAD,
+  ROOM_VIBE_LABELS,
+  ROOM_VIBES,
+  VENUE_TYPE_LABELS,
   type VenueListItem,
 } from '@lucko/shared'
-import { useStore } from '@tanstack/react-form'
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import * as Linking from 'expo-linking'
 import { router, useLocalSearchParams } from 'expo-router'
-import { useWindowDimensions, View } from 'react-native'
-import { PlayerScreen } from '@/components/PlayerScreen'
-import { dayOptions, roomBody, roomDefaults, TIME_PATTERN } from '@/forms/room.form'
-import { useAppForm } from '@/hooks/formConfig'
+import { type ReactNode, useState } from 'react'
+import { Platform, ScrollView, Share, useWindowDimensions, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { ExploreMap } from '@/components/explore/ExploreMap'
+import {
+  clampMinute,
+  clockLabel,
+  dayChip,
+  formatOf,
+  MINUTE_RANGE,
+  otherDayLabel,
+  PRESET_MINUTES,
+  presetDays,
+  previewTime,
+  type RoomDraft,
+  roomBody,
+  roomDraft,
+  roomTitle,
+  seatsRange,
+  startsAt,
+  whenLabel,
+  withFormat,
+  withGame,
+} from '@/forms/room.form'
+import { gameLabel } from '@/lib/explore'
 import { goBack } from '@/lib/navigation'
+import { gameColor } from '@/lib/profile'
 import { ApiError } from '@/lib/queryClient'
 import { venuesQueryOptions } from '@/queries/useExplore'
 import { useGamesQuery } from '@/queries/useGames'
 import { useMeQuery } from '@/queries/useMe'
+import { gameDemandQueryOptions } from '@/queries/usePlayIntents'
 import { useRoomMutations } from '@/queries/useRoom'
 
-const WIDE = 900
-
-const BRACKET_OPTIONS = [
-  { key: '', label: 'Pas précisé' },
-  ...Object.entries(COMMANDER_BRACKETS).map(([n, name]) => ({ key: n, label: `${n} · ${name}` })),
-]
-
-/** « Partie à 2 · environ 50 min », « 2 à 5 joueurs par partie · environ 1 h 30 ». */
-const formatInfo = (f: Game['formats'][number]) =>
-  `${f.minPlayers === f.maxPlayers ? `Partie à ${f.minPlayers}` : `${f.minPlayers} à ${f.maxPlayers} joueurs par partie`} · environ ${formatDuration(f.durationMinutes)}`
-
-const MODE_OPTIONS = [
-  { key: 'CASUAL' as const, label: 'Normale' },
-  { key: 'RANKED' as const, label: 'Classée' },
-]
+const WIDE = 1024
+const STEPS = ['Le jeu', 'Lieu et heure', 'Joueurs']
+const STEP_TITLES = ['Quel jeu ?', 'Où et quand ?', 'Les joueurs']
 
 /**
- * Créer une room (C1 jeu, C2 où et quand, C3 qui) sur un seul écran. `?venue=<slug>` présélectionne
- * le lieu (bouton « Créer une room ici » de la fiche lieu).
+ * Créer une room (19a popup web, 19b plein écran) : le jeu, le lieu et l'heure, les joueurs, puis
+ * « Room créée ». `?venue=<slug>` présélectionne le lieu (« Créer une room ici » de la fiche lieu).
  */
-// ponytail: récap et lien de partage (C4) avec LKO-98, critères d'acceptation avec LKO-56
+// ponytail: « Chez moi » (room à domicile) arrive avec LKO-71 / LKO-72
 export default function CreateRoomScreen() {
   const wide = useWindowDimensions().width >= WIDE
+  const insets = useSafeAreaInsets()
   const { venue: venueSlug } = useLocalSearchParams<{ venue?: string }>()
   const me = useMeQuery({ required: true })
   const games = useGamesQuery()
-  // Lieux autour de la ville du joueur, dans le rayon maximal : la room peut être un peu plus loin
+  const today = localDateTime(new Date()).date
+  const [draft, setDraft] = useState(() => roomDraft(today))
+  const set = (patch: Partial<RoomDraft>) => setDraft((d) => ({ ...d, ...patch }))
+  const [step, setStep] = useState(0)
+  const [createdId, setCreatedId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [confirmClose, setConfirmClose] = useState(false)
+  const { createRoom } = useRoomMutations()
+
+  const center = { lat: me?.latitude ?? DEFAULT_CITY.lat, lng: me?.longitude ?? DEFAULT_CITY.lng }
+  const at = startsAt(draft).toISOString()
+  // Lieux dans le rayon maximal, ouverts ou non à l'heure choisie : la room peut être un peu plus loin
   const venues = useQuery({
-    ...venuesQueryOptions(
-      me?.latitude ?? DEFAULT_CITY.lat,
-      me?.longitude ?? DEFAULT_CITY.lng,
-      RADIUS_KM.max,
-    ),
+    ...venuesQueryOptions(center.lat, center.lng, RADIUS_KM.max, at),
+    enabled: !!me,
+    placeholderData: keepPreviousData,
+  })
+  const demand = useQuery({
+    ...gameDemandQueryOptions({ ...center, label: '' }, me?.searchRadiusKm ?? RADIUS_KM.default),
     enabled: !!me,
   })
+  // Lieu passé par la fiche lieu : sélectionné dès que la liste arrive
+  const preset = venues.data?.find((v) => v.slug === venueSlug)
+  if (preset && !draft.venueId) set({ venueId: preset.id })
 
-  const header = <ScreenHeader title="Créer une room" onBack={goBack} />
+  const game = games.data?.find((g) => g.id === draft.gameId)
+  const venue = venues.data?.find((v) => v.id === draft.venueId)
+  const title = roomTitle(game, draft)
+  const waiting = demand.data?.find((d) => d.game.id === draft.gameId)?.waitingCount
+  const demandCount = waiting == null ? `< ${PLAY_INTENT_MIN_COUNT}` : String(waiting)
+  const demandText = game
+    ? `${waiting == null ? 'joueurs' : waiting > 1 ? 'joueurs attendent' : 'joueur attend'} du ${gameLabel(game)} près d'ici. Ils seront prévenus dès que la room est créée.`
+    : ''
+
+  const blocker =
+    step === 0 && !game
+      ? 'Choisis un jeu.'
+      : step === 1 && startsAt(draft) <= new Date()
+        ? 'Choisis une heure à venir.'
+        : step === 1 && !venue
+          ? 'Choisis un lieu.'
+          : step === 1 && venue?.openNow === false
+            ? 'Ce lieu est fermé à cette heure : choisis-en un autre.'
+            : null
+  const last = step === STEPS.length - 1
+
+  const next = async () => {
+    if (!last) return setStep(step + 1)
+    setError(null)
+    try {
+      const room = await createRoom.mutateAsync(roomBody(draft))
+      setCreatedId(room.id)
+    } catch (e) {
+      // 400 : motif métier (lieu fermé, mineurs…) affiché tel quel
+      setError(
+        e instanceof ApiError && e.status === 400
+          ? e.message
+          : 'Impossible de créer la room pour l’instant. Réessaie.',
+      )
+    }
+  }
+  const close = () => (step > 0 && !createdId ? setConfirmClose(true) : goBack())
+
   const failed = games.isError || venues.isError
-  const content =
-    games.data && venues.data ? (
-      <RoomForm
-        games={games.data}
-        venues={venues.data}
-        venueId={venues.data.find((v) => v.slug === venueSlug)?.id}
-        wide={wide}
-      />
-    ) : failed ? (
+  const body = createdId ? (
+    <SuccessState
+      compact={!wide}
+      title="Room créée"
+      text={`Ta room « ${title} » est en ligne à ${venue?.name ?? 'ce lieu'}. On prévient ${waiting == null ? 'les joueurs' : `les ${waiting} joueurs`} qui attendent ce jeu près d'ici.`}
+      actions={
+        <>
+          <Button
+            kind="ghost"
+            label="Partager le lien"
+            onPress={() => void shareRoom(createdId, title)}
+          />
+          <Button
+            kind="rating"
+            label="Voir la room"
+            onPress={() => router.replace({ pathname: '/rooms/[id]', params: { id: createdId } })}
+          />
+        </>
+      }
+    />
+  ) : !games.data || !venues.data ? (
+    failed ? (
       <Banner
         tone="err"
         message="Impossible de charger les jeux et les lieux."
@@ -91,205 +196,599 @@ export default function CreateRoomScreen() {
     ) : (
       <SkeletonCard />
     )
+  ) : step === 0 ? (
+    <GameStep games={games.data} game={game} draft={draft} setDraft={setDraft} wide={wide} />
+  ) : step === 1 ? (
+    <WhereStep
+      draft={draft}
+      set={set}
+      today={today}
+      venues={venues.data}
+      center={center}
+      radiusKm={me?.searchRadiusKm ?? RADIUS_KM.default}
+      wide={wide}
+    />
+  ) : (
+    <PlayersStep
+      game={game}
+      draft={draft}
+      set={set}
+      wide={wide}
+      demand={game ? <DemandCard inline count={demandCount} text={demandText} /> : null}
+    />
+  )
 
   return (
-    <PlayerScreen tab="explorer" wide={wide} pushed header={header}>
-      {wide ? (
-        <View style={{ width: '100%', maxWidth: 720, alignSelf: 'center', gap: 20 }}>
-          <PageTitle title="Créer une room" />
-          {content}
-        </View>
-      ) : (
-        content
-      )}
-    </PlayerScreen>
+    <>
+      <WizardDialog
+        wide={wide}
+        title="Créer une room"
+        steps={STEPS}
+        stepTitles={STEP_TITLES}
+        step={step}
+        done={!!createdId}
+        doneTitle="C'est fait"
+        blocker={blocker ?? error}
+        action={{
+          label: last ? 'Créer la room' : 'Continuer',
+          kind: last ? 'room' : 'rating',
+          disabled: !!blocker || createRoom.isPending,
+          onPress: () => void next(),
+        }}
+        insets={insets}
+        onStep={(i) => {
+          setError(null)
+          setStep(i)
+        }}
+        onBack={() => {
+          setError(null)
+          setStep(Math.max(0, step - 1))
+        }}
+        onClose={close}
+        aside={
+          <>
+            <Typography variant="label">Aperçu dans l'agenda</Typography>
+            <AgendaRow
+              time={previewTime(draft, today)}
+              color={colors.rating}
+              tint={colors.ratingPale}
+              type="Room"
+              title={title}
+              meta={[venue?.name ?? 'Lieu à choisir', game ? gameLabel(game) : null]
+                .filter(Boolean)
+                .join(' · ')}
+              adult={!draft.minorsAllowed}
+              places={`1/${draft.capacity}${draft.ranked ? ' · classée' : ''}`}
+            />
+            {game ? <DemandCard count={demandCount} text={demandText} /> : null}
+            {venue?.isPartner && venue.luckoPerk ? (
+              <PerkBanner compact text={venue.luckoPerk} />
+            ) : null}
+          </>
+        }
+      >
+        {body}
+      </WizardDialog>
+      <ConfirmDialog
+        visible={confirmClose}
+        sheet={!wide}
+        title="Abandonner la création ?"
+        message="Ta room n'est pas encore créée : ce que tu as choisi sera perdu."
+        confirmLabel="Abandonner"
+        cancelLabel="Continuer"
+        onConfirm={() => {
+          setConfirmClose(false)
+          goBack()
+        }}
+        onCancel={() => setConfirmClose(false)}
+      />
+    </>
   )
 }
 
-function RoomForm({
+/** Lien de la room : partage du système, sinon copie dans le presse-papiers (web). */
+async function shareRoom(id: string, title: string) {
+  const url = Linking.createURL(`/rooms/${id}`)
+  if (Platform.OS === 'web' && !navigator.share) return navigator.clipboard?.writeText(url)
+  await Share.share({ title, message: url, url }).catch(() => undefined)
+}
+
+function Field({ label, aside, children }: { label: string; aside?: string; children: ReactNode }) {
+  return (
+    <View style={{ gap: 10 }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'baseline',
+          gap: 12,
+        }}
+      >
+        <Typography variant="label">{label}</Typography>
+        {aside ? (
+          <Typography variant="title" style={{ fontSize: 14 }}>
+            {aside}
+          </Typography>
+        ) : null}
+      </View>
+      {children}
+    </View>
+  )
+}
+
+/** Cartes en `columns` colonnes égales ; la dernière ligne garde la largeur des autres. */
+function Grid({ columns, children }: { columns: number; children: ReactNode[] }) {
+  const rows = Array.from({ length: Math.ceil(children.length / columns) }, (_, r) =>
+    children.slice(r * columns, r * columns + columns),
+  )
+  return (
+    <View style={{ gap: 10 }}>
+      {rows.map((row, r) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: lignes d'une grille fixe
+        <View key={r} style={{ flexDirection: 'row', gap: 10 }}>
+          {row}
+          {Array.from({ length: columns - row.length }, (_, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: cases vides de fin de ligne
+            <View key={`empty-${i}`} style={{ flex: 1 }} />
+          ))}
+        </View>
+      ))}
+    </View>
+  )
+}
+
+const pills = { flexDirection: 'row', flexWrap: 'wrap', gap: 6 } as const
+
+function GameStep({
   games,
-  venues,
-  venueId,
+  game,
+  draft,
+  setDraft,
   wide,
 }: {
   games: Game[]
-  venues: VenueListItem[]
-  venueId?: string
+  game: Game | undefined
+  draft: RoomDraft
+  setDraft: (update: (d: RoomDraft) => RoomDraft) => void
   wide: boolean
 }) {
-  const { createRoom } = useRoomMutations()
-  const form = useAppForm({
-    defaultValues: roomDefaults(venueId),
-    onSubmit: async ({ value, formApi }) => {
-      try {
-        await createRoom.mutateAsync(roomBody(value))
-        router.replace('/my-games')
-      } catch (error) {
-        formApi.setErrorMap({
-          onSubmit: {
-            // 400 : motif métier (lieu fermé, mineurs…) affiché tel quel
-            form:
-              error instanceof ApiError && error.status === 400
-                ? error.message
-                : 'Impossible de créer la room pour l’instant. Réessaie.',
-            fields: {},
-          },
-        })
-      }
-    },
-  })
-  const gameId = useStore(form.store, (state) => state.values.gameId)
-  const game = games.find((g) => g.id === gameId)
-  const tcg = game?.kind === 'TCG'
-  const formatId = useStore(form.store, (state) => state.values.formatId)
-  const format = game?.formats.find((f) => f.id === formatId)
-  /** Nouveau format : bracket remis à zéro, places relevées au minimum du format (6 en draft). */
-  const fitFormat = (minPlayers: number = ROOM_CAPACITY.min) => {
-    form.setFieldValue('bracket', '')
-    if (form.getFieldValue('capacity') < minPlayers) form.setFieldValue('capacity', minPlayers)
-  }
-
-  const gameFields = (
+  const board = game ? game.kind !== 'TCG' : false
+  const format = formatOf(game, draft)
+  return (
     <>
-      <form.AppField
-        name="gameId"
-        validators={{ onSubmit: createRoomSchema.shape.gameId }}
-        listeners={{
-          // Nouveau jeu : premier format proposé ; jeux de société toujours en room normale
-          onChange: ({ value }) => {
-            const next = games.find((g) => g.id === value)
-            form.setFieldValue('formatId', next?.formats[0]?.id ?? '')
-            if (next?.kind !== 'TCG') form.setFieldValue('mode', 'CASUAL')
-            fitFormat(next?.formats[0]?.minPlayers ?? next?.minPlayers)
-          },
-        }}
-      >
-        {(field) => <field.Choice options={games.map((g) => ({ key: g.id, label: g.name }))} />}
-      </form.AppField>
-      {tcg && game ? (
-        <>
-          <form.AppField
-            name="formatId"
-            listeners={{
-              onChange: ({ value }) =>
-                fitFormat(game.formats.find((f) => f.id === value)?.minPlayers),
-            }}
-          >
-            {(field) => (
-              <field.Choice
-                label="Format"
-                options={game.formats.map((f) => ({ key: f.id, label: f.name }))}
+      <Field label="Jeu">
+        <Grid columns={wide ? 4 : 2}>
+          {games.map((g) => (
+            <ChoiceCard
+              key={g.id}
+              label={gameLabel(g)}
+              swatch={g.kind === 'TCG' ? gameColor(g.slug) : colors.venue}
+              selected={g.id === draft.gameId}
+              onPress={() => setDraft((d) => withGame(d, g))}
+            />
+          ))}
+        </Grid>
+      </Field>
+      {game ? (
+        <Field label={board ? 'Catégorie' : 'Format'}>
+          <View style={pills}>
+            {board
+              ? BOARD_GAME_CATEGORIES.map((c) => (
+                  <Chip
+                    key={c}
+                    tall
+                    label={BOARD_GAME_CATEGORY_LABELS[c].label}
+                    active={draft.category === c}
+                    onPress={() => setDraft((d) => withFormat(d, game, '', c))}
+                  />
+                ))
+              : game.formats.map((f) => (
+                  <Chip
+                    key={f.id}
+                    tall
+                    label={f.name}
+                    active={draft.formatId === f.id}
+                    onPress={() => setDraft((d) => withFormat(d, game, f.id, null))}
+                  />
+                ))}
+          </View>
+        </Field>
+      ) : null}
+      {format?.hasBrackets ? (
+        <Field label={wide ? 'Puissance des decks (bracket)' : 'Bracket'}>
+          <View style={{ flexDirection: 'row', gap: wide ? 8 : 6 }}>
+            {Object.entries(COMMANDER_BRACKETS).map(([n, name]) => (
+              <ChoiceCard
+                key={n}
+                big
+                label={n}
+                description={wide ? name : undefined}
+                selected={draft.bracket === Number(n)}
+                onPress={() =>
+                  setDraft((d) => ({ ...d, bracket: d.bracket === Number(n) ? null : Number(n) }))
+                }
               />
-            )}
-          </form.AppField>
-          {format ? <Typography variant="small">{formatInfo(format)}</Typography> : null}
-          {format?.hasBrackets ? (
-            <form.AppField name="bracket">
-              {(field) => <field.Choice label="Bracket des decks" options={BRACKET_OPTIONS} />}
-            </form.AppField>
+            ))}
+          </View>
+          {!wide && draft.bracket ? (
+            <Typography variant="small">
+              {`Bracket ${draft.bracket} · ${COMMANDER_BRACKETS[draft.bracket as keyof typeof COMMANDER_BRACKETS]}`}
+            </Typography>
           ) : null}
-          <form.AppField name="mode">
-            {(field) => <field.Choice label="Mode" options={MODE_OPTIONS} />}
-          </form.AppField>
-          <Typography variant="small">
-            Classée : le résultat compte pour les LK. Normale : on joue pour le plaisir, XP
-            seulement.
-          </Typography>
-        </>
+        </Field>
+      ) : null}
+      {game ? (
+        <View style={{ flexDirection: wide ? 'row' : 'column', gap: wide ? 10 : 8 }}>
+          <ChoiceCard
+            label="Amicale"
+            description="Pour le plaisir. Pas de résultat à saisir."
+            selected={!draft.ranked}
+            onPress={() => setDraft((d) => ({ ...d, ranked: false }))}
+          />
+          <ChoiceCard
+            label="Classée"
+            description={
+              board
+                ? 'Indisponible pour les jeux de société.'
+                : 'Résultat à confirmer en fin de partie, compte pour les LK.'
+            }
+            disabled={board}
+            selected={draft.ranked}
+            onPress={() => setDraft((d) => ({ ...d, ranked: true }))}
+          />
+        </View>
       ) : null}
     </>
   )
+}
 
-  const whereFields = (
-    <>
-      <form.AppField name="venueId" validators={{ onSubmit: createRoomSchema.shape.venueId }}>
-        {(field) => (
-          <field.Choice
-            label="Lieu"
-            options={venues.map((v) => ({
-              key: v.id,
-              label: `${v.name} · ${formatDistance(v.distanceMeters)}`,
-            }))}
-          />
-        )}
-      </form.AppField>
-      <form.AppField name="day">
-        {(field) => <field.Choice label="Jour" options={dayOptions()} />}
-      </form.AppField>
-      <form.AppField
-        name="time"
-        validators={{
-          onSubmit: ({ value }) => (TIME_PATTERN.test(value) ? undefined : 'Heure au format 20:30'),
-        }}
-      >
-        {(field) => (
-          <field.Text label="Heure" placeholder="20:30" keyboardType="numbers-and-punctuation" />
-        )}
-      </form.AppField>
-    </>
+function WhereStep({
+  draft,
+  set,
+  today,
+  venues,
+  center,
+  radiusKm,
+  wide,
+}: {
+  draft: RoomDraft
+  set: (patch: Partial<RoomDraft>) => void
+  today: string
+  venues: VenueListItem[]
+  center: { lat: number; lng: number }
+  radiusKm: number
+  wide: boolean
+}) {
+  const [calendar, setCalendar] = useState<string | null>(null)
+  const [timeOpen, setTimeOpen] = useState(false)
+  const [mapView, setMapView] = useState(false)
+  const days = presetDays(today)
+  const otherDay = !days.includes(draft.day)
+  const otherTime = !PRESET_MINUTES.includes(draft.minute)
+  const lastDay = addDays(today, ROOM_MAX_DAYS_AHEAD)
+  const selected = venues.find((v) => v.id === draft.venueId)
+  const pick = (v: VenueListItem) =>
+    v.openNow === false ? undefined : () => set({ venueId: v.id })
+
+  const map = (
+    <View
+      style={{
+        height: wide ? 250 : 300,
+        borderWidth: border.base,
+        borderColor: colors.ink,
+        borderRadius: radius.card,
+        overflow: 'hidden',
+      }}
+    >
+      <ExploreMap
+        center={{ ...center, label: '' }}
+        venues={venues.filter((v) => v.openNow !== false)}
+        selectedId={draft.venueId || null}
+        onSelect={(id) => set({ venueId: id })}
+      />
+    </View>
   )
-
-  const whoFields = (
-    <>
-      <form.AppField name="capacity">
-        {(field) => (
-          <field.Slider
-            label="Places (toi compris)"
-            min={format?.minPlayers ?? ROOM_CAPACITY.min}
-            max={ROOM_CAPACITY.max}
-            unit="joueurs"
-          />
-        )}
-      </form.AppField>
-      <form.AppField name="minorsAllowed">
-        {(field) => (
-          <field.Switch
-            label="Ouverte aux mineurs"
-            description="Sinon, la room est réservée aux 18 ans et plus et cachée aux mineurs."
-          />
-        )}
-      </form.AppField>
-      <form.AppField name="autoAccept">
-        {(field) => (
-          <field.Switch
-            label="Inscription automatique"
-            description="Sinon, tu acceptes chaque joueur qui demande à rejoindre."
-          />
-        )}
-      </form.AppField>
-      <form.AppField
-        name="description"
-        validators={{ onSubmit: createRoomSchema.shape.description.unwrap() }}
-      >
-        {(field) => (
-          <field.Text
-            label="Description et règles maison"
-            placeholder="Ex. Bracket 3, decks proxy acceptés, on démarre à l’heure."
-            multiline
-            maxLength={ROOM_DESCRIPTION_MAX}
-          />
-        )}
-      </form.AppField>
-    </>
+  const list = (
+    <ListCard>
+      {venues.map((v, i) => {
+        const closed = v.openNow === false
+        const on = v.id === draft.venueId
+        return (
+          <View key={v.id} style={{ opacity: closed ? 0.5 : 1 }}>
+            <ListRow
+              inset={wide ? 16 : 12}
+              last={i === venues.length - 1}
+              selected={on}
+              onPress={pick(v)}
+              left={<RadioDot on={on} />}
+              title={v.name}
+              subtitle={closed ? 'Fermé à cette heure' : venueLine(v)}
+              right={
+                <View style={{ alignItems: 'flex-end', gap: 4 }}>
+                  {v.isPartner ? <Tag label="Partenaire" variant="partner" /> : null}
+                  <Typography variant="label">{formatDistance(v.distanceMeters)}</Typography>
+                </View>
+              }
+            />
+          </View>
+        )
+      })}
+    </ListCard>
   )
 
   return (
-    <View style={{ gap: wide ? 24 : 16 }}>
-      <Panel title="Jeu" compact={!wide}>
-        {gameFields}
-      </Panel>
-      <Panel title="Où et quand" compact={!wide}>
-        {whereFields}
-      </Panel>
-      <Panel title="Qui" compact={!wide}>
-        {whoFields}
-      </Panel>
-      <form.AppForm>
-        <form.FormError />
-        <View style={wide ? { alignSelf: 'flex-start' } : null}>
-          <form.SubmitButton kind="rating" label="Publier la room" />
+    <>
+      <Field label="Quand" aside={whenLabel(draft, today)}>
+        <ScrollView
+          horizontal
+          scrollEnabled={!wide}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 6, paddingRight: 4, paddingBottom: 4 }}
+        >
+          {days.map((day) => (
+            <DayChip
+              key={day}
+              compact={!wide}
+              {...dayChip(day, today)}
+              active={draft.day === day}
+              onPress={() => {
+                setCalendar(null)
+                set({ day })
+              }}
+            />
+          ))}
+          <DayChip
+            other
+            compact={!wide}
+            {...(otherDay ? otherDayLabel(draft.day) : { top: 'Autre', label: 'date…' })}
+            active={otherDay}
+            open={!!calendar}
+            onPress={() => setCalendar(calendar ? null : draft.day.slice(0, 7))}
+          />
+        </ScrollView>
+        {calendar ? (
+          <View style={{ maxWidth: wide ? 360 : undefined }}>
+            <MonthCalendar
+              compact
+              title={new Intl.DateTimeFormat('fr-FR', {
+                timeZone: 'UTC',
+                month: 'long',
+                year: 'numeric',
+              }).format(new Date(`${calendar}-15T12:00:00Z`))}
+              days={monthGrid(calendar).map(
+                (day, i): CalendarDay =>
+                  day
+                    ? {
+                        key: day,
+                        day: Number(day.slice(8)),
+                        today: day === today,
+                        past: day < today || day > lastDay,
+                        items: [],
+                      }
+                    : { key: `${calendar}-${i}`, day: null, items: [] },
+              )}
+              selected={draft.day}
+              onSelect={(day) => {
+                if (day < today || day > lastDay) return
+                set({ day })
+                setCalendar(null)
+              }}
+              onPrev={
+                calendar > today.slice(0, 7)
+                  ? () => setCalendar(addMonths(calendar, -1))
+                  : undefined
+              }
+              onNext={
+                calendar < lastDay.slice(0, 7)
+                  ? () => setCalendar(addMonths(calendar, 1))
+                  : undefined
+              }
+              dayTitle={whenLabel(draft, today)}
+            />
+          </View>
+        ) : null}
+        <View style={pills}>
+          {PRESET_MINUTES.map((minute) => (
+            <Chip
+              key={minute}
+              tall
+              label={clockLabel(minute)}
+              active={draft.minute === minute}
+              onPress={() => {
+                setTimeOpen(false)
+                set({ minute })
+              }}
+            />
+          ))}
+          <Chip
+            tall
+            dashed
+            label={otherTime ? clockLabel(draft.minute) : 'Autre heure…'}
+            active={otherTime || timeOpen}
+            onPress={() => setTimeOpen(!timeOpen)}
+          />
         </View>
-      </form.AppForm>
-    </View>
+        {timeOpen ? (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 10 }}>
+            <Stepper
+              label="d'heures"
+              value={Math.floor(draft.minute / 60)}
+              min={8}
+              max={23}
+              format={(h) => String(h).padStart(2, '0')}
+              onChange={(h) => set({ minute: clampMinute(h * 60 + (draft.minute % 60)) })}
+            />
+            <Typography variant="h2">:</Typography>
+            <Stepper
+              label="de minutes"
+              value={draft.minute % 60}
+              min={-MINUTE_RANGE.step}
+              max={60}
+              step={MINUTE_RANGE.step}
+              format={(m) => String(m).padStart(2, '0')}
+              // Les minutes débordent sur l'heure voisine : 45 + 15 = heure suivante
+              onChange={(m) => set({ minute: clampMinute(draft.minute - (draft.minute % 60) + m) })}
+            />
+            <Typography variant="small">Par pas de 15 min.</Typography>
+          </View>
+        ) : null}
+      </Field>
+
+      <View style={{ gap: 10 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 12,
+          }}
+        >
+          <Typography variant="label">Où</Typography>
+          {wide ? (
+            <Typography variant="small">Ouverts à cette heure · triés par distance</Typography>
+          ) : (
+            <View style={{ width: 160 }}>
+              <Segmented
+                items={['Liste', 'Carte']}
+                value={mapView ? 1 : 0}
+                onChange={(i) => setMapView(i === 1)}
+                color={colors.ink}
+              />
+            </View>
+          )}
+        </View>
+        {wide ? (
+          <>
+            {map}
+            {list}
+          </>
+        ) : mapView ? (
+          <>
+            {map}
+            <Typography variant="small">
+              {selected
+                ? `Sélectionné : ${selected.name} · ${formatDistance(selected.distanceMeters)}`
+                : `Touche un lieu sur la carte · rayon ${radiusKm} km`}
+            </Typography>
+          </>
+        ) : (
+          list
+        )}
+      </View>
+    </>
+  )
+}
+
+/** « Bar à jeux · ferme à 22 h ». */
+const venueLine = (v: VenueListItem) =>
+  [
+    VENUE_TYPE_LABELS[v.type],
+    v.closesAtMinute === null ? null : `ferme à ${formatMinuteOfDay(v.closesAtMinute)}`,
+  ]
+    .filter(Boolean)
+    .join(' · ')
+
+function RadioDot({ on }: { on: boolean }) {
+  return (
+    <View
+      style={{
+        width: 20,
+        height: 20,
+        borderWidth: border.thin,
+        borderColor: colors.ink,
+        borderRadius: 10,
+        backgroundColor: on ? colors.ink : colors.white,
+      }}
+    />
+  )
+}
+
+function PlayersStep({
+  game,
+  draft,
+  set,
+  wide,
+  demand,
+}: {
+  game: Game | undefined
+  draft: RoomDraft
+  set: (patch: Partial<RoomDraft>) => void
+  wide: boolean
+  demand: ReactNode
+}) {
+  const { min, max } = seatsRange(game, draft)
+  const format = formatOf(game, draft)
+  const hint = format?.hasBrackets
+    ? 'Le Commander se joue idéalement à 4.'
+    : draft.category
+      ? `Pré-rempli selon la catégorie. Entre ${min} et ${max} joueurs.`
+      : `Entre ${min} et ${max} joueurs.`
+  return (
+    <>
+      <Field label="Joueurs, toi compris">
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 16 }}>
+          <Stepper
+            label="de joueurs"
+            value={draft.capacity}
+            min={min}
+            max={max}
+            onChange={(capacity) => set({ capacity })}
+          />
+          <Typography variant="small">{hint}</Typography>
+        </View>
+      </Field>
+      <Field label="Qui peut rejoindre">
+        <View style={{ flexDirection: wide ? 'row' : 'column', gap: wide ? 10 : 8 }}>
+          <ChoiceCard
+            label="Tout le monde"
+            description="Les joueurs rejoignent directement tant qu'il reste des places."
+            selected={draft.autoAccept}
+            onPress={() => set({ autoAccept: true })}
+          />
+          <ChoiceCard
+            label="Sur acceptation"
+            description="Tu valides chaque demande."
+            selected={!draft.autoAccept}
+            onPress={() => set({ autoAccept: false })}
+          />
+        </View>
+      </Field>
+      <Field label="Ambiance">
+        <View style={pills}>
+          {ROOM_VIBES.map((v) => (
+            <Chip
+              key={v}
+              tall
+              label={ROOM_VIBE_LABELS[v]}
+              active={draft.vibes.includes(v)}
+              onPress={() =>
+                set({
+                  vibes: draft.vibes.includes(v)
+                    ? draft.vibes.filter((x) => x !== v)
+                    : [...draft.vibes, v],
+                })
+              }
+            />
+          ))}
+        </View>
+      </Field>
+      <TextField
+        label="Un mot pour les joueurs (facultatif)"
+        placeholder="Ex. Proxys acceptés, on commence à l'heure, j'ai des sleeves en rab."
+        multiline
+        maxLength={ROOM_DESCRIPTION_MAX}
+        value={draft.description}
+        onChangeText={(description) => set({ description })}
+      />
+      <ListCard style={{ padding: 14, borderWidth: border.thin, borderRadius: radius.button }}>
+        <SettingRow
+          title="Ouverte aux mineurs"
+          description="Les 13–17 ans peuvent rejoindre. Les règles de sécurité mineurs s'appliquent."
+          value={draft.minorsAllowed}
+          onChange={(minorsAllowed) => set({ minorsAllowed })}
+        />
+      </ListCard>
+      {wide ? null : demand}
+    </>
   )
 }

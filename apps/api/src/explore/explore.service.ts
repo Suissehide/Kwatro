@@ -1,6 +1,8 @@
 import {
   accessibilityItemSchema,
   addDays,
+  BOARD_GAME_CATEGORY_LABELS,
+  type BoardGameCategory,
   type EventsQuery,
   type eventListItemSchema,
   type GeoQuery,
@@ -9,6 +11,7 @@ import {
   type roomListItemSchema,
   VENUE_AGENDA_MONTHS,
   type VenueListItem,
+  type VenuesQuery,
   type venueDetailSchema,
 } from '@lucko/shared'
 import { Injectable, NotFoundException } from '@nestjs/common'
@@ -67,6 +70,14 @@ const myRegistration = (viewer: Viewer) => ({
 const myStatus = (registrations: { status: string }[]) =>
   (registrations[0]?.status as 'REGISTERED' | 'WAITLISTED' | undefined) ?? null
 
+/** Format TCG, ou catégorie d'une room jeux de société. */
+export const formatLabel = (room: {
+  format: { name: string } | null
+  boardGameCategory: BoardGameCategory | null
+}) =>
+  room.format?.name ??
+  (room.boardGameCategory ? BOARD_GAME_CATEGORY_LABELS[room.boardGameCategory].label : null)
+
 /** Room publique : initiales des joueurs et fourchette de LK des parties classées. */
 function roomItem({
   format,
@@ -78,7 +89,7 @@ function roomItem({
   )
   return {
     ...room,
-    format: format?.name ?? null,
+    format: formatLabel({ format, ...room }),
     players: participants.map(({ user }) => ({ initial: user.pseudo?.slice(0, 1) ?? '?' })),
     ratingRange:
       room.mode === 'RANKED' && ratings.length
@@ -101,9 +112,10 @@ export class ExploreService {
   }
 
   /** Carte et liste des lieux : tri honnête (distance, partenaires en premier à distance égale). */
-  async venues(query: GeoQuery, viewer: Viewer): Promise<VenueListItem[]> {
+  async venues(query: VenuesQuery, viewer: Viewer): Promise<VenueListItem[]> {
     const distances = await this.distances(query)
     const now = new Date()
+    const at = query.at ?? now
     const yesterday = fromLocalDate(addDays(localDateTime(now).date, -1))
     const venues = await this.prisma.venue.findMany({
       where: { id: { in: [...distances.keys()] } },
@@ -118,7 +130,7 @@ export class ExploreService {
         const { openNow, closesAtMinute } = openingStatus(
           openingHours,
           closures.map(closureRange),
-          now,
+          at,
         )
         return {
           ...venue,

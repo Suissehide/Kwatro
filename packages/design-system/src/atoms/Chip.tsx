@@ -11,6 +11,7 @@ export function Chip({
   tall,
   count,
   icon: Icon,
+  dashed,
   onPress,
 }: {
   label: string
@@ -21,12 +22,15 @@ export function Chip({
   count?: number
   /** Icône Lucide avant le libellé (coche d'un filtre actif). */
   icon?: LucideIcon
+  /** Choix « Autre… » qui ouvre un réglage : bordure en pointillés tant qu'il est inactif. */
+  dashed?: boolean
   onPress?: () => void
 }) {
   const { hovered, hoverProps } = useHover()
   const style = {
     borderWidth: border.thin,
     borderColor: colors.ink,
+    borderStyle: dashed && !active ? ('dashed' as const) : ('solid' as const),
     borderRadius: radius.pill,
     paddingVertical: 5,
     paddingHorizontal: tall ? 14 : 11,

@@ -17,6 +17,7 @@ import {
   type CommanderBracket,
   formatRating,
   type HostAction,
+  ROOM_VIBE_LABELS,
   type RoomCandidate,
   type RoomDetail,
 } from '@lucko/shared'
@@ -110,6 +111,9 @@ export default function RoomScreen() {
       value: room.autoAccept ? 'Automatique' : "Sur acceptation de l'hôte",
     },
     { title: 'Âge', value: room.minorsAllowed ? 'Ouverte aux mineurs' : '18 ans et plus' },
+    ...(room.vibes.length
+      ? [{ title: 'Ambiance', value: room.vibes.map((v) => ROOM_VIBE_LABELS[v]).join(', ') }]
+      : []),
     ...(room.bracket
       ? [
           {

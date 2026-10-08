@@ -1358,6 +1358,7 @@ export interface operations {
                 lat: number;
                 lng: number;
                 radiusKm?: number;
+                at?: string;
             };
             header?: never;
             path?: never;
@@ -1630,6 +1631,8 @@ export interface operations {
                 "application/json": {
                     gameId: string;
                     formatId?: string | null;
+                    /** @enum {string|null} */
+                    boardGameCategory?: "STRATEGY" | "AMBIANCE" | "COOPERATIVE" | "FAMILY" | "INVESTIGATION" | "ROLE_PLAYING" | "WARGAME" | "PARTY" | null;
                     /** @enum {string} */
                     mode: "RANKED" | "CASUAL";
                     venueId: string;
@@ -1641,6 +1644,8 @@ export interface operations {
                     minorsAllowed?: boolean;
                     /** @default false */
                     autoAccept?: boolean;
+                    /** @default [] */
+                    vibes?: ("CHILL" | "COMPETITIVE" | "BEGINNERS_WELCOME" | "LENDS_DECKS" | "ENGLISH_OK")[];
                     description?: string;
                 };
             };
@@ -1961,6 +1966,7 @@ export interface operations {
                         description: string | null;
                         minorsAllowed: boolean;
                         autoAccept: boolean;
+                        vibes: ("CHILL" | "COMPETITIVE" | "BEGINNERS_WELCOME" | "LENDS_DECKS" | "ENGLISH_OK")[];
                         game: {
                             slug: string;
                             name: string;
@@ -2031,6 +2037,7 @@ export interface operations {
                         description: string | null;
                         minorsAllowed: boolean;
                         autoAccept: boolean;
+                        vibes: ("CHILL" | "COMPETITIVE" | "BEGINNERS_WELCOME" | "LENDS_DECKS" | "ENGLISH_OK")[];
                         game: {
                             slug: string;
                             name: string;
@@ -2101,6 +2108,7 @@ export interface operations {
                         description: string | null;
                         minorsAllowed: boolean;
                         autoAccept: boolean;
+                        vibes: ("CHILL" | "COMPETITIVE" | "BEGINNERS_WELCOME" | "LENDS_DECKS" | "ENGLISH_OK")[];
                         game: {
                             slug: string;
                             name: string;
@@ -2172,6 +2180,7 @@ export interface operations {
                         description: string | null;
                         minorsAllowed: boolean;
                         autoAccept: boolean;
+                        vibes: ("CHILL" | "COMPETITIVE" | "BEGINNERS_WELCOME" | "LENDS_DECKS" | "ENGLISH_OK")[];
                         game: {
                             slug: string;
                             name: string;
@@ -2243,6 +2252,7 @@ export interface operations {
                         description: string | null;
                         minorsAllowed: boolean;
                         autoAccept: boolean;
+                        vibes: ("CHILL" | "COMPETITIVE" | "BEGINNERS_WELCOME" | "LENDS_DECKS" | "ENGLISH_OK")[];
                         game: {
                             slug: string;
                             name: string;
@@ -2334,6 +2344,7 @@ export interface operations {
                         description: string | null;
                         minorsAllowed: boolean;
                         autoAccept: boolean;
+                        vibes: ("CHILL" | "COMPETITIVE" | "BEGINNERS_WELCOME" | "LENDS_DECKS" | "ENGLISH_OK")[];
                         game: {
                             slug: string;
                             name: string;

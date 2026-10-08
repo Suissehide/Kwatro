@@ -11,6 +11,9 @@ import {
 } from '../constants'
 import { geoQuerySchema, isoDateTime } from './common'
 
+/** Lieux autour d'un point ; `at` : ouverture à cet instant plutôt que maintenant (création de room). */
+export const venuesQuerySchema = geoQuerySchema.extend({ at: isoDateTime.optional() })
+
 /** Lieu dans la carte / la liste « Où jouer ce soir » (B1, B2). */
 export const venueListItemSchema = z.object({
   id: z.string(),
@@ -23,7 +26,7 @@ export const venueListItemSchema = z.object({
   isPartner: z.boolean(),
   luckoPerk: z.string().nullable(),
   distanceMeters: z.number().int(),
-  /** Ouvert maintenant (heure de Paris) ; null si les horaires ne sont pas renseignés. */
+  /** Ouvert maintenant, ou à `at` (heure de Paris) ; null si les horaires ne sont pas renseignés. */
   openNow: z.boolean().nullable(),
   /** Heure de fermeture de la plage en cours, en minutes depuis minuit. */
   closesAtMinute: z.number().int().nullable(),
@@ -82,6 +85,7 @@ export const roomListItemSchema = z.object({
 export type VenueListItem = z.infer<typeof venueListItemSchema>
 /** Forme JSON reçue par l'app (dates en chaînes ISO). Côté API, `z.output` donne les `Date`. */
 export type EventListItem = z.input<typeof eventListItemSchema>
+export type VenuesQuery = z.infer<typeof venuesQuerySchema>
 export type EventsQuery = z.infer<typeof eventsQuerySchema>
 export type RoomListItem = z.input<typeof roomListItemSchema>
 
