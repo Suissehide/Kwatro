@@ -121,3 +121,20 @@ export function fromLocalDateTime(date: string, minute: number, timeZone = VENUE
   }
   return new Date(instant)
 }
+
+export const AGENDA_RANGES = ['tonight', 'tomorrow', 'weekend', 'week'] as const
+export type AgendaRange = (typeof AGENDA_RANGES)[number]
+
+/**
+ * Jours locaux d'une période de l'agenda de la ville : ce soir, demain, ce week-end (le samedi
+ * et le dimanche à venir, ou ce qu'il en reste), les 7 prochains jours.
+ */
+export function agendaRangeDays(range: AgendaRange, now = new Date()): string[] {
+  const { date, weekday } = localDateTime(now)
+  if (range === 'tonight') return [date]
+  if (range === 'tomorrow') return [addDays(date, 1)]
+  if (range === 'week') return Array.from({ length: 7 }, (_, i) => addDays(date, i))
+  if (weekday === 7) return [date]
+  const saturday = addDays(date, 6 - weekday)
+  return [saturday, addDays(saturday, 1)]
+}

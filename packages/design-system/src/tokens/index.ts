@@ -39,6 +39,8 @@ export const colors = {
   eventSoft: '#DCE3FF',
   venueSoft: '#CFEFE0',
   ratingSoft: '#FFE8A3',
+  ratingPale: '#FFF1C2', // étiquette « Room » de l'agenda
+  prerelease: '#B88700', // avant-premières (agenda)
 } as const
 
 // Texte à poser sur chaque couleur pleine

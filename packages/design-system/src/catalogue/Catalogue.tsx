@@ -10,6 +10,8 @@ import {
   Chip,
   CountBadge,
   DateBlock,
+  FilterButton,
+  FilterTag,
   IconButton,
   InfoChip,
   Inset,
@@ -32,6 +34,7 @@ import {
   AccessibilityList,
   AgendaCard,
   AgendaEventCard,
+  AgendaRow,
   AvailabilityGrid,
   AvatarStack,
   Banner,
@@ -46,6 +49,7 @@ import {
   ChecklistItem,
   ChipGroup,
   ClosureRow,
+  ColorLegend,
   ContentCard,
   DayEventRow,
   DecisionCard,
@@ -106,6 +110,7 @@ import {
   ContextMenu,
   DataTable,
   DetailCard,
+  FilterMenu,
   type MenuAnchor,
   MonthCalendar,
   type PlayerTab,
@@ -602,6 +607,62 @@ export function Catalogue() {
           <InfoChip label="Cascadia" />
           <InfoChip label="+ 290 autres" muted />
         </Row>
+      </Section>
+
+      <Section title="Agenda de la ville">
+        <Row>
+          <FilterMenu
+            label="Type"
+            options={[
+              { value: 'room', label: 'Room', count: 2, selected: true, swatch: colors.rating },
+              {
+                value: 'tournoi',
+                label: 'Tournoi',
+                count: 0,
+                selected: false,
+                swatch: colors.room,
+              },
+            ]}
+            results={2}
+            onToggle={() => {}}
+            onClear={() => {}}
+          />
+          <FilterButton small label="Filtres" count={2} active onPress={() => {}} />
+          <FilterTag label="Magic" onRemove={() => {}} />
+        </Row>
+        <ListCard>
+          <AgendaRow
+            wide
+            first
+            time="19:30"
+            color={colors.rating}
+            tint={colors.ratingPale}
+            type="Room"
+            title="Room Magic · Commander"
+            meta="Le Dé Fêlé · 450 m · Magic"
+            partner
+            places="1 place"
+            placesTone="alert"
+            price="Gratuit"
+            action={<Button small kind="rating" label="Rejoindre" />}
+          />
+        </ListCard>
+        <AgendaRow
+          time="21:00"
+          color={colors.event}
+          tint={colors.eventSoft}
+          type="Soirée jeux"
+          title="Blind test et jeux d'ambiance"
+          meta="La Taverne des Dés · 2,8 km · Gratuit"
+          adult
+          places="Accès libre"
+        />
+        <ColorLegend
+          items={[
+            { label: 'Room entre joueurs', color: colors.rating },
+            { label: 'Tournoi', color: colors.room },
+          ]}
+        />
       </Section>
 
       <Section title="Organismes">

@@ -1,0 +1,293 @@
+import {
+  AgendaRow,
+  Banner,
+  BottomSheet,
+  Button,
+  Carousel,
+  Chip,
+  ColorLegend,
+  colors,
+  EmptyState,
+  FilterButton,
+  FilterMenu,
+  FilterTag,
+  ListCard,
+  PageTitle,
+  Segmented,
+  SettingsCard,
+  SettingsRow,
+  SkeletonCard,
+  space,
+  TextLink,
+  Typography,
+} from '@lucko/design-system'
+import { AGENDA_RANGES, agendaRangeDays, RADIUS_KM } from '@lucko/shared'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useQuery } from '@tanstack/react-query'
+import { router, useLocalSearchParams } from 'expo-router'
+import { CalendarX, Check } from 'lucide-react-native'
+import { type ReactNode, useEffect, useState } from 'react'
+import { useWindowDimensions, View } from 'react-native'
+import { PlayerScreen } from '@/components/PlayerScreen'
+import {
+  AGENDA_LEGEND,
+  type AgendaEntry,
+  type AgendaFilters,
+  agendaRowProps,
+  agendaView,
+  filterParams,
+  parseFilters,
+  RANGE_LABELS,
+} from '@/lib/cityAgenda'
+import { openEvent, openRoom } from '@/lib/navigation'
+import { useLocation } from '@/lib/useLocation'
+import { cityAgendaQueryOptions } from '@/queries/useExplore'
+import { useMeQuery } from '@/queries/useMe'
+
+const WIDE = 1024
+const STORAGE_KEY = 'lucko.agendaFilters'
+
+const open = (e: AgendaEntry) => (e.kind === 'ROOM' ? openRoom(e.id) : openEvent(e.id))
+
+/**
+ * Agenda de la ville (LKO-62) : rooms et événements de la période autour du joueur, filtrables par type,
+ * jeu, distance, gratuité, places et 18+. Filtres dans l'URL (partageables), derniers filtres gardés.
+ */
+export default function AgendaScreen() {
+  const wide = useWindowDimensions().width >= WIDE
+  const me = useMeQuery()
+  const { place, ready } = useLocation()
+  const radiusKm = me?.searchRadiusKm ?? RADIUS_KM.default
+  const agenda = useQuery({ ...cityAgendaQueryOptions(place, radiusKm), enabled: ready })
+  const params = useLocalSearchParams()
+  const filters = parseFilters(params)
+  const [sheet, setSheet] = useState(false)
+
+  const set = (f: AgendaFilters) => {
+    const next = filterParams(f)
+    router.setParams(next)
+    const query = new URLSearchParams(
+      Object.entries(next).filter((e): e is [string, string] => !!e[1]),
+    ).toString()
+    AsyncStorage.setItem(STORAGE_KEY, query).catch(() => {})
+  }
+
+  // Ouvert sans filtres dans l'URL : on reprend les derniers utilisés
+  // biome-ignore lint/correctness/useExhaustiveDependencies: une seule fois, à l'ouverture
+  useEffect(() => {
+    if (Object.keys(params).length) return
+    AsyncStorage.getItem(STORAGE_KEY)
+      .then((saved) => {
+        if (saved)
+          router.setParams(
+            filterParams(parseFilters(Object.fromEntries(new URLSearchParams(saved)))),
+          )
+      })
+      .catch(() => {})
+  }, [])
+
+  const days = agendaRangeDays(filters.range)
+  const view = agendaView(agenda.data ?? [], days, filters, radiusKm, set)
+  const total = view.results.length
+  const ranges = (
+    <Segmented
+      items={AGENDA_RANGES.map((r) => (wide || r !== 'weekend' ? RANGE_LABELS[r] : 'Week-end'))}
+      value={AGENDA_RANGES.indexOf(filters.range)}
+      onChange={(i) => set({ ...filters, range: AGENDA_RANGES[i] ?? 'tonight' })}
+    />
+  )
+  const where = `${me?.city ?? place.label} · ${radiusKm} km`
+  const clearAll = <TextLink label="Tout effacer" onPress={view.clearAll} />
+  const chips = view.chips.map((c) => <FilterTag key={c.label} {...c} />)
+
+  const list: ReactNode = !agenda.data ? (
+    agenda.isError ? (
+      <Banner
+        tone="err"
+        message="Impossible de charger l'agenda."
+        action="Réessayer"
+        onAction={() => void agenda.refetch()}
+      />
+    ) : (
+      <SkeletonCard />
+    )
+  ) : total === 0 ? (
+    <EmptyState
+      dashed
+      icon={<CalendarX size={28} color={colors.ink} strokeWidth={2.5} />}
+      title="Rien ce jour-là"
+      text="Élargis le rayon ou change de période : de nouvelles rooms s'ouvrent tous les jours."
+    />
+  ) : (
+    view.groups.map((g) => (
+      <View key={g.day} style={{ gap: wide ? 10 : 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 12 }}>
+          <Typography variant="h2" style={wide ? null : { fontSize: 18, lineHeight: 19 }}>
+            {g.label}
+          </Typography>
+          {wide ? <Typography variant="small">{g.count}</Typography> : null}
+        </View>
+        {wide ? (
+          <ListCard>
+            {g.items.map((e, i) => (
+              <AgendaRow
+                key={e.id}
+                {...agendaRowProps(e, true)}
+                wide
+                first={i === 0}
+                onPress={() => open(e)}
+                action={<RowAction entry={e} />}
+              />
+            ))}
+          </ListCard>
+        ) : (
+          g.items.map((e) => (
+            <AgendaRow key={e.id} {...agendaRowProps(e, false)} onPress={() => open(e)} />
+          ))
+        )}
+      </View>
+    ))
+  )
+
+  if (wide) {
+    return (
+      <PlayerScreen tab="explorer" wide>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'flex-end',
+            gap: 24,
+          }}
+        >
+          <PageTitle eyebrow={where} title="Agenda" hero />
+          <View style={{ width: 460 }}>{ranges}</View>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 32 }}>
+          <View style={{ flex: 1, minWidth: 0, gap: 20 }}>
+            <View style={{ gap: 12 }}>
+              <View
+                style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}
+              >
+                {view.menus.map((m) => (
+                  <FilterMenu key={m.id} {...m} results={total} />
+                ))}
+                <View
+                  style={{
+                    width: 2,
+                    height: 28,
+                    marginHorizontal: 4,
+                    backgroundColor: colors.line,
+                  }}
+                />
+                {view.toggles.map((t) => (
+                  <Chip
+                    key={t.key}
+                    tall
+                    label={t.label}
+                    active={t.value}
+                    color={colors.venue}
+                    icon={t.value ? Check : undefined}
+                    onPress={() => t.onChange(!t.value)}
+                  />
+                ))}
+              </View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                  gap: 10,
+                  minHeight: 28,
+                }}
+              >
+                <Typography variant="number">{`${total} rendez-vous`}</Typography>
+                {chips}
+                {view.chips.length ? clearAll : null}
+              </View>
+            </View>
+            {list}
+          </View>
+          <View style={{ width: 340, gap: 20 }}>
+            <ColorLegend items={AGENDA_LEGEND} />
+          </View>
+        </View>
+      </PlayerScreen>
+    )
+  }
+
+  return (
+    <PlayerScreen
+      tab="explorer"
+      wide={false}
+      header={
+        <View
+          style={{ paddingHorizontal: space.screen, paddingTop: 6, paddingBottom: 10, gap: 12 }}
+        >
+          <View
+            style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+          >
+            <Typography variant="h1">Agenda</Typography>
+            <Typography variant="label">{where}</Typography>
+          </View>
+          {ranges}
+          <Carousel gap={6}>
+            <FilterButton
+              small
+              label="Filtres"
+              count={view.chips.length}
+              active={view.chips.length > 0}
+              onPress={() => setSheet(true)}
+            />
+            {chips}
+          </Carousel>
+        </View>
+      }
+    >
+      {list}
+      <BottomSheet
+        visible={sheet}
+        title="Filtres"
+        action={clearAll}
+        onClose={() => setSheet(false)}
+        footer={<Button label={`Voir ${total}`} onPress={() => setSheet(false)} />}
+      >
+        {view.menus.map((m) => (
+          <View key={m.id} style={{ gap: 8 }}>
+            <Typography variant="label">{m.title}</Typography>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+              {m.options.map((o) => (
+                <Chip
+                  key={o.value}
+                  tall
+                  label={o.label}
+                  count={o.count}
+                  active={o.selected}
+                  onPress={() => m.onToggle(o.value)}
+                />
+              ))}
+            </View>
+          </View>
+        ))}
+        <SettingsCard>
+          {view.toggles.map((t) => (
+            <SettingsRow key={t.key} label={t.label} toggle={t} />
+          ))}
+        </SettingsCard>
+      </BottomSheet>
+    </PlayerScreen>
+  )
+}
+
+/** Room : « Rejoindre » ; événement : action de la fiche (s'inscrire, liste d'attente, voir). */
+function RowAction({ entry }: { entry: AgendaEntry }) {
+  const press = () => open(entry)
+  if (!entry.action) {
+    return entry.full ? (
+      <Button small kind="ghost" label="Voir" onPress={press} />
+    ) : (
+      <Button small kind="rating" label="Rejoindre" onPress={press} />
+    )
+  }
+  return <Button small kind={entry.action.kind} label={entry.action.label} onPress={press} />
+}

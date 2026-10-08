@@ -1823,6 +1823,12 @@
                               "EXTERNAL"
                             ]
                           },
+                          "minAge": {
+                            "nullable": true,
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
                           "myRegistration": {
                             "nullable": true,
                             "type": "string",
@@ -1867,6 +1873,7 @@
                           "capacity",
                           "registeredCount",
                           "registrationMode",
+                          "minAge",
                           "myRegistration",
                           "games",
                           "seriesId",
@@ -2121,6 +2128,12 @@
                           "EXTERNAL"
                         ]
                       },
+                      "minAge": {
+                        "nullable": true,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
                       "myRegistration": {
                         "nullable": true,
                         "type": "string",
@@ -2186,6 +2199,7 @@
                       "capacity",
                       "registeredCount",
                       "registrationMode",
+                      "minAge",
                       "myRegistration",
                       "games",
                       "venue"

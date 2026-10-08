@@ -1362,6 +1362,7 @@ export interface operations {
                             registeredCount: number;
                             /** @enum {string} */
                             registrationMode: "NONE" | "IN_APP" | "EXTERNAL";
+                            minAge: number | null;
                             /** @enum {string|null} */
                             myRegistration: "REGISTERED" | "WAITLISTED" | null;
                             games: {
@@ -1428,6 +1429,7 @@ export interface operations {
                         registeredCount: number;
                         /** @enum {string} */
                         registrationMode: "NONE" | "IN_APP" | "EXTERNAL";
+                        minAge: number | null;
                         /** @enum {string|null} */
                         myRegistration: "REGISTERED" | "WAITLISTED" | null;
                         games: {
