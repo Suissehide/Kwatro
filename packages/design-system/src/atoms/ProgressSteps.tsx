@@ -1,5 +1,7 @@
+import type { ReactNode } from 'react'
 import { Pressable, Text, View } from 'react-native'
-import { border, colors, font } from '../tokens'
+import { border, colors, font, transition } from '../tokens'
+import { useHover } from './useHover'
 
 /**
  * Barre d'étapes (onboarding, création de room). `current` = nombre d'étapes faites.
@@ -48,29 +50,59 @@ export function ProgressSteps({
             </View>
           )
         }
-        const reached = step <= current
         return (
-          <Pressable
+          <LabeledStep
             key={step}
-            role="button"
-            aria-label={`Revenir à l'étape ${step}`}
-            disabled={!onStep || !reached}
-            onPress={() => onStep?.(step - 1)}
-            style={{ flex: 1, gap: 6 }}
-          >
-            {bar(step)}
-            <Text
-              style={{
-                ...font('body', step === current ? 800 : 600),
-                fontSize: 12,
-                color: reached ? colors.ink : colors.muted,
-              }}
-            >
-              {`${step}. ${label}`}
-            </Text>
-          </Pressable>
+            step={step}
+            label={label}
+            bar={bar(step)}
+            reached={step <= current}
+            active={step === current}
+            onPress={onStep ? () => onStep(step - 1) : undefined}
+          />
         )
       })}
     </View>
+  )
+}
+
+function LabeledStep({
+  step,
+  label,
+  bar,
+  reached,
+  active,
+  onPress,
+}: {
+  step: number
+  label: string
+  bar: ReactNode
+  reached: boolean
+  active: boolean
+  onPress?: () => void
+}) {
+  const { hovered, hoverProps } = useHover()
+  const clickable = !!onPress && reached
+  return (
+    <Pressable
+      role="button"
+      aria-label={`Revenir à l'étape ${step}`}
+      disabled={!clickable}
+      onPress={onPress}
+      {...hoverProps}
+      style={{ flex: 1, gap: 6 }}
+    >
+      {bar}
+      <Text
+        style={{
+          ...font('body', active ? 800 : 600),
+          fontSize: 12,
+          color: clickable && hovered ? colors.room : reached ? colors.ink : colors.muted,
+          ...transition(['color']),
+        }}
+      >
+        {`${step}. ${label}`}
+      </Text>
+    </Pressable>
   )
 }
