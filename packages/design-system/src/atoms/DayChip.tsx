@@ -58,6 +58,7 @@ export function DayChip({
         style={{
           ...font('mono', 700),
           fontSize: compact ? 10 : 11,
+          lineHeight: compact ? 14 : 16,
           textTransform: 'uppercase',
           color: fg,
         }}
@@ -65,11 +66,14 @@ export function DayChip({
         {top}
       </Text>
       <Text
-        style={
-          other
-            ? { ...font('body', 800), fontSize: compact ? 13 : 14, color: fg }
-            : { ...font('display'), fontSize: compact ? 18 : 20, color: fg }
-        }
+        style={{
+          ...(other
+            ? { ...font('body', 800), fontSize: compact ? 13 : 14 }
+            : { ...font('display'), fontSize: compact ? 18 : 20 }),
+          // Même interligne pour le numéro et « date… » : toutes les puces ont la même hauteur
+          lineHeight: compact ? 22 : 24,
+          color: fg,
+        }}
       >
         {label}
       </Text>
