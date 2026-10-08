@@ -17,6 +17,7 @@ import type { z } from 'zod'
 import { isMinor, roomVisibleTo, type Viewer } from '../common/minors.rules'
 import { closureRange, notBlockedWith } from '../explore/explore.service'
 import type { Prisma, User } from '../generated/prisma/client'
+import { PlayIntentsService } from '../play-intents/play-intents.service'
 import { PrismaService } from '../prisma/prisma.service'
 import { PushService } from '../push/push.service'
 import { RealtimeGateway } from '../realtime/realtime.gateway'
@@ -60,6 +61,7 @@ export class RoomsService {
     private readonly prisma: PrismaService,
     private readonly push: PushService,
     private readonly realtime: RealtimeGateway,
+    private readonly intents: PlayIntentsService,
   ) {}
 
   /** Crée la room ; l'hôte en est le premier joueur accepté. */
@@ -97,7 +99,7 @@ export class RoomsService {
     )
     if (refusal) throw new BadRequestException(refusal)
 
-    return this.prisma.room.create({
+    const room = await this.prisma.room.create({
       data: {
         ...input,
         formatId: input.formatId ?? null,
@@ -108,6 +110,9 @@ export class RoomsService {
       },
       select: { id: true },
     })
+    // Joueurs qui attendent ce jeu près du lieu (LKO-17)
+    await this.intents.roomOpened(room.id)
+    return room
   }
 
   /**

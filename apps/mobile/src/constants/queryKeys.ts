@@ -51,6 +51,12 @@ export const ROOM = {
   HOST_ACTION: 'room_host_action',
 } as const
 
+export const PLAY_INTENTS = {
+  GET: 'play_intents',
+  SET: 'set_play_intents',
+  DEMAND: 'games_demand',
+} as const
+
 export const MY_GAMES = {
   GET: 'my_games',
   SET: 'set_my_games',

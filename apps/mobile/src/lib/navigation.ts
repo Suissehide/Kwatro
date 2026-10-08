@@ -20,6 +20,9 @@ export const openVenues = () => router.push('/venues')
 /** Agenda de la ville : rooms et événements des prochains jours (LKO-62). */
 export const openAgenda = () => router.push('/agenda')
 
+/** « Je veux jouer à… » : jeux attendus, prévenu à l'ouverture d'une room (LKO-17). */
+export const openPlayIntents = () => router.push('/agenda/play-intents')
+
 export const openVenue = (slug: string) =>
   router.push({ pathname: '/venues/[slug]', params: { slug } })
 

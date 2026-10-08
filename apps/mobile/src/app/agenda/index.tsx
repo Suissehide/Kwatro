@@ -11,8 +11,10 @@ import {
   FilterButton,
   FilterMenu,
   FilterTag,
+  LinkCard,
   ListCard,
   PageTitle,
+  PlayIntentsCard,
   Segmented,
   SettingsCard,
   SettingsRow,
@@ -25,7 +27,7 @@ import { AGENDA_RANGES, agendaRangeDays, RADIUS_KM } from '@lucko/shared'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useQuery } from '@tanstack/react-query'
 import { router, useLocalSearchParams } from 'expo-router'
-import { CalendarX, Check } from 'lucide-react-native'
+import { ArrowRight, CalendarX, Check } from 'lucide-react-native'
 import { type ReactNode, useEffect, useState } from 'react'
 import { useWindowDimensions, View } from 'react-native'
 import { PlayerScreen } from '@/components/PlayerScreen'
@@ -39,7 +41,8 @@ import {
   parseFilters,
   RANGE_LABELS,
 } from '@/lib/cityAgenda'
-import { openEvent, openRoom } from '@/lib/navigation'
+import { openEvent, openPlayIntents, openRoom } from '@/lib/navigation'
+import { demandLine, followedLine, PLAY_INTENTS_NOTE, usePlayIntents } from '@/lib/playIntents'
 import { useLocation } from '@/lib/useLocation'
 import { cityAgendaQueryOptions } from '@/queries/useExplore'
 import { useMeQuery } from '@/queries/useMe'
@@ -62,6 +65,7 @@ export default function AgendaScreen() {
   const params = useLocalSearchParams()
   const filters = parseFilters(params)
   const [sheet, setSheet] = useState(false)
+  const intents = usePlayIntents()
 
   const set = (f: AgendaFilters) => {
     const next = filterParams(f)
@@ -116,7 +120,7 @@ export default function AgendaScreen() {
       dashed
       icon={<CalendarX size={28} color={colors.ink} strokeWidth={2.5} />}
       title="Rien ce jour-là"
-      text="Élargis le rayon ou change de période : de nouvelles rooms s'ouvrent tous les jours."
+      text="Élargis le rayon ou dis-nous à quoi tu veux jouer : on te prévient dès qu'une room s'ouvre."
     />
   ) : (
     view.groups.map((g) => (
@@ -209,6 +213,19 @@ export default function AgendaScreen() {
             {list}
           </View>
           <View style={{ width: 340, gap: 20 }}>
+            {intents.loaded ? (
+              <PlayIntentsCard
+                subtitle="On te prévient dès qu'une room s'ouvre près de toi."
+                rows={intents.demand.slice(0, 6).map((d) => ({
+                  id: d.game.id,
+                  game: d.game.name,
+                  demand: demandLine(d, intents.city),
+                  on: intents.gameIds.includes(d.game.id),
+                }))}
+                footer={PLAY_INTENTS_NOTE}
+                onToggle={(id) => void intents.toggle(id)}
+              />
+            ) : null}
             <ColorLegend items={AGENDA_LEGEND} />
           </View>
         </View>
@@ -244,6 +261,13 @@ export default function AgendaScreen() {
         </View>
       }
     >
+      <LinkCard
+        highlight
+        label="Je veux jouer à…"
+        description={followedLine(intents.gameIds.length)}
+        icon={ArrowRight}
+        onPress={openPlayIntents}
+      />
       {list}
       <BottomSheet
         visible={sheet}

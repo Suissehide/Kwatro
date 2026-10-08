@@ -657,6 +657,20 @@ export function Catalogue() {
           adult
           places="Accès libre"
         />
+        <PlayIntentsCard
+          subtitle="On te prévient dès qu'une room s'ouvre près de toi."
+          rows={[
+            {
+              id: 'mtg',
+              game: 'Magic : Commander',
+              demand: "23 joueurs l'attendent à Bordeaux",
+              on: true,
+            },
+            { id: 'op', game: 'One Piece', demand: 'Sois parmi les premiers', on: false },
+          ]}
+          footer="Les hôtes voient combien de joueurs attendent un jeu, jamais qui."
+          onToggle={() => {}}
+        />
         <ColorLegend
           items={[
             { label: 'Room entre joueurs', color: colors.rating },

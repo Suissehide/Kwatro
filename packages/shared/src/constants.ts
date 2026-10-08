@@ -54,13 +54,14 @@ export const VENUE_STAFF_ROLES = ['MANAGER', 'STAFF'] as const
 export type VenueStaffRole = (typeof VENUE_STAFF_ROLES)[number]
 
 /** Sujets de notifications push (enum Prisma NotificationTopic), que le joueur peut couper un par un. */
-export const NOTIFICATION_TOPICS = ['ROOMS', 'MESSAGES', 'VENUES'] as const
+export const NOTIFICATION_TOPICS = ['ROOMS', 'MESSAGES', 'VENUES', 'GAMES'] as const
 export type NotificationTopic = (typeof NOTIFICATION_TOPICS)[number]
 
 export const NOTIFICATION_TOPIC_LABELS: Record<NotificationTopic, string> = {
   ROOMS: 'Mes rooms',
   MESSAGES: 'Messages',
   VENUES: 'Lieux suivis',
+  GAMES: 'Rooms de mes jeux',
 }
 
 /** Ce que couvre chaque sujet : `long` sur le web, `short` sur téléphone. */
@@ -74,7 +75,28 @@ export const NOTIFICATION_TOPIC_DESCRIPTIONS: Record<
   },
   MESSAGES: { long: 'Nouveaux messages dans tes rooms.', short: 'Nouveaux messages' },
   VENUES: { long: 'Nouveaux événements des lieux que tu suis.', short: 'Nouveaux événements' },
+  GAMES: {
+    long: "Une room s'ouvre près de toi pour un jeu de « Je veux jouer à… ».",
+    short: 'Rooms des jeux que tu attends',
+  },
 }
+
+/** « Je veux jouer à… » (LKO-17) : soir, week-end ou peu importe. */
+export const PLAY_WHEN = ['EVENING', 'WEEKEND', 'ANY'] as const
+export type PlayWhen = (typeof PLAY_WHEN)[number]
+
+export const PLAY_WHEN_LABELS: Record<PlayWhen, string> = {
+  EVENING: 'Soir',
+  WEEKEND: 'Week-end',
+  ANY: 'Peu importe',
+}
+
+/** Une envie de jeu dure 7 jours, renouvelée à chaque enregistrement. */
+export const PLAY_INTENT_DAYS = 7
+/** En dessous, le nombre de joueurs qui attendent un jeu n'est pas affiché (on reconnaîtrait quelqu'un). */
+export const PLAY_INTENT_MIN_COUNT = 3
+/** Au plus une notification par joueur et par jeu sur cette durée. */
+export const PLAY_INTENT_COOLDOWN_HOURS = 12
 
 export const VENUE_TYPES = ['GAME_BAR', 'TCG_SHOP', 'LUDOTHEQUE', 'ASSOCIATION', 'OTHER'] as const
 export type VenueType = (typeof VENUE_TYPES)[number]

@@ -11,6 +11,7 @@ export function PlayerScreen({
   wide,
   header,
   pushed,
+  footer,
   children,
 }: {
   tab: PlayerTab
@@ -19,6 +20,8 @@ export function PlayerScreen({
   header?: ReactNode
   /** Écran poussé (édition) : pas de barre d'onglets sur téléphone. */
   pushed?: boolean
+  /** Actions : pied fixe sur téléphone, à la suite du contenu sur desktop. */
+  footer?: ReactNode
   children: ReactNode
 }) {
   const insets = useSafeAreaInsets()
@@ -28,6 +31,7 @@ export function PlayerScreen({
       <MobileScreen
         insets={insets}
         header={header}
+        footer={footer}
         tabBar={
           pushed ? undefined : (
             <PlayerTabBar
@@ -47,6 +51,7 @@ export function PlayerScreen({
   return (
     <WebScreen nav={<PlayerNav active={tab} />} contentStyle={{ gap: 40 }}>
       {children}
+      {footer}
     </WebScreen>
   )
 }
