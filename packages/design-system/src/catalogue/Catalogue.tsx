@@ -56,6 +56,7 @@ import {
   EmptyState,
   EventCard,
   FactCard,
+  GameTile,
   HoursCard,
   LevelCard,
   LinkCard,
@@ -74,6 +75,7 @@ import {
   ProfileIdentity,
   QueueCard,
   QueueItem,
+  RadiusMap,
   RankCard,
   RankRow,
   RatingBadge,
@@ -94,6 +96,7 @@ import {
   SkeletonCard,
   StatCard,
   StatStrip,
+  StepHeader,
   Stepper,
   StripeRow,
   TextField,
@@ -120,6 +123,7 @@ import {
   Sidebar,
   SiteFooter,
   type Sort,
+  StepsAside,
   TopNav,
   VenueTabBar,
 } from '../organisms'
@@ -247,6 +251,15 @@ export function Catalogue() {
 
       <Section title="Molécules">
         <ScreenHeader title="Fiche room" onBack={() => {}} />
+        <View style={{ marginHorizontal: -space.screen }}>
+          <StepHeader
+            current={2}
+            total={3}
+            title="Tu joues où ?"
+            subtitle="Une ville et un rayon suffisent."
+            onBack={() => {}}
+          />
+        </View>
         <Segmented items={['Rooms', 'Événements', 'Lieux']} value={seg} onChange={setSeg} />
         <TextField
           label="Nom de la room"
@@ -271,6 +284,24 @@ export function Catalogue() {
             }
           />
         </Panel>
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          {(
+            [
+              ['Magic', colors.room],
+              ['Lorcana', colors.event],
+            ] as const
+          ).map(([label, color]) => (
+            <View key={label} style={{ flex: 1 }}>
+              <GameTile
+                label={label}
+                color={color}
+                selected={vibe === (label === 'Magic')}
+                onPress={() => setVibe((v) => !v)}
+              />
+            </View>
+          ))}
+        </View>
+        <RadiusMap radiusKm={radiusKm} label="14 lieux · 23 soirées cette semaine" />
         <OptionCard
           label="Détente"
           description="On joue pour le plaisir, sans pression."
@@ -774,6 +805,15 @@ export function Catalogue() {
               { key: 'pointage', label: 'Pointage' },
               { key: 'factures', label: 'Factures', later: true },
             ]}
+          />
+        </View>
+        <View style={{ height: 520, flexDirection: 'row' }}>
+          <StepsAside
+            title="Trois questions et on te montre où jouer ce soir."
+            subtitle="Tu pourras tout changer plus tard dans ton profil."
+            steps={['Tes jeux', 'Ta ville', 'Ton pseudo']}
+            current={1}
+            onSelect={() => {}}
           />
         </View>
         <SiteFooter compact={false} />

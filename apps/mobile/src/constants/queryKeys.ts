@@ -21,6 +21,7 @@ export const EXPLORE = {
   TONIGHT: 'explore_tonight',
   VENUES: 'explore_venues',
   CITY_AGENDA: 'explore_city_agenda',
+  NEARBY_COUNT: 'explore_nearby_count',
 } as const
 
 export const EVENT = {

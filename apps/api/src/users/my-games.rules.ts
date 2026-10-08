@@ -9,8 +9,8 @@ import type { z } from 'zod'
 export type CatalogGame = { id: string; name: string; kind: GameKind; formatIds: string[] }
 
 /**
- * Mes jeux (LKO-46) : motif de refus, ou null. Un format doit appartenir à un TCG coché,
- * et chaque TCG coché a au moins un format (c'est par format que se fait le niveau).
+ * Mes jeux (LKO-46) : motif de refus, ou null. Un format doit appartenir à un TCG coché. Un TCG
+ * peut rester sans format : l'onboarding (LKO-47) enregistre les jeux, le niveau vient plus tard.
  */
 export function myGamesRefusal(
   input: z.output<typeof myGamesSchema>,
@@ -21,11 +21,6 @@ export function myGamesRefusal(
   for (const { formatId } of input.formats) {
     const game = games.find((g) => g?.formatIds.includes(formatId))
     if (game?.kind !== 'TCG') return 'Ce format ne correspond à aucun TCG choisi'
-  }
-  for (const game of games) {
-    if (game?.kind !== 'TCG') continue
-    if (!input.formats.some((f) => game.formatIds.includes(f.formatId)))
-      return `Choisis au moins un format pour ${game.name}`
   }
   return null
 }

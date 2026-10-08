@@ -246,8 +246,11 @@ const SwitchField = ({ label, description }: { label: string; description?: stri
 // Position arrondie à ~1 km : assez pour chercher autour, sans garder l'adresse exacte du joueur
 const round = (value: number) => Math.round(value * 100) / 100
 
-/** Ville saisie, ou trouvée par « Me localiser » (position de l'appareil puis commune). */
-const CityField = ({ compact }: { compact?: boolean }) => {
+/**
+ * Ville saisie, ou trouvée par « Me localiser » (position de l'appareil puis commune).
+ * `locateButton` : grand bouton « Utiliser ma position » au-dessus du champ (onboarding sur téléphone).
+ */
+const CityField = ({ compact, locateButton }: { compact?: boolean; locateButton?: boolean }) => {
   const { field, error, onChange } = useKwField<CityValue>()
   const [locating, setLocating] = useState(false)
   const [locateError, setLocateError] = useState<string>()
@@ -273,7 +276,7 @@ const CityField = ({ compact }: { compact?: boolean }) => {
     }
   }
 
-  return (
+  const input = (
     <TextField
       label="Ville"
       placeholder="Ex. Bordeaux"
@@ -288,11 +291,23 @@ const CityField = ({ compact }: { compact?: boolean }) => {
       right={
         locating ? (
           <Spinner />
-        ) : (
+        ) : locateButton ? undefined : (
           <TextLink label={compact ? 'Localiser' : 'Me localiser'} onPress={() => void locate()} />
         )
       }
     />
+  )
+  if (!locateButton) return input
+  return (
+    <View style={{ gap: 16 }}>
+      <Button
+        kind="ghost"
+        label={locating ? 'Localisation…' : 'Utiliser ma position'}
+        disabled={locating}
+        onPress={() => void locate()}
+      />
+      {input}
+    </View>
   )
 }
 
