@@ -9,6 +9,7 @@ import { ContentCard } from './ContentCard'
 /**
  * Date de l'agenda d'un lieu, à la couleur de son type (soirée bleue, tournoi rouge).
  * `wide` : liseré à gauche et colonne d'action à droite ; sinon carte à bandeau, toute cliquable.
+ * `time` (agenda de la ville) : l'heure remplace le bloc date ; `tags` se posent à côté du titre.
  */
 export function AgendaEventCard({
   kind,
@@ -18,6 +19,9 @@ export function AgendaEventCard({
   label,
   title,
   meta,
+  time,
+  tags,
+  price,
   places,
   placesAlert,
   action,
@@ -26,10 +30,15 @@ export function AgendaEventCard({
 }: {
   kind: ContentKind
   /** Bandeau du bloc date, « SAM ». */
-  weekday: string
-  day: string
-  month: string
-  label: string
+  weekday?: string
+  day?: string
+  month?: string
+  /** « 19:30 » : remplace le bloc date. */
+  time?: string
+  /** Tag type / 18+ / Partenaire. */
+  tags?: ReactNode
+  price?: string
+  label?: string
   title: string
   meta: string
   places?: string | null
@@ -41,7 +50,11 @@ export function AgendaEventCard({
 }) {
   const { hovered, hoverProps } = useHover()
   const color = contentColor[kind]
-  const date = <DateBlock day={day} month={weekday} sub={month} color={color} />
+  const date = time ? (
+    <Text style={{ width: 60, ...font('mono', 700), fontSize: 18, color: colors.ink }}>{time}</Text>
+  ) : (
+    <DateBlock day={day ?? ''} month={weekday ?? ''} sub={month} color={color} />
+  )
   const placesText = places ? (
     <Text
       style={{
@@ -55,8 +68,15 @@ export function AgendaEventCard({
   ) : null
   const text = (
     <View style={{ flex: 1, minWidth: 0, gap: 5 }}>
-      <Typography variant="label">{label}</Typography>
-      <Typography variant="title">{title}</Typography>
+      {label ? <Typography variant="label">{label}</Typography> : null}
+      {tags ? (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+          <Typography variant="title">{title}</Typography>
+          {tags}
+        </View>
+      ) : (
+        <Typography variant="title">{title}</Typography>
+      )}
       <Typography variant="small">{meta}</Typography>
       {wide ? null : placesText}
     </View>
@@ -109,6 +129,9 @@ export function AgendaEventCard({
           <View style={{ width: 170, alignItems: 'flex-end', gap: 6 }}>
             {action}
             {placesText}
+            {price ? (
+              <Text style={{ ...font('mono', 700), fontSize: 12, color: colors.ink }}>{price}</Text>
+            ) : null}
           </View>
         </View>
       </View>

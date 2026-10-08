@@ -22,6 +22,7 @@ export const colors = {
   skeleton: '#F3DFB8',
   skeletonSoft: '#FBEACB',
   scrim: 'rgba(22,19,15,0.55)',
+  inactive: '#A69A88', // badge pas encore gagné, donnée manquante, chiffre nul
   // Surfaces sur fond ink (barre latérale du back-office)
   inkHover: '#2A2520',
   inkLine: '#3A332C',
@@ -143,6 +144,7 @@ export const contentColor = {
   event: colors.event,
   venue: colors.venue,
   rating: colors.rating,
+  preview: '#B88700', // avant-première
 } as const
 export type ContentKind = keyof typeof contentColor
 
@@ -158,6 +160,15 @@ export const semantic = {
   info: colors.event,
   infoSoft: colors.eventSoft,
   neutralSoft: '#F1E6D0',
+} as const
+
+// Mode sombre localisé : écran QR, écran TV, bandeau de ronde
+export const dark = {
+  bg: colors.ink,
+  card: '#221E1A',
+  cardAlt: '#2A2520',
+  line: '#3A332C',
+  muted: '#E6D3AE',
 } as const
 
 export const motion = {
