@@ -1,6 +1,5 @@
 import {
   addDays,
-  BOARD_GAME_CATEGORIES,
   BOARD_GAME_CATEGORY_LABELS,
   type BoardGameCategory,
   type CreateRoomInput,
@@ -57,27 +56,26 @@ export const roomDraft = (today: string, venueId = ''): RoomDraft => ({
 export const formatOf = (game: Game | undefined, d: RoomDraft) =>
   game?.formats.find((f) => f.id === d.formatId)
 
-/** Places proposées : 4 en Commander, la catégorie pour les jeux de société, sinon le maximum d'une partie. */
+/** Places proposées : 4 en Commander, la catégorie pour les jeux de société (4 sans catégorie), sinon le maximum d'une partie. */
 function defaultCapacity(game: Game, formatId: string, category: BoardGameCategory | null) {
   if (category) return BOARD_GAME_CATEGORY_LABELS[category].players
   const format = game.formats.find((f) => f.id === formatId)
-  if (!format) return game.minPlayers
+  if (!format) return game.kind === 'TCG' ? game.minPlayers : 4
   return format.hasBrackets ? 4 : format.maxPlayers
 }
 
-/** Nouveau jeu : premier format (ou catégorie), bracket remis à zéro, places par défaut. */
+/** Nouveau jeu : premier format (jeux de société : toutes catégories), bracket remis à zéro, places par défaut. */
 export function withGame(d: RoomDraft, game: Game): RoomDraft {
   const board = game.kind !== 'TCG'
   const formatId = game.formats[0]?.id ?? ''
-  const category = board ? BOARD_GAME_CATEGORIES[0] : null
   return {
     ...d,
     gameId: game.id,
     formatId,
-    category,
+    category: null,
     bracket: null,
     ranked: board ? false : d.ranked,
-    capacity: defaultCapacity(game, formatId, category),
+    capacity: defaultCapacity(game, formatId, null),
   }
 }
 
@@ -103,7 +101,7 @@ export function seatsRange(game: Game | undefined, d: RoomDraft) {
   }
 }
 
-/** « Commander · bracket 3 », « Jeux · Ambiance », « Modern ». */
+/** « Commander · bracket 3 », « Jeux · Ambiance », « Jeux de société » (toutes catégories), « Modern ». */
 export function roomTitle(game: Game | undefined, d: RoomDraft) {
   if (d.category) return `Jeux · ${BOARD_GAME_CATEGORY_LABELS[d.category].label}`
   const format = formatOf(game, d)

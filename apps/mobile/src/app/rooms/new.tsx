@@ -129,7 +129,7 @@ export default function CreateRoomScreen() {
   const waiting = demand.data?.find((d) => d.game.id === draft.gameId)?.waitingCount
   const demandCount = waiting == null ? `< ${PLAY_INTENT_MIN_COUNT}` : String(waiting)
   const demandText = game
-    ? `${waiting == null ? 'joueurs' : waiting > 1 ? 'joueurs attendent' : 'joueur attend'} du ${gameLabel(game)} près d'ici. Ils seront prévenus dès que la room est créée.`
+    ? `${waiting === 1 ? 'joueur attend' : 'joueurs attendent'} ${game.kind === 'TCG' ? `du ${gameLabel(game)}` : 'des jeux de société'} près d'ici. Ils seront prévenus dès que la room est créée.`
     : ''
 
   const blocker =
@@ -397,11 +397,11 @@ function GameStep({
         <Field label={board ? 'Catégorie' : 'Format'}>
           <View style={pills}>
             {board
-              ? BOARD_GAME_CATEGORIES.map((c) => (
+              ? [null, ...BOARD_GAME_CATEGORIES].map((c) => (
                   <Chip
-                    key={c}
+                    key={c ?? 'all'}
                     tall
-                    label={BOARD_GAME_CATEGORY_LABELS[c].label}
+                    label={c ? BOARD_GAME_CATEGORY_LABELS[c].label : 'Tous les jeux'}
                     active={draft.category === c}
                     onPress={() => setDraft((d) => withFormat(d, game, '', c))}
                   />
