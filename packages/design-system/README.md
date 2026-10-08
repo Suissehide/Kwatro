@@ -64,3 +64,26 @@ import { Button, ContentCard, Typography, colors } from '@lucko/design-system'
 3. L'ajouter au catalogue (`src/catalogue/Catalogue.tsx`).
 4. Toute logique non triviale (calcul, tri, pagination…) dans un fichier pur avec un test Vitest
    (ex. `molecules/pageList.ts`).
+
+## Composants des nouveaux écrans (handoff « Nouveaux composants », 18a)
+
+Prêts dans le catalogue, à utiliser au lieu de recoder ces morceaux dans les écrans :
+
+| Écran (code) | Composants |
+|---|---|
+| QR et pointage (10a–10d, LKO-77/78) | `QrPass`, `Countdown variant="bar"`, `ScanResult`, `PresenceToggle`, `StatCard layout="label-first"` |
+| Résultats et confiance (11a–11c) | `RankPicker`, `RatingScale` (`sm` web, `touch` mobile), `ProgressSteps labels` |
+| Progression (12a, 12b) | `Badge`, `XpBar tone="inverse" size="lg"` |
+| Tournoi (13a–13d) | `ScorePicker`, `PairingRow` (`list`, `orga`, `tv`), `Countdown` (`clock`, `tv`), `ChecklistRow`, `Segmented color={colors.ink}` |
+| Espace lieu (14a, 14c) | `StatCard`, `BarChart` (30–90 barres : `gap`, `color`), `CodeInput`, `SourceTag`, `AgendaEventCard time` |
+| Agenda de la ville (9a–9c) | `FilterMenu`, `WantToPlayRow` (`pill` web, `checkbox` mobile), `AgendaEventCard wide time tags price` |
+| Room à domicile (16a, 17a–17c) | `FuzzyZoneMap` (app, `components/explore`) avec `FuzzyZoneLabel` + `fuzzyZone`, `ChecklistRow` |
+
+- Écrans sombres (QR, TV, bandeau de ronde) : tokens `dark.*`.
+- À faire dans l'écran, pas dans le composant : minuterie de `Countdown`, luminosité max (`expo-brightness`)
+  sous `QrPass`, retour haptique après `ScanResult`, ouverture d'un seul `FilterMenu` à la fois
+  (`open` / `onOpenChange`).
+- `FuzzyZoneMap` : le centre doit arriver déjà décalé par le serveur ; jamais les vraies coordonnées
+  avant la révélation.
+- `ChecklistItem` (back-office) reste pour les lignes compactes sans cadre ; `ChecklistRow` pour les listes
+  encadrées à 4 états.
