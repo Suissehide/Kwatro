@@ -15,12 +15,15 @@ import {
 /** Carte de contenu avec bandeau de 8 px à la couleur du type ; `raised` pour la carte en tête de liste. */
 export function ContentCard({
   kind,
+  color,
   raised,
   onPress,
   label,
   children,
 }: {
   kind?: ContentKind
+  /** Remplace la couleur du type pour le bandeau. */
+  color?: string
   raised?: boolean
   onPress?: () => void
   label?: string
@@ -38,11 +41,11 @@ export function ContentCard({
         overflow: 'hidden',
       }}
     >
-      {kind ? (
+      {kind || color ? (
         <View
           style={{
             height: 8,
-            backgroundColor: contentColor[kind],
+            backgroundColor: color ?? (kind && contentColor[kind]),
             borderBottomWidth: border.base,
             borderColor: colors.ink,
           }}
