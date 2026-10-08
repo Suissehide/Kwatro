@@ -55,7 +55,7 @@ export function shouldNotify(
     atHome: boolean
     minorsAllowed: boolean
     startsAt: Date
-    venue: Place | null
+    venue: (Place & { acceptsUnaccompaniedMinors: boolean }) | null
   },
   now = new Date(),
 ) {

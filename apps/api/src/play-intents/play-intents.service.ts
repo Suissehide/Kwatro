@@ -124,7 +124,9 @@ export class PlayIntentsService implements OnModuleInit {
       where: { id: roomId },
       include: {
         game: { select: { name: true } },
-        venue: { select: { name: true, latitude: true, longitude: true } },
+        venue: {
+          select: { name: true, latitude: true, longitude: true, acceptsUnaccompaniedMinors: true },
+        },
       },
     })
     if (room?.status !== 'OPEN') return

@@ -18,7 +18,7 @@ const room = {
   atHome: false,
   minorsAllowed: false,
   startsAt: new Date('2026-10-10T17:30:00Z'),
-  venue: { latitude: 44.8412, longitude: -0.5701 },
+  venue: { latitude: 44.8412, longitude: -0.5701, acceptsUnaccompaniedMinors: true },
 }
 
 describe('visibleCount', () => {
@@ -58,7 +58,10 @@ describe('shouldNotify', () => {
 
   it('hors du rayon ou sans ville : rien', () => {
     // Mérignac, à environ 8 km
-    const far = { ...room, venue: { latitude: 44.8333, longitude: -0.6833 } }
+    const far = {
+      ...room,
+      venue: { latitude: 44.8333, longitude: -0.6833, acceptsUnaccompaniedMinors: true },
+    }
     expect(shouldNotify(intent, { ...adult, searchRadiusKm: 5 }, far, now)).toBe(false)
     expect(shouldNotify(intent, { ...adult, latitude: null }, room, now)).toBe(false)
   })
