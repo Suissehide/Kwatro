@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <TextPage title="Conditions d’utilisation" updated="4 octobre 2026">
+    <TextPage title="Conditions d’utilisation" updated="8 octobre 2026">
       <p>
         Ces conditions encadrent l’utilisation du site lucko.fr et de l’application Lucko. En créant
         un compte, tu les acceptes. L’éditeur est présenté dans les{' '}
@@ -62,13 +62,21 @@ export default function TermsPage() {
         événement (âge minimum, nombre de places, liste d’attente, inscription chez l’organisateur)
         s’appliquent.
       </p>
+      <p>
+        Mineurs : les rooms et soirées réservées aux adultes ne sont pas proposées aux moins de 18
+        ans. Dans un bar (débit de boissons), la loi interdit d’accueillir un moins de 16 ans qui
+        n’est pas accompagné d’un parent ou d’un adulte qui en a la charge (article L3342-3 du Code
+        de la santé publique) : les rooms de ces lieux ne sont pas proposées aux moins de 16 ans,
+        sauf celle de leur parent lié.
+      </p>
 
       <h2>5. Responsabilité</h2>
       <p>
         Lucko fait son possible pour que le service soit disponible et que les informations soient à
         jour, sans pouvoir le garantir. Les horaires, événements, tarifs et descriptions sont
         fournis par les lieux. Lucko ne répond pas du déroulé des soirées, des échanges entre
-        joueurs ni des achats effectués dans les lieux.
+        joueurs ni des achats effectués dans les lieux. Le contrôle de l’âge à l’entrée, en
+        particulier l’accueil des mineurs, reste de la responsabilité du lieu.
       </p>
 
       <h2>6. Suspension et suppression</h2>
