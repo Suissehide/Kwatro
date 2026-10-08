@@ -25,6 +25,8 @@ export type RoomContext = {
   /** Lieu ouvert à l'heure de la room ; null si ses horaires ne sont pas renseignés. */
   venueOpen: boolean | null
   hostIsMinor: boolean
+  /** Moins de 16 ans dans un lieu qui ne les accueille pas seuls (LKO-51). */
+  venueRefusesHost: boolean
   /** Rooms à venir encore ouvertes ou complètes, organisées par l'hôte. */
   hostOpenRooms: number
 }
@@ -35,7 +37,7 @@ export type RoomContext = {
  */
 export function createRoomRefusal(
   room: z.output<typeof createRoomSchema>,
-  { game, venueOpen, hostIsMinor, hostOpenRooms }: RoomContext,
+  { game, venueOpen, hostIsMinor, venueRefusesHost, hostOpenRooms }: RoomContext,
   now = new Date(),
 ): string | null {
   const format = game.formats.find((f) => f.id === room.formatId)
@@ -53,6 +55,7 @@ export function createRoomRefusal(
   if (venueOpen === false) return 'Le lieu est fermé à cette heure-là'
   // Un mineur ne pourrait pas jouer dans sa propre room 18+
   if (hostIsMinor && !room.minorsAllowed) return 'Ta room doit être ouverte aux mineurs'
+  if (venueRefusesHost) return 'Ce lieu n’accueille pas les moins de 16 ans sans adulte'
   if (hostOpenRooms >= MAX_OPEN_ROOMS_PER_HOST)
     return `Tu as déjà ${MAX_OPEN_ROOMS_PER_HOST} rooms à venir : attends qu’une soit passée`
   return null
@@ -66,7 +69,7 @@ export type JoinableRoom = {
   autoAccept: boolean
 }
 
-const ACTIVE: ParticipantStatus[] = ['PENDING', 'ACCEPTED', 'WAITLISTED']
+export const ACTIVE: ParticipantStatus[] = ['PENDING', 'ACCEPTED', 'WAITLISTED']
 
 /**
  * Demande à rejoindre (LKO-56) : complète → liste d'attente ; sinon acceptée d'office si l'inscription

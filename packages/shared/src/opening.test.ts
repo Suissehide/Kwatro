@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   addMonths,
+  agendaRangeDays,
   type ClosureRange,
   fromLocalDateTime,
   localDateTime,
@@ -119,5 +120,30 @@ describe('fromLocalDateTime', () => {
   it("garde l'heure de Paris de part et d'autre du passage à l'heure d'hiver", () => {
     expect(fromLocalDateTime('2026-10-24', 19 * 60).toISOString()).toBe('2026-10-24T17:00:00.000Z')
     expect(fromLocalDateTime('2026-10-31', 19 * 60).toISOString()).toBe('2026-10-31T18:00:00.000Z')
+  })
+})
+
+describe('agendaRangeDays', () => {
+  // Mercredi 7 octobre 2026, 23 h 30 à Paris (21 h 30 UTC)
+  const wednesday = new Date('2026-10-07T21:30:00Z')
+
+  it('ce soir et demain suivent la date de Paris, pas celle UTC', () => {
+    expect(agendaRangeDays('tonight', new Date('2026-10-07T22:30:00Z'))).toEqual(['2026-10-08'])
+    expect(agendaRangeDays('tomorrow', wednesday)).toEqual(['2026-10-08'])
+  })
+
+  it('ce week-end : samedi et dimanche à venir, ou ce qu’il en reste', () => {
+    expect(agendaRangeDays('weekend', wednesday)).toEqual(['2026-10-10', '2026-10-11'])
+    expect(agendaRangeDays('weekend', new Date('2026-10-10T10:00:00Z'))).toEqual([
+      '2026-10-10',
+      '2026-10-11',
+    ])
+    expect(agendaRangeDays('weekend', new Date('2026-10-11T10:00:00Z'))).toEqual(['2026-10-11'])
+  })
+
+  it('7 jours à partir d’aujourd’hui', () => {
+    const days = agendaRangeDays('week', wednesday)
+    expect(days).toHaveLength(7)
+    expect([days[0], days[6]]).toEqual(['2026-10-07', '2026-10-13'])
   })
 })

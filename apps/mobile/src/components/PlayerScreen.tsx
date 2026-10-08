@@ -11,14 +11,18 @@ export function PlayerScreen({
   wide,
   header,
   pushed,
+  footer,
   children,
 }: {
-  tab: PlayerTab
+  /** `agenda` n'est un onglet que sur desktop ; sur téléphone, c'est Explorer. */
+  tab: PlayerTab | 'agenda'
   wide: boolean
   /** Téléphone : en-tête fixe au-dessus du contenu. */
   header?: ReactNode
   /** Écran poussé (édition) : pas de barre d'onglets sur téléphone. */
   pushed?: boolean
+  /** Actions : pied fixe sur téléphone, à la suite du contenu sur desktop. */
+  footer?: ReactNode
   children: ReactNode
 }) {
   const insets = useSafeAreaInsets()
@@ -28,10 +32,11 @@ export function PlayerScreen({
       <MobileScreen
         insets={insets}
         header={header}
+        footer={footer}
         tabBar={
           pushed ? undefined : (
             <PlayerTabBar
-              active={tab}
+              active={tab === 'agenda' ? 'explorer' : tab}
               badges={badges}
               onSelect={openTab}
               onCreate={() => openCreateRoom()}
@@ -47,6 +52,7 @@ export function PlayerScreen({
   return (
     <WebScreen nav={<PlayerNav active={tab} />} contentStyle={{ gap: 40 }}>
       {children}
+      {footer}
     </WebScreen>
   )
 }

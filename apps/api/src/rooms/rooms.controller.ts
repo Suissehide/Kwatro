@@ -36,7 +36,10 @@ export class RoomsController {
     return this.rooms.detail(id, user ?? null)
   }
 
-  /** Demander à rejoindre. 409 avec le motif si c'est impossible (room commencée, demande refusée…). */
+  /**
+   * Demander à rejoindre. 409 avec le motif si c'est impossible (room commencée, demande refusée…),
+   * 403 `MINOR_REFUSED` si les règles mineurs l'interdisent (room 18+, bar pour un moins de 16 ans).
+   */
   @Post(':id/participation')
   @ZodResponse(roomDetailSchema, 201)
   join(@Param('id') id: string, @CurrentUser() user: User) {

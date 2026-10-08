@@ -135,7 +135,7 @@ export function VenueDetail({ venue }: { venue: AdminVenue }) {
                 />
                 <SettingRow
                   title="Mineurs non accompagnés"
-                  description="Les moins de 16 ans peuvent venir seuls."
+                  description="Les moins de 16 ans peuvent venir seuls. Interdit dans un bar (art. L3342-3 du Code de la santé publique) : laisse désactivé si le lieu sert de l’alcool."
                   value={venue.acceptsUnaccompaniedMinors}
                   onChange={(on) => update({ id: venue.id, acceptsUnaccompaniedMinors: on })}
                 />

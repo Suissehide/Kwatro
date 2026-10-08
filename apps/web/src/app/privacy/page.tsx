@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <TextPage title="Politique de confidentialité" updated="4 octobre 2026">
+    <TextPage title="Politique de confidentialité" updated="8 octobre 2026">
       <p>
         Cette page explique quelles données Lucko collecte, pourquoi, combien de temps elles sont
         gardées ainsi que tes droits. Version courte : on collecte le strict nécessaire pour te
@@ -65,6 +65,11 @@ export default function PrivacyPage() {
           organisateurs ainsi que pour ta progression.
         </li>
         <li>
+          Jeux que tu attends (« Je veux jouer à… ») et moment préféré : pour te prévenir quand une
+          room s’ouvre près de chez toi. Les autres joueurs et les hôtes ne voient qu’un nombre de
+          joueurs par jeu, jamais qui, et seulement à partir de 3 joueurs.
+        </li>
+        <li>
           Sessions de connexion (adresse IP, type d’appareil et de navigateur) : pour garder ton
           compte sécurisé. Base légale : intérêt légitime (sécurité).
         </li>
@@ -92,6 +97,7 @@ export default function PrivacyPage() {
           et facturation des lieux).
         </li>
         <li>Sessions de connexion : jusqu’à leur expiration ou ta déconnexion.</li>
+        <li>Jeux que tu attends : 7 jours, sauf si tu les renouvelles.</li>
         <li>Liste d’attente : jusqu’au lancement dans ta ville, au plus tard 3 ans.</li>
       </ul>
 

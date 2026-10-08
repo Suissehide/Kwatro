@@ -9,14 +9,22 @@ import { ArchivoBlack_400Regular } from '@expo-google-fonts/archivo-black'
 import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { useFonts } from 'expo-font'
-import { Stack } from 'expo-router'
+import { Stack, usePathname } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
+import { useEffect } from 'react'
+import { trackPage } from '@/lib/analytics'
 import { usePush } from '@/lib/push'
 import { persistOptions, queryClient } from '@/lib/queryClient'
 import { useMeQuery } from '@/queries/useMe'
 
 function PushSetup() {
   usePush(useMeQuery()?.id)
+  return null
+}
+
+function PageViews() {
+  const path = usePathname()
+  useEffect(() => trackPage(path), [path])
   return null
 }
 
@@ -37,6 +45,7 @@ export default function RootLayout() {
   return (
     <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
       <PushSetup />
+      <PageViews />
       <Stack screenOptions={{ headerShown: false }} />
       <StatusBar style="auto" />
     </PersistQueryClientProvider>

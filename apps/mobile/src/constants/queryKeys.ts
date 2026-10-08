@@ -20,6 +20,7 @@ export const AGENDA = {
 export const EXPLORE = {
   TONIGHT: 'explore_tonight',
   VENUES: 'explore_venues',
+  CITY_AGENDA: 'explore_city_agenda',
 } as const
 
 export const EVENT = {
@@ -48,6 +49,12 @@ export const ROOM = {
   LEAVE: 'leave_room',
   DECIDE: 'decide_room_candidate',
   HOST_ACTION: 'room_host_action',
+} as const
+
+export const PLAY_INTENTS = {
+  GET: 'play_intents',
+  SET: 'set_play_intents',
+  DEMAND: 'games_demand',
 } as const
 
 export const MY_GAMES = {

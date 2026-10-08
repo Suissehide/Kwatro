@@ -14,13 +14,22 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import type { z } from 'zod'
-import { isMinor, roomVisibleTo, type Viewer } from '../common/minors.rules'
+import {
+  isMinor,
+  MINOR_REFUSED,
+  minorRefusal,
+  roomVisibleTo,
+  type Viewer,
+  venueRefuses,
+} from '../common/minors.rules'
 import { closureRange, notBlockedWith } from '../explore/explore.service'
 import type { Prisma, User } from '../generated/prisma/client'
+import { PlayIntentsService } from '../play-intents/play-intents.service'
 import { PrismaService } from '../prisma/prisma.service'
 import { PushService } from '../push/push.service'
 import { RealtimeGateway } from '../realtime/realtime.gateway'
 import {
+  ACTIVE,
   acceptRefusal,
   createRoomRefusal,
   fillStatus,
@@ -36,7 +45,16 @@ const detailInclude = {
   host: { select: { pseudo: true } },
   game: { select: { slug: true, name: true } },
   format: { select: { name: true } },
-  venue: { select: { id: true, slug: true, name: true, address: true, isPartner: true } },
+  venue: {
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      address: true,
+      isPartner: true,
+      acceptsUnaccompaniedMinors: true,
+    },
+  },
   participants: {
     orderBy: { createdAt: 'asc' },
     include: {
@@ -60,6 +78,7 @@ export class RoomsService {
     private readonly prisma: PrismaService,
     private readonly push: PushService,
     private readonly realtime: RealtimeGateway,
+    private readonly intents: PlayIntentsService,
   ) {}
 
   /** Crée la room ; l'hôte en est le premier joueur accepté. */
@@ -91,13 +110,14 @@ export class RoomsService {
           input.startsAt,
         ).openNow,
         hostIsMinor: isMinor(host, now),
+        venueRefusesHost: venueRefuses(venue, host, now),
         hostOpenRooms,
       },
       now,
     )
     if (refusal) throw new BadRequestException(refusal)
 
-    return this.prisma.room.create({
+    const room = await this.prisma.room.create({
       data: {
         ...input,
         formatId: input.formatId ?? null,
@@ -108,6 +128,9 @@ export class RoomsService {
       },
       select: { id: true },
     })
+    // Joueurs qui attendent ce jeu près du lieu (LKO-17)
+    await this.intents.roomOpened(room.id)
+    return room
   }
 
   /**
@@ -120,10 +143,12 @@ export class RoomsService {
       where: { id, ...notBlockedWith(viewer?.id) },
       include: detailInclude,
     })
-    if (!room || !roomVisibleTo(room, viewer, now)) throw new NotFoundException('Room introuvable')
+    const mine = room?.participants.find((p) => p.userId === viewer?.id)
+    // Un joueur déjà passé par la room la voit encore si les règles ont changé depuis (lieu qui refuse désormais les mineurs seuls)
+    if (!room || (!mine && !roomVisibleTo(room, viewer, now)))
+      throw new NotFoundException('Room introuvable')
 
     const isHost = room.hostId === viewer?.id
-    const mine = room.participants.find((p) => p.userId === viewer?.id)
     const member = isHost || mine?.status === 'ACCEPTED'
     const accepted = room.participants.filter((p) => p.status === 'ACCEPTED')
     const waiting = room.participants.filter(
@@ -163,7 +188,7 @@ export class RoomsService {
   /** Demander à rejoindre : en attente de l'hôte, acceptée d'office ou liste d'attente (rooms.rules). */
   async join(id: string, user: User) {
     await this.prisma.$transaction(async (tx) => {
-      const room = await this.lock(tx, id, user)
+      const room = await this.lock(tx, id, user, { minorCode: true })
       const current = room.participants.find((p) => p.userId === user.id)?.status ?? null
       const outcome = joinOutcome(room, accepted(room), user.id, current)
       if ('refused' in outcome) throw new ConflictException(outcome.refused)
@@ -292,14 +317,26 @@ export class RoomsService {
     return this.detail(id, host)
   }
 
-  /** Verrou sur la room (deux demandes simultanées ne prennent pas la même dernière place), visibilité comprise. */
-  private async lock(tx: Tx, id: string, user: User) {
+  /**
+   * Verrou sur la room (deux demandes simultanées ne prennent pas la même dernière place), visibilité comprise.
+   * Règles mineurs ignorées pour un joueur qui y a déjà une place ou une demande : il peut toujours la quitter.
+   * `minorCode` : 403 `MINOR_REFUSED` avec le motif au lieu de « Room introuvable » (candidature, LKO-51).
+   */
+  private async lock(tx: Tx, id: string, user: User, { minorCode = false } = {}) {
     await tx.$queryRaw`SELECT 1 FROM "Room" WHERE "id" = ${id} FOR UPDATE`
     const room = await tx.room.findFirst({
       where: { id, ...notBlockedWith(user.id) },
-      include: { participants: { orderBy: { createdAt: 'asc' } } },
+      include: {
+        participants: { orderBy: { createdAt: 'asc' } },
+        venue: { select: { acceptsUnaccompaniedMinors: true } },
+      },
     })
-    if (!room || !roomVisibleTo(room, user)) throw new NotFoundException('Room introuvable')
+    if (!room) throw new NotFoundException('Room introuvable')
+    const active = room.participants.some((p) => p.userId === user.id && ACTIVE.includes(p.status))
+    const refusal = active ? null : minorRefusal(room, user)
+    if (refusal && minorCode)
+      throw new ForbiddenException({ code: MINOR_REFUSED, message: refusal })
+    if (refusal) throw new NotFoundException('Room introuvable')
     return room
   }
 

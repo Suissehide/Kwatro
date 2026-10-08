@@ -37,7 +37,7 @@ export async function chatAccess(
         atHome: true,
         startsAt: true,
         capacity: true,
-        venue: { select: { name: true } },
+        venue: { select: { name: true, acceptsUnaccompaniedMinors: true } },
         game: { select: { name: true } },
         format: { select: { name: true } },
         participants: { where: { status: 'ACCEPTED' }, select: { userId: true } },

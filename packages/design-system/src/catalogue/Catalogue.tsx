@@ -11,6 +11,8 @@ import {
   Chip,
   CountBadge,
   DateBlock,
+  FilterButton,
+  FilterTag,
   IconButton,
   InfoChip,
   Inset,
@@ -37,6 +39,7 @@ import {
   AccessibilityList,
   AgendaCard,
   AgendaEventCard,
+  AgendaRow,
   AvailabilityGrid,
   AvatarStack,
   Banner,
@@ -53,6 +56,7 @@ import {
   ChipGroup,
   ClosureRow,
   CodeInput,
+  ColorLegend,
   ContentCard,
   Countdown,
   DayEventRow,
@@ -125,6 +129,7 @@ import {
   MonthCalendar,
   type PlayerTab,
   PlayerTabBar,
+  PlayIntentsCard,
   playerNavItems,
   RankPicker,
   Sidebar,
@@ -184,8 +189,6 @@ export function Catalogue() {
   const [score, setScore] = useState<string | null>('2-0')
   const [ranking, setRanking] = useState(['hugo'])
   const [notified, setNotified] = useState(true)
-  const [filterOpen, setFilterOpen] = useState(false)
-  const [filterGames, setFilterGames] = useState(['mtg'])
 
   return (
     <ScrollView
@@ -628,6 +631,76 @@ export function Catalogue() {
         </Row>
       </Section>
 
+      <Section title="Agenda de la ville">
+        <Row>
+          <FilterMenu
+            label="Type"
+            options={[
+              { value: 'room', label: 'Room', count: 2, selected: true, swatch: colors.rating },
+              {
+                value: 'tournoi',
+                label: 'Tournoi',
+                count: 0,
+                selected: false,
+                swatch: colors.room,
+              },
+            ]}
+            results={2}
+            onToggle={() => {}}
+            onClear={() => {}}
+          />
+          <FilterButton small label="Filtres" count={2} active onPress={() => {}} />
+          <FilterTag label="Magic" onRemove={() => {}} />
+        </Row>
+        <ListCard>
+          <AgendaRow
+            wide
+            first
+            time="19:30"
+            color={colors.rating}
+            tint={colors.ratingPale}
+            type="Room"
+            title="Room Magic · Commander"
+            meta="Le Dé Fêlé · 450 m · Magic"
+            partner
+            places="1 place"
+            placesTone="alert"
+            price="Gratuit"
+            action={<Button small kind="rating" label="Rejoindre" />}
+          />
+        </ListCard>
+        <AgendaRow
+          time="21:00"
+          color={colors.event}
+          tint={colors.eventSoft}
+          type="Soirée jeux"
+          title="Blind test et jeux d'ambiance"
+          meta="La Taverne des Dés · 2,8 km · Gratuit"
+          adult
+          places="Accès libre"
+        />
+        <PlayIntentsCard
+          subtitle="On te prévient dès qu'une room s'ouvre près de toi."
+          rows={[
+            {
+              id: 'mtg',
+              game: 'Magic : Commander',
+              demand: "23 joueurs l'attendent à Bordeaux",
+              on: true,
+            },
+            { id: 'op', game: 'One Piece', demand: 'Sois parmi les premiers', on: false },
+          ]}
+          footer="Les hôtes voient combien de joueurs attendent un jeu, jamais qui."
+          onToggle={() => {}}
+        />
+        <ColorLegend
+          items={[
+            { label: 'Room entre joueurs', color: colors.rating },
+            { label: 'Tournoi', color: colors.room },
+          ]}
+        />
+      </Section>
+
       <Section title="Organismes">
         <MonthCalendar
           title="Octobre 2026"
@@ -989,22 +1062,6 @@ export function Catalogue() {
           onToggle={() => setNotified(!notified)}
           variant="checkbox"
         />
-        <Row>
-          <FilterMenu
-            label="Jeux"
-            title="Filtrer par jeu"
-            options={[
-              { value: 'mtg', label: 'Magic', count: 12, swatch: colors.room },
-              { value: 'lorcana', label: 'Lorcana', count: 4, swatch: colors.event },
-              { value: 'pokemon', label: 'Pokémon', count: 0, swatch: colors.rating },
-            ]}
-            selected={filterGames}
-            onChange={setFilterGames}
-            resultCount={filterGames.length ? 12 : 16}
-            open={filterOpen}
-            onOpenChange={setFilterOpen}
-          />
-        </Row>
         <BarChart
           data={Array.from({ length: 30 }, (_, i) => ({
             label: String(i + 1),

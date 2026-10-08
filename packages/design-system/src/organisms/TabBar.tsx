@@ -26,8 +26,12 @@ export const playerItems: TabItem<PlayerTab>[] = [
   { key: 'messages', label: 'Messages', icon: MessageCircle },
   { key: 'profil', label: 'Profil', icon: User },
 ]
-/** Barre du site (desktop) : le profil s'ouvre par l'avatar à droite, pas par un onglet. */
-export const playerNavItems = playerItems.filter((item) => item.key !== 'profil')
+/** Barre du site (desktop) : le profil s'ouvre par l'avatar à droite, pas par un onglet ; l'agenda n'a de place que là. */
+export const playerNavItems: TabItem<PlayerTab | 'agenda'>[] = [
+  ...playerItems.slice(0, 1),
+  { key: 'agenda', label: 'Agenda', icon: CalendarDays },
+  ...playerItems.slice(1, 3),
+]
 const venueItems: TabItem<VenueTab>[] = [
   { key: 'ce-soir', label: 'Ce soir', icon: Moon },
   { key: 'scanner', label: 'Scanner', icon: ScanLine },

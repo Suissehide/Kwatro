@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react-native'
 import { Pressable, Text, View } from 'react-native'
 import { border, colors, font, radius, sizes, textOn, transition } from '../tokens'
 import { useHover } from './useHover'
@@ -9,6 +10,7 @@ export function Chip({
   color = colors.rating,
   tall,
   count,
+  icon: Icon,
   onPress,
 }: {
   label: string
@@ -17,6 +19,8 @@ export function Chip({
   /** Cible tactile de 44 px (choix sur téléphone). */
   tall?: boolean
   count?: number
+  /** Icône Lucide avant le libellé (coche d'un filtre actif). */
+  icon?: LucideIcon
   onPress?: () => void
 }) {
   const { hovered, hoverProps } = useHover()
@@ -27,16 +31,20 @@ export function Chip({
     paddingVertical: 5,
     paddingHorizontal: tall ? 14 : 11,
     minHeight: tall ? sizes.touch : undefined,
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 5,
     justifyContent: 'center' as const,
     backgroundColor: active ? color : hovered ? colors.hover : colors.white,
     ...transition(['background-color']),
   }
+  const fg = active ? textOn(color) : colors.ink
   const text = (
     <Text
       style={{
         ...font('body', active ? 800 : 600),
         fontSize: 13,
-        color: active ? textOn(color) : colors.ink,
+        color: fg,
       }}
     >
       {label}
@@ -45,7 +53,15 @@ export function Chip({
       )}
     </Text>
   )
-  if (!onPress) return <View style={[style, { alignSelf: 'flex-start' }]}>{text}</View>
+  const icon = Icon ? <Icon size={14} color={fg} strokeWidth={3} /> : null
+  if (!onPress) {
+    return (
+      <View style={[style, { alignSelf: 'flex-start' }]}>
+        {icon}
+        {text}
+      </View>
+    )
+  }
   return (
     <Pressable
       role="button"
@@ -54,6 +70,7 @@ export function Chip({
       {...hoverProps}
       style={style}
     >
+      {icon}
       {text}
     </Pressable>
   )
