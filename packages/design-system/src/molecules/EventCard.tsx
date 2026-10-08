@@ -14,6 +14,7 @@ export function EventCard({
   meta,
   places,
   partner,
+  color,
   action,
   wide,
   raised,
@@ -26,6 +27,8 @@ export function EventCard({
   meta: string
   places?: string | null
   partner?: boolean
+  /** Couleur du type d'événement (bandeau et date), comme dans l'agenda. */
+  color?: string
   action?: ReactNode
   wide?: boolean
   raised?: boolean
@@ -33,7 +36,13 @@ export function EventCard({
 }) {
   const tag = partner ? <Tag label="Partenaire" variant="partner" /> : null
   return (
-    <ContentCard kind="event" raised={raised} onPress={wide ? undefined : onPress} label={title}>
+    <ContentCard
+      kind="event"
+      color={color}
+      raised={raised}
+      onPress={wide ? undefined : onPress}
+      label={title}
+    >
       <View
         style={{
           flexDirection: 'row',
@@ -41,7 +50,7 @@ export function EventCard({
           gap: wide ? 16 : 12,
         }}
       >
-        <DateBlock day={day} month={time} />
+        <DateBlock day={day} month={time} color={color} />
         <View style={{ flex: 1, minWidth: 0, gap: 6 }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
             <Typography variant="label">{label}</Typography>
