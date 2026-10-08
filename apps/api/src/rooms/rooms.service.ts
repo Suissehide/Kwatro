@@ -14,7 +14,14 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import type { z } from 'zod'
-import { isMinor, roomVisibleTo, type Viewer, venueRefuses } from '../common/minors.rules'
+import {
+  isMinor,
+  MINOR_REFUSED,
+  minorRefusal,
+  roomVisibleTo,
+  type Viewer,
+  venueRefuses,
+} from '../common/minors.rules'
 import { closureRange, notBlockedWith } from '../explore/explore.service'
 import type { Prisma, User } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
@@ -173,7 +180,7 @@ export class RoomsService {
   /** Demander à rejoindre : en attente de l'hôte, acceptée d'office ou liste d'attente (rooms.rules). */
   async join(id: string, user: User) {
     await this.prisma.$transaction(async (tx) => {
-      const room = await this.lock(tx, id, user)
+      const room = await this.lock(tx, id, user, { minorCode: true })
       const current = room.participants.find((p) => p.userId === user.id)?.status ?? null
       const outcome = joinOutcome(room, accepted(room), user.id, current)
       if ('refused' in outcome) throw new ConflictException(outcome.refused)
@@ -303,7 +310,8 @@ export class RoomsService {
   }
 
   /** Verrou sur la room (deux demandes simultanées ne prennent pas la même dernière place), visibilité comprise. */
-  private async lock(tx: Tx, id: string, user: User) {
+  /** `minorCode` : 403 `MINOR_REFUSED` avec le motif au lieu de « Room introuvable » (candidature, LKO-51). */
+  private async lock(tx: Tx, id: string, user: User, { minorCode = false } = {}) {
     await tx.$queryRaw`SELECT 1 FROM "Room" WHERE "id" = ${id} FOR UPDATE`
     const room = await tx.room.findFirst({
       where: { id, ...notBlockedWith(user.id) },
@@ -312,7 +320,11 @@ export class RoomsService {
         venue: { select: { acceptsUnaccompaniedMinors: true } },
       },
     })
-    if (!room || !roomVisibleTo(room, user)) throw new NotFoundException('Room introuvable')
+    if (!room) throw new NotFoundException('Room introuvable')
+    const refusal = minorRefusal(room, user)
+    if (refusal && minorCode)
+      throw new ForbiddenException({ code: MINOR_REFUSED, message: refusal })
+    if (refusal) throw new NotFoundException('Room introuvable')
     return room
   }
 

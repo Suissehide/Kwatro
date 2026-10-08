@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { eventVisibleTo, isMinor, roomVisibleTo, venueRefuses } from './minors.rules'
+import { eventVisibleTo, isMinor, minorRefusal, roomVisibleTo, venueRefuses } from './minors.rules'
 
 const now = new Date('2026-10-05T12:00:00Z')
 const adult = { id: 'adult', birthDate: new Date('1990-05-01'), parentId: null }
@@ -60,6 +60,14 @@ describe('lieux et moins de 16 ans (LKO-51)', () => {
     expect(roomVisibleTo({ ...inBar, hostId: 'parent', minorsAllowed: false }, young, now)).toBe(
       false,
     )
+  })
+
+  it('minorRefusal : motif affiché à la candidature', () => {
+    expect(minorRefusal(inBar, young, now)).toMatch(/16 ans/)
+    expect(minorRefusal(room, minor, now)).toMatch(/adultes/)
+    expect(minorRefusal({ ...room, atHome: true, venue: null }, minor, now)).toMatch(/domicile/)
+    expect(minorRefusal(inBar, minor, now)).toBeNull()
+    expect(minorRefusal(room, adult, now)).toBeNull()
   })
 
   it('venueRefuses : seulement sous 16 ans, dans un lieu qui refuse les mineurs seuls', () => {

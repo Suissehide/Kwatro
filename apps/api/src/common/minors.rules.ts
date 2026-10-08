@@ -28,11 +28,15 @@ export const venueRefuses = (
   venue?.acceptsUnaccompaniedMinors === false &&
   viewerAge(viewer, now) < UNACCOMPANIED_AGE
 
+/** Code d'erreur d'une candidature refusée par les règles mineurs, pour que l'app la distingue. */
+export const MINOR_REFUSED = 'MINOR_REFUSED'
+
 /**
- * Room visible par un mineur : seulement « ouverte aux mineurs », jamais à domicile, ni dans un lieu
- * qui refuse les moins de 16 ans seuls (LKO-51), sauf la room de son parent lié (décision du 25/09).
+ * Motif pour lequel un mineur ne peut pas voir ni rejoindre la room, ou null : seulement « ouverte aux
+ * mineurs », jamais à domicile, ni dans un lieu qui refuse les moins de 16 ans seuls (LKO-51), sauf la
+ * room de son parent lié (décision du 25/09).
  */
-export function roomVisibleTo(
+export function minorRefusal(
   room: {
     minorsAllowed: boolean
     atHome: boolean
@@ -41,14 +45,18 @@ export function roomVisibleTo(
   },
   viewer: Viewer,
   now = new Date(),
-) {
-  if (!isMinor(viewer, now)) return true
+): string | null {
+  if (!isMinor(viewer, now)) return null
   // Room de son parent : il vient accompagné
   const parentHosts = viewer?.parentId != null && room.hostId === viewer.parentId
-  if (room.atHome) return parentHosts
-  if (!parentHosts && venueRefuses(room.venue, viewer, now)) return false
-  return room.minorsAllowed
+  if (room.atHome) return parentHosts ? null : 'Les rooms à domicile sont réservées aux adultes'
+  if (!parentHosts && venueRefuses(room.venue, viewer, now))
+    return 'Ce lieu n’accueille pas les moins de 16 ans sans adulte'
+  return room.minorsAllowed ? null : 'Cette room est réservée aux adultes'
 }
+
+export const roomVisibleTo = (...args: Parameters<typeof minorRefusal>) =>
+  minorRefusal(...args) === null
 
 /** Événement visible : pas d'âge minimum, ou le joueur l'a (soirées 18+ jamais montrées aux mineurs). */
 export function eventVisibleTo(event: { minAge: number | null }, viewer: Viewer, now = new Date()) {
