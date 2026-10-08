@@ -1603,6 +1603,16 @@
               "exclusiveMinimum": true,
               "maximum": 50
             }
+          },
+          {
+            "name": "at",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+            }
           }
         ],
         "responses": {
@@ -2641,6 +2651,20 @@
                     "type": "string",
                     "minLength": 1
                   },
+                  "boardGameCategory": {
+                    "nullable": true,
+                    "type": "string",
+                    "enum": [
+                      "STRATEGY",
+                      "AMBIANCE",
+                      "COOPERATIVE",
+                      "FAMILY",
+                      "INVESTIGATION",
+                      "ROLE_PLAYING",
+                      "WARGAME",
+                      "PARTY"
+                    ]
+                  },
                   "mode": {
                     "type": "string",
                     "enum": [
@@ -2676,9 +2700,23 @@
                     "default": false,
                     "type": "boolean"
                   },
+                  "vibes": {
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "CHILL",
+                        "COMPETITIVE",
+                        "BEGINNERS_WELCOME",
+                        "LENDS_DECKS",
+                        "ENGLISH_OK"
+                      ]
+                    }
+                  },
                   "description": {
                     "type": "string",
-                    "maxLength": 1000
+                    "maxLength": 280
                   }
                 },
                 "required": [
@@ -3486,6 +3524,19 @@
                     "autoAccept": {
                       "type": "boolean"
                     },
+                    "vibes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "CHILL",
+                          "COMPETITIVE",
+                          "BEGINNERS_WELCOME",
+                          "LENDS_DECKS",
+                          "ENGLISH_OK"
+                        ]
+                      }
+                    },
                     "game": {
                       "type": "object",
                       "properties": {
@@ -3660,6 +3711,7 @@
                     "description",
                     "minorsAllowed",
                     "autoAccept",
+                    "vibes",
                     "game",
                     "format",
                     "bracket",
@@ -3743,6 +3795,19 @@
                     "autoAccept": {
                       "type": "boolean"
                     },
+                    "vibes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "CHILL",
+                          "COMPETITIVE",
+                          "BEGINNERS_WELCOME",
+                          "LENDS_DECKS",
+                          "ENGLISH_OK"
+                        ]
+                      }
+                    },
                     "game": {
                       "type": "object",
                       "properties": {
@@ -3917,6 +3982,7 @@
                     "description",
                     "minorsAllowed",
                     "autoAccept",
+                    "vibes",
                     "game",
                     "format",
                     "bracket",
@@ -3998,6 +4064,19 @@
                     "autoAccept": {
                       "type": "boolean"
                     },
+                    "vibes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "CHILL",
+                          "COMPETITIVE",
+                          "BEGINNERS_WELCOME",
+                          "LENDS_DECKS",
+                          "ENGLISH_OK"
+                        ]
+                      }
+                    },
                     "game": {
                       "type": "object",
                       "properties": {
@@ -4172,6 +4251,7 @@
                     "description",
                     "minorsAllowed",
                     "autoAccept",
+                    "vibes",
                     "game",
                     "format",
                     "bracket",
@@ -4263,6 +4343,19 @@
                     "autoAccept": {
                       "type": "boolean"
                     },
+                    "vibes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "CHILL",
+                          "COMPETITIVE",
+                          "BEGINNERS_WELCOME",
+                          "LENDS_DECKS",
+                          "ENGLISH_OK"
+                        ]
+                      }
+                    },
                     "game": {
                       "type": "object",
                       "properties": {
@@ -4437,6 +4530,7 @@
                     "description",
                     "minorsAllowed",
                     "autoAccept",
+                    "vibes",
                     "game",
                     "format",
                     "bracket",
@@ -4528,6 +4622,19 @@
                     "autoAccept": {
                       "type": "boolean"
                     },
+                    "vibes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "CHILL",
+                          "COMPETITIVE",
+                          "BEGINNERS_WELCOME",
+                          "LENDS_DECKS",
+                          "ENGLISH_OK"
+                        ]
+                      }
+                    },
                     "game": {
                       "type": "object",
                       "properties": {
@@ -4702,6 +4809,7 @@
                     "description",
                     "minorsAllowed",
                     "autoAccept",
+                    "vibes",
                     "game",
                     "format",
                     "bracket",
@@ -4876,6 +4984,19 @@
                     "autoAccept": {
                       "type": "boolean"
                     },
+                    "vibes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "CHILL",
+                          "COMPETITIVE",
+                          "BEGINNERS_WELCOME",
+                          "LENDS_DECKS",
+                          "ENGLISH_OK"
+                        ]
+                      }
+                    },
                     "game": {
                       "type": "object",
                       "properties": {
@@ -5050,6 +5171,7 @@
                     "description",
                     "minorsAllowed",
                     "autoAccept",
+                    "vibes",
                     "game",
                     "format",
                     "bracket",
