@@ -36,6 +36,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/play-intents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["PlayIntentsController_mine"];
+        put: operations["PlayIntentsController_set"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/games/demand": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["PlayIntentsController_demand"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -826,6 +858,94 @@ export interface operations {
             };
         };
     };
+    PlayIntentsController_mine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        gameIds: string[];
+                        /** @enum {string} */
+                        when: "EVENING" | "WEEKEND" | "ANY";
+                        /** Format: date-time */
+                        expiresAt: string | null;
+                    };
+                };
+            };
+        };
+    };
+    PlayIntentsController_set: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    gameIds: string[];
+                    /** @enum {string} */
+                    when: "EVENING" | "WEEKEND" | "ANY";
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        gameIds: string[];
+                        /** @enum {string} */
+                        when: "EVENING" | "WEEKEND" | "ANY";
+                        /** Format: date-time */
+                        expiresAt: string | null;
+                    };
+                };
+            };
+        };
+    };
+    PlayIntentsController_demand: {
+        parameters: {
+            query: {
+                lat: number;
+                lng: number;
+                radiusKm?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        game: {
+                            id: string;
+                            slug: string;
+                            name: string;
+                        };
+                        waitingCount: number | null;
+                    }[];
+                };
+            };
+        };
+    };
     HealthController_check: {
         parameters: {
             query?: never;
@@ -917,7 +1037,7 @@ export interface operations {
                         searchRadiusKm: number;
                         availability: number[];
                         vibes: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
-                        notificationsOff: ("ROOMS" | "MESSAGES" | "VENUES")[];
+                        notificationsOff: ("ROOMS" | "MESSAGES" | "VENUES" | "GAMES")[];
                         xp: number;
                         mainRating: {
                             game: string;
@@ -981,7 +1101,7 @@ export interface operations {
                     searchRadiusKm?: number;
                     availability?: number[];
                     vibes?: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
-                    notificationsOff?: ("ROOMS" | "MESSAGES" | "VENUES")[];
+                    notificationsOff?: ("ROOMS" | "MESSAGES" | "VENUES" | "GAMES")[];
                 };
             };
         };
@@ -1008,7 +1128,7 @@ export interface operations {
                         searchRadiusKm: number;
                         availability: number[];
                         vibes: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
-                        notificationsOff: ("ROOMS" | "MESSAGES" | "VENUES")[];
+                        notificationsOff: ("ROOMS" | "MESSAGES" | "VENUES" | "GAMES")[];
                         xp: number;
                         mainRating: {
                             game: string;
@@ -1075,7 +1195,7 @@ export interface operations {
                         searchRadiusKm: number;
                         availability: number[];
                         vibes: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
-                        notificationsOff: ("ROOMS" | "MESSAGES" | "VENUES")[];
+                        notificationsOff: ("ROOMS" | "MESSAGES" | "VENUES" | "GAMES")[];
                         xp: number;
                         mainRating: {
                             game: string;

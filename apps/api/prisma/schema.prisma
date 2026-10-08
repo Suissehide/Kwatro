@@ -50,6 +50,8 @@ model User {
   xp                Int                 @default(0)
   /// Sujets de notifications push coupés par le joueur (tout est activé par défaut)
   notificationsOff  NotificationTopic[] @default([])
+  /// « Je veux jouer à… » : soir, week-end ou peu importe (LKO-17)
+  playWhen          PlayWhen            @default(ANY)
   /// Suspendu par un admin (LKO-20) : plus de connexion ; `suspendedUntil` null = définitive
   suspendedAt       DateTime?
   suspendedUntil    DateTime?
@@ -76,12 +78,21 @@ model User {
   adminActions       AdminAction[]
   messages           Message[]
   conversationReads  ConversationRead[]
+  playIntents        PlayIntent[]
 }
 
 enum NotificationTopic {
   ROOMS
   MESSAGES
   VENUES
+  GAMES
+}
+
+/// Moment où le joueur veut être prévenu d'une room de ses envies (LKO-17)
+enum PlayWhen {
+  EVENING
+  WEEKEND
+  ANY
 }
 
 /// Appareil d'un joueur : jeton Expo Push (LKO-108). Un appareil change de joueur s'il s'y reconnecte.
@@ -179,6 +190,7 @@ model Game {
   venues     Venue[]      @relation("VenueGames")
   /// Joueurs qui le déclarent dans leurs jeux (LKO-46)
   players    User[]       @relation("PlayedGames")
+  intents    PlayIntent[]
 }
 
 model GameFormat {
@@ -594,6 +606,22 @@ model Visit {
 // ---------- Modération (LKO-19) ----------
 
 /// Blocage d'un joueur par un autre. Effet dans les deux sens : aucun des deux ne voit plus l'autre.
+/// « Je veux jouer à… » (LKO-17) : le joueur est prévenu quand une room de ce jeu s'ouvre dans son
+/// rayon, autour de sa ville (jamais sa position précise). Expire au bout de PLAY_INTENT_DAYS.
+model PlayIntent {
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId     String
+  game       Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  /// Dernière notification pour ce jeu (anti-spam)
+  notifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@id([userId, gameId])
+  @@index([gameId, expiresAt])
+}
+
 model Block {
   blockerId String
   blocker   User     @relation("BlocksGiven", fields: [blockerId], references: [id])

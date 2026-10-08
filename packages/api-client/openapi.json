@@ -57,6 +57,224 @@
         ]
       }
     },
+    "/me/play-intents": {
+      "get": {
+        "operationId": "PlayIntentsController_mine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "gameIds": {
+                      "maxItems": 30,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "when": {
+                      "type": "string",
+                      "enum": [
+                        "EVENING",
+                        "WEEKEND",
+                        "ANY"
+                      ]
+                    },
+                    "expiresAt": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    }
+                  },
+                  "required": [
+                    "gameIds",
+                    "when",
+                    "expiresAt"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "play-intents"
+        ]
+      },
+      "put": {
+        "operationId": "PlayIntentsController_set",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "gameIds": {
+                    "maxItems": 30,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "when": {
+                    "type": "string",
+                    "enum": [
+                      "EVENING",
+                      "WEEKEND",
+                      "ANY"
+                    ]
+                  }
+                },
+                "required": [
+                  "gameIds",
+                  "when"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "gameIds": {
+                      "maxItems": 30,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "when": {
+                      "type": "string",
+                      "enum": [
+                        "EVENING",
+                        "WEEKEND",
+                        "ANY"
+                      ]
+                    },
+                    "expiresAt": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    }
+                  },
+                  "required": [
+                    "gameIds",
+                    "when",
+                    "expiresAt"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "play-intents"
+        ]
+      }
+    },
+    "/games/demand": {
+      "get": {
+        "operationId": "PlayIntentsController_demand",
+        "parameters": [
+          {
+            "name": "lat",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          {
+            "name": "lng",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          {
+            "name": "radiusKm",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": true,
+              "maximum": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "game": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "slug": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "slug",
+                          "name"
+                        ]
+                      },
+                      "waitingCount": {
+                        "nullable": true,
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "required": [
+                      "game",
+                      "waitingCount"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "play-intents"
+        ]
+      }
+    },
     "/health": {
       "get": {
         "operationId": "HealthController_check",
@@ -296,7 +514,8 @@
                         "enum": [
                           "ROOMS",
                           "MESSAGES",
-                          "VENUES"
+                          "VENUES",
+                          "GAMES"
                         ]
                       }
                     },
@@ -509,7 +728,8 @@
                       "enum": [
                         "ROOMS",
                         "MESSAGES",
-                        "VENUES"
+                        "VENUES",
+                        "GAMES"
                       ]
                     }
                   }
@@ -609,7 +829,8 @@
                         "enum": [
                           "ROOMS",
                           "MESSAGES",
-                          "VENUES"
+                          "VENUES",
+                          "GAMES"
                         ]
                       }
                     },
@@ -874,7 +1095,8 @@
                         "enum": [
                           "ROOMS",
                           "MESSAGES",
-                          "VENUES"
+                          "VENUES",
+                          "GAMES"
                         ]
                       }
                     },

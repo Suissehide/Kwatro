@@ -21,6 +21,7 @@ import {
   WebScreen,
 } from '@lucko/design-system'
 import { formatRating, xpLevel } from '@lucko/shared'
+import { useQuery } from '@tanstack/react-query'
 import { Redirect } from 'expo-router'
 import { MoonStar } from 'lucide-react-native'
 import { useState } from 'react'
@@ -28,6 +29,7 @@ import { useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { MapFrame } from '@/components/explore/MapFrame'
 import { PlayerNav } from '@/components/PlayerNav'
+import { track } from '@/lib/analytics'
 import {
   eventCardProps,
   GAMES,
@@ -51,6 +53,7 @@ import { agendaAction } from '@/lib/venue'
 import { useTabBadges } from '@/queries/useChat'
 import { useTonightQuery } from '@/queries/useExplore'
 import { useMeQuery } from '@/queries/useMe'
+import { gameDemandQueryOptions } from '@/queries/usePlayIntents'
 
 const WIDE = 900
 
@@ -62,6 +65,9 @@ export default function HomeScreen() {
   const { place, data, failed, retry } = useTonightQuery()
   const [game, setGame] = useState<string | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  // Jeu le plus attendu près de toi (LKO-17) : raccourci pour ouvrir une room
+  const demand = useQuery(gameDemandQueryOptions(place, me?.searchRadiusKm ?? 10))
+  const wanted = demand.data?.[0]?.waitingCount ? demand.data[0] : null
 
   // Compte tout juste créé : pseudo et ville avant l'accueil
   if (me && me.pseudo === null) return <Redirect href="/onboarding" />
@@ -76,6 +82,17 @@ export default function HomeScreen() {
     />
   )
   const filters = <ChipGroup items={GAMES} value={game} onChange={setGame} scroll={!wide} />
+  const wantedBanner = wanted ? (
+    <Banner
+      tone="info"
+      message={`${wanted.waitingCount} joueurs veulent jouer à ${wanted.game.name} près de toi`}
+      action="Créer une room"
+      onAction={() => {
+        track('room-from-demand', { game: wanted.game.slug })
+        openCreateRoom()
+      }}
+    />
+  ) : null
   const error = failed ? (
     <Banner
       tone="err"
@@ -189,6 +206,7 @@ export default function HomeScreen() {
         {title}
         {filters}
         {error}
+        {wantedBanner}
         <Section title="Soirées ce soir" link="Agenda" onLink={openAgenda}>
           {eventList}
         </Section>
@@ -218,6 +236,7 @@ export default function HomeScreen() {
       </View>
       {filters}
       {error}
+      {wantedBanner}
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 40 }}>
         <View style={{ flex: 7, minWidth: 0, gap: 40 }}>
           <Section title="Soirées ce soir" link="Tout l'agenda" onLink={openAgenda}>

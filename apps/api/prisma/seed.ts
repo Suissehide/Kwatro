@@ -412,6 +412,23 @@ async function main() {
     create: { userId: 'staff-demo', venueId: bar.id, role: 'MANAGER' },
   })
 
+  // « Je veux jouer à… » (LKO-17) : Magic attendu par 4 joueurs (compteur visible), Lorcana par 2 (masqué)
+  const intentExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  for (const [game, pseudos] of [
+    ['magic', ['maya', 'sam', 'alix', 'noah']],
+    ['lorcana', ['jade', 'theo']],
+  ] as const) {
+    const { id: gameId } = await prisma.game.findUniqueOrThrow({ where: { slug: game } })
+    for (const pseudo of pseudos) {
+      const userId = `demo-${pseudo}`
+      await prisma.playIntent.upsert({
+        where: { userId_gameId: { userId, gameId } },
+        update: { expiresAt: intentExpiresAt },
+        create: { userId, gameId, expiresAt: intentExpiresAt },
+      })
+    }
+  }
+
   const format = (game: string, slug: string) =>
     prisma.gameFormat.findFirstOrThrow({ where: { slug, game: { slug: game } } })
   const commander = await format('magic', 'commander')

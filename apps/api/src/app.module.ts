@@ -9,6 +9,7 @@ import { HealthModule } from './health/health.module'
 import { JobsModule } from './jobs/jobs.module'
 import { MailModule } from './mail/mail.module'
 import { ModerationModule } from './moderation/moderation.module'
+import { PlayIntentsModule } from './play-intents/play-intents.module'
 import { PrismaModule } from './prisma/prisma.module'
 import { PushModule } from './push/push.module'
 import { RealtimeModule } from './realtime/realtime.module'
@@ -24,6 +25,7 @@ import { WaitlistModule } from './waitlist/waitlist.module'
     MailModule,
     StorageModule,
     PushModule,
+    PlayIntentsModule,
     RealtimeModule,
     AuthModule,
     HealthModule,
