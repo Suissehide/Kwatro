@@ -7,6 +7,7 @@ import {
   usePlayIntentsMutations,
   usePlayIntentsQuery,
 } from '@/queries/usePlayIntents'
+import { track } from './analytics'
 import { useLocation } from './useLocation'
 
 export const PLAY_INTENTS_NOTE = `Les hôtes voient combien de joueurs attendent un jeu, jamais qui. Tes envies durent ${PLAY_INTENT_DAYS} jours.`
@@ -38,6 +39,7 @@ export function usePlayIntents() {
 
   const save = (next: { gameIds: string[]; when: PlayWhen }) => {
     if (!me) return router.push('/auth')
+    track('play-intents-save', { games: next.gameIds.length, when: next.when })
     return setPlayIntents.mutateAsync(next)
   }
   const toggle = (gameId: string) =>

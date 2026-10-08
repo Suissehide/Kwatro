@@ -29,6 +29,7 @@ import { useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { MapFrame } from '@/components/explore/MapFrame'
 import { PlayerNav } from '@/components/PlayerNav'
+import { track } from '@/lib/analytics'
 import {
   eventCardProps,
   GAMES,
@@ -86,7 +87,10 @@ export default function HomeScreen() {
       tone="info"
       message={`${wanted.waitingCount} joueurs veulent jouer à ${wanted.game.name} près de toi`}
       action="Créer une room"
-      onAction={() => openCreateRoom()}
+      onAction={() => {
+        track('room-from-demand', { game: wanted.game.slug })
+        openCreateRoom()
+      }}
     />
   ) : null
   const error = failed ? (

@@ -5,6 +5,7 @@ import { type Href, router } from 'expo-router'
 import { useEffect } from 'react'
 import { Platform } from 'react-native'
 import { CHAT } from '@/constants/queryKeys'
+import { track } from './analytics'
 import { api } from './api'
 import { queryClient } from './queryClient'
 
@@ -71,7 +72,9 @@ export function usePush(meId: string | undefined) {
     if (!supported) return
     const open = (response: Notifications.NotificationResponse | null) => {
       const url = response?.notification.request.content.data?.url
-      if (typeof url === 'string') router.push(url as Href)
+      if (typeof url !== 'string') return
+      track('push-open', { screen: url.split('/')[1] ?? '' })
+      router.push(url as Href)
     }
     void Notifications.getLastNotificationResponseAsync().then(open)
     const subscription = Notifications.addNotificationResponseReceivedListener(open)
