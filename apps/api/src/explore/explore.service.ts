@@ -179,7 +179,9 @@ export class ExploreService {
           registeredCount: _count.registrations,
           myRegistration: myStatus(registrations),
         })),
-      rooms: venue.rooms.filter((room) => roomVisibleTo(room, viewer, now)).map(roomItem),
+      rooms: venue.rooms
+        .filter((room) => roomVisibleTo({ ...room, venue }, viewer, now))
+        .map(roomItem),
     }
   }
 
@@ -228,7 +230,12 @@ export class ExploreService {
         startsAt: { gte: now, lt: new Date(now.getTime() + query.days * DAY_MS) },
         ...notBlockedWith(viewer?.id),
       },
-      include: { ...roomInclude, venue: { select: { id: true, name: true, isPartner: true } } },
+      include: {
+        ...roomInclude,
+        venue: {
+          select: { id: true, name: true, isPartner: true, acceptsUnaccompaniedMinors: true },
+        },
+      },
     })
     return rooms
       .filter((room) => roomVisibleTo(room, viewer, now))

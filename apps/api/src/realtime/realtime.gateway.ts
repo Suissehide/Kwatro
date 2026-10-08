@@ -132,6 +132,7 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection {
           minorsAllowed: true,
           atHome: true,
           hostId: true,
+          venue: { select: { acceptsUnaccompaniedMinors: true } },
           participants: {
             where: { userId: user.id, status: { in: [...MEMBER_STATUSES] } },
             select: { userId: true },

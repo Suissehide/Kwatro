@@ -35,6 +35,7 @@ const ctx: RoomContext = {
   },
   venueOpen: true,
   hostIsMinor: false,
+  venueRefusesHost: false,
   hostOpenRooms: 0,
 }
 const boardGame: RoomContext = {
@@ -91,6 +92,8 @@ describe('createRoomRefusal', () => {
     const minor = { ...ctx, hostIsMinor: true }
     expect(createRoomRefusal(room, minor, now)).toMatch(/mineurs/)
     expect(createRoomRefusal({ ...room, minorsAllowed: true }, minor, now)).toBeNull()
+    const bar = { ...minor, venueRefusesHost: true }
+    expect(createRoomRefusal({ ...room, minorsAllowed: true }, bar, now)).toMatch(/16 ans/)
     const busy = { ...ctx, hostOpenRooms: MAX_OPEN_ROOMS_PER_HOST }
     expect(createRoomRefusal(room, busy, now)).toMatch(/déjà/)
   })
