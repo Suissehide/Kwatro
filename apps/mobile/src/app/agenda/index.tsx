@@ -162,7 +162,7 @@ export default function AgendaScreen() {
 
   if (wide) {
     return (
-      <PlayerScreen tab="explorer" wide>
+      <PlayerScreen tab="agenda" wide>
         <View
           style={{
             flexDirection: 'row',
@@ -242,7 +242,7 @@ export default function AgendaScreen() {
 
   return (
     <PlayerScreen
-      tab="explorer"
+      tab="agenda"
       wide={false}
       header={
         <View

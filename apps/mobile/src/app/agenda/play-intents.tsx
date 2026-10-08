@@ -52,7 +52,7 @@ export default function PlayIntentsScreen() {
 
   return (
     <PlayerScreen
-      tab="explorer"
+      tab="agenda"
       wide={wide}
       pushed
       header={<ScreenHeader title="Je veux jouer à…" onBack={goBack} />}

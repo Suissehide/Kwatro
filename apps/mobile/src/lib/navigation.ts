@@ -2,8 +2,12 @@ import { type PlayerTab, SITE_URL } from '@lucko/design-system'
 import { router } from 'expo-router'
 import { Linking } from 'react-native'
 
-const TAB_ROUTES: Record<PlayerTab, '/' | '/my-games' | '/messages' | '/profile'> = {
+const TAB_ROUTES: Record<
+  PlayerTab | 'agenda',
+  '/' | '/agenda' | '/my-games' | '/messages' | '/profile'
+> = {
   explorer: '/',
+  agenda: '/agenda',
   parties: '/my-games',
   messages: '/messages',
   profil: '/profile',
@@ -43,7 +47,7 @@ export const openCreateRoom = (venueSlug?: string) =>
 export const openSite = (path: string) => void Linking.openURL(SITE_URL + path)
 
 export function openTab(tab: string) {
-  const route = TAB_ROUTES[tab as PlayerTab]
+  const route = TAB_ROUTES[tab as keyof typeof TAB_ROUTES]
   if (route) router.navigate(route)
 }
 

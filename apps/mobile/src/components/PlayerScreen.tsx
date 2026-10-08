@@ -14,7 +14,8 @@ export function PlayerScreen({
   footer,
   children,
 }: {
-  tab: PlayerTab
+  /** `agenda` n'est un onglet que sur desktop ; sur téléphone, c'est Explorer. */
+  tab: PlayerTab | 'agenda'
   wide: boolean
   /** Téléphone : en-tête fixe au-dessus du contenu. */
   header?: ReactNode
@@ -35,7 +36,7 @@ export function PlayerScreen({
         tabBar={
           pushed ? undefined : (
             <PlayerTabBar
-              active={tab}
+              active={tab === 'agenda' ? 'explorer' : tab}
               badges={badges}
               onSelect={openTab}
               onCreate={() => openCreateRoom()}
