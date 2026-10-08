@@ -14,7 +14,7 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import type { z } from 'zod'
-import { isMinor, roomVisibleTo, type Viewer } from '../common/minors.rules'
+import { isMinor, roomVisibleTo, type Viewer, venueRefuses } from '../common/minors.rules'
 import { closureRange, notBlockedWith } from '../explore/explore.service'
 import type { Prisma, User } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
@@ -36,7 +36,16 @@ const detailInclude = {
   host: { select: { pseudo: true } },
   game: { select: { slug: true, name: true } },
   format: { select: { name: true } },
-  venue: { select: { id: true, slug: true, name: true, address: true, isPartner: true } },
+  venue: {
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      address: true,
+      isPartner: true,
+      acceptsUnaccompaniedMinors: true,
+    },
+  },
   participants: {
     orderBy: { createdAt: 'asc' },
     include: {
@@ -91,6 +100,7 @@ export class RoomsService {
           input.startsAt,
         ).openNow,
         hostIsMinor: isMinor(host, now),
+        venueRefusesHost: venueRefuses(venue, host, now),
         hostOpenRooms,
       },
       now,
@@ -297,7 +307,10 @@ export class RoomsService {
     await tx.$queryRaw`SELECT 1 FROM "Room" WHERE "id" = ${id} FOR UPDATE`
     const room = await tx.room.findFirst({
       where: { id, ...notBlockedWith(user.id) },
-      include: { participants: { orderBy: { createdAt: 'asc' } } },
+      include: {
+        participants: { orderBy: { createdAt: 'asc' } },
+        venue: { select: { acceptsUnaccompaniedMinors: true } },
+      },
     })
     if (!room || !roomVisibleTo(room, user)) throw new NotFoundException('Room introuvable')
     return room
