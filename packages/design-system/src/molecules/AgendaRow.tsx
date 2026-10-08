@@ -106,7 +106,6 @@ export function AgendaRow({
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Text style={{ ...font('mono', 700), fontSize: 14, color: colors.ink }}>{time}</Text>
               {typeTag}
-              {adultTag}
               <View style={{ flex: 1 }} />
               {placesText}
             </View>
@@ -118,7 +117,14 @@ export function AgendaRow({
             >
               {meta}
             </Text>
-            {rankedTag}
+            {rankedTag || adultTag ? (
+              // « Classée » à gauche, « 18+ » en bas à droite
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {rankedTag}
+                <View style={{ flex: 1 }} />
+                {adultTag}
+              </View>
+            ) : null}
           </View>
         </View>
       </Pressable>
