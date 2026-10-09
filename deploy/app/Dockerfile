@@ -12,8 +12,10 @@ FROM base AS builder
 # Les variables EXPO_PUBLIC_* sont figées au moment du build
 ARG EXPO_PUBLIC_API_URL
 ARG EXPO_PUBLIC_SITE_URL
+ARG EXPO_PUBLIC_UMAMI_WEBSITE_ID
 ENV EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL
 ENV EXPO_PUBLIC_SITE_URL=$EXPO_PUBLIC_SITE_URL
+ENV EXPO_PUBLIC_UMAMI_WEBSITE_ID=$EXPO_PUBLIC_UMAMI_WEBSITE_ID
 COPY --from=pruner /app/out/json/ .
 RUN pnpm install --frozen-lockfile
 COPY --from=pruner /app/out/full/ .

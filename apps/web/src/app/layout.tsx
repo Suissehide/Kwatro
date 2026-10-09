@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import Script from 'next/script'
 import type { ReactNode } from 'react'
 import '@lucko/design-system/lucko.css'
 import { RnwStyles } from './rnw-styles'
@@ -33,6 +34,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="fr">
       <body>
         <RnwStyles>{children}</RnwStyles>
+        <Script
+          src="https://umami.qwetle.fr/script.js"
+          data-website-id="70866b85-3299-431a-8c9a-7735323d8c14"
+          data-domains="lucko.fr,www.lucko.fr"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   )
