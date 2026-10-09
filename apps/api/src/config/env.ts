@@ -80,7 +80,10 @@ export type Env = z.infer<typeof envSchema>
 
 /** Valide les variables d'environnement au démarrage : l'API refuse de démarrer si une variable manque. */
 export function loadEnv(): Env {
-  const parsed = envSchema.safeParse(process.env)
+  // Variable vide (`S3_ENDPOINT=` dans Dokploy) = absente : valeur par défaut, pas d'URL invalide
+  const parsed = envSchema.safeParse(
+    Object.fromEntries(Object.entries(process.env).filter(([, value]) => value !== '')),
+  )
   if (!parsed.success) {
     console.error('Variables d’environnement invalides :', z.treeifyError(parsed.error))
     process.exit(1)
