@@ -524,6 +524,9 @@
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
                     },
+                    "homeSafetyAccepted": {
+                      "type": "boolean"
+                    },
                     "mainRating": {
                       "nullable": true,
                       "type": "object",
@@ -643,6 +646,7 @@
                     "vibes",
                     "notificationsOff",
                     "xp",
+                    "homeSafetyAccepted",
                     "mainRating",
                     "rankings",
                     "venues"
@@ -839,6 +843,9 @@
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
                     },
+                    "homeSafetyAccepted": {
+                      "type": "boolean"
+                    },
                     "mainRating": {
                       "nullable": true,
                       "type": "object",
@@ -958,6 +965,7 @@
                     "vibes",
                     "notificationsOff",
                     "xp",
+                    "homeSafetyAccepted",
                     "mainRating",
                     "rankings",
                     "venues"
@@ -1105,6 +1113,9 @@
                       "minimum": -9007199254740991,
                       "maximum": 9007199254740991
                     },
+                    "homeSafetyAccepted": {
+                      "type": "boolean"
+                    },
                     "mainRating": {
                       "nullable": true,
                       "type": "object",
@@ -1224,6 +1235,269 @@
                     "vibes",
                     "notificationsOff",
                     "xp",
+                    "homeSafetyAccepted",
+                    "mainRating",
+                    "rankings",
+                    "venues"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/me/home-safety": {
+      "put": {
+        "operationId": "UsersController_acceptHomeSafety",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "version"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "pseudo": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "hasBirthDate": {
+                      "type": "boolean"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "PLAYER",
+                        "VENUE_STAFF",
+                        "ADMIN"
+                      ]
+                    },
+                    "avatarUrl": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "avatarStatus": {
+                      "nullable": true,
+                      "type": "string",
+                      "enum": [
+                        "PENDING",
+                        "APPROVED",
+                        "REJECTED"
+                      ]
+                    },
+                    "city": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "latitude": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "longitude": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "searchRadiusKm": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "availability": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      }
+                    },
+                    "vibes": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "CHILL",
+                          "COMPETITIVE",
+                          "TEACHER",
+                          "BEGINNER",
+                          "HOMEBREW",
+                          "SOCIAL"
+                        ]
+                      }
+                    },
+                    "notificationsOff": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "ROOMS",
+                          "MESSAGES",
+                          "VENUES",
+                          "GAMES"
+                        ]
+                      }
+                    },
+                    "xp": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "homeSafetyAccepted": {
+                      "type": "boolean"
+                    },
+                    "mainRating": {
+                      "nullable": true,
+                      "type": "object",
+                      "properties": {
+                        "game": {
+                          "type": "string"
+                        },
+                        "format": {
+                          "type": "string"
+                        },
+                        "rating": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "game",
+                        "format",
+                        "rating"
+                      ]
+                    },
+                    "rankings": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "game": {
+                            "type": "object",
+                            "properties": {
+                              "slug": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "slug",
+                              "name"
+                            ]
+                          },
+                          "format": {
+                            "type": "string"
+                          },
+                          "rating": {
+                            "nullable": true,
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "rankedGames": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          },
+                          "reliabilityPct": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "game",
+                          "format",
+                          "rating",
+                          "rankedGames",
+                          "reliabilityPct"
+                        ]
+                      }
+                    },
+                    "venues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "slug": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "role": {
+                            "type": "string",
+                            "enum": [
+                              "MANAGER",
+                              "STAFF"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "slug",
+                          "name",
+                          "role"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "email",
+                    "pseudo",
+                    "name",
+                    "hasBirthDate",
+                    "role",
+                    "avatarUrl",
+                    "avatarStatus",
+                    "city",
+                    "latitude",
+                    "longitude",
+                    "searchRadiusKm",
+                    "availability",
+                    "vibes",
+                    "notificationsOff",
+                    "xp",
+                    "homeSafetyAccepted",
                     "mainRating",
                     "rankings",
                     "venues"
@@ -2551,6 +2825,7 @@
                         "maximum": 9007199254740991
                       },
                       "venue": {
+                        "nullable": true,
                         "type": "object",
                         "properties": {
                           "id": {
@@ -2572,6 +2847,24 @@
                           "id",
                           "name",
                           "isPartner",
+                          "distanceMeters"
+                        ]
+                      },
+                      "home": {
+                        "nullable": true,
+                        "type": "object",
+                        "properties": {
+                          "areaLabel": {
+                            "type": "string"
+                          },
+                          "distanceMeters": {
+                            "type": "integer",
+                            "minimum": -9007199254740991,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "areaLabel",
                           "distanceMeters"
                         ]
                       },
@@ -2619,6 +2912,7 @@
                       "format",
                       "bracket",
                       "venue",
+                      "home",
                       "players",
                       "ratingRange"
                     ]
@@ -2673,8 +2967,39 @@
                     ]
                   },
                   "venueId": {
+                    "nullable": true,
                     "type": "string",
                     "minLength": 1
+                  },
+                  "home": {
+                    "nullable": true,
+                    "type": "object",
+                    "properties": {
+                      "lat": {
+                        "type": "number",
+                        "minimum": -90,
+                        "maximum": 90
+                      },
+                      "lng": {
+                        "type": "number",
+                        "minimum": -180,
+                        "maximum": 180
+                      },
+                      "areaLabel": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      },
+                      "address": {
+                        "type": "string",
+                        "maxLength": 200
+                      }
+                    },
+                    "required": [
+                      "lat",
+                      "lng",
+                      "areaLabel"
+                    ]
                   },
                   "startsAt": {
                     "type": "string",
@@ -2722,7 +3047,6 @@
                 "required": [
                   "gameId",
                   "mode",
-                  "venueId",
                   "startsAt",
                   "capacity"
                 ]
@@ -3436,6 +3760,7 @@
                       "CHEATING",
                       "NO_SHOW",
                       "MINOR_SAFETY",
+                      "SAFETY",
                       "OTHER"
                     ]
                   },
@@ -3590,6 +3915,42 @@
                         "isPartner"
                       ]
                     },
+                    "home": {
+                      "nullable": true,
+                      "type": "object",
+                      "properties": {
+                        "areaLabel": {
+                          "type": "string"
+                        },
+                        "lat": {
+                          "type": "number"
+                        },
+                        "lng": {
+                          "type": "number"
+                        },
+                        "radiusM": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "revealAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "hasAddress": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "areaLabel",
+                        "lat",
+                        "lng",
+                        "radiusM",
+                        "revealAt",
+                        "hasAddress"
+                      ]
+                    },
                     "host": {
                       "type": "object",
                       "properties": {
@@ -3716,12 +4077,59 @@
                     "format",
                     "bracket",
                     "venue",
+                    "home",
                     "host",
                     "players",
                     "waitlistCount",
                     "myStatus",
                     "isHost",
                     "candidates"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "rooms"
+        ]
+      }
+    },
+    "/rooms/{id}/address": {
+      "get": {
+        "operationId": "RoomsController_address",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "address": {
+                      "type": "string"
+                    },
+                    "lat": {
+                      "type": "number"
+                    },
+                    "lng": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "address",
+                    "lat",
+                    "lng"
                   ]
                 }
               }
@@ -3861,6 +4269,42 @@
                         "isPartner"
                       ]
                     },
+                    "home": {
+                      "nullable": true,
+                      "type": "object",
+                      "properties": {
+                        "areaLabel": {
+                          "type": "string"
+                        },
+                        "lat": {
+                          "type": "number"
+                        },
+                        "lng": {
+                          "type": "number"
+                        },
+                        "radiusM": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "revealAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "hasAddress": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "areaLabel",
+                        "lat",
+                        "lng",
+                        "radiusM",
+                        "revealAt",
+                        "hasAddress"
+                      ]
+                    },
                     "host": {
                       "type": "object",
                       "properties": {
@@ -3987,6 +4431,7 @@
                     "format",
                     "bracket",
                     "venue",
+                    "home",
                     "host",
                     "players",
                     "waitlistCount",
@@ -4130,6 +4575,42 @@
                         "isPartner"
                       ]
                     },
+                    "home": {
+                      "nullable": true,
+                      "type": "object",
+                      "properties": {
+                        "areaLabel": {
+                          "type": "string"
+                        },
+                        "lat": {
+                          "type": "number"
+                        },
+                        "lng": {
+                          "type": "number"
+                        },
+                        "radiusM": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "revealAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "hasAddress": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "areaLabel",
+                        "lat",
+                        "lng",
+                        "radiusM",
+                        "revealAt",
+                        "hasAddress"
+                      ]
+                    },
                     "host": {
                       "type": "object",
                       "properties": {
@@ -4256,6 +4737,7 @@
                     "format",
                     "bracket",
                     "venue",
+                    "home",
                     "host",
                     "players",
                     "waitlistCount",
@@ -4409,6 +4891,42 @@
                         "isPartner"
                       ]
                     },
+                    "home": {
+                      "nullable": true,
+                      "type": "object",
+                      "properties": {
+                        "areaLabel": {
+                          "type": "string"
+                        },
+                        "lat": {
+                          "type": "number"
+                        },
+                        "lng": {
+                          "type": "number"
+                        },
+                        "radiusM": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "revealAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "hasAddress": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "areaLabel",
+                        "lat",
+                        "lng",
+                        "radiusM",
+                        "revealAt",
+                        "hasAddress"
+                      ]
+                    },
                     "host": {
                       "type": "object",
                       "properties": {
@@ -4535,6 +5053,7 @@
                     "format",
                     "bracket",
                     "venue",
+                    "home",
                     "host",
                     "players",
                     "waitlistCount",
@@ -4688,6 +5207,42 @@
                         "isPartner"
                       ]
                     },
+                    "home": {
+                      "nullable": true,
+                      "type": "object",
+                      "properties": {
+                        "areaLabel": {
+                          "type": "string"
+                        },
+                        "lat": {
+                          "type": "number"
+                        },
+                        "lng": {
+                          "type": "number"
+                        },
+                        "radiusM": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "revealAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "hasAddress": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "areaLabel",
+                        "lat",
+                        "lng",
+                        "radiusM",
+                        "revealAt",
+                        "hasAddress"
+                      ]
+                    },
                     "host": {
                       "type": "object",
                       "properties": {
@@ -4814,6 +5369,7 @@
                     "format",
                     "bracket",
                     "venue",
+                    "home",
                     "host",
                     "players",
                     "waitlistCount",
@@ -5050,6 +5606,42 @@
                         "isPartner"
                       ]
                     },
+                    "home": {
+                      "nullable": true,
+                      "type": "object",
+                      "properties": {
+                        "areaLabel": {
+                          "type": "string"
+                        },
+                        "lat": {
+                          "type": "number"
+                        },
+                        "lng": {
+                          "type": "number"
+                        },
+                        "radiusM": {
+                          "type": "integer",
+                          "minimum": -9007199254740991,
+                          "maximum": 9007199254740991
+                        },
+                        "revealAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "hasAddress": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "areaLabel",
+                        "lat",
+                        "lng",
+                        "radiusM",
+                        "revealAt",
+                        "hasAddress"
+                      ]
+                    },
                     "host": {
                       "type": "object",
                       "properties": {
@@ -5176,6 +5768,7 @@
                     "format",
                     "bracket",
                     "venue",
+                    "home",
                     "host",
                     "players",
                     "waitlistCount",
@@ -5294,6 +5887,7 @@
                           "CHEATING",
                           "NO_SHOW",
                           "MINOR_SAFETY",
+                          "SAFETY",
                           "OTHER"
                         ]
                       },
@@ -5719,6 +6313,7 @@
                               "CHEATING",
                               "NO_SHOW",
                               "MINOR_SAFETY",
+                              "SAFETY",
                               "OTHER"
                             ]
                           },
@@ -7814,6 +8409,7 @@
                       "CHEATING",
                       "NO_SHOW",
                       "MINOR_SAFETY",
+                      "SAFETY",
                       "OTHER"
                     ]
                   },

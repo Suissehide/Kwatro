@@ -52,6 +52,7 @@ describe('schémas de réponse', () => {
       vibes: [],
       notificationsOff: [],
       xp: 0,
+      homeSafetyAccepted: false,
       mainRating: null,
       rankings: [],
       venues: [],

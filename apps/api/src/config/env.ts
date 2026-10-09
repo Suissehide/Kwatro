@@ -4,6 +4,7 @@ import { config } from 'dotenv'
 config({ path: ['.env', '../../.env'], quiet: true })
 
 import { z } from 'zod'
+import { addressKeys } from '../rooms/home.rules'
 
 const envSchema = z
   .object({
@@ -44,10 +45,35 @@ const envSchema = z
     /** Analyse automatique des photos (sightengine.com) ; sans clé, chaque photo attend un admin. */
     SIGHTENGINE_API_USER: z.string().optional(),
     SIGHTENGINE_API_SECRET: z.string().optional(),
+    /**
+     * Clés AES-256 des adresses de rooms à domicile, « 1:<base64> » (`openssl rand -base64 32`),
+     * la clé active en tête (rotation : voir `addressKeys`). Obligatoire en production ; ailleurs,
+     * une clé de développement fixe.
+     */
+    HOME_ADDRESS_KEYS: z
+      .string()
+      .refine(
+        (value) => {
+          try {
+            addressKeys(value)
+            return true
+          } catch {
+            return false
+          }
+        },
+        {
+          message: '« version:clé » attendu, clé de 32 octets en base64, séparées par des virgules',
+        },
+      )
+      .optional(),
   })
   .refine((env) => !(env.NODE_ENV === 'production' && env.DEV_AUTH_HEADER), {
     message: 'DEV_AUTH_HEADER est interdit en production',
     path: ['DEV_AUTH_HEADER'],
+  })
+  .refine((env) => env.NODE_ENV !== 'production' || env.HOME_ADDRESS_KEYS, {
+    message: 'HOME_ADDRESS_KEYS est obligatoire en production',
+    path: ['HOME_ADDRESS_KEYS'],
   })
 
 export type Env = z.infer<typeof envSchema>

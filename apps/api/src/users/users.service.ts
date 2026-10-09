@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import {
   type AgendaPeriod,
   type agendaItemSchema,
+  HOME_SAFETY_VERSION,
   type meSchema,
   type myGamesSchema,
   RATING_PROVISIONAL_GAMES,
@@ -55,6 +56,7 @@ export class UsersService {
     return {
       ...user,
       hasBirthDate: user.birthDate !== null,
+      homeSafetyAccepted: (user.homeSafetyVersion ?? 0) >= HOME_SAFETY_VERSION,
       mainRating: main
         ? { game: main.format.game.name, format: main.format.name, rating: main.rating }
         : null,

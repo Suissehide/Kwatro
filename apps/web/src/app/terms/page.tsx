@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { TextPage } from '../text-page'
+import { TextPage, ToFill } from '../text-page'
 
 export const metadata: Metadata = {
   title: 'Conditions d’utilisation',
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <TextPage title="Conditions d’utilisation" updated="8 octobre 2026">
+    <TextPage title="Conditions d’utilisation" updated="9 octobre 2026">
       <p>
         Ces conditions encadrent l’utilisation du site lucko.fr et de l’application Lucko. En créant
         un compte, tu les acceptes. L’éditeur est présenté dans les{' '}
@@ -70,7 +70,47 @@ export default function TermsPage() {
         sauf celle de leur parent lié.
       </p>
 
-      <h2>5. Responsabilité</h2>
+      <h2>5. Rooms à domicile</h2>
+      <p>
+        <ToFill>Section à faire valider par un juriste avant la mise en ligne</ToFill>
+      </p>
+      <p>
+        Un joueur peut organiser une room chez lui. Lucko met les joueurs en relation : Lucko
+        n’organise pas ces parties, n’y est pas présent et ne vérifie pas les lieux. L’hôte est
+        responsable de l’accueil chez lui ; chaque participant reste responsable de son
+        comportement.
+      </p>
+      <ul>
+        <li>
+          Les rooms à domicile sont réservées aux adultes. Un mineur ne peut y participer qu’avec
+          son parent lié à son compte, présent dans la même room. Un mineur ne peut pas en
+          organiser.
+        </li>
+        <li>
+          L’hôte accepte chaque joueur lui-même. Avant de créer ou de rejoindre sa première room à
+          domicile, chacun prend connaissance des conseils de sécurité.
+        </li>
+        <li>
+          Les autres joueurs ne voient qu’une zone approximative. L’adresse n’est communiquée qu’aux
+          joueurs acceptés, 24 h avant la partie. Elle ne doit pas être diffusée en dehors de la
+          room.
+        </li>
+        <li>
+          Une room à domicile est gratuite : pas de droit d’entrée, de vente ni d’activité
+          commerciale.
+        </li>
+        <li>
+          Chacun peut partir à tout moment. Un comportement inapproprié ou dangereux se signale
+          depuis le chat de la room, y compris après la partie : il est traité en priorité et peut
+          mener à la suspension du compte.
+        </li>
+        <li>
+          Les dommages éventuels relèvent de l’assurance de chacun (habitation, responsabilité
+          civile).
+        </li>
+      </ul>
+
+      <h2>6. Responsabilité</h2>
       <p>
         Lucko fait son possible pour que le service soit disponible et que les informations soient à
         jour, sans pouvoir le garantir. Les horaires, événements, tarifs et descriptions sont
@@ -79,24 +119,24 @@ export default function TermsPage() {
         particulier l’accueil des mineurs, reste de la responsabilité du lieu.
       </p>
 
-      <h2>6. Suspension et suppression</h2>
+      <h2>7. Suspension et suppression</h2>
       <p>
         En cas de manquement à ces conditions, Lucko peut masquer un contenu, suspendre ou supprimer
         un compte, après t’avoir prévenu sauf urgence (sécurité des joueurs, contenu illégal).
       </p>
 
-      <h2>7. Tes données</h2>
+      <h2>8. Tes données</h2>
       <p>
         Leur utilisation est détaillée dans la <a href="/privacy">politique de confidentialité</a>.
       </p>
 
-      <h2>8. Évolution des conditions</h2>
+      <h2>9. Évolution des conditions</h2>
       <p>
         Ces conditions peuvent évoluer avec le service. En cas de changement important, tu en es
         informé dans l’app ou par e-mail avant son entrée en vigueur.
       </p>
 
-      <h2>9. Droit applicable et litiges</h2>
+      <h2>10. Droit applicable et litiges</h2>
       <p>
         Ces conditions sont soumises au droit français. En cas de désaccord, écris-nous d’abord : on
         cherche une solution amiable. Tu peux aussi recourir gratuitement à un médiateur de la

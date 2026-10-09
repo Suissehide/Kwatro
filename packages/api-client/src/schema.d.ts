@@ -132,6 +132,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/home-safety": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["UsersController_acceptHomeSafety"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/me/agenda": {
         parameters: {
             query?: never;
@@ -348,6 +364,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["RoomsController_detail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rooms/{id}/address": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["RoomsController_address"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1039,6 +1071,7 @@ export interface operations {
                         vibes: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
                         notificationsOff: ("ROOMS" | "MESSAGES" | "VENUES" | "GAMES")[];
                         xp: number;
+                        homeSafetyAccepted: boolean;
                         mainRating: {
                             game: string;
                             format: string;
@@ -1130,6 +1163,7 @@ export interface operations {
                         vibes: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
                         notificationsOff: ("ROOMS" | "MESSAGES" | "VENUES" | "GAMES")[];
                         xp: number;
+                        homeSafetyAccepted: boolean;
                         mainRating: {
                             game: string;
                             format: string;
@@ -1197,6 +1231,74 @@ export interface operations {
                         vibes: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
                         notificationsOff: ("ROOMS" | "MESSAGES" | "VENUES" | "GAMES")[];
                         xp: number;
+                        homeSafetyAccepted: boolean;
+                        mainRating: {
+                            game: string;
+                            format: string;
+                            rating: number;
+                        } | null;
+                        rankings: {
+                            game: {
+                                slug: string;
+                                name: string;
+                            };
+                            format: string;
+                            rating: number | null;
+                            rankedGames: number;
+                            reliabilityPct: number;
+                        }[];
+                        venues: {
+                            id: string;
+                            slug: string;
+                            name: string;
+                            /** @enum {string} */
+                            role: "MANAGER" | "STAFF";
+                        }[];
+                    };
+                };
+            };
+        };
+    };
+    UsersController_acceptHomeSafety: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    version: number;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: string;
+                        email: string;
+                        pseudo: string | null;
+                        name: string;
+                        hasBirthDate: boolean;
+                        /** @enum {string} */
+                        role: "PLAYER" | "VENUE_STAFF" | "ADMIN";
+                        avatarUrl: string | null;
+                        /** @enum {string|null} */
+                        avatarStatus: "PENDING" | "APPROVED" | "REJECTED" | null;
+                        city: string | null;
+                        latitude: number | null;
+                        longitude: number | null;
+                        searchRadiusKm: number;
+                        availability: number[];
+                        vibes: ("CHILL" | "COMPETITIVE" | "TEACHER" | "BEGINNER" | "HOMEBREW" | "SOCIAL")[];
+                        notificationsOff: ("ROOMS" | "MESSAGES" | "VENUES" | "GAMES")[];
+                        xp: number;
+                        homeSafetyAccepted: boolean;
                         mainRating: {
                             game: string;
                             format: string;
@@ -1606,7 +1708,11 @@ export interface operations {
                             name: string;
                             isPartner: boolean;
                             distanceMeters: number;
-                        };
+                        } | null;
+                        home: {
+                            areaLabel: string;
+                            distanceMeters: number;
+                        } | null;
                         players: {
                             initial: string;
                         }[];
@@ -1635,7 +1741,13 @@ export interface operations {
                     boardGameCategory?: "STRATEGY" | "AMBIANCE" | "COOPERATIVE" | "FAMILY" | "INVESTIGATION" | "ROLE_PLAYING" | "WARGAME" | "PARTY" | null;
                     /** @enum {string} */
                     mode: "RANKED" | "CASUAL";
-                    venueId: string;
+                    venueId?: string | null;
+                    home?: {
+                        lat: number;
+                        lng: number;
+                        areaLabel: string;
+                        address?: string;
+                    } | null;
                     /** Format: date-time */
                     startsAt: string;
                     capacity: number;
@@ -1923,7 +2035,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /** @enum {string} */
-                    reason: "HARASSMENT" | "INAPPROPRIATE_CONTENT" | "CHEATING" | "NO_SHOW" | "MINOR_SAFETY" | "OTHER";
+                    reason: "HARASSMENT" | "INAPPROPRIATE_CONTENT" | "CHEATING" | "NO_SHOW" | "MINOR_SAFETY" | "SAFETY" | "OTHER";
                     /** @default  */
                     details?: string;
                 };
@@ -1980,6 +2092,15 @@ export interface operations {
                             address: string;
                             isPartner: boolean;
                         } | null;
+                        home: {
+                            areaLabel: string;
+                            lat: number;
+                            lng: number;
+                            radiusM: number;
+                            /** Format: date-time */
+                            revealAt: string;
+                            hasAddress: boolean;
+                        } | null;
                         host: {
                             pseudo: string | null;
                         };
@@ -2004,6 +2125,31 @@ export interface operations {
                             /** Format: date-time */
                             appliedAt: string;
                         }[];
+                    };
+                };
+            };
+        };
+    };
+    RoomsController_address: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        address: string;
+                        lat: number;
+                        lng: number;
                     };
                 };
             };
@@ -2050,6 +2196,15 @@ export interface operations {
                             name: string;
                             address: string;
                             isPartner: boolean;
+                        } | null;
+                        home: {
+                            areaLabel: string;
+                            lat: number;
+                            lng: number;
+                            radiusM: number;
+                            /** Format: date-time */
+                            revealAt: string;
+                            hasAddress: boolean;
                         } | null;
                         host: {
                             pseudo: string | null;
@@ -2121,6 +2276,15 @@ export interface operations {
                             name: string;
                             address: string;
                             isPartner: boolean;
+                        } | null;
+                        home: {
+                            areaLabel: string;
+                            lat: number;
+                            lng: number;
+                            radiusM: number;
+                            /** Format: date-time */
+                            revealAt: string;
+                            hasAddress: boolean;
                         } | null;
                         host: {
                             pseudo: string | null;
@@ -2194,6 +2358,15 @@ export interface operations {
                             address: string;
                             isPartner: boolean;
                         } | null;
+                        home: {
+                            areaLabel: string;
+                            lat: number;
+                            lng: number;
+                            radiusM: number;
+                            /** Format: date-time */
+                            revealAt: string;
+                            hasAddress: boolean;
+                        } | null;
                         host: {
                             pseudo: string | null;
                         };
@@ -2265,6 +2438,15 @@ export interface operations {
                             name: string;
                             address: string;
                             isPartner: boolean;
+                        } | null;
+                        home: {
+                            areaLabel: string;
+                            lat: number;
+                            lng: number;
+                            radiusM: number;
+                            /** Format: date-time */
+                            revealAt: string;
+                            hasAddress: boolean;
                         } | null;
                         host: {
                             pseudo: string | null;
@@ -2358,6 +2540,15 @@ export interface operations {
                             address: string;
                             isPartner: boolean;
                         } | null;
+                        home: {
+                            areaLabel: string;
+                            lat: number;
+                            lng: number;
+                            radiusM: number;
+                            /** Format: date-time */
+                            revealAt: string;
+                            hasAddress: boolean;
+                        } | null;
                         host: {
                             pseudo: string | null;
                         };
@@ -2434,7 +2625,7 @@ export interface operations {
                     "application/json": {
                         id: string;
                         /** @enum {string} */
-                        reason: "HARASSMENT" | "INAPPROPRIATE_CONTENT" | "CHEATING" | "NO_SHOW" | "MINOR_SAFETY" | "OTHER";
+                        reason: "HARASSMENT" | "INAPPROPRIATE_CONTENT" | "CHEATING" | "NO_SHOW" | "MINOR_SAFETY" | "SAFETY" | "OTHER";
                         details: string;
                         /** Format: date-time */
                         createdAt: string;
@@ -2574,7 +2765,7 @@ export interface operations {
                         reports: {
                             id: string;
                             /** @enum {string} */
-                            reason: "HARASSMENT" | "INAPPROPRIATE_CONTENT" | "CHEATING" | "NO_SHOW" | "MINOR_SAFETY" | "OTHER";
+                            reason: "HARASSMENT" | "INAPPROPRIATE_CONTENT" | "CHEATING" | "NO_SHOW" | "MINOR_SAFETY" | "SAFETY" | "OTHER";
                             details: string;
                             /** Format: date-time */
                             createdAt: string;
@@ -3323,7 +3514,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /** @enum {string} */
-                    reason: "HARASSMENT" | "INAPPROPRIATE_CONTENT" | "CHEATING" | "NO_SHOW" | "MINOR_SAFETY" | "OTHER";
+                    reason: "HARASSMENT" | "INAPPROPRIATE_CONTENT" | "CHEATING" | "NO_SHOW" | "MINOR_SAFETY" | "SAFETY" | "OTHER";
                     /** @default  */
                     details?: string;
                 };

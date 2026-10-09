@@ -1,4 +1,4 @@
-import type { UpdateProfileInput } from '@lucko/shared'
+import { HOME_SAFETY_VERSION, type UpdateProfileInput } from '@lucko/shared'
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { router } from 'expo-router'
 import { useEffect } from 'react'
@@ -77,5 +77,13 @@ export function useMeMutations() {
     onSuccess: () => client.clear(),
   })
 
-  return { updateProfile, setBirthDate, setAvatar, deleteAccount }
+  /** Avertissement sécurité des rooms à domicile accepté (LKO-72). */
+  const acceptHomeSafety = useMutation({
+    mutationKey: [ME.ACCEPT_HOME_SAFETY],
+    mutationFn: () =>
+      unwrap(api.PUT('/me/home-safety', { body: { version: HOME_SAFETY_VERSION } })),
+    onSuccess: (me) => client.setQueryData(meQueryOptions.queryKey, me),
+  })
+
+  return { updateProfile, setBirthDate, setAvatar, deleteAccount, acceptHomeSafety }
 }

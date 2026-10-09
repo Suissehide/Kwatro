@@ -33,8 +33,8 @@ export const MINOR_REFUSED = 'MINOR_REFUSED'
 
 /**
  * Motif pour lequel un mineur ne peut pas voir ni rejoindre la room, ou null : seulement « ouverte aux
- * mineurs », jamais à domicile, ni dans un lieu qui refuse les moins de 16 ans seuls (LKO-51), sauf la
- * room de son parent lié (décision du 25/09).
+ * mineurs », jamais à domicile, ni dans un lieu qui refuse les moins de 16 ans seuls (LKO-51), sauf si
+ * son parent lié organise la room (décision du 25/09) ou y est accepté (LKO-72).
  */
 export function minorRefusal(
   room: {
@@ -42,15 +42,19 @@ export function minorRefusal(
     atHome: boolean
     hostId: string
     venue: { acceptsUnaccompaniedMinors: boolean } | null
+    /** Joueurs acceptés, hôte compris (fiche et candidature) ; absent dans les listes. */
+    acceptedUserIds?: string[]
   },
   viewer: Viewer,
   now = new Date(),
 ): string | null {
   if (!isMinor(viewer, now)) return null
-  // Room de son parent : il vient accompagné
-  const parentHosts = viewer?.parentId != null && room.hostId === viewer.parentId
-  if (room.atHome) return parentHosts ? null : 'Les rooms à domicile sont réservées aux adultes'
-  if (!parentHosts && venueRefuses(room.venue, viewer, now))
+  // Son parent est de la partie : il vient accompagné
+  const parentId = viewer?.parentId
+  const withParent =
+    parentId != null && (room.hostId === parentId || !!room.acceptedUserIds?.includes(parentId))
+  if (room.atHome) return withParent ? null : 'Les rooms à domicile sont réservées aux adultes'
+  if (!withParent && venueRefuses(room.venue, viewer, now))
     return 'Ce lieu n’accueille pas les moins de 16 ans sans adulte'
   return room.minorsAllowed ? null : 'Cette room est réservée aux adultes'
 }

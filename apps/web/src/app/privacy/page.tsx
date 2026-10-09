@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <TextPage title="Politique de confidentialité" updated="8 octobre 2026">
+    <TextPage title="Politique de confidentialité" updated="9 octobre 2026">
       <p>
         Cette page explique quelles données Lucko collecte, pourquoi, combien de temps elles sont
         gardées ainsi que tes droits. Version courte : on collecte le strict nécessaire pour te
@@ -47,7 +47,8 @@ export default function PrivacyPage() {
       <ul>
         <li>
           Pseudo, photo, jeux pratiqués, ambiance recherchée, disponibilités habituelles : pour que
-          les autres joueurs sachent avec qui ils jouent.
+          les autres joueurs sachent avec qui ils jouent. Ta photo est analysée automatiquement
+          puis, si besoin, vérifiée par l’équipe avant d’être visible.
         </li>
         <li>
           Ville, position (centre de la ville choisie ou position de ton appareil si tu la partages)
@@ -75,6 +76,38 @@ export default function PrivacyPage() {
         </li>
       </ul>
 
+      <h3>Les rooms à domicile</h3>
+      <p>
+        Si tu organises une room chez toi, ton adresse sert uniquement aux joueurs que tu as
+        acceptés pour venir jouer. Les autres joueurs ne voient qu’une zone d’environ 500 m, décalée
+        au hasard autour de chez toi, et le nom de ton quartier. L’adresse est chiffrée, montrée aux
+        joueurs acceptés à partir de 24 h avant la partie, puis supprimée. Tu peux aussi ne pas
+        l’enregistrer et la donner dans le chat de la room. Pendant la saisie, l’adresse est envoyée
+        au service de géocodage de l’IGN pour te proposer des adresses. Base légale : exécution du
+        contrat.
+      </p>
+
+      <h3>Les messages</h3>
+      <p>
+        Les messages des chats de rooms et d’événements, pour échanger entre joueurs inscrits. Il
+        n’y a pas de messages privés. Les messages signalés sont lus par l’équipe de modération.
+        Base légale : exécution du contrat.
+      </p>
+
+      <h3>Les notifications</h3>
+      <p>
+        Si tu les autorises sur ton téléphone, un identifiant de notification par appareil : pour te
+        prévenir (candidature acceptée, room annulée, adresse disponible, messages). Tu peux couper
+        chaque type de notification dans les réglages. Base légale : ton consentement.
+      </p>
+
+      <h3>La sécurité et la modération</h3>
+      <p>
+        Joueurs bloqués, signalements (motif, précisions), avertissements et suspensions : pour
+        protéger les joueurs et traiter les comportements inappropriés. Base légale : intérêt
+        légitime (sécurité des joueurs).
+      </p>
+
       <h3>La liste d’attente du site</h3>
       <p>
         E-mail et ville (facultative) : uniquement pour te prévenir du lancement de Lucko près de
@@ -98,6 +131,20 @@ export default function PrivacyPage() {
         </li>
         <li>Sessions de connexion : jusqu’à leur expiration ou ta déconnexion.</li>
         <li>Jeux que tu attends : 7 jours, sauf si tu les renouvelles.</li>
+        <li>
+          Adresse d’une room à domicile : supprimée à l’annulation, sinon au plus tard 6 h après la
+          fin de la partie.
+        </li>
+        <li>
+          Messages : <ToFill>Durée de conservation</ToFill>.
+        </li>
+        <li>
+          Signalements : conservés après la suppression du compte visé, comme preuve,{' '}
+          <ToFill>Durée maximale</ToFill>.
+        </li>
+        <li>
+          Identifiant de notification : jusqu’à ta déconnexion ou la désinstallation de l’app.
+        </li>
         <li>Liste d’attente : jusqu’au lancement dans ta ville, au plus tard 3 ans.</li>
       </ul>
 
@@ -113,11 +160,25 @@ export default function PrivacyPage() {
           Apple et Google : uniquement si tu choisis de te connecter avec eux, selon leurs propres
           politiques ;
         </li>
-        <li>Géoplateforme de l’IGN (France) : recherche de ta ville, sans donnée te concernant.</li>
+        <li>
+          Géoplateforme de l’IGN (France) : recherche de ta ville, et de ton adresse si tu organises
+          une room à domicile (rien n’y est conservé par Lucko) ;
+        </li>
+        <li>Expo, puis Apple et Google : acheminement des notifications vers ton téléphone ;</li>
+        <li>Sightengine : analyse automatique des photos de profil avant leur vérification ;</li>
+        <li>
+          OpenStreetMap (Royaume-Uni) : fonds de carte. Ton appareil les télécharge directement, le
+          serveur de cartes voit donc ton adresse IP.
+        </li>
       </ul>
       <p>
-        Resend étant basé aux États-Unis, ce transfert hors de l’Union européenne est encadré par
-        les clauses contractuelles types de la Commission européenne.
+        Resend et Expo étant basés aux États-Unis, ces transferts hors de l’Union européenne sont
+        encadrés par{' '}
+        <ToFill>
+          Garanties de transfert de chaque prestataire (clauses contractuelles types ou Data Privacy
+          Framework)
+        </ToFill>
+        . Le Royaume-Uni bénéficie d’une décision d’adéquation de la Commission européenne.
       </p>
 
       <h2>Cookies et mesure d’audience</h2>
@@ -148,6 +209,12 @@ export default function PrivacyPage() {
       <p>
         Lucko est interdit aux moins de 13 ans. Entre 13 et 14 ans, l’inscription nécessite l’accord
         d’un parent, qui peut exercer les droits ci-dessus pour le compte de son enfant.
+      </p>
+      <p>
+        Pour protéger les 13-17 ans : pas de messages privés, seulement les chats des rooms et
+        événements qui leur sont ouverts ; pas de rooms à domicile ni, pour les moins de 16 ans, de
+        rooms dans un bar, sauf avec leur parent lié ; pas de notifications la nuit. Les autres
+        joueurs ne voient jamais leur âge.
       </p>
     </TextPage>
   )

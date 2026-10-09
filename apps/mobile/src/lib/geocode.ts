@@ -30,3 +30,33 @@ export async function reverseCity(lat: number, lng: number): Promise<string | nu
   const feature = await first(`${BASE}/reverse?lon=${lng}&lat=${lat}&index=address&limit=1`)
   return feature?.properties.city ?? null
 }
+
+export type AddressSuggestion = {
+  /** « 12 Rue des Faures 33000 Bordeaux » */
+  label: string
+  lat: number
+  lng: number
+  /** Affiché aux autres joueurs : « Paris · Paris 11e Arrondissement », « Bordeaux (33100) ». */
+  areaLabel: string
+}
+
+type AddressFeature = Feature & {
+  properties: { label: string; district?: string; postcode?: string }
+}
+
+/** Adresses proposées pendant la saisie (room à domicile) ; rien n'est gardé côté IGN ni chez nous. */
+export async function searchAddresses(query: string): Promise<AddressSuggestion[]> {
+  const response = await fetch(
+    `${BASE}/search?q=${encodeURIComponent(query)}&index=address&autocomplete=1&limit=5`,
+  )
+  if (!response.ok) throw new Error(`Géocodage : ${response.status}`)
+  const { features } = (await response.json()) as { features: AddressFeature[] }
+  return features.map(({ geometry, properties }) => ({
+    label: properties.label,
+    lat: geometry.coordinates[1],
+    lng: geometry.coordinates[0],
+    areaLabel: properties.district
+      ? `${properties.city} · ${properties.district}`
+      : `${properties.city ?? properties.label}${properties.postcode ? ` (${properties.postcode})` : ''}`,
+  }))
+}
