@@ -36,7 +36,7 @@ import { PrismaService } from '../prisma/prisma.service'
 import { PushService } from '../push/push.service'
 import { RealtimeGateway } from '../realtime/realtime.gateway'
 import {
-  addressKey,
+  addressKeys,
   addressRefusal,
   fuzzyCenter,
   openAddress,
@@ -97,7 +97,7 @@ const detailInclude = {
 @Injectable()
 export class RoomsService implements OnModuleInit {
   private readonly logger = new Logger('Rooms')
-  private readonly addressKey = addressKey(loadEnv().HOME_ADDRESS_KEY)
+  private readonly addressKeys = addressKeys(loadEnv().HOME_ADDRESS_KEYS)
 
   constructor(
     private readonly prisma: PrismaService,
@@ -108,6 +108,13 @@ export class RoomsService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
+    // Rotation : une clé retirée trop tôt rendrait des adresses illisibles, l'API refuse de démarrer
+    const versions = await this.prisma.roomPrivateAddress.groupBy({ by: ['keyVersion'] })
+    const missing = versions.filter(({ keyVersion }) => !this.addressKeys.keys.has(keyVersion))
+    if (missing.length)
+      throw new Error(
+        `HOME_ADDRESS_KEYS : clé version ${missing.map((m) => m.keyVersion).join(', ')} encore utilisée par des adresses`,
+      )
     await this.jobs.handle<{ roomId: string }>(HOME_REVEAL_JOB, ({ roomId }) =>
       this.addressRevealed(roomId),
     )
@@ -177,7 +184,7 @@ export class RoomsService implements OnModuleInit {
               ...(home.address
                 ? {
                     privateAddress: {
-                      create: sealAddress(this.addressKey, {
+                      create: sealAddress(this.addressKeys, {
                         address: home.address,
                         lat: home.lat,
                         lng: home.lng,
@@ -226,7 +233,7 @@ export class RoomsService implements OnModuleInit {
       throw new NotFoundException('Pas d’adresse enregistrée : l’hôte la donne dans le chat')
     // Journal des accès, sans l'adresse
     this.logger.log(`Adresse de la room ${id} lue par ${user.id}`)
-    return openAddress(this.addressKey, room.privateAddress)
+    return openAddress(this.addressKeys, room.privateAddress)
   }
 
   /** 24 h avant : les joueurs acceptés sont prévenus que l'adresse est visible. */

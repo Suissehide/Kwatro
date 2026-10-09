@@ -1,7 +1,7 @@
 import { HOME_FUZZY_RADIUS_M } from '@lucko/shared'
 import { describe, expect, it } from 'vitest'
 import {
-  addressKey,
+  addressKeys,
   addressRefusal,
   distanceMeters,
   fuzzyCenter,
@@ -76,21 +76,37 @@ describe('purgeBefore', () => {
 })
 
 describe('sealAddress / openAddress', () => {
-  const key = addressKey()
+  const k = (byte: number) => Buffer.alloc(32, byte).toString('base64')
+  const keys = addressKeys()
   const address = { address: '12 rue des Faures, 33000 Bordeaux', ...home }
 
   it('chiffre puis déchiffre, sans l’adresse en clair dans la base', () => {
-    const sealed = sealAddress(key, address)
+    const sealed = sealAddress(keys, address)
     expect(Buffer.from(sealed.ciphertext).toString('utf8')).not.toContain('Faures')
-    expect(openAddress(key, sealed)).toEqual(address)
+    expect(openAddress(keys, sealed)).toEqual(address)
   })
 
   it('refuse une donnée altérée ou une autre clé', () => {
-    const sealed = sealAddress(key, address)
+    const sealed = sealAddress(keys, address)
     const tampered = Buffer.from(sealed.ciphertext)
     tampered[0] = (tampered[0] ?? 0) ^ 1
-    expect(() => openAddress(key, { ...sealed, ciphertext: tampered })).toThrow()
-    expect(() => openAddress(addressKey(Buffer.alloc(32, 7).toString('base64')), sealed)).toThrow()
-    expect(() => openAddress(key, { ...sealed, keyVersion: 2 })).toThrow()
+    expect(() => openAddress(keys, { ...sealed, ciphertext: tampered })).toThrow()
+    expect(() => openAddress(addressKeys(`1:${k(7)}`), sealed)).toThrow()
+  })
+
+  it('rotation : la nouvelle clé chiffre, l’ancienne relit les adresses existantes', () => {
+    const before = addressKeys(`1:${k(1)}`)
+    const old = sealAddress(before, address)
+    const after = addressKeys(`2:${k(2)},1:${k(1)}`)
+    expect(sealAddress(after, address).keyVersion).toBe(2)
+    expect(openAddress(after, old)).toEqual(address)
+    // Ancienne clé retirée trop tôt : illisible
+    expect(() => openAddress(addressKeys(`2:${k(2)}`), old)).toThrow(/version 1/)
+  })
+
+  it('HOME_ADDRESS_KEYS mal formée', () => {
+    expect(() => addressKeys('1:courte')).toThrow()
+    expect(() => addressKeys(k(1))).toThrow()
+    expect(() => addressKeys(`1:${k(1)},1:${k(2)}`)).toThrow(/double/)
   })
 })

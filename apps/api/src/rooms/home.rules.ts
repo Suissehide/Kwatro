@@ -71,17 +71,37 @@ export function addressRefusal(
 
 // ---------- Chiffrement de l'adresse (AES-256-GCM) ----------
 
-// ponytail: une seule clé (version 1) ; pour la rotation, une clé par version et re-chiffrement des adresses restantes
-export const ADDRESS_KEY_VERSION = 1
 const TAG_BYTES = 16
 
-/** Clé de 32 octets ; sans clé (hors production, cf. env.ts), une clé de développement fixe. */
-export const addressKey = (base64?: string) =>
-  base64
-    ? Buffer.from(base64, 'base64')
-    : createHash('sha256').update('lucko-dev-home-address').digest()
+/** Clés par version ; `active` chiffre, les autres ne servent qu'à relire les adresses déjà chiffrées. */
+export type AddressKeys = { active: number; keys: Map<number, Buffer> }
 
-export function sealAddress(key: Buffer, address: RoomAddress) {
+/**
+ * `HOME_ADDRESS_KEYS` : « 2:<base64>,1:<base64> », clés de 32 octets, la première est la clé active.
+ * Rotation : ajouter la nouvelle clé en tête ; retirer l'ancienne une fois ses adresses supprimées
+ * (au plus 60 jours). Sans valeur (hors production, cf. env.ts), une clé de développement fixe.
+ */
+export function addressKeys(value?: string): AddressKeys {
+  if (!value)
+    return {
+      active: 1,
+      keys: new Map([[1, createHash('sha256').update('lucko-dev-home-address').digest()]]),
+    }
+  const entries = value.split(',').map((part) => {
+    const [version = '', base64 = ''] = part.trim().split(':')
+    const key = Buffer.from(base64, 'base64')
+    if (!/^\d+$/.test(version) || key.length !== 32)
+      throw new Error('« version:clé » attendu, clé de 32 octets en base64')
+    return [Number(version), key] as const
+  })
+  const keys = new Map(entries)
+  if (keys.size !== entries.length) throw new Error('Version de clé en double')
+  return { active: entries[0]?.[0] ?? 1, keys }
+}
+
+export function sealAddress({ active, keys }: AddressKeys, address: RoomAddress) {
+  const key = keys.get(active)
+  if (!key) throw new Error('Clé d’adresse active introuvable')
   const iv = randomBytes(12)
   const cipher = createCipheriv('aes-256-gcm', key, iv)
   const ciphertext = Buffer.concat([
@@ -89,15 +109,16 @@ export function sealAddress(key: Buffer, address: RoomAddress) {
     cipher.final(),
     cipher.getAuthTag(),
   ])
-  return { ciphertext, iv, keyVersion: ADDRESS_KEY_VERSION }
+  return { ciphertext, iv, keyVersion: active }
 }
 
 /** Déchiffre ; lève une erreur si la donnée a été altérée ou la clé ne correspond pas. */
 export function openAddress(
-  key: Buffer,
+  { keys }: AddressKeys,
   sealed: { ciphertext: Uint8Array; iv: Uint8Array; keyVersion: number },
 ): RoomAddress {
-  if (sealed.keyVersion !== ADDRESS_KEY_VERSION) throw new Error('Clé d’adresse inconnue')
+  const key = keys.get(sealed.keyVersion)
+  if (!key) throw new Error(`Clé d’adresse version ${sealed.keyVersion} absente`)
   const data = Buffer.from(sealed.ciphertext)
   const decipher = createDecipheriv('aes-256-gcm', key, Buffer.from(sealed.iv))
   decipher.setAuthTag(data.subarray(data.length - TAG_BYTES))

@@ -102,7 +102,7 @@ services:
       CORS_ORIGINS: http://localhost:3010,http://localhost:8081
       # Stack locale uniquement (comme les identifiants Postgres ci-dessus) : à remplacer sur un vrai serveur
       BETTER_AUTH_SECRET: lucko-local-docker-only-not-a-real-secret
-      HOME_ADDRESS_KEY: bHVja28tbG9jYWwtZG9ja2VyLW9ubHkta2V5LTMyYiE=
+      HOME_ADDRESS_KEYS: 1:bHVja28tbG9jYWwtZG9ja2VyLW9ubHkta2V5LTMyYiE=
       # E-mails dans Mailpit (http://localhost:8025), joint par son nom sur le réseau Docker
       SMTP_URL: smtp://mailpit:1025
       S3_ENDPOINT: http://s3:9000
