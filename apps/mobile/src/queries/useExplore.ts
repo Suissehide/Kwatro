@@ -59,3 +59,17 @@ export const venuesQueryOptions = (lat: number, lng: number, radiusKm: number, a
     queryKey: [EXPLORE.VENUES, lat, lng, radiusKm, at],
     queryFn: () => unwrap(api.GET('/venues', { params: { query: { lat, lng, radiusKm, at } } })),
   })
+
+/** Nombre de lieux et de soirées des 7 prochains jours dans un rayon (onboarding). */
+export const nearbyCountQueryOptions = (lat: number, lng: number, radiusKm: number) =>
+  queryOptions({
+    queryKey: [EXPLORE.NEARBY_COUNT, lat, lng, radiusKm],
+    queryFn: async () => {
+      const query = { lat, lng, radiusKm }
+      const [venues, events] = await Promise.all([
+        unwrap(api.GET('/venues', { params: { query } })),
+        unwrap(api.GET('/events', { params: { query: { ...query, days: 7 } } })),
+      ])
+      return { venues: venues.length, events: events.length }
+    },
+  })

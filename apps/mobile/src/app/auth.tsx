@@ -402,7 +402,7 @@ const OUTCOMES: Record<
 > = {
   adult: {
     title: 'C’est parti',
-    text: 'Il reste ton pseudo, ta ville et tes jeux. Ensuite, tu vois les parties près de chez toi.',
+    text: 'Il reste tes jeux, ta ville et ton pseudo. Ensuite, tu vois les parties près de chez toi.',
     tone: 'venue',
   },
   minor: {

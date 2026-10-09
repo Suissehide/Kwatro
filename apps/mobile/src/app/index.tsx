@@ -50,6 +50,7 @@ import {
   openVenue,
   openVenues,
 } from '@/lib/navigation'
+import { onboarding } from '@/lib/onboarding'
 import { agendaAction } from '@/lib/venue'
 import { useTabBadges } from '@/queries/useChat'
 import { useTonightQuery } from '@/queries/useExplore'
@@ -70,8 +71,8 @@ export default function HomeScreen() {
   const demand = useQuery(gameDemandQueryOptions(place, me?.searchRadiusKm ?? 10))
   const wanted = demand.data?.[0]?.waitingCount ? demand.data[0] : null
 
-  // Compte tout juste créé : pseudo et ville avant l'accueil
-  if (me && me.pseudo === null) return <Redirect href="/onboarding" />
+  // Compte tout juste créé : jeux, ville et pseudo avant l'accueil (sauf « Je regarde d'abord »)
+  if (me && me.pseudo === null && !onboarding.deferred) return <Redirect href="/onboarding" />
 
   const events = data?.events.filter((e) => matchesGame(game, e.games)) ?? []
   const rooms = data?.rooms.filter((r) => matchesGame(game, [r.game])) ?? []

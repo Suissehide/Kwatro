@@ -18,7 +18,7 @@ describe('myGamesRefusal', () => {
     expect(myGamesRefusal({ gameIds: [], formats: [] }, catalog)).toBeNull()
   })
 
-  it('refuse un jeu inconnu, un format d’un jeu non coché, un TCG sans format', () => {
+  it('refuse un jeu inconnu ou un format d’un jeu non coché', () => {
     expect(myGamesRefusal({ gameIds: ['chess'], formats: [] }, catalog)).toBe('Jeu inconnu')
     expect(
       myGamesRefusal(
@@ -26,9 +26,10 @@ describe('myGamesRefusal', () => {
         catalog,
       ),
     ).toMatch(/aucun TCG/)
-    expect(myGamesRefusal({ gameIds: ['lorcana'], formats: [] }, catalog)).toBe(
-      'Choisis au moins un format pour Lorcana',
-    )
+  })
+
+  it('accepte un TCG sans format (onboarding, niveau déclaré plus tard)', () => {
+    expect(myGamesRefusal({ gameIds: ['lorcana'], formats: [] }, catalog)).toBeNull()
   })
 })
 
