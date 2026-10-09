@@ -99,6 +99,7 @@ import {
   StepHeader,
   Stepper,
   StripeRow,
+  SuggestionList,
   TextField,
   TimelineItem,
   Section as TitledSection,
@@ -301,6 +302,14 @@ export function Catalogue() {
             </View>
           ))}
         </View>
+        <SuggestionList
+          items={[
+            { key: '974', label: 'Saint-Denis', detail: '974' },
+            { key: '93', label: 'Saint-Denis', detail: '93' },
+            { key: '45', label: 'Saint-Denis-en-Val', detail: '45' },
+          ]}
+          onSelect={() => {}}
+        />
         <RadiusMap radiusKm={radiusKm} label="14 lieux · 23 soirées cette semaine" />
         <OptionCard
           label="Détente"

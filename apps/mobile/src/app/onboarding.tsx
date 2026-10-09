@@ -25,6 +25,7 @@ import { IdentityFields } from '@/components/profile/IdentityFields'
 import { WIDE } from '@/components/StepFrame'
 import { profileBody, profileDefaults, profileFormOpts } from '@/forms/profile.form'
 import { useAppForm } from '@/hooks/formConfig'
+import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { track } from '@/lib/analytics'
 import { type CityValue, validateCity } from '@/lib/city'
 import { nearbyLabel, onboarding, splitCatalog } from '@/lib/onboarding'
@@ -414,11 +415,7 @@ function WhereStep({
 
 /** Lieux et soirées dans le rayon : carte sur téléphone, simple ligne sur desktop. */
 function Nearby({ city, radiusKm, wide }: { city: CityValue; radiusKm: number; wide: boolean }) {
-  const [name, setName] = useState(city.name.trim())
-  useEffect(() => {
-    const timer = setTimeout(() => setName(city.name.trim()), 400)
-    return () => clearTimeout(timer)
-  }, [city.name])
+  const name = useDebouncedValue(city.name.trim())
 
   const typed = useQuery({
     ...citySearchQueryOptions(name),

@@ -11,6 +11,7 @@ import {
   radius,
   Slider,
   Spinner,
+  SuggestionList,
   TextField,
   TextLink,
   Toggle,
@@ -24,13 +25,15 @@ import {
   levelFromAnswers,
 } from '@lucko/shared'
 import { createFormHook } from '@tanstack/react-form'
+import { useQuery } from '@tanstack/react-query'
 import * as Location from 'expo-location'
 import { type ComponentProps, type RefObject, useState } from 'react'
 import { Text, type TextInput, View } from 'react-native'
 import { type FormatChoice, type GamesValue, NO_ANSWERS } from '@/forms/games.form'
 import type { CityValue } from '@/lib/city'
-import { findCityAt } from '@/queries/useGeocode'
+import { citySuggestionsQueryOptions, findCityAt } from '@/queries/useGeocode'
 import { fieldContext, formContext, useFieldContext, useFormContext } from './formContext'
+import { useDebouncedValue } from './useDebouncedValue'
 
 /** Premier message d'erreur d'un champ : chaîne d'un validateur, ou `{ message }` d'un schéma Zod. */
 const firstError = (errors: unknown[]) => {
@@ -247,13 +250,18 @@ const SwitchField = ({ label, description }: { label: string; description?: stri
 const round = (value: number) => Math.round(value * 100) / 100
 
 /**
- * Ville saisie, ou trouvée par « Me localiser » (position de l'appareil puis commune).
- * `locateButton` : grand bouton « Utiliser ma position » au-dessus du champ (onboarding sur téléphone).
+ * Ville saisie avec suggestions de communes, ou trouvée par « Me localiser » (position de l'appareil
+ * puis commune). `locateButton` : grand bouton « Utiliser ma position » au-dessus du champ (onboarding sur téléphone).
  */
 const CityField = ({ compact, locateButton }: { compact?: boolean; locateButton?: boolean }) => {
   const { field, error, onChange } = useKwField<CityValue>()
   const [locating, setLocating] = useState(false)
   const [locateError, setLocateError] = useState<string>()
+  const value = field.state.value
+  const query = useDebouncedValue(value.name.trim())
+  // Une commune choisie (suggestion, position ou profil enregistré) a sa position : plus rien à proposer
+  const open = value.lat === null && query.length >= 2
+  const suggestions = useQuery({ ...citySuggestionsQueryOptions(query), enabled: open })
 
   const locate = async () => {
     setLocating(true)
@@ -280,7 +288,7 @@ const CityField = ({ compact, locateButton }: { compact?: boolean; locateButton?
     <TextField
       label="Ville"
       placeholder="Ex. Bordeaux"
-      value={field.state.value.name}
+      value={value.name}
       onChangeText={(name) => {
         setLocateError(undefined)
         onChange({ name, lat: null, lng: null })
@@ -297,16 +305,33 @@ const CityField = ({ compact, locateButton }: { compact?: boolean; locateButton?
       }
     />
   )
-  if (!locateButton) return input
-  return (
-    <View style={{ gap: 16 }}>
-      <Button
-        kind="ghost"
-        label={locating ? 'Localisation…' : 'Utiliser ma position'}
-        disabled={locating}
-        onPress={() => void locate()}
+  const list =
+    open && suggestions.data?.length ? (
+      <SuggestionList
+        items={suggestions.data.map((c) => ({
+          key: `${c.name}-${c.department}-${c.lat}`,
+          label: c.name,
+          detail: c.department,
+        }))}
+        onSelect={({ key }) => {
+          const city = suggestions.data.find((c) => `${c.name}-${c.department}-${c.lat}` === key)
+          if (city) onChange({ name: city.name, lat: city.lat, lng: city.lng })
+        }}
       />
+    ) : null
+
+  return (
+    <View style={{ gap: locateButton ? 16 : 8 }}>
+      {locateButton ? (
+        <Button
+          kind="ghost"
+          label={locating ? 'Localisation…' : 'Utiliser ma position'}
+          disabled={locating}
+          onPress={() => void locate()}
+        />
+      ) : null}
       {input}
+      {list}
     </View>
   )
 }

@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 import { GEOCODE } from '@/constants/queryKeys'
-import { reverseCity, searchCity } from '@/lib/geocode'
+import { reverseCity, searchCity, suggestCities } from '@/lib/geocode'
 import { queryClient } from '@/lib/queryClient'
 
 // Communes et positions changent rarement : une recherche faite reste valable toute la session
@@ -12,6 +12,13 @@ export const citySearchQueryOptions = (query: string) =>
   queryOptions({
     queryKey: [GEOCODE.SEARCH, query.trim().toLowerCase()],
     queryFn: () => searchCity(query.trim()),
+    ...STATIC,
+  })
+
+export const citySuggestionsQueryOptions = (query: string) =>
+  queryOptions({
+    queryKey: [GEOCODE.SUGGEST, query.trim().toLowerCase()],
+    queryFn: () => suggestCities(query.trim()),
     ...STATIC,
   })
 

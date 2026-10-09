@@ -36,6 +36,7 @@ export const VENUE = {
 
 export const GEOCODE = {
   SEARCH: 'geocode_search',
+  SUGGEST: 'geocode_suggest',
   REVERSE: 'geocode_reverse',
 } as const
 
