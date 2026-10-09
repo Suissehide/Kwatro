@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Script
           src="https://umami.qwetle.fr/script.js"
           data-website-id="70866b85-3299-431a-8c9a-7735323d8c14"
-          data-domains="lucko.fr"
+          data-domains="lucko.fr,www.lucko.fr"
           strategy="afterInteractive"
         />
       </body>
