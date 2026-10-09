@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 import { GEOCODE } from '@/constants/queryKeys'
-import { reverseCity, searchCity, suggestCities } from '@/lib/geocode'
+import { reverseCity, searchAddresses, searchCity, suggestCities } from '@/lib/geocode'
 import { queryClient } from '@/lib/queryClient'
 
 // Communes et positions changent rarement : une recherche faite reste valable toute la session
@@ -19,6 +19,15 @@ export const citySuggestionsQueryOptions = (query: string) =>
   queryOptions({
     queryKey: [GEOCODE.SUGGEST, query.trim().toLowerCase()],
     queryFn: () => suggestCities(query.trim()),
+    ...STATIC,
+  })
+
+/** Adresses proposées à partir de 3 caractères (room à domicile). */
+export const addressSearchQueryOptions = (query: string) =>
+  queryOptions({
+    queryKey: [GEOCODE.ADDRESS, query.trim().toLowerCase()],
+    queryFn: () => searchAddresses(query.trim()),
+    enabled: query.trim().length >= 3,
     ...STATIC,
   })
 

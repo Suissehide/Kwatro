@@ -6,12 +6,13 @@ import {
   Chip,
   colors,
   font,
+  ListCard,
+  ListRow,
   Note,
   OptionCard,
   radius,
   Slider,
   Spinner,
-  SuggestionList,
   TextField,
   TextLink,
   Toggle,
@@ -307,17 +308,18 @@ const CityField = ({ compact, locateButton }: { compact?: boolean; locateButton?
   )
   const list =
     open && suggestions.data?.length ? (
-      <SuggestionList
-        items={suggestions.data.map((c) => ({
-          key: `${c.name}-${c.department}-${c.lat}`,
-          label: c.name,
-          detail: c.department,
-        }))}
-        onSelect={({ key }) => {
-          const city = suggestions.data.find((c) => `${c.name}-${c.department}-${c.lat}` === key)
-          if (city) onChange({ name: city.name, lat: city.lat, lng: city.lng })
-        }}
-      />
+      <ListCard>
+        {suggestions.data.map((c, i, all) => (
+          <ListRow
+            key={`${c.lat},${c.lng}`}
+            inset={14}
+            last={i === all.length - 1}
+            title={c.name}
+            right={<Typography variant="number">{c.department}</Typography>}
+            onPress={() => onChange({ name: c.name, lat: c.lat, lng: c.lng })}
+          />
+        ))}
+      </ListCard>
     ) : null
 
   return (

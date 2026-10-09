@@ -14,6 +14,17 @@ export const roomQueryOptions = (id: string) =>
   })
 
 /**
+ * Adresse d'une room à domicile (LKO-71) : l'app ne la demande qu'à l'hôte et aux acceptés, à partir de
+ * `revealAt`. Oubliée dès que l'écran se ferme.
+ */
+export const roomAddressQueryOptions = (id: string) =>
+  queryOptions({
+    queryKey: [ROOM.ADDRESS, id],
+    queryFn: () => unwrap(api.GET('/rooms/{id}/address', { params: { path: { id } } })),
+    gcTime: 0,
+  })
+
+/**
  * Fiche room. Pour l'hôte et les joueurs inscrits (acceptés, en attente, liste d'attente), rechargée en direct
  * quand elle change (places restantes, candidatures, statut).
  */

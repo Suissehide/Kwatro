@@ -81,6 +81,9 @@ const suspendedNow = (now: Date) =>
   }) satisfies Prisma.UserWhereInput
 
 // Même règle que ageOn : date de naissance (en UTC) après la date du jour d'il y a 18 ans
+const urgent = (report: { reason: string; target: { minor: boolean } }) =>
+  report.target.minor || report.reason === 'SAFETY' || report.reason === 'MINOR_SAFETY'
+
 const minorSince = (now: Date) =>
   new Date(Date.UTC(now.getFullYear() - 18, now.getMonth(), now.getDate()))
 
@@ -152,7 +155,10 @@ export class AdminModerationController {
     }
   }
 
-  /** File des signalements ouverts : ceux qui visent un mineur d'abord, puis du plus ancien. */
+  /**
+   * File des signalements ouverts : ceux qui visent un mineur ou touchent à la sécurité (LKO-72) d'abord,
+   * puis du plus ancien.
+   */
   @Get('reports')
   @Admin()
   @ZodResponse(z.array(adminReportSchema))
@@ -171,7 +177,7 @@ export class AdminModerationController {
         ...report,
         target: { ...target, minor: isMinor(birthDate), openReports: _count.reportsReceived },
       }))
-      .sort((a, b) => Number(b.target.minor) - Number(a.target.minor))
+      .sort((a, b) => Number(urgent(b)) - Number(urgent(a)))
   }
 
   /**

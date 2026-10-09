@@ -47,6 +47,8 @@ model User {
   parent            User?               @relation("ParentChild", fields: [parentId], references: [id])
   children          User[]              @relation("ParentChild")
   parentalConsentAt DateTime?
+  /// Version de l'avertissement sécurité des rooms à domicile acceptée (LKO-72)
+  homeSafetyVersion Int?
   xp                Int                 @default(0)
   /// Sujets de notifications push coupés par le joueur (tout est activé par défaut)
   notificationsOff  NotificationTopic[] @default([])
@@ -120,6 +122,27 @@ enum PlayVibe {
   BEGINNER
   HOMEBREW
   SOCIAL
+}
+
+/// Ambiance d'une room, choisie par l'hôte
+enum RoomVibe {
+  CHILL
+  COMPETITIVE
+  BEGINNERS_WELCOME
+  LENDS_DECKS
+  ENGLISH_OK
+}
+
+/// Catégorie d'une room jeux de société (pas de format)
+enum BoardGameCategory {
+  STRATEGY
+  AMBIANCE
+  COOPERATIVE
+  FAMILY
+  INVESTIGATION
+  ROLE_PLAYING
+  WARGAME
+  PARTY
 }
 
 // ---------- Auth (tables Better Auth, LKO-9) ----------
@@ -415,10 +438,13 @@ model Room {
   status               RoomStatus  @default(OPEN)
   venueId              String?
   venue                Venue?      @relation(fields: [venueId], references: [id])
-  /// Domicile : seule une zone floue est publique ; adresse chiffrée, révélée 24 h avant
+  /// Domicile (LKO-71) : seule la zone floue est publique ; l'adresse est dans RoomPrivateAddress
   atHome               Boolean     @default(false)
+  /// Quartier affiché, ex. « Bordeaux · Saint-Michel »
   homeAreaLabel        String?
-  homeAddressEncrypted String?
+  /// Centre de la zone floue : point réel décalé au hasard une fois pour toutes, à la création
+  fuzzyLat             Float?
+  fuzzyLng             Float?
   startsAt             DateTime
   capacity             Int
   minorsAllowed        Boolean     @default(false)
@@ -426,14 +452,28 @@ model Room {
   description          String?
   /// Bracket Commander visé (1 à 5), seulement pour un format qui en a (LKO-52)
   bracket              Int?
+  boardGameCategory    BoardGameCategory?
+  vibes                RoomVibe[]         @default([])
   createdAt            DateTime    @default(now())
   updatedAt            DateTime    @updatedAt
 
-  participants  RoomParticipant[]
-  ratingChanges RatingChange[]
-  conversation  Conversation?
+  participants   RoomParticipant[]
+  ratingChanges  RatingChange[]
+  conversation   Conversation?
+  privateAddress RoomPrivateAddress?
 
   @@index([startsAt])
+}
+
+/// Adresse d'une room à domicile, chiffrée (AES-256-GCM) : révélée aux acceptés 24 h avant, supprimée après la room
+model RoomPrivateAddress {
+  roomId     String @id
+  room       Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  /// Adresse et position exacte (JSON) chiffrées, tag GCM compris
+  ciphertext Bytes
+  iv         Bytes
+  /// Clé de chiffrement utilisée, pour la rotation
+  keyVersion Int
 }
 
 enum ParticipantStatus {
@@ -640,6 +680,7 @@ enum ReportReason {
   CHEATING
   NO_SHOW
   MINOR_SAFETY
+  SAFETY
   OTHER
 }
 

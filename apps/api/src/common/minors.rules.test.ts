@@ -33,6 +33,14 @@ describe('roomVisibleTo', () => {
     expect(roomVisibleTo({ ...home, hostId: 'parent' }, minor, now)).toBe(true)
     expect(roomVisibleTo(home, adult, now)).toBe(true)
   })
+
+  it('room à domicile : un mineur avec son parent accepté dans la room passe (LKO-72)', () => {
+    const home = { minorsAllowed: true, atHome: true, hostId: 'host', venue: null }
+    const withParent = { ...home, acceptedUserIds: ['host', 'parent'] }
+    expect(minorRefusal(withParent, minor, now)).toBeNull()
+    expect(minorRefusal({ ...home, acceptedUserIds: ['host'] }, minor, now)).toMatch(/domicile/)
+    expect(minorRefusal(withParent, noBirthDate, now)).toMatch(/domicile/)
+  })
 })
 
 describe('lieux et moins de 16 ans (LKO-51)', () => {

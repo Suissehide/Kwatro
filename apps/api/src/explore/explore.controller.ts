@@ -2,11 +2,11 @@ import {
   type EventsQuery,
   eventListItemSchema,
   eventsQuerySchema,
-  type GeoQuery,
-  geoQuerySchema,
   roomListItemSchema,
+  type VenuesQuery,
   venueDetailSchema,
   venueListItemSchema,
+  venuesQuerySchema,
 } from '@lucko/shared'
 import { Controller, Get, Param } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
@@ -29,7 +29,7 @@ export class ExploreController {
   /** Lieux autour d'un point, du plus proche au plus loin (partenaires en premier à distance égale). */
   @Get('venues')
   @ZodResponse(z.array(venueListItemSchema))
-  venues(@ZodQuery(geoQuerySchema) query: GeoQuery, @CurrentUser() user?: User) {
+  venues(@ZodQuery(venuesQuerySchema) query: VenuesQuery, @CurrentUser() user?: User) {
     return this.explore.venues(query, user ?? null)
   }
 

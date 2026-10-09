@@ -1,67 +1,184 @@
-import type { CreateRoomInput, RoomMode } from '@lucko/shared'
-import { formOptions } from '@tanstack/react-form'
+import {
+  addDays,
+  BOARD_GAME_CATEGORY_LABELS,
+  type BoardGameCategory,
+  type CreateRoomInput,
+  formatMinuteOfDay,
+  fromLocalDateTime,
+  type Game,
+  type RoomVibe,
+} from '@lucko/shared'
+import type { AddressSuggestion } from '@/lib/geocode'
 
-/** Créer une room (C1-C3). Jour et heure séparés : pastilles des 14 prochains jours + heure saisie. */
-export type RoomFormValues = {
+/** Brouillon de « Créer une room » (19a / 19b), gardé tant que la popup est ouverte. */
+export type RoomDraft = {
   gameId: string
   formatId: string
-  /** Bracket Commander : '' (pas précisé) ou '1' à '5'. */
-  bracket: string
-  mode: RoomMode
-  venueId: string
-  /** Jour local « 2026-10-06 ». */
+  category: BoardGameCategory | null
+  /** Bracket Commander (1 à 5), facultatif. */
+  bracket: number | null
+  ranked: boolean
+  /** Date locale du lieu, « 2026-10-24 ». */
   day: string
-  /** « 20:30 ». */
-  time: string
+  /** Minutes depuis minuit, heure du lieu. */
+  minute: number
+  venueId: string
+  /** Room à domicile (LKO-71) : adresse choisie dans les propositions IGN. */
+  atHome: boolean
+  home: AddressSuggestion | null
+  /** Adresse enregistrée (chiffrée) ; sinon l'hôte la donne dans le chat. */
+  saveAddress: boolean
   capacity: number
-  minorsAllowed: boolean
   autoAccept: boolean
+  vibes: RoomVibe[]
   description: string
+  minorsAllowed: boolean
 }
 
-const pad = (n: number) => String(n).padStart(2, '0')
-const localDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+/** Jours proposés en puces (aujourd'hui compris) ; au-delà, le calendrier. */
+export const PRESET_DAYS = 6
+export const PRESET_MINUTES = [840, 1020, 1110, 1170, 1230, 1260]
+/** Réglage « Autre heure… » : de 8 h à 23 h 45, par pas de 15 min. */
+export const MINUTE_RANGE = { min: 8 * 60, max: 23 * 60 + 45, step: 15 }
+/** Au-delà des joueurs d'une partie, la room plafonne à 6 (8 en draft et aux jeux de société). */
+const ROOM_SEATS_MAX = 6
 
-export const ROOM_DAYS = 14
-
-/** Pastilles des jours : « Aujourd'hui », « Demain », puis « mer. 8 ». */
-export function dayOptions(now = new Date()) {
-  return Array.from({ length: ROOM_DAYS }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i)
-    const label =
-      i === 0
-        ? 'Aujourd’hui'
-        : i === 1
-          ? 'Demain'
-          : d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' })
-    return { key: localDate(d), label }
-  })
-}
-
-export const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/
-
-export const roomDefaults = (venueId = ''): RoomFormValues => ({
+export const roomDraft = (today: string, venueId = ''): RoomDraft => ({
   gameId: '',
   formatId: '',
-  bracket: '',
-  mode: 'CASUAL',
+  category: null,
+  bracket: null,
+  ranked: false,
+  day: today,
+  minute: 19 * 60 + 30,
   venueId,
-  day: localDate(new Date()),
-  time: '20:00',
+  atHome: false,
+  home: null,
+  saveAddress: true,
   capacity: 4,
-  minorsAllowed: false,
-  autoAccept: false,
+  autoAccept: true,
+  vibes: [],
   description: '',
+  minorsAllowed: true,
 })
 
-export const roomFormOpts = formOptions({ defaultValues: roomDefaults() })
+export const formatOf = (game: Game | undefined, d: RoomDraft) =>
+  game?.formats.find((f) => f.id === d.formatId)
 
-/** Corps du POST /rooms : jour + heure à l'heure du téléphone, champs vides retirés. */
-export const roomBody = ({ day, time, formatId, bracket, description, ...rest }: RoomFormValues) =>
-  ({
-    ...rest,
-    formatId: formatId || null,
-    bracket: bracket ? Number(bracket) : null,
-    startsAt: new Date(`${day}T${time}:00`).toISOString(),
-    description: description.trim() || undefined,
-  }) satisfies CreateRoomInput
+/** Places proposées : 4 en Commander, la catégorie pour les jeux de société (4 sans catégorie), sinon le maximum d'une partie. */
+function defaultCapacity(game: Game, formatId: string, category: BoardGameCategory | null) {
+  if (category) return BOARD_GAME_CATEGORY_LABELS[category].players
+  const format = game.formats.find((f) => f.id === formatId)
+  if (!format) return game.kind === 'TCG' ? game.minPlayers : 4
+  return format.hasBrackets ? 4 : format.maxPlayers
+}
+
+/** Nouveau jeu : premier format (jeux de société : toutes catégories), bracket remis à zéro, places par défaut. */
+export function withGame(d: RoomDraft, game: Game): RoomDraft {
+  const board = game.kind !== 'TCG'
+  const formatId = game.formats[0]?.id ?? ''
+  return {
+    ...d,
+    gameId: game.id,
+    formatId,
+    category: null,
+    bracket: null,
+    ranked: board ? false : d.ranked,
+    capacity: defaultCapacity(game, formatId, null),
+  }
+}
+
+/** Nouveau format ou nouvelle catégorie : places par défaut, bracket remis à zéro. */
+export const withFormat = (
+  d: RoomDraft,
+  game: Game,
+  formatId: string,
+  category: BoardGameCategory | null,
+): RoomDraft => ({
+  ...d,
+  formatId,
+  category,
+  bracket: null,
+  capacity: defaultCapacity(game, formatId, category),
+})
+
+export function seatsRange(game: Game | undefined, d: RoomDraft) {
+  const format = formatOf(game, d)
+  return {
+    min: format?.minPlayers ?? game?.minPlayers ?? 2,
+    max: Math.max(ROOM_SEATS_MAX, format?.maxPlayers ?? game?.maxPlayers ?? 0),
+  }
+}
+
+/** « Commander · bracket 3 », « Jeux · Ambiance », « Jeux de société » (toutes catégories), « Modern ». */
+export function roomTitle(game: Game | undefined, d: RoomDraft) {
+  if (d.category) return `Jeux · ${BOARD_GAME_CATEGORY_LABELS[d.category].label}`
+  const format = formatOf(game, d)
+  if (!format) return game?.name ?? 'Nouvelle room'
+  return d.bracket ? `${format.name} · bracket ${d.bracket}` : format.name
+}
+
+const dayDate = (day: string) => new Date(`${day}T12:00:00Z`)
+const dayFormat = (day: string, options: Intl.DateTimeFormatOptions) =>
+  new Intl.DateTimeFormat('fr-FR', { timeZone: 'UTC', ...options }).format(dayDate(day))
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+
+/** Puce d'un jour : « Auj. » / « Mer. » au-dessus de « 7 ». */
+export const dayChip = (day: string, today: string) => ({
+  top: day === today ? 'Auj.' : capitalize(dayFormat(day, { weekday: 'short' })),
+  label: String(Number(day.slice(8))),
+})
+
+/** « Sam. · 24 oct. » sur la puce « Autre date… » une fois choisie. */
+export const otherDayLabel = (day: string) => ({
+  top: capitalize(dayFormat(day, { weekday: 'short' })),
+  label: dayFormat(day, { day: 'numeric', month: 'short' }),
+})
+
+/** « Aujourd'hui · 19 h 30 », « Mer 7 octobre · 19 h 30 ». */
+export const whenLabel = (d: RoomDraft, today: string) =>
+  `${
+    d.day === today
+      ? 'Aujourd’hui'
+      : capitalize(dayFormat(d.day, { weekday: 'short', day: 'numeric', month: 'long' }))
+  } · ${formatMinuteOfDay(d.minute)}`
+
+/** « Auj. 7 · 19:30 », pour l'aperçu dans l'agenda. */
+export const previewTime = (d: RoomDraft, today: string) => {
+  const { top, label } = dayChip(d.day, today)
+  return `${top} ${label} · ${clockLabel(d.minute)}`
+}
+
+export const clockLabel = (minute: number) =>
+  `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`
+
+export const startsAt = (d: RoomDraft) => fromLocalDateTime(d.day, d.minute)
+
+export const presetDays = (today: string) =>
+  Array.from({ length: PRESET_DAYS }, (_, i) => addDays(today, i))
+
+/** Corps du POST /rooms. À domicile : sur acceptation, réservée aux adultes (LKO-72). */
+export const roomBody = (d: RoomDraft): CreateRoomInput => ({
+  gameId: d.gameId,
+  formatId: d.formatId || null,
+  boardGameCategory: d.category,
+  bracket: d.bracket,
+  mode: d.ranked ? 'RANKED' : 'CASUAL',
+  ...(d.atHome && d.home
+    ? {
+        venueId: null,
+        home: {
+          lat: d.home.lat,
+          lng: d.home.lng,
+          areaLabel: d.home.areaLabel,
+          address: d.saveAddress ? d.home.label : undefined,
+        },
+      }
+    : { venueId: d.venueId, home: null }),
+  startsAt: startsAt(d).toISOString(),
+  capacity: d.capacity,
+  autoAccept: d.atHome ? false : d.autoAccept,
+  vibes: d.vibes,
+  description: d.description.trim() || undefined,
+  minorsAllowed: d.atHome ? false : d.minorsAllowed,
+})

@@ -53,10 +53,11 @@ export const cityAgendaQueryOptions = (place: Place, radiusKm: number) =>
   })
 
 /** Lieux autour d'un point (choix du lieu d'une room), du plus proche au plus loin. */
-export const venuesQueryOptions = (lat: number, lng: number, radiusKm: number) =>
+/** `at` (ISO) : ouverture des lieux à cet instant plutôt que maintenant (création de room). */
+export const venuesQueryOptions = (lat: number, lng: number, radiusKm: number, at?: string) =>
   queryOptions({
-    queryKey: [EXPLORE.VENUES, lat, lng, radiusKm],
-    queryFn: () => unwrap(api.GET('/venues', { params: { query: { lat, lng, radiusKm } } })),
+    queryKey: [EXPLORE.VENUES, lat, lng, radiusKm, at],
+    queryFn: () => unwrap(api.GET('/venues', { params: { query: { lat, lng, radiusKm, at } } })),
   })
 
 /** Nombre de lieux et de soirées des 7 prochains jours dans un rayon (onboarding). */

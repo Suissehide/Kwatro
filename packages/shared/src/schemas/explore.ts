@@ -11,6 +11,9 @@ import {
 } from '../constants'
 import { geoQuerySchema, isoDateTime } from './common'
 
+/** Lieux autour d'un point ; `at` : ouverture à cet instant plutôt que maintenant (création de room). */
+export const venuesQuerySchema = geoQuerySchema.extend({ at: isoDateTime.optional() })
+
 /** Lieu dans la carte / la liste « Où jouer ce soir » (B1, B2). */
 export const venueListItemSchema = z.object({
   id: z.string(),
@@ -23,7 +26,7 @@ export const venueListItemSchema = z.object({
   isPartner: z.boolean(),
   luckoPerk: z.string().nullable(),
   distanceMeters: z.number().int(),
-  /** Ouvert maintenant (heure de Paris) ; null si les horaires ne sont pas renseignés. */
+  /** Ouvert maintenant, ou à `at` (heure de Paris) ; null si les horaires ne sont pas renseignés. */
   openNow: z.boolean().nullable(),
   /** Heure de fermeture de la plage en cours, en minutes depuis minuit. */
   closesAtMinute: z.number().int().nullable(),
@@ -68,12 +71,16 @@ export const roomListItemSchema = z.object({
   format: z.string().nullable(),
   /** Bracket Commander visé (1 à 5). */
   bracket: z.number().int().nullable(),
-  venue: z.object({
-    id: z.string(),
-    name: z.string(),
-    isPartner: z.boolean(),
-    distanceMeters: z.number().int(),
-  }),
+  venue: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+      isPartner: z.boolean(),
+      distanceMeters: z.number().int(),
+    })
+    .nullable(),
+  /** Room à domicile (LKO-71) : quartier et distance jusqu'à la zone floue, jamais l'adresse. */
+  home: z.object({ areaLabel: z.string(), distanceMeters: z.number().int() }).nullable(),
   /** Joueurs acceptés (hôte compris) : initiales seulement, la liste est publique. */
   players: z.array(z.object({ initial: z.string() })),
   ratingRange: z.object({ min: z.number().int(), max: z.number().int() }).nullable(),
@@ -82,6 +89,7 @@ export const roomListItemSchema = z.object({
 export type VenueListItem = z.infer<typeof venueListItemSchema>
 /** Forme JSON reçue par l'app (dates en chaînes ISO). Côté API, `z.output` donne les `Date`. */
 export type EventListItem = z.input<typeof eventListItemSchema>
+export type VenuesQuery = z.infer<typeof venuesQuerySchema>
 export type EventsQuery = z.infer<typeof eventsQuerySchema>
 export type RoomListItem = z.input<typeof roomListItemSchema>
 
@@ -173,7 +181,7 @@ export const venueDetailSchema = venueListItemSchema
         externalUrl: z.string().nullable(),
       }),
     ),
-    rooms: z.array(roomListItemSchema.omit({ venue: true })),
+    rooms: z.array(roomListItemSchema.omit({ venue: true, home: true })),
   })
 
 export type EventDetail = z.input<typeof eventDetailSchema>

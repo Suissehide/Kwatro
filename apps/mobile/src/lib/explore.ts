@@ -108,15 +108,15 @@ export function dayLabel(date: Date | string) {
   return shortDay(date)
 }
 
-/** Carte room ; sans `venue` (fiche lieu), le jour remplace le lieu. */
+/** Carte room ; sans `venue` (fiche lieu), le jour remplace le lieu ; à domicile, le quartier. */
 export function roomCardProps(
-  room: Omit<RoomListItem, 'venue'> & { venue?: RoomListItem['venue'] },
+  room: Omit<RoomListItem, 'venue' | 'home'> & Partial<Pick<RoomListItem, 'venue' | 'home'>>,
 ) {
   const missing = Math.max(0, room.capacity - room.players.length)
   return {
     label: `${room.mode === 'RANKED' ? 'Partie classée' : 'Partie libre'} · ${gameLabel(room.game)}${room.bracket ? ` · Bracket ${room.bracket}` : ''}`,
     title: missing ? `Il manque ${missing} joueur${missing > 1 ? 's' : ''}` : 'Room complète',
-    meta: `${room.venue ? room.venue.name : dayLabel(room.startsAt)} · ${formatHour(room.startsAt)}`,
+    meta: `${room.venue?.name ?? room.home?.areaLabel ?? dayLabel(room.startsAt)} · ${formatHour(room.startsAt)}`,
     players: room.players.map((p) => p.initial),
     capacity: room.capacity,
     rating: room.ratingRange

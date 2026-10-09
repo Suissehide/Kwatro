@@ -734,6 +734,9 @@ async function main() {
       mode: 'CASUAL' as const,
       atHome: true,
       homeAreaLabel: 'Bordeaux · Saint-Michel',
+      // Zone floue seulement : pas d'adresse chiffrée dans le seed (« je la donnerai dans le chat »)
+      fuzzyLat: 44.8327,
+      fuzzyLng: -0.5672,
       startsAt: daysLater(3, 20, 0),
       capacity: 5,
       description: 'Soirée Cascadia et Azul, débutants bienvenus.',

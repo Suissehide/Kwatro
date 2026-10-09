@@ -1,6 +1,8 @@
 import {
   accessibilityItemSchema,
   addDays,
+  BOARD_GAME_CATEGORY_LABELS,
+  type BoardGameCategory,
   type EventsQuery,
   type eventListItemSchema,
   type GeoQuery,
@@ -9,6 +11,7 @@ import {
   type roomListItemSchema,
   VENUE_AGENDA_MONTHS,
   type VenueListItem,
+  type VenuesQuery,
   type venueDetailSchema,
 } from '@lucko/shared'
 import { Injectable, NotFoundException } from '@nestjs/common'
@@ -16,6 +19,7 @@ import type { z } from 'zod'
 import { eventVisibleTo, roomVisibleTo, type Viewer } from '../common/minors.rules'
 import type { Prisma } from '../generated/prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
+import { distanceMeters } from '../rooms/home.rules'
 import { compareByDistance } from './explore.rules'
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -67,6 +71,14 @@ const myRegistration = (viewer: Viewer) => ({
 const myStatus = (registrations: { status: string }[]) =>
   (registrations[0]?.status as 'REGISTERED' | 'WAITLISTED' | undefined) ?? null
 
+/** Format TCG, ou catégorie d'une room jeux de société. */
+export const formatLabel = (room: {
+  format: { name: string } | null
+  boardGameCategory: BoardGameCategory | null
+}) =>
+  room.format?.name ??
+  (room.boardGameCategory ? BOARD_GAME_CATEGORY_LABELS[room.boardGameCategory].label : null)
+
 /** Room publique : initiales des joueurs et fourchette de LK des parties classées. */
 function roomItem({
   format,
@@ -78,7 +90,7 @@ function roomItem({
   )
   return {
     ...room,
-    format: format?.name ?? null,
+    format: formatLabel({ format, ...room }),
     players: participants.map(({ user }) => ({ initial: user.pseudo?.slice(0, 1) ?? '?' })),
     ratingRange:
       room.mode === 'RANKED' && ratings.length
@@ -101,9 +113,10 @@ export class ExploreService {
   }
 
   /** Carte et liste des lieux : tri honnête (distance, partenaires en premier à distance égale). */
-  async venues(query: GeoQuery, viewer: Viewer): Promise<VenueListItem[]> {
+  async venues(query: VenuesQuery, viewer: Viewer): Promise<VenueListItem[]> {
     const distances = await this.distances(query)
     const now = new Date()
+    const at = query.at ?? now
     const yesterday = fromLocalDate(addDays(localDateTime(now).date, -1))
     const venues = await this.prisma.venue.findMany({
       where: { id: { in: [...distances.keys()] } },
@@ -118,7 +131,7 @@ export class ExploreService {
         const { openNow, closesAtMinute } = openingStatus(
           openingHours,
           closures.map(closureRange),
-          now,
+          at,
         )
         return {
           ...venue,
@@ -219,14 +232,17 @@ export class ExploreService {
       )
   }
 
+  /**
+   * Rooms ouvertes autour du point : dans un lieu du rayon, ou à domicile avec la zone floue dans le rayon
+   * (quartier et distance jusqu'au centre de la zone, jamais l'adresse).
+   */
   async rooms(query: EventsQuery, viewer: Viewer): Promise<z.output<typeof roomListItemSchema>[]> {
     const distances = await this.distances(query)
     const now = new Date()
-    // ponytail: rooms à domicile exclues (zone floue à afficher, ticket des rooms à domicile)
     const rooms = await this.prisma.room.findMany({
       where: {
         status: 'OPEN',
-        venueId: { in: [...distances.keys()] },
+        OR: [{ venueId: { in: [...distances.keys()] } }, { atHome: true, fuzzyLat: { not: null } }],
         startsAt: { gte: now, lt: new Date(now.getTime() + query.days * DAY_MS) },
         ...notBlockedWith(viewer?.id),
       },
@@ -237,21 +253,42 @@ export class ExploreService {
         },
       },
     })
+    // ponytail: distance des rooms à domicile calculée ici, une requête PostGIS si elles deviennent nombreuses
+    const homeDistance = (room: { fuzzyLat: number | null; fuzzyLng: number | null }) =>
+      Math.round(
+        distanceMeters(query, { lat: room.fuzzyLat ?? query.lat, lng: room.fuzzyLng ?? query.lng }),
+      )
     return rooms
       .filter((room) => roomVisibleTo(room, viewer, now))
-      .flatMap(({ venue, ...room }) =>
-        venue
+      .flatMap(({ venue, ...room }): z.output<typeof roomListItemSchema>[] => {
+        if (venue)
+          return [
+            {
+              ...roomItem(room),
+              venue: { ...venue, distanceMeters: distances.get(venue.id) ?? 0 },
+              home: null,
+            },
+          ]
+        const distance = homeDistance(room)
+        return room.atHome && distance <= query.radiusKm * 1000
           ? [
               {
                 ...roomItem(room),
-                venue: { ...venue, distanceMeters: distances.get(venue.id) ?? 0 },
+                venue: null,
+                home: { areaLabel: room.homeAreaLabel ?? 'À domicile', distanceMeters: distance },
               },
             ]
-          : [],
-      )
+          : []
+      })
       .sort(
         (a, b) =>
-          a.startsAt.getTime() - b.startsAt.getTime() || compareByDistance(a.venue, b.venue),
+          a.startsAt.getTime() - b.startsAt.getTime() || compareByDistance(placeOf(a), placeOf(b)),
       )
   }
 }
+
+/** Lieu ou zone d'une room, pour le tri par distance (une room à domicile n'est jamais partenaire). */
+const placeOf = (room: {
+  venue: { isPartner: boolean; distanceMeters: number } | null
+  home: { distanceMeters: number } | null
+}) => room.venue ?? { isPartner: false, distanceMeters: room.home?.distanceMeters ?? 0 }

@@ -5,11 +5,13 @@ import { type ReactNode, useState } from 'react'
 import { ScrollView, View } from 'react-native'
 import {
   Avatar,
+  Badge,
   Button,
   Checkbox,
   Chip,
   CountBadge,
   DateBlock,
+  DayChip,
   FilterButton,
   FilterTag,
   IconButton,
@@ -17,11 +19,15 @@ import {
   Inset,
   Logo,
   Note,
+  type Presence,
+  PresenceToggle,
   ProgressSteps,
   Quote,
   Radio,
+  RatingScale,
   Skeleton,
   Slider,
+  SourceTag,
   Spinner,
   StatusPill,
   Swatch,
@@ -47,15 +53,21 @@ import {
   ChatHeader,
   ChatRow,
   ChecklistItem,
+  ChecklistRow,
   ChipGroup,
+  ChoiceCard,
   ClosureRow,
+  CodeInput,
   ColorLegend,
   ContentCard,
+  Countdown,
   DayEventRow,
   DecisionCard,
+  DemandCard,
   EmptyState,
   EventCard,
   FactCard,
+  FuzzyZoneLabel,
   GameTile,
   HoursCard,
   LevelCard,
@@ -65,6 +77,7 @@ import {
   OptionCard,
   PageTitle,
   Pagination,
+  PairingRow,
   Panel,
   PerkBanner,
   PersonCell,
@@ -73,6 +86,7 @@ import {
   PriorityBanner,
   ProfileCard,
   ProfileIdentity,
+  QrPass,
   QueueCard,
   QueueItem,
   RadiusMap,
@@ -83,6 +97,8 @@ import {
   ReviewCard,
   RoomCard,
   RoomStatusTimeline,
+  ScanResult,
+  ScorePicker,
   ScreenHeader,
   Segmented,
   SettingRow,
@@ -99,13 +115,15 @@ import {
   StepHeader,
   Stepper,
   StripeRow,
-  SuggestionList,
+  SuccessState,
   TextField,
   TimelineItem,
+  TimePicker,
   Section as TitledSection,
   Toast,
   ToggleGroup,
   VenueRow,
+  WantToPlayRow,
   XpBar,
 } from '../molecules'
 import {
@@ -120,7 +138,9 @@ import {
   type PlayerTab,
   PlayerTabBar,
   PlayIntentsCard,
+  Popover,
   playerNavItems,
+  RankPicker,
   Sidebar,
   SiteFooter,
   type Sort,
@@ -128,7 +148,7 @@ import {
   TopNav,
   VenueTabBar,
 } from '../organisms'
-import { colors, space } from '../tokens'
+import { colors, dark, space } from '../tokens'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -164,6 +184,7 @@ export function Catalogue() {
   const [check, setCheck] = useState(true)
   const [radio, setRadio] = useState(0)
   const [players, setPlayers] = useState(4)
+  const [minute, setMinute] = useState(19 * 60 + 30)
   const [name, setName] = useState('')
   const [page, setPage] = useState(7)
   const [menu, setMenu] = useState<MenuAnchor | null>(null)
@@ -173,6 +194,12 @@ export function Catalogue() {
   const [radiusKm, setRadiusKm] = useState(10)
   const [slots, setSlots] = useState([5, 11, 14, 17])
   const [vibe, setVibe] = useState(true)
+  const [presence, setPresence] = useState<Presence | null>('present')
+  const [punctual, setPunctual] = useState(4)
+  const [code, setCode] = useState('48')
+  const [score, setScore] = useState<string | null>('2-0')
+  const [ranking, setRanking] = useState(['hugo'])
+  const [notified, setNotified] = useState(true)
 
   return (
     <ScrollView
@@ -302,15 +329,50 @@ export function Catalogue() {
             </View>
           ))}
         </View>
-        <SuggestionList
-          items={[
-            { key: '974', label: 'Saint-Denis', detail: '974' },
-            { key: '93', label: 'Saint-Denis', detail: '93' },
-            { key: '45', label: 'Saint-Denis-en-Val', detail: '45' },
-          ]}
-          onSelect={() => {}}
-        />
         <RadiusMap radiusKm={radiusKm} label="14 lieux · 23 soirées cette semaine" />
+        <Row>
+          <DayChip top="Auj." label="8" active onPress={() => {}} />
+          <DayChip top="Ven." label="9" active={false} onPress={() => {}} />
+          <DayChip other top="Autre" label="date…" active={false} onPress={() => {}} />
+          <Chip tall dashed label="Autre heure…" onPress={() => {}} />
+        </Row>
+        <Row>
+          <ChoiceCard
+            label="Amicale"
+            description="Pour le plaisir. Pas de résultat à saisir."
+            selected
+            onPress={() => {}}
+          />
+          <ChoiceCard
+            label="Classée"
+            description="Indisponible pour les jeux de société."
+            disabled
+            selected={false}
+            onPress={() => {}}
+          />
+        </Row>
+        <Popover
+          label="Choisir une heure"
+          width={340}
+          trigger={({ open, toggle }) => (
+            <Chip tall dashed label="Autre heure…" active={open} onPress={toggle} />
+          )}
+        >
+          {() => (
+            <View style={{ padding: 14 }}>
+              <TimePicker value={minute} min={8 * 60} max={23 * 60 + 45} onChange={setMinute} />
+            </View>
+          )}
+        </Popover>
+        <DemandCard
+          count="23"
+          text="joueurs attendent du Magic près d'ici. Ils seront prévenus dès que la room est créée."
+        />
+        <SuccessState
+          title="Room créée"
+          text="Ta room « Commander · bracket 3 » est en ligne au Dé Fêlé."
+          actions={<Button kind="rating" label="Voir la room" onPress={() => {}} />}
+        />
         <OptionCard
           label="Détente"
           description="On joue pour le plaisir, sans pression."
@@ -962,6 +1024,144 @@ export function Catalogue() {
             onReject={() => {}}
           />
         </View>
+      </Section>
+
+      <Section title="Présence, parties et progression">
+        <View style={{ backgroundColor: dark.bg, padding: 22, borderRadius: 14, gap: 20 }}>
+          <QrPass value="lucko:demo:jeton-signe" pseudo="Léa" size={180} scanning />
+          <Countdown variant="bar" label="Nouveau code dans" seconds={18} total={30} tone="dark" />
+          <Countdown variant="clock" label="Ronde 3" seconds={29 * 60 + 42} tone="dark" />
+        </View>
+        <ScanResult
+          status="ok"
+          player={{ pseudo: 'Hugo', level: 3, visits: 4, minor: true }}
+          body="Première venue de la semaine : +40 XP."
+          perk="-10 % sur les boissons"
+        />
+        <Row>
+          <ScanResult status="duplicate" body="Ce code a déjà été scanné ce soir." />
+          <ScanResult status="expired" body="Demande au joueur de rafraîchir son QR." />
+        </Row>
+        <Row>
+          <PresenceToggle label="Hugo" value={presence} onChange={setPresence} />
+          <SourceTag source="google" />
+          <SourceTag source="lucko" />
+          <SourceTag source="missing" />
+        </Row>
+        <CodeInput value={code} onChange={setCode} />
+        <RatingScale label="Ponctualité" size="sm" value={punctual} onChange={setPunctual} />
+        <RatingScale
+          label="Ponctualité"
+          help="Arrivé à l'heure, prêt à jouer"
+          value={punctual}
+          onChange={setPunctual}
+        />
+        <ScorePicker bestOf={3} value={score} onChange={setScore} />
+        <ScorePicker bestOf={3} value={score} onChange={setScore} wide />
+        <RankPicker
+          players={[
+            {
+              id: 'hugo',
+              pseudo: 'Hugo',
+              deck: 'Izzet Prowess',
+              rating: 1420,
+              color: colors.event,
+            },
+            { id: 'noah', pseudo: 'Noah', deck: 'Golgari', rating: 1385, color: colors.venue },
+            { id: 'lea', pseudo: 'Léa', rating: 1502, color: colors.room },
+          ]}
+          order={ranking}
+          onChange={setRanking}
+          deltas={['+18', '-4', '-14']}
+        />
+        <PairingRow table={4} a="Jade" b="Léa" score="2-1" status="done" />
+        <PairingRow
+          table={5}
+          a="Hugo"
+          b="Noah"
+          score="1-1"
+          status="disputed"
+          variant="orga"
+          action={{ label: 'Trancher', onPress: () => {} }}
+        />
+        <PairingRow table={6} a="Maya" status="bye" variant="orga" />
+        <PairingRow table={4} a="Jade" b="Léa" status="live" variant="tv" />
+        <PairingRow table={5} a="Hugo" b="Noah" status="live" variant="tv" odd />
+        <ChecklistRow state="done" label="Decklist envoyée" note="Moxfield" />
+        <ChecklistRow state="todo" label="Paiement" />
+        <ChecklistRow state="warn" label="Photos" note="Aucune photo" />
+        <ChecklistRow state="locked" label="Pas d'alcool pour les -18" />
+        <FuzzyZoneLabel revealed={false} />
+        <FuzzyZoneLabel revealed address="12 rue des Lilas, Lyon 7e" />
+        <Row>
+          <Badge glyph="T" name="Tournoi" color={colors.room} rotate={-4} earned />
+          <Badge glyph="5" name="5 venues" color={colors.venue} shape="round" earned />
+          <Badge
+            glyph="10"
+            name="10 venues"
+            description="Viens 10 fois"
+            color={colors.venue}
+            shape="round"
+            earned={false}
+          />
+        </Row>
+        <View style={{ backgroundColor: colors.event, padding: 16, borderRadius: 14 }}>
+          <XpBar level={3} name="Régulier" current={340} max={500} tone="inverse" size="lg" />
+        </View>
+        <ProgressSteps
+          current={2}
+          total={3}
+          color={colors.venue}
+          labels={['Trouver', 'Prouver', 'Vérifier']}
+          onStep={() => {}}
+        />
+        <Row>
+          <StatCard
+            label="Attendus ce soir"
+            value="17"
+            note="dans 4 rooms et événements"
+            bg={colors.white}
+            layout="label-first"
+            emphasized
+          />
+          <StatCard label="Litiges" value="0" bg={colors.white} layout="label-first" empty />
+        </Row>
+        <AgendaEventCard
+          kind="room"
+          time="19:30"
+          title="Tournoi Standard"
+          meta="Carte Blanche · 1,2 km · Magic"
+          tags={<Tag label="18+" />}
+          places="9/16"
+          price="8 €"
+          wide
+          onPress={() => {}}
+        />
+        <WantToPlayRow
+          game="Magic : Commander"
+          demandCount={23}
+          city="Lyon"
+          subscribed={notified}
+          onToggle={() => setNotified(!notified)}
+        />
+        <WantToPlayRow
+          game="Lorcana"
+          demandCount={7}
+          city="Lyon"
+          subscribed={notified}
+          onToggle={() => setNotified(!notified)}
+          variant="checkbox"
+        />
+        <BarChart
+          data={Array.from({ length: 30 }, (_, i) => ({
+            label: String(i + 1),
+            value: 3 + ((i * 7) % 11),
+          }))}
+          highlight={[4, 11, 18, 25]}
+          color={colors.event}
+          gap={6}
+          height={120}
+        />
       </Section>
 
       <Section title="Templates">

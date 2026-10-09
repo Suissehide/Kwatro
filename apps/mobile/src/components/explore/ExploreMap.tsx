@@ -1,9 +1,10 @@
 import { colors } from '@lucko/design-system'
 import type { VenueListItem } from '@lucko/shared'
+import { useEffect, useRef } from 'react'
 import MapView, { Marker } from 'react-native-maps'
 import type { Place } from '@/lib/useLocation'
 
-/** Carte des lieux (B1) : épingle verte pour les partenaires, blanche sinon. */
+/** Carte des lieux (B1) : épingle verte pour les partenaires, blanche sinon ; centrée sur le lieu choisi. */
 export function ExploreMap({
   center,
   venues,
@@ -15,8 +16,20 @@ export function ExploreMap({
   selectedId: string | null
   onSelect: (id: string) => void
 }) {
+  const map = useRef<MapView>(null)
+  const selected = venues.find((v) => v.id === selectedId)
+  const lat = selected?.latitude
+  const lng = selected?.longitude
+  useEffect(() => {
+    if (lat === undefined || lng === undefined) return
+    map.current?.animateToRegion(
+      { latitude: lat, longitude: lng, latitudeDelta: 0.02, longitudeDelta: 0.02 },
+      600,
+    )
+  }, [lat, lng])
   return (
     <MapView
+      ref={map}
       style={{ flex: 1 }}
       initialRegion={{
         latitude: center.lat,

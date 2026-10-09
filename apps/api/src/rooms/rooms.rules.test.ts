@@ -22,6 +22,7 @@ const room = {
   capacity: 4,
   minorsAllowed: false,
   autoAccept: false,
+  vibes: [],
 }
 const ctx: RoomContext = {
   game: {
@@ -56,6 +57,14 @@ describe('createRoomRefusal', () => {
     expect(createRoomRefusal({ ...room, formatId: null }, ctx, now)).toBe('Choisis un format')
     expect(createRoomRefusal({ ...room, formatId: null, mode: 'RANKED' }, boardGame, now)).toMatch(
       /room normale/,
+    )
+  })
+
+  it('catégorie pour les jeux de société seulement', () => {
+    const party = { ...room, formatId: null, boardGameCategory: 'PARTY' as const }
+    expect(createRoomRefusal(party, boardGame, now)).toBeNull()
+    expect(createRoomRefusal({ ...room, boardGameCategory: 'PARTY' }, ctx, now)).toMatch(
+      /jeux de société/,
     )
   })
 
@@ -96,6 +105,21 @@ describe('createRoomRefusal', () => {
     expect(createRoomRefusal({ ...room, minorsAllowed: true }, bar, now)).toMatch(/16 ans/)
     const busy = { ...ctx, hostOpenRooms: MAX_OPEN_ROOMS_PER_HOST }
     expect(createRoomRefusal(room, busy, now)).toMatch(/déjà/)
+  })
+})
+
+describe('createRoomRefusal à domicile (LKO-72)', () => {
+  const home = {
+    ...room,
+    venueId: null,
+    home: { lat: 44.83, lng: -0.57, areaLabel: 'Bordeaux · Saint-Michel' },
+  }
+  const atHome = { ...ctx, venueOpen: null }
+
+  it('réservée aux adultes, acceptation obligatoire', () => {
+    expect(createRoomRefusal(home, atHome, now)).toBeNull()
+    expect(createRoomRefusal(home, { ...atHome, hostIsMinor: true }, now)).toMatch(/adultes/)
+    expect(createRoomRefusal({ ...home, autoAccept: true }, atHome, now)).toMatch(/acceptes/)
   })
 })
 

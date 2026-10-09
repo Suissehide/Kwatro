@@ -3,6 +3,8 @@ import {
   agendaItemSchema,
   agendaQuerySchema,
   ageRegime,
+  HOME_SAFETY_VERSION,
+  homeSafetySchema,
   MIN_AGE,
   meSchema,
   myGamesSchema,
@@ -71,6 +73,23 @@ export class UsersController {
   async setAvatar(@CurrentUser() user: User, @UploadedFile() file?: { buffer: Buffer }) {
     if (!file) throw new BadRequestException('Photo manquante')
     return this.users.profile(await this.users.setAvatar(user, file.buffer))
+  }
+
+  /** Avertissement sécurité des rooms à domicile accepté (LKO-72), dans sa version actuelle. */
+  @Put('me/home-safety')
+  @ZodResponse(meSchema)
+  async acceptHomeSafety(
+    @CurrentUser() user: User,
+    @ZodBody(homeSafetySchema) { version }: z.output<typeof homeSafetySchema>,
+  ) {
+    if (version !== HOME_SAFETY_VERSION)
+      throw new ConflictException('L’avertissement a changé : relis-le avant de l’accepter')
+    return this.users.profile(
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { homeSafetyVersion: version },
+      }),
+    )
   }
 
   /** Mes parties (D1) : à venir par date croissante, historique du plus récent au plus ancien. */

@@ -24,6 +24,7 @@
     "react-native-svg": "*"
   },
   "devDependencies": {
+    "@types/qrcode": "^1.5.6",
     "@types/react": "~19.2.2",
     "@types/three": "^0.186.0",
     "react": "19.2.3",
@@ -35,6 +36,7 @@
   "dependencies": {
     "gsap": "^3.15.0",
     "lucide-react-native": "^1.52.0",
+    "qrcode": "^1.5.4",
     "three": "^0.186.1"
   }
 }

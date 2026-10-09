@@ -1,14 +1,13 @@
-import type {
-  createRoomSchema,
-  GameKind,
-  HostAction,
-  ParticipantStatus,
-  RoomStatus,
+import {
+  type createRoomSchema,
+  type GameKind,
+  type HostAction,
+  type ParticipantStatus,
+  ROOM_MAX_DAYS_AHEAD,
+  type RoomStatus,
 } from '@lucko/shared'
 import type { z } from 'zod'
 
-/** Délai de réservation maximal d'une room. */
-export const ROOM_MAX_DAYS_AHEAD = 60
 // ponytail: limite fixe contre le spam, à ajuster quand on verra l'usage réel
 export const MAX_OPEN_ROOMS_PER_HOST = 5
 
@@ -22,7 +21,7 @@ export type RoomContext = {
     kind: GameKind
     formats: (PlayerRange & { id: string; hasBrackets: boolean })[]
   }
-  /** Lieu ouvert à l'heure de la room ; null si ses horaires ne sont pas renseignés. */
+  /** Lieu ouvert à l'heure de la room ; null si ses horaires ne sont pas renseignés ou à domicile. */
   venueOpen: boolean | null
   hostIsMinor: boolean
   /** Moins de 16 ans dans un lieu qui ne les accueille pas seuls (LKO-51). */
@@ -43,6 +42,8 @@ export function createRoomRefusal(
   const format = game.formats.find((f) => f.id === room.formatId)
   if (room.formatId && !format) return 'Ce format n’existe pas pour ce jeu'
   if (game.kind === 'TCG' && !room.formatId) return 'Choisis un format'
+  if (game.kind === 'TCG' && room.boardGameCategory)
+    return 'La catégorie ne concerne que les jeux de société'
   if (room.mode === 'RANKED' && game.kind !== 'TCG')
     return 'Les jeux de société se jouent en room normale'
   // Une room peut réunir plus de joueurs qu'une partie (4 joueurs qui enchaînent des duels) : seul le minimum compte
@@ -53,6 +54,10 @@ export function createRoomRefusal(
   if (room.startsAt.getTime() > now.getTime() + ROOM_MAX_DAYS_AHEAD * DAY_MS)
     return `Une room se crée au plus ${ROOM_MAX_DAYS_AHEAD} jours à l’avance`
   if (venueOpen === false) return 'Le lieu est fermé à cette heure-là'
+  // Garde-fous domicile (LKO-72) : adultes seulement, chaque joueur accepté par l'hôte
+  if (room.home && hostIsMinor) return 'Les rooms à domicile sont réservées aux adultes'
+  if (room.home && room.autoAccept)
+    return 'Chez toi, tu acceptes chaque joueur : l’inscription automatique n’est pas possible'
   // Un mineur ne pourrait pas jouer dans sa propre room 18+
   if (hostIsMinor && !room.minorsAllowed) return 'Ta room doit être ouverte aux mineurs'
   if (venueRefusesHost) return 'Ce lieu n’accueille pas les moins de 16 ans sans adulte'

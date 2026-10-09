@@ -30,6 +30,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { MapFrame } from '@/components/explore/MapFrame'
 import { PlayerNav } from '@/components/PlayerNav'
 import { track } from '@/lib/analytics'
+import { KIND_COLORS } from '@/lib/cityAgenda'
 import {
   eventCardProps,
   GAMES,
@@ -122,6 +123,7 @@ export default function HomeScreen() {
         <EventCard
           key={e.id}
           {...eventCardProps(e)}
+          color={KIND_COLORS[e.type].color}
           wide={wide}
           raised={i === 0}
           onPress={() => openEvent(e.id)}

@@ -28,7 +28,7 @@ export const KINDS: Kind[] = ['ROOM', ...EVENT_TYPES]
 const KIND_LABELS: Record<Kind, string> = { ROOM: 'Room', ...EVENT_TYPE_LABELS }
 
 /** Liseré et fond de l'étiquette de chaque type. */
-const KIND_COLORS: Record<Kind, { color: string; tint: string }> = {
+export const KIND_COLORS: Record<Kind, { color: string; tint: string }> = {
   ROOM: { color: colors.rating, tint: colors.ratingPale },
   GAME_NIGHT: { color: colors.event, tint: colors.eventSoft },
   THEMED: { color: colors.event, tint: colors.eventSoft },
@@ -110,7 +110,12 @@ function roomEntry(r: RoomListItem): AgendaEntry {
     title: [`Room ${gameLabel(r.game)}`, r.format, r.bracket ? `Bracket ${r.bracket}` : null]
       .filter(Boolean)
       .join(' · '),
-    venue: r.venue,
+    // À domicile : le quartier et la distance jusqu'à la zone floue
+    venue: r.venue ?? {
+      name: r.home?.areaLabel ?? 'À domicile',
+      isPartner: false,
+      distanceMeters: r.home?.distanceMeters ?? 0,
+    },
     games: [r.game],
     places: seats(r.players.length, r.capacity),
     price: 'Gratuit',
